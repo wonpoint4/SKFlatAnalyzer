@@ -30,7 +30,7 @@ SaveZPtWeightALL(1)
 */
 TH1* ExtractZPtWeight(int channel,int year){
   TString channelname=Setup(channel,year);
-  TCanvas* cc=GetCompare(channelname+"/OS_Z/dipty",0,0,0,0,false,"BGSub");
+  TCanvas* cc=GetCompare(channelname+"/OS_Z/dipty",0,0,0,0,"BGSub");
   TH1* ratio=(TH1*)cc->GetPad(2)->GetPrimitive("ratio");
   ratio->SetDirectory(0);
   ratio->GetXaxis()->UnZoom();
@@ -109,4 +109,56 @@ void AutoIteration(int iteration){
   system("python python/SKFlat.py -a SMPValidation -y 2016 -i DYJets -n 100 --skim SkimTree_GEN;");
   SaveZPtWeightAll(1);
 }
+TCanvas* GetCompareProjectionX(TH2 *hist2d){
+  TCanvas* c1=new TCanvas(hist2d->GetTitle(),hist2d->GetTitle(),800,800);
+  c1->Divide(1,2);
+  c1->cd(1);
+  gPad->SetPad(0,0.35,1,1);
+  gPad->SetBottomMargin(0.02);
+  vector<TH1*> hists;
+  hist2d->SetFillColor(0);
+  hist2d->SetMarkerStyle(0);
+  hist2d->GetXaxis()->SetRangeUser(0,200);
+  for(int i=1;i<hist2d->GetNbinsY()+1;i++){
+    TH1* hist=(TH1*)hist2d->ProjectionX("_px",i,i)->Clone(Form("bin%d",i));
+    hist->SetTitle(hist->GetTitle()+TString(hist->GetName()));
+    hists.push_back(hist);
+    hist->SetLineColor(i);
+    if(i==1) hist->Draw("e");
+    else hist->Draw("sames e");
+  }
+  gPad->BuildLegend();
 
+  c1->cd(2);
+  gPad->SetPad(0,0,1,0.35);
+  gPad->SetTopMargin(0.02);
+  gPad->SetBottomMargin(0.2);
+  gPad->SetGridx();gPad->SetGridy();
+  for(int i=0;i<hists.size();i++){
+    TH1* ratio=(TH1*)hists[i]->Clone(Form("ratio%d",i+1));
+    ratio->SetTitle("");
+    ratio->SetStats(0);
+    ratio->Divide(hists[0]);
+    if(i==0){
+      ratio->Draw("hist");
+      ratio->GetYaxis()->SetRangeUser(0.8,1.2);
+    }
+    else ratio->Draw("same e");
+  }
+  return c1;
+}
+void plot(int channel,int year){
+  TString zptfile=getenv("SKFlat_WD")+TString("/data/")+getenv("SKFlatV")+"/"+Form("%d",year)+"/ZPt/ZPtWeight.root";
+  TH2* iter0=(TH2*)GetHist(zptfile,Form("%s%d_iter0",GetStringChannel((Channel)channel).Data(),year));
+  iter0->SetTitle("iter0");
+  TH2* iter1=(TH2*)GetHist(zptfile,Form("%s%d_iter1",GetStringChannel((Channel)channel).Data(),year));
+  iter1->SetTitle("iter1");
+  TH2* iter2=(TH2*)GetHist(zptfile,Form("%s%d_iter2",GetStringChannel((Channel)channel).Data(),year));
+  iter2->SetTitle("iter2");
+  TH2* norm=(TH2*)GetHist(zptfile,Form("%s%d_norm",GetStringChannel((Channel)channel).Data(),year));
+  norm->SetTitle("norm");
+  TCanvas* c0=GetCompareProjectionX(iter0);
+  TCanvas* c1=GetCompareProjectionX(iter1);
+  TCanvas* c2=GetCompareProjectionX(iter2);
+  
+}

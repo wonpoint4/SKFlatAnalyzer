@@ -1,6 +1,6 @@
-import os
+import os,sys
 
-cyclename = "NewAnalyzer"
+cyclename = sys.argv[1]
 
 out_h = open(cyclename+'.h','w')
 print>>out_h,'''#ifndef {0}_h

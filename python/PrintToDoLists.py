@@ -18,6 +18,9 @@ dirnames = [
 'DataFormats/src',
 'Analyzers/include',
 'Analyzers/src',
+'AnalyzerTools/include',
+'AnalyzerTools/src',
+'AnalyzerTools/src/BTagEfficiencies'
 ]
 
 for tag in tags:

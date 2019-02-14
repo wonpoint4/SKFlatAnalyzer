@@ -15,7 +15,7 @@ using namespace std;
 struct Sample{
   TString name;
   int type;
-  int colorcode;
+  int color;
   vector<TString> files;
 };
 enum SuffixType{NONE,UPDOWN,NUMBER,COSTOM};
@@ -25,7 +25,7 @@ TString GetStringSuffixType(SuffixType type){
   case UPDOWN: return "UPDOWN";
   case NUMBER: return "NUMBER";
   case COSTOM: return "CUSTON";
-  default: return "WARNING Bad SuffixType";
+  default: return "###WARNING### Bad SuffixType";
   }
 }
 enum SystematicType{ENVELOPE,GAUSSIAN,HESSIAN,MULTI};
@@ -35,7 +35,7 @@ TString GetStringSystematicType(SystematicType type){
   case GAUSSIAN: return "GAUSSIAN";
   case HESSIAN: return "HESSIAN";
   case MULTI: return "MULTI";
-  default: return "WARNING Bad SystematicType";
+  default: return "###WARNING### Bad SystematicType";
   }
 }
 struct Systematic{
@@ -65,7 +65,7 @@ TString GetStringSampleType(SampleType type){
   case DY: return "DY";
   case TAU: return "TAU";
   case BG: return "BG";
-  default: return "WARNING Bad SampleType";
+  default: return "###WARNING### Bad SampleType";
   }
 }
 TString GetStringEColor(EColor color){
@@ -76,7 +76,7 @@ TString GetStringEColor(EColor color){
   case kBlue: return "kBlue";
   case kYellow: return "kYellow";
   case kMagenta: return "kMagenta";
-  default: return "WARNING Bad EColor";
+  default: return "###WARNING### Bad EColor";
   }
 }
 enum Channel{MUON,ELECTRON};
@@ -84,7 +84,7 @@ TString GetStringChannel(Channel channel){
   switch(channel){
   case MUON: return "muon";
   case ELECTRON: return "electron";
-  default: return "WARNING Bad Channel";
+  default: return "###WARNING### Bad Channel";
   }
 }
 
@@ -94,23 +94,23 @@ TString GetStringChannel(Channel channel){
 vector<Sample> samples;
 vector<Systematic> systematics;
 vector<Directory> directories;
-
+bool DEBUG=false;
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////// Add functions for global variables//////////////////////
 /////////////////////////////////////////////////////////////////////////////
-void AddSample(TString name_,SampleType type_,EColor colorcode_,vector<TString> files_){
+void AddSample(TString name_,SampleType type_,EColor color_,vector<TString> files_){
   Sample sample;
   sample.name=name_;
   sample.type=type_;
-  sample.colorcode=colorcode_;
+  sample.color=color_;
   sample.files=files_;
-  cout<<" [AddSample] "<<sample.name<<" "<<GetStringSampleType((SampleType)sample.type)<<" "<<GetStringEColor((EColor)sample.colorcode)<<endl;
+  cout<<" [AddSample] "<<sample.name<<" "<<GetStringSampleType((SampleType)sample.type)<<" "<<GetStringEColor((EColor)sample.color)<<endl;
   for(int i=0;i<sample.files.size();i++)
     cout<<"   "<<sample.files.at(i)<<endl;    
   samples.push_back(sample);
 }
-void AddSample(TString name_,SampleType type_,EColor colorcode_,TString file1,TString file2="",TString file3="",TString file4="",TString file5="",TString file6="",TString file7=""){
+void AddSample(TString name_,SampleType type_,EColor color_,TString file1,TString file2="",TString file3="",TString file4="",TString file5="",TString file6="",TString file7=""){
   vector<TString> files;
   if(file1!="") files.push_back(file1);
   if(file2!="") files.push_back(file2);
@@ -119,7 +119,7 @@ void AddSample(TString name_,SampleType type_,EColor colorcode_,TString file1,TS
   if(file5!="") files.push_back(file5);
   if(file6!="") files.push_back(file6);
   if(file7!="") files.push_back(file7);
-  AddSample(name_,type_,colorcode_,files);
+  AddSample(name_,type_,color_,files);
 }
 void AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool exist_data_,bool exist_bg_){
   Systematic systematic;
@@ -160,7 +160,7 @@ void AddHistogram(Directory& directory,TString name_,int rebin_,double xmin_,dou
   histogram.xmin=xmin_;
   histogram.xmax=xmax_;
   histogram.option=option_;
-  //cout<<" [AddHistogram] to <<histogram.name<<" "<<histogram.rebin<<" "<<histogram.xmin<<" "<<histogram.xmax<<endl;
+  if(DEBUG) std::cout<<" [AddHistogram] to "<<histogram.name<<" "<<histogram.rebin<<" "<<histogram.xmin<<" "<<histogram.xmax<<endl;
   directory.histograms.push_back(histogram);
 }
 
@@ -183,7 +183,7 @@ void SetupSamples(int channel,int year,TString analyzer,TString skim){
   }else if(year==2016){
     if(channel==Channel::MUON){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_B_ver2.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_C.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_D.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_E.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_F.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_G.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_H.root");
-      AddSample("#gamma*/Z#rightarrow#mu#mu",SampleType::DY,EColor::kRed,filedir+"2016/"+analyzer+skim+"_DYJets.root");
+      AddSample("#gamma*/Z#rightarrow#mu#mu",SampleType::DY,(EColor)(EColor::kRed),filedir+"2016/"+analyzer+skim+"_DYJets.root");
     }else if(channel==Channel::ELECTRON){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_B_ver2.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_C.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_D.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_E.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_F.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_G.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_H.root");
       AddSample("#gamma*/Z#rightarrowee",SampleType::DY,EColor::kRed,filedir+"2016/"+analyzer+skim+"_DYJets.root");
@@ -209,7 +209,7 @@ void SetupSystematics(int channel,int year,TString analyzer){
   for(int i=0;i<100;i++) prefixes.push_back(Form("_pdf%d",i));
   if(year==2017) AddSystematic("pdf",SystematicType::HESSIAN,prefixes,0,0);
   else if(year==2016) AddSystematic("pdf",SystematicType::GAUSSIAN,prefixes,0,0);
-  else cout<<"[SetupSystematics] WARNING wrong year"<<endl;
+  else cout<<"###WARNING### [SetupSystematics] wrong year"<<endl;
 
   AddSystematic("noRECOSF",SystematicType::ENVELOPE,"_noRECOSF",0,1);
   AddSystematic("noIDSF",SystematicType::ENVELOPE,"_noIDSF",0,1);
@@ -221,7 +221,7 @@ void SetupSystematics(int channel,int year,TString analyzer){
   AddSystematic("noefficiencySF",SystematicType::ENVELOPE,"_noefficiencySF",0,1);
   AddSystematic("IDSF_POG",SystematicType::ENVELOPE,"_IDSF_POG",0,1);
   AddSystematic("efficiencySF",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF",0,0);
-  AddSystematic("totalsys",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF PUreweight prefireweight alphaS scalevariation",0,0);
+  AddSystematic("totalsys",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF PUreweight prefireweight alphaS scalevariation pdf nozptcor",0,0);
 }
 void SetupDirectoriesSMPValidation(int channel,int year){
   cout<<"[SetupDirectoriesSMPValidation] SMPValidation "<<GetStringChannel((Channel)channel)<<year<<endl;
@@ -233,10 +233,10 @@ void SetupDirectoriesSMPValidation(int channel,int year){
     AddHistogram(directory,"dimass",0,80,100);
     AddHistogram(directory,"dipt",4,0,200);
     AddHistogram(directory,"dirap",0,0,0);
-    AddHistogram(directory,"l0pt",4,0,200);
+    AddHistogram(directory,"l0pt",2,0,100);
     AddHistogram(directory,"l0eta",0,0,0);
     AddHistogram(directory,"l0riso",0,0,0);
-    AddHistogram(directory,"l1pt",4,0,200);
+    AddHistogram(directory,"l1pt",2,0,100);
     AddHistogram(directory,"l1eta",0,0,0);
     AddHistogram(directory,"l1riso",0,0,0);
     AddHistogram(directory,"lldelR",0,0,0);
@@ -247,7 +247,7 @@ void SetupDirectoriesSMPValidation(int channel,int year){
   cout<<endl;
   directories[0].histograms[0].rebin=4;
   directories[0].histograms[0].xmin=0;
-  directories[0].histograms[0].xmin=0;
+  directories[0].histograms[0].xmax=0;
 }
 void SetupDirectoriesAFBAnalyzer(int channel,int year){
   cout<<"[SetupDirectoriesAFBAnalyzer] AFBAnalyzer "<<GetStringChannel((Channel)channel)<<year<<endl;
@@ -270,17 +270,17 @@ void SetupDirectoriesAFBAnalyzer(int channel,int year){
     AddHistogram(directory,"dimass",2,60,120);
     AddHistogram(directory,"dipt",4,0,200);
     AddHistogram(directory,"dirap",0,0,0);
-    AddHistogram(directory,"l0pt",4,0,200);
+    AddHistogram(directory,"l0pt",2,0,100);
     AddHistogram(directory,"l0eta",0,0,0);
     AddHistogram(directory,"l0riso",0,0,0);
-    AddHistogram(directory,"l1pt",4,0,200);
+    AddHistogram(directory,"l1pt",2,0,100);
     AddHistogram(directory,"l1eta",0,0,0);
     AddHistogram(directory,"l1riso",0,0,0);
     AddHistogram(directory,"lldelR",0,0,0);
     AddHistogram(directory,"lldelphi",0,0,0);
     AddHistogram(directory,"nPV",0,0,0);
-    AddHistogram(directory,"costhetaCS",0,0,0,"noleg");
-    AddHistogram(directory,"abscosthetaCS",0,0,0,"noleg");
+    AddHistogram(directory,"costhetaCS",0,0,0,"1:noleg");
+    AddHistogram(directory,"abscosthetaCS",0,0,0,"1:noleg");
     if(region[i].Contains("m60to120")) AddHistogram(directory,"AFB",0,0,0,"AFB");
     directories.push_back(directory);
   }
@@ -295,7 +295,7 @@ TString Setup(int channel,int year,TString analyzer="SMPValidation",TString skim
   SetupSystematics(channel,year,analyzer);
   if(analyzer.Contains("SMPValidation")) SetupDirectoriesSMPValidation(channel,year);
   else if(analyzer.Contains("AFBAnalyzer")) SetupDirectoriesAFBAnalyzer(channel,year);
-  else cout<<"[Setup] WARNING: unknown Analyzer="<<analyzer<<endl;
+  else cout<<"###WARNING### [Setup] unknown Analyzer="<<analyzer<<endl;
 
   cout<<"[Setup] nsample: "<<samples.size()<<endl;
   cout<<"[Setup] nsys: "<<systematics.size()<<endl;
@@ -316,7 +316,7 @@ TH1* GetHist(TString filename,TString histname){
     hist->SetDirectory(0);
     return hist;
   }else{
-    cout<<"no "<<histname<<" in "<<filename<<endl;
+    cout<<"###WARNING### [GetHist] no "<<histname<<" in "<<filename<<endl;
     return NULL;
   }
 }
@@ -355,8 +355,8 @@ vector<TH1*> GetHists(TString datahistname,TString dyhistname,TString bghistname
 	hist->SetName(samples[i].name);
 	hist->SetTitle(dyhistname);
 	hist->GetXaxis()->SetTitle(dyhistname);
-	hist->SetLineColor(samples[i].colorcode);
-	hist->SetFillColor(samples[i].colorcode);
+	hist->SetLineColor(samples[i].color);
+	hist->SetFillColor(samples[i].color);
       }
       hists.push_back(hist);
     }
@@ -389,7 +389,10 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
   }else if(option.Contains("stack")){
     THStack* hstack=new THStack;
     for(int i=(int)hists.size()-1;i>0;i--){
-      if(hists.at(i)) hstack->Add(hists.at(i),"HIST");
+      if(hists.at(i)){
+	if(samples.at(i).type==SampleType::DY) hists.at(i)->SetFillColor(samples.at(i).color-9);
+	hstack->Add(hists.at(i),"HIST");
+      }
     }
     return (TH1*)hstack;
   }else if(option.Contains("BGSub")) return (TH1*)hists.at(1)->Clone();
@@ -503,7 +506,7 @@ TH1* GetRMSError(TH1* central,const vector<TH1*>& variations){
 int AddError(TH1* hist,TH1* sys){
   for(int i=1;i<hist->GetNbinsX()+1;i++){
     if(fabs(hist->GetBinContent(i)-sys->GetBinContent(i))*1000000>fabs(hist->GetBinContent(i))){
-      cout<<"[AddError] sys hist is wrong"<<endl;
+      cout<<"###WARNING### [AddError] sys hist is wrong"<<endl;
       cout.precision(20);
       cout<<i<<" "<<hist->GetBinContent(i)<<" "<<sys->GetBinContent(i)<<" "<<fabs(hist->GetBinContent(i)-sys->GetBinContent(i))<<endl;
       return -1;
@@ -536,6 +539,7 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,int rebin,double xmin,
   }
   if(xmin||xmax){
     h1->GetXaxis()->SetRangeUser(xmin,xmax);
+    h2->GetXaxis()->SetRangeUser(xmin,xmax);
   }
 
   h1->SetStats(0);
@@ -568,17 +572,25 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,int rebin,double xmin,
 
   if(hstack){
     hstack->Draw("same");
-    if(h2sys) h2->SetFillColor(4);
-  }else if(h2sys) h2->SetFillStyle(3001);
-  h2total->SetFillStyle(3001);
-  h2total->Draw("same e2");
-  if(h2sys){
-    h2total->SetFillColor(4);
-    h2->Draw("same e2");
+    h2->SetFillStyle(3144);
+    h2->SetFillColor(samples.at(1).color+2);
+    if(h2sys){
+      h2total->SetFillStyle(3244);
+      h2total->SetFillColor(samples.at(1).color);
+    }      
+  }else if(h2sys){
+    h2->SetFillStyle(3001);
+    h2->SetFillColor(samples.at(1).color-9);
+    h2total->SetFillStyle(3001);
+    h2total->SetFillColor(samples.at(1).color+1);
+  }else{
+    h2->SetFillStyle(3001);
   }
+  h2total->Draw("same e2");
+  if(h2sys) h2->Draw("same e2");
 
   TLegend* legend=GetLegend(h1,hstack?(TH1*)hstack:h2,option);
-  if(!option.Contains("noleg")) legend->Draw();
+  if(!option.Contains("1:noleg")) legend->Draw();
 
   if(option.Contains("logy")){
     gPad->SetLogy();
@@ -586,7 +598,6 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,int rebin,double xmin,
     double maximum=h1total->GetMaximum()>h2total->GetMaximum()?h1total->GetMaximum():h2total->GetMaximum();
     double minimum=h1total->GetMinimum()<h2total->GetMinimum()?h1total->GetMinimum():h2total->GetMinimum();
     double range=fabs(maximum-minimum);
-    cout<<minimum<<endl;
     h1total->GetYaxis()->SetRangeUser(minimum<0?minimum-0.1*range:0,maximum+0.1*range);
   }
   h1total->Draw("same a e");
@@ -605,7 +616,7 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,int rebin,double xmin,
     defaultval=0.;
     ratio->Add(h2,-1);
     ratio->GetYaxis()->SetTitle("Data - Simulation");
-    ratio->GetYaxis()->SetRangeUser(-0.02,0.02);
+    ratio->GetYaxis()->SetRangeUser(-0.037,0.037);
     ratio->GetYaxis()->SetLabelSize(0.06);
   }else{
     defaultval=1.;
@@ -632,16 +643,16 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,int rebin,double xmin,
       double eyh2sys=yh2sys==0?0:h2sys->GetBinError(i);
       ratiosys->SetBinContent(i,defaultval);
       if(option.Contains("diff")) ratiosys->SetBinError(i,sqrt(pow(eyh1sys,2)+pow(eyh2sys,2)));  
-      else ratiosys->SetBinError(i,sqrt(pow(eyh1sys/yh1sys,2)+pow(eyh2sys/yh2sys,2)));  
+      else ratiosys->SetBinError(i,sqrt((yh1sys?pow(eyh1sys/yh1sys,2):0)+(yh2sys?pow(eyh2sys/yh2sys,2):0)));  
     }
     ratiosys->SetFillStyle(3002);
-    ratiosys->SetFillColor(4);
+    ratiosys->SetFillColor(samples.at(1).color);
     ratiosys->Draw("same p e2");
     TLegend* syslegend=new TLegend(0.6,0.75,0.89,0.95);
     if(option.Contains("diff")) syslegend->AddEntry(ratio,"Data - Simulation (Stat.)","lp");
     else syslegend->AddEntry(ratio,"Data/Simulation (Stat.)","lp");
     syslegend->AddEntry(ratiosys,"Syst.","f");
-    syslegend->Draw();
+    if(!option.Contains("2:noleg")) syslegend->Draw();
   }
   ratio->Draw("same");
 
@@ -657,14 +668,14 @@ TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,doub
   for(int i=0;i<systematics.size();i++){
     if(systematics[i].type==SystematicType::MULTI) continue;
     if(sysbit&systematics[i].sysbit){
-      cout<<"sysname="<<systematics[i].name<<" systype="<<GetStringSystematicType(systematics[i].type)<<endl;
+      if(DEBUG) std::cout<<"sysname="<<systematics[i].name<<" systype="<<GetStringSystematicType(systematics[i].type)<<endl;
       vector<TH1*> hdata_variations;
       vector<TH1*> hmc_variations;
       for(int j=0;j<systematics[i].suffixes.size();j++){
 	TString datahistname=histname+(systematics[i].exist_data?systematics[i].suffixes[j]:"");
 	TString dyhistname=histname+systematics[i].suffixes[j];
 	TString bghistname=histname+(systematics[i].exist_bg?systematics[i].suffixes[j]:"");
-	cout<<datahistname<<" "<<dyhistname<<" "<<bghistname<<endl;
+	if(DEBUG) std::cout<<datahistname<<" "<<dyhistname<<" "<<bghistname<<endl;
 	vector<TH1*> gethists=GetHists(datahistname,dyhistname,bghistname,option);
 	hdata_variations.push_back(GetHData(gethists,option));
 	hmc_variations.push_back(GetHMC(gethists,option));
@@ -680,13 +691,13 @@ TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,doub
 	hdata_syss.push_back(GetHessianError(hdata_central,hdata_variations));
 	hmc_syss.push_back(GetHessianError(hmc_central,hmc_variations));
       }else{
-	cout<<"[GetCompare] WARNING wrong SystematicType "<<systematics[i].type<<endl;
+	cout<<"###WARNING### [GetCompare] Wrong SystematicType "<<systematics[i].type<<endl;
       }
       for(int j=0;j<(int)hdata_variations.size();j++){
 	delete hdata_variations.at(j);
 	delete hmc_variations.at(j);
       }
-      cout<<systematics[i].name+": "<<hdata_variations.size()<<" variations"<<endl;
+      if(DEBUG) std::cout<<systematics[i].name+": "<<hdata_variations.size()<<" variations"<<endl;
     }
   }
   TH1 *hdata_sys=NULL,*hmc_sys=NULL;
@@ -706,13 +717,104 @@ TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,doub
   TCanvas* c1=GetCompare(hdata_central,hdata_sys,hstack_central?(TH1*)hstack_central:hmc_central,hmc_sys,rebin,xmin,xmax,option);
   return c1;
 }
+TH1* GetAxisParent(TPad* pad){
+  TList* list=pad->GetListOfPrimitives();
+  for(int i=0;i<list->GetSize();i){
+    if(strstr(list->At(i)->ClassName(),"TH")!=NULL) return (TH1*)list->At(i);
+  }
+  return NULL;
+}
+TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
+  TString canvasname=histnames[0];
+  canvasname.ReplaceAll("_y0.0to0.4","");
+  int nhist=histnames.size();
+  TCanvas* c1=new TCanvas(canvasname,canvasname,800,800);
+  c1->Divide(nhist,1);
+  for(int i=0;i<nhist;i++){
+    TCanvas* ctemp=GetCompare(histnames[i],sysbit,rebin,xmin,xmax,option+(i==0?" ":" 1:noleg 2:noleg"));
+    TH1* hdata=GetAxisParent((TPad*)ctemp->GetPad(1));
+    TH1* hratio=GetAxisParent((TPad*)ctemp->GetPad(2));
+    TLegend *leg1,*leg2;
+    double sf0=(0.85/nhist)/(0.1+0.85/nhist);
+    double sf1=(0.85/nhist)/(0.05+0.85/nhist);
+    ctemp->GetPad(1)->SetLeftMargin(i==0?1-sf0:0);
+    ctemp->GetPad(2)->SetLeftMargin(i==0?1-sf0:0);
+    ctemp->GetPad(1)->SetRightMargin(i==nhist-1?1-sf1:0);
+    ctemp->GetPad(2)->SetRightMargin(i==nhist-1?1-sf1:0);
+
+    hdata->GetYaxis()->SetRangeUser(-0.14,0.23);
+    hdata->GetXaxis()->SetNdivisions(503);
+
+    TString ratiotitle=hratio->GetXaxis()->GetTitle();
+    ratiotitle=ratiotitle("_y.*/");
+    ratiotitle=ratiotitle(1,ratiotitle.Length()-2);
+    hratio->GetXaxis()->SetTitle(ratiotitle);
+    hratio->GetXaxis()->CenterTitle();
+    hratio->GetXaxis()->SetNdivisions(503);
+    hratio->GetXaxis()->SetLabelSize(0.15);
+    hratio->GetXaxis()->SetLabelOffset(-0.05);
+    hratio->GetXaxis()->SetTitleOffset(0.5);
+    hratio->GetXaxis()->SetTitleSize(0.2);
+    if(i==0){
+      leg1=(TLegend*)ctemp->GetPad(1)->GetPrimitive("TPave");
+      leg1->SetX1(1-sf0+0.02);
+      leg1->SetX2(0.9);
+      leg1->SetTextSize(0.13);
+      leg2=(TLegend*)ctemp->GetPad(2)->GetPrimitive("TPave");
+      if(leg2){
+	((TLegendEntry*)leg2->GetListOfPrimitives()->At(0))->SetLabel("Stat.");
+	leg2->SetX1(1-sf0+0.02);
+	leg2->SetX2(0.9);
+	leg2->SetTextSize(0.13);
+      }
+      hdata->GetYaxis()->SetLabelSize(0.12);
+      hdata->GetYaxis()->SetLabelOffset(0.02);
+      hdata->GetYaxis()->SetTitle("A_{FB}");
+      hdata->GetYaxis()->SetTitleSize(0.15);
+      hdata->GetYaxis()->SetTitleOffset(1.3);
+
+      hratio->GetYaxis()->SetLabelSize(0.1);
+      hratio->GetYaxis()->SetLabelOffset(0.02);
+      hratio->GetYaxis()->SetTitleOffset(1.8);
+      hratio->GetYaxis()->SetTitleSize(0.12);
+
+      hratio->GetXaxis()->SetLabelSize(hratio->GetXaxis()->GetLabelSize()*sf0);
+      hratio->GetXaxis()->SetLabelOffset(0.001);
+      hratio->GetXaxis()->SetTitleSize(hratio->GetXaxis()->GetTitleSize()*sf0);
+      hratio->GetXaxis()->SetTitleOffset(hratio->GetXaxis()->GetTitleOffset()/sf0);
+    }else if(i==nhist-1){
+      hratio->GetXaxis()->SetLabelSize(hratio->GetXaxis()->GetLabelSize()*sf1);
+      hratio->GetXaxis()->SetLabelOffset(0.025);
+      hratio->GetXaxis()->SetTitleSize(hratio->GetXaxis()->GetTitleSize()*sf1);
+      hratio->GetXaxis()->SetTitleOffset(hratio->GetXaxis()->GetTitleOffset()/sf1);
+      hratio->GetXaxis()->SetLabelOffset(-0.02);
+    }
+    c1->cd(i+1);
+    gPad->SetPad((i==0?0:0.1)+0.85*i/nhist,0.0,(i==nhist-1?0.15:0.1)+0.85*(i+1)/nhist,1);
+    ctemp->GetPad(1)->SetGridx();
+    ctemp->GetPad(1)->SetGridy();
+    ctemp->DrawClonePad();
+    delete ctemp;
+  }
+  c1->cd(0);
+  TPad* titlepad=new TPad("titlepad","titlepad",0,0.94,1,1);
+  titlepad->Draw();
+  titlepad->cd();
+  TPaveText* pavetitle=new TPaveText(0.1,0.1,0.9,0.9);
+  pavetitle->AddText(c1->GetTitle());
+  pavetitle->Draw();
+  return c1;
+}
+
 
 void SaveAll(TString outputdir="plot"){
+  int oldlevel=gErrorIgnoreLevel;
+  gErrorIgnoreLevel=kWarning;
   int dmax=directories.size();
   int smax=systematics.size();
   TCanvas* c=NULL;
   for(int id=0;id<dmax;id++){
-    cout<<"mkdir -p "+outputdir+"/"+directories[id].name<<endl;
+    std::cout<<"mkdir -p "+outputdir+"/"+directories[id].name<<endl;
     system("mkdir -p "+outputdir+"/"+directories[id].name);
     int hmax=directories[id].histograms.size();
     for(int ih=0;ih<hmax;ih++){
@@ -723,7 +825,7 @@ void SaveAll(TString outputdir="plot"){
       delete c;      
     }
     for(int is=0;is<smax;is++){
-      cout<<"mkdir -p "+outputdir+"/"+directories[id].name+systematics[is].name<<endl;
+      if(DEBUG) std::cout<<"mkdir -p "+outputdir+"/"+directories[id].name+systematics[is].name<<endl;
       system("mkdir -p "+outputdir+"/"+directories[id].name+systematics[is].name);
       for(int ih=0;ih<hmax;ih++){
 	Histogram *histogram=&(directories[id].histograms[ih]);
@@ -731,9 +833,39 @@ void SaveAll(TString outputdir="plot"){
 	c=GetCompare(this_histname,systematics[is].sysbit,histogram->rebin,histogram->xmin,histogram->xmax,histogram->option);
 	c->SaveAs(outputdir+"/"+this_histname(0,this_histname.Last('/')+1)+systematics[is].name+this_histname(this_histname.Last('/'),this_histname.Length())+".png");
 	delete c;
+	/*
+	if(systematics[is].suffixes.size()==1){
+	  c=GetCompare(this_histname+"/"+systematics[is].suffixes[0],0,histogram->rebin,histogram->xmin,histogram->xmax,histogram->option);
+	  c->SaveAs(outputdir+"/"+this_histname(0,this_histname.Last('/')+1)+systematics[is].name+this_histname(this_histname.Last('/'),this_histname.Length())+".png");
+	}
+	*/
       }
     }
   }  
+  gErrorIgnoreLevel=oldlevel;
+}
+void SaveAFB(TString outputdir="plot"){
+  int oldlevel=gErrorIgnoreLevel;
+  gErrorIgnoreLevel=kWarning;
+  int smax=systematics.size();
+  TString dirname=directories[0].name(0,directories[0].name.Index('/'))+"/summary/";
+  TCanvas* c=NULL;
+  std::cout<<"mkdir -p "+outputdir+"/"+dirname<<endl;
+  system("mkdir -p "+outputdir+"/"+dirname);
+  vector<TString> histnames;
+  for(int i=0;i<directories.size();i++){
+    if(directories[i].name.Contains(TRegexp("_y.*to.*/"))) 
+      histnames.push_back(directories[i].name+"AFB");
+  }
+  c=GetCompareAFBAll(histnames,0,0,0,0,"AFB");
+  c->SaveAs(outputdir+"/"+dirname+"AFB.png");
+  delete c;      
+  for(int is=0;is<smax;is++){
+    c=GetCompareAFBAll(histnames,systematics[is].sysbit,0,0,0,"AFB");
+    c->SaveAs(outputdir+"/"+dirname+"AFB_"+systematics[is].name+".png");
+    delete c;
+  }
+  gErrorIgnoreLevel=oldlevel;
 }
 
 /////////////////////////////////////////////////////////////////////////////

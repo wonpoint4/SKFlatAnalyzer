@@ -44,9 +44,34 @@ public:
     CvsL, CvsB,
     DeepFlavour_b, DeepFlavour_bb, DeepFlavour_lepb, DeepFlavour_c, DeepFlavour_uds, DeepFlavour_g,
   };
+  
+  inline TString TaggerString(Jet::Tagger t) const {
+    if(t == Jet::CSVv2) return "CSVv2"; 
+    if(t == Jet::DeepCSV) return "DeepCSV";    
+    if(t == Jet::DeepCvsL) return "DeepCvsL";    
+    if(t == Jet::CvsL) return "CvsL";    
+    if(t == Jet::CvsB) return "CvsB";    
+    if(t == Jet::DeepFlavour_b) return "DeepFlavour_b";    
+    if(t == Jet::DeepFlavour_bb) return "DeepFlavour_bb";    
+    if(t == Jet::DeepFlavour_lepb) return "DeepFlavour_lepb";    
+    if(t == Jet::DeepFlavour_c) return "DeepFlavour_c";    
+    if(t == Jet::DeepFlavour_uds) return "DeepFlavour_uds";    
+    if(t == Jet::DeepFlavour_g) return "DeepFlavour_g";    
+    
+    return "None";
+  }
+
   enum WP{
     Loose, Medium, Tight
   };
+  
+  inline TString WPString(Jet::WP wp) const {
+    if(wp == Jet::Loose) return "Loose";
+    if(wp == Jet::Medium) return "Medium";
+    if(wp == Jet::Tight) return "Tight";
+    return "None";
+  }
+
   double GetTaggerResult(Tagger tg);
   bool IsTagged(Tagger tg, WP wp);
 
