@@ -42,21 +42,20 @@ source SMPValidationSubmit.sh
 ```
 
 ### SMPValidation plotting
-Edit TString filedir in plot.cc  
 Draw a plot
 ```bash
+source setup.sh //if you haven't
 root -l
 .L plot.cc
-Setup("electron2017")
-GetCompareStack("electron2017/OS_Z/dimass",0,0,80,100)
+Setup(Channel::ELECTRON,2017)
+GetCompare("electron2017/OS_Z/dirap")
 ```
-Save plots
+Save all plots
 ```bash
+source setup.sh //if you haven't
 root -b
 .L plot.cc
-Setup("electron2017")
-SaveAll()
-Setup("muon2017")
+Setup(Channel::ELECTRON,2017)
 SaveAll()
 ```
 

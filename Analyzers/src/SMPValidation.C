@@ -214,7 +214,7 @@ void SMPValidation::executeEventFromParameter(TString channelname,Event* ev){
   FillHist(channelname+"/"+prefix+"cutflow",9.5,totalweight,20,0,20);
 
 
-  //////////////////////PrefileWeight////////////////////
+  //////////////////////PrefireWeight////////////////////
   double prefireweight=1.;
   double prefireweight_up=1.;
   double prefireweight_down=1.;
