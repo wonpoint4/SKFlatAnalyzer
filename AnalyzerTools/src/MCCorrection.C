@@ -149,7 +149,7 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
   double value = 1.;
   double error = 0.;
 
-  if(DataYear==2017){
+  if(DataYear!=2016){
     eta = fabs(eta);
   }
 
@@ -175,12 +175,8 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
   if(DataYear==2016){
     this_bin = this_hist->FindBin(eta,pt);
   }
-  else if(DataYear==2017){
-    this_bin = this_hist->FindBin(pt,eta);
-  }
   else{
-    cout << "[MCCorrection::MuonID_SF] Wrong year : "<<DataYear<<endl;
-    exit(EXIT_FAILURE);
+    this_bin = this_hist->FindBin(pt,eta);
   }
 
   value = this_hist->GetBinContent(this_bin);
@@ -201,7 +197,7 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
   double value = 1.;
   double error = 0.;
 
-  if(DataYear==2017){
+  if(DataYear!=2016){
     eta = fabs(eta);
   }
 
@@ -227,12 +223,8 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
   if(DataYear==2016){
     this_bin = this_hist->FindBin(eta,pt);
   }
-  else if(DataYear==2017){
-    this_bin = this_hist->FindBin(pt,eta);
-  }
   else{
-    cout << "[MCCorrection::MuonISO_SF] Wrong year : "<<DataYear<<endl;
-    exit(EXIT_FAILURE);
+    this_bin = this_hist->FindBin(pt,eta);
   }
 
   value = this_hist->GetBinContent(this_bin);
@@ -247,6 +239,7 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys){
 
   if(ID=="Default") return 1.;
+  if(trig=="Default") return 1.;
 
   //cout << "[MCCorrection::MuonTrigger_Eff] ID = " << ID << "\t" << "trig = " << trig << endl;
   //cout << "[MCCorrection::MuonTrigger_Eff] DataOrMC = " << DataOrMC << endl;
@@ -255,25 +248,21 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
   double value = 1.;
   double error = 0.;
 
-  //FIXME no 2016 trigger SF YET. Should check this layer
-  if(DataYear==2017){
-    eta = fabs(eta);
-  }
+  eta = fabs(eta);
 
   //==== 2016
   if(DataYear==2016){
     if(trig=="IsoMu24"){
       if(pt<26.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
-      if(eta<-2.4) eta = -2.4;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>500.) pt = 499.;
     }
     else if(trig=="Mu50"){
       if(pt<52.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>800.) pt = 799.;
     }
     else{
 
@@ -284,7 +273,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       //==== FIXME MiniAODPt Pt
       //==== FIXME 28.9918  29.0363
       //==== FIXME This event pass pt>29GeV cut, but MiniAOD pt < 29 GeV
-      //==== FIXME So when I return 0., SF goes nan.. let's returning 1. for now..
+      //==== FIXME So when I return 0., SF goes nan.. let's return 1 for now..
       if(pt<29.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
@@ -313,19 +302,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
     }
   }
 
-  int this_bin(-999);
-
-  if(DataYear==2016){
-    //FIXME no 2016 trigger SF YET. Should check this layer
-    this_bin = this_hist->FindBin(eta,pt);
-  }
-  else if(DataYear==2017){
-    this_bin = this_hist->FindBin(pt,eta);
-  }
-  else{
-    cout << "[MCCorrection::MuonTrigger_Eff] Wrong year : "<<DataYear<<endl;
-    exit(EXIT_FAILURE);
-  }
+  int this_bin = this_hist->FindBin(pt,eta);
 
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
@@ -340,6 +317,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
 double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon> muons, int sys){
 
   if(ID=="Default") return 1.;
+  if(trig=="Default") return 1.;
 
   double value = 1.;
 
@@ -387,46 +365,47 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
 
   if( ID.Contains("HEEP") ){
 
-    TString this_key = "ID_SF_"+ID;
+    //==== https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaRunIIRecommendations#HEEPV7_0
+    //==== summary: a simple robust ID designed to be safe for high electrons.
+    //==== The Et evolution of this ID must be well described in the MC therefore this ID is designed so its scale factor is flat vs Et.
+    //==== As a result the HEEP differs in that it provides just a single number for the barrel and a single number for the endcap.
+    //==== * note there almost certainly will have to be a retune for 2018 due to HCAL data/MC disagreements
+    //==== * 2018 prompt: expected Dec 2018
+
+/*
     if(fabs(sceta) < 1.479) this_key += "_Barrel";
     else                    this_key += "_Endcap";
+*/
 
-    TGraphAsymmErrors *this_graph = map_graph_Electron[this_key];
-    if(!this_graph){
-      if(IgnoreNoHist) return 1.;
-      else{
-        cout << "[MCCorrection::ElectronID_SF] (Graph) No "<<this_key<<endl;
-        exit(EXIT_FAILURE);
-      }
+    bool IsBarrel = fabs(sceta) < 1.479;
+    double this_SF(1.);
+    double this_SF_staterr(0.); // absolute value
+    double this_SF_systerr(0.); // absolute value
+    double this_SF_err(0.);
+
+    if(DataYear==2016){
+      this_SF         = (IsBarrel ? 0.971 : 0.983);
+      this_SF_staterr = (IsBarrel ? 0.001 : 0.001);
+
+      if(IsBarrel) this_SF_systerr = (pt<90. ? 0.01 : min(1.+(pt-90.)*0.0022,3.)*0.01) * this_SF;
+      else         this_SF_systerr = (pt<90. ? 0.01 : min(1.+(pt-90.)*0.0143,4.)*0.01) * this_SF;
+
+      this_SF_err = sqrt(this_SF_staterr*this_SF_staterr+this_SF_systerr*this_SF_systerr);
+    }
+    else if(DataYear==2017){ 
+      this_SF         = (IsBarrel ? 0.967 : 0.973);
+      this_SF_staterr = (IsBarrel ? 0.001 : 0.002);
+      
+      if(IsBarrel) this_SF_systerr = (pt<90. ? 0.01 : min(1.+(pt-90.)*0.0022,3.)*0.01) * this_SF;
+      else         this_SF_systerr = (pt<90. ? 0.02 : min(1.+(pt-90.)*0.0143,5.)*0.01) * this_SF;
+      
+      this_SF_err = sqrt(this_SF_staterr*this_SF_staterr+this_SF_systerr*this_SF_systerr);
+    }
+    else if(DataYear==2018){
+      //==== TODO not yet supported
     }
 
-    int NX = this_graph->GetN();
-
-    for(int j=0; j<NX; j++){
-
-      double x, x_low, x_high;
-      double y, y_low, y_high;
-      this_graph->GetPoint(j, x, y);
-      x_low = this_graph->GetErrorXlow(j);
-      x_high = this_graph->GetErrorXhigh(j);
-
-      if(j==0 && pt < x-x_low ) pt = x-x_low;
-      if(j==NX-1 && x+x_high <= pt ) pt = x-x_low;
-
-      if( x-x_low <= pt && pt < x+x_high){
-        y_low = this_graph->GetErrorYlow(j);
-        y_high = this_graph->GetErrorYhigh(j);
-
-        if(sys==0) return y;
-        else if(sys>0) return y+y_high;
-        else return y-y_low;
-
-      }
-
-    }
-    cout << "[MCCorrection::ElectronID_SF] (Graph) pt range strange.. "<<"ID_SF_"+ID<<", with pt = " << pt << endl;
-    exit(EXIT_FAILURE);
-    return 1.;
+    return this_SF+double(sys)*this_SF_err;
 
   }
   else{
@@ -525,10 +504,10 @@ double MCCorrection::GetPrefireWeight(std::vector<Photon> photons, std::vector<J
 }
 
 
-double MCCorrection::GetPileUpWeightBySampleName(int N_vtx, int syst){
+double MCCorrection::GetPileUpWeightBySampleName(int N_pileup, int syst){
   
-  int this_bin = N_vtx+1;
-  if(N_vtx >= 100) this_bin=100;
+  int this_bin = N_pileup+1;
+  if(N_pileup >= 100) this_bin=100;
 
   TString this_histname = MCSample;
   if(syst == 0){
@@ -555,10 +534,10 @@ double MCCorrection::GetPileUpWeightBySampleName(int N_vtx, int syst){
 
 }
 
-double MCCorrection::GetPileUpWeight(int N_vtx, int syst){
+double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
 
-  int this_bin = N_vtx+1;
-  if(N_vtx >= 100) this_bin=100;
+  int this_bin = N_pileup+1;
+  if(N_pileup >= 100) this_bin=100;
 
   TString this_histname = "MC_" + TString::Itoa(DataYear,10);
   if(syst == 0){
@@ -585,7 +564,40 @@ double MCCorrection::GetPileUpWeight(int N_vtx, int syst){
 
 }
 
+double MCCorrection::GetTopPtReweight(std::vector<Gen> gens){
+  //==== ref: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting2017
+  //==== Only top quarks in SM ttbar events must be reweighted, 
+  //==== not single tops or tops from BSM production mechanisms.
+  if(!MCSample.Contains("TT") || !MCSample.Contains("powheg")){
+    return 1.;
+  }
+  //==== initialize with large number
+  double toppt1=10000, toppt2=10000;
+  bool found_top = false, found_atop = false;
 
-
-
+  for(vector<Gen>::iterator genit=gens.begin(); genit!=gens.end(); genit++){
+    
+    if(genit->Status() == 22){
+      if(genit->PID() == 6){
+        toppt1= genit->Pt();
+        found_top = true;
+      }
+      else if(genit->PID() == -6){
+        toppt2= genit->Pt();
+        found_atop = true;
+      }
+    }
+    //==== after we found top pair, break the loop
+    if(found_top && found_atop) break;
+  }
+  double pt_reweight = 1.;
+  //==== if top pair is not found, return 1.
+  //==== the measurement covers only the range pt(top)<=800GeV, otherwise, return 1.
+  if(toppt1<=800 && toppt2 <=800){
+    pt_reweight*=exp(0.0615-0.0005*toppt1);
+    pt_reweight*=exp(0.0615-0.0005*toppt2);
+    pt_reweight = sqrt(pt_reweight);
+  }
+  return pt_reweight;
+}
 

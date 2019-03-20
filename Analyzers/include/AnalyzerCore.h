@@ -132,7 +132,7 @@ public:
   double GetPrefireWeight(int sys);
 
   //==== PU Reweight
-  double GetPileUpWeight(int N_vtx, int syst);
+  double GetPileUpWeight(int N_pileup, int syst);
 
 
   //==== Btag setup

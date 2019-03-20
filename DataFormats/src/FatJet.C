@@ -136,63 +136,6 @@ double FatJet::GetTaggerResult(Tagger tg){
   }
 }
 
-
-bool FatJet::IsTagged(Tagger tg, WP wp){
-
-  double tr = GetTaggerResult(tg);
-
-  if(tg==CSVv2){
-    if(wp==Loose) return (tr>0.5803);
-    else if(wp==Medium) return (tr>0.8838);
-    else if(wp==Tight) return (tr>0.9693);
-    else return false;
-  }
-  else if(tg==DeepCSV){
-    if(wp==Loose) return (tr>0.1522);
-    else if(wp==Medium) return (tr>0.4941);
-    else if(wp==Tight) return (tr>0.8001);
-    else return false;
-  }
-/* FIXME DeepFlavour WPs not yet done in twiki
-  else if(tg==DeepFlavour){
-    if(wp==Loose) return (tr>0.0574);
-    else if(wp==Medium) return (tr>0.4318);
-    else if(wp==Tight) return (tr>0.9068);
-    else return false;
-  }  
-*/
-  else if(tg==CvsL){
-    if(wp==Loose) return (tr>-0.53);
-    else if(wp==Medium) return (tr>0.07);
-    else if(wp==Tight) return (tr>0.87);
-    else return false;
-  }  
-  else if(tg==CvsB){
-    if(wp==Loose) return (tr>-0.26);
-    else if(wp==Medium) return (tr>-0.10);
-    else if(wp==Tight) return (tr>-0.3);
-    else return false;
-  }  
-  else if(tg==DeepCvsL){
-    if(wp==Loose) return (tr>0.05);
-    else if(wp==Medium) return (tr>0.15);
-    else if(wp==Tight) return (tr>0.8);
-    else return false;
-  }  
-  else if(tg==DeepCvsB){
-    if(wp==Loose) return (tr>0.33);
-    else if(wp==Medium) return (tr>0.28);
-    else if(wp==Tight) return (tr>0.1);
-    else return false;
-  }  
-  else{
-    cout << "[FatJet::IsTagged] ERROR; Wrong tagger" << endl;
-    return false;
-  }
-
-
-}
-
 void FatJet::SetPuppiTaus(double t1, double t2, double t3, double t4){
   j_puppi_tau1 = t1;
   j_puppi_tau2 = t2;

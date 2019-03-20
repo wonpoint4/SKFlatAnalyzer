@@ -227,6 +227,23 @@ double Event::GetTriggerLumi(TString trig){
     }
 
   }
+  else if(j_DataYear==2018){
+
+    if(trig=="Full"){
+      return 59966.161000;
+    }
+    else{
+      cout << "[Event::GetTriggerLumi] Wrong trigger (DataYear=" << j_DataYear << ", trig=" << trig << ")" << endl;
+      exit(EXIT_FAILURE);
+      return -1.;
+    }
+
+  }
+  else{
+    cout << "[Event::GetTriggerLumi] Wrong trigger (DataYear=" << j_DataYear << ", trig=" << trig << ")" << endl;
+    exit(EXIT_FAILURE);
+    return -1.;
+  }
 
   cout << "[Event::GetTriggerLumi] Wrong trigger (DataYear=" << j_DataYear << ", trig=" << trig << ")" << endl;
   exit(EXIT_FAILURE);

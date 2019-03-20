@@ -48,7 +48,6 @@ public:
     Loose, Medium, Tight
   };
   double GetTaggerResult(Tagger tg);
-  bool IsTagged(Tagger tg, WP wp);
 
   void SetPuppiTaus(double t1, double t2, double t3, double t4);
   double PuppiTau1() const { return j_puppi_tau1; }

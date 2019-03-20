@@ -835,10 +835,10 @@ void AnalyzerCore::SetupBTagger(std::vector<Jet::Tagger> taggers, std::vector<Je
       MapBTagSF[stagger + "_" + swp + "_lf"]              = new BTagSFUtil("incl"  ,  string(stagger), swp, DataYear, period_dependant,0);
       MapBTagSF[stagger + "_" + swp + "_hf"]              = new BTagSFUtil("mujets",  string(stagger), swp, DataYear, period_dependant,0);
       if(setup_systematics){
-	MapBTagSF[stagger + "_" + swp + "_lf_systup"]     = new BTagSFUtil("incl"  ,  string(stagger), swp, DataYear, period_dependant , 3);
-	MapBTagSF[stagger + "_" + swp + "_hf_systup"]     = new BTagSFUtil("mujets",  string(stagger), swp, DataYear, period_dependant , 1);
-	MapBTagSF[stagger + "_" + swp + "_lf_systdown"]   = new BTagSFUtil("incl"  ,  string(stagger), swp, DataYear, period_dependant , -3);
-	MapBTagSF[stagger + "_" + swp + "_hf_systdown"]   = new BTagSFUtil("mujets",  string(stagger), swp, DataYear, period_dependant , -1);
+        MapBTagSF[stagger + "_" + swp + "_lf_systup"]     = new BTagSFUtil("incl"  ,  string(stagger), swp, DataYear, period_dependant , 3);
+        MapBTagSF[stagger + "_" + swp + "_hf_systup"]     = new BTagSFUtil("mujets",  string(stagger), swp, DataYear, period_dependant , 1);
+        MapBTagSF[stagger + "_" + swp + "_lf_systdown"]   = new BTagSFUtil("incl"  ,  string(stagger), swp, DataYear, period_dependant , -3);
+        MapBTagSF[stagger + "_" + swp + "_hf_systdown"]   = new BTagSFUtil("mujets",  string(stagger), swp, DataYear, period_dependant , -1);
       }
     }
   }
@@ -900,16 +900,16 @@ bool AnalyzerCore::IsBTagged(Jet j, Jet::Tagger tagger, Jet::WP WP, bool applySF
 
 
 
-double AnalyzerCore::GetPileUpWeight(int N_vtx, int syst){
+double AnalyzerCore::GetPileUpWeight(int N_pileup, int syst){
 
   if(IsDATA) return 1.;
   else{
 
     if(DataYear==2016){
-      return mcCorr->GetPileUpWeight(N_vtx, syst);
+      return mcCorr->GetPileUpWeight(N_pileup, syst);
     }
     else if(DataYear==2017){
-      return mcCorr->GetPileUpWeightBySampleName(N_vtx, syst);
+      return mcCorr->GetPileUpWeightBySampleName(N_pileup, syst);
     }
     else if(DataYear==2018){
       //==== TODO 2018 not yet added

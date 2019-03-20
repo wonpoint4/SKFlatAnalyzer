@@ -22,6 +22,7 @@ public:
   vector<TString> Triggers_POGHighPt_Electron, Triggers_POGHighPt_Muon;
   TString TriggerNameForSF_POGHighPt_Electron, TriggerNameForSF_POGHighPt_Muon;
   double TriggerSafePt_POGHighPt_Electron, TriggerSafePt_POGHighPt_Muon;
+  double DoublePhotonSafePtCut;
 
 };
 

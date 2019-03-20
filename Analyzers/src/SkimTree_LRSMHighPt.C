@@ -17,7 +17,7 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
   else if(DataYear==2017){
     triggers = {
       "HLT_Mu50_v",
-      "HLT_oldMu100_v",
+      "HLT_OldMu100_v",
       "HLT_TkMu100_v",
       "HLT_Ele35_WPTight_Gsf_v",
       "HLT_Photon200_v",
