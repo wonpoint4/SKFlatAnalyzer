@@ -848,6 +848,9 @@ try:
             if IsKISTI:
               os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
               os.system('rm output/*.root')
+            elif IsTAMSA2:
+              os.system('hadd -j 4 -f '+outputname+'.root job_*/*.root >> JobStatus.log')
+              os.system('rm job_*/*.root')              
             else:
               os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')
               os.system('rm job_*/*.root')
