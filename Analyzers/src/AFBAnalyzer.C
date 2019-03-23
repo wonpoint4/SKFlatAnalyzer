@@ -153,7 +153,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   double (MCCorrection::*LeptonID_SF)(TString,double,double,int)=NULL;
   double (MCCorrection::*LeptonISO_SF)(TString,double,double,int)=NULL;
   double (MCCorrection::*LeptonReco_SF)(double,double,int)=NULL;
-  TString LeptonID_key,LeptonID_key_POG,LeptonISO_key,LeptonReco_key,triggerSF_key0,triggerSF_key1;
+  TString LeptonID_key,LeptonISO_key,LeptonReco_key,triggerSF_key0,triggerSF_key1;
   map<TString,vector<Lepton*>> map_lepton_systematic;
   if(channelname.Contains("muon")){
     muons=GetMuons("POGTightWithTightIso",0.0,2.4);
@@ -177,9 +177,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     triggerSF_key0="IsoMu17_POGTight";
     triggerSF_key1="Mu8_POGTight";
  }else if(channelname.Contains("electron")){
-    electrons_all=GetAllElectrons();
-
-    electrons=SelectElectrons(electrons_all,"passMediumID",0.0,2.5);
+    electrons=SelectElectrons(electrons_all,"passMediumID_selective",0.0,2.5);
     std::sort(electrons.begin(),electrons.end(),PtComparing);
     leps=MakeLeptonPointerVector(electrons);
 
@@ -198,25 +196,14 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     electrons_smear_down=SmearElectrons(electrons,-1);
     std::sort(electrons_smear_down.begin(),electrons_smear_down.end(),PtComparing);
     map_lepton_systematic["smear_down"]=MakeLeptonPointerVector(electrons_smear_down);
-      
-    int electrons_all_size=electron_eta->size();
-    for(int i=0;i<(int)electrons_all_size;i++){
-      if(fabs(electrons_all.at(i).scEta())>2.5) continue;
-      if(!electrons_all.at(i).PassID("passMediumID")) continue;
-      if(!electron_isGsfCtfScPixChargeConsistent->at(i)) continue;
-      electrons_selective.push_back(electrons_all.at(i));
-    }
-    std::sort(electrons_selective.begin(),electrons_selective.end(),PtComparing);
-    map_lepton_systematic["selective"]=MakeLeptonPointerVector(electrons_selective);
 
     lep0ptcut=25.;
     lep1ptcut=15.;
     LeptonID_SF=&MCCorrection::ElectronID_SF;
     LeptonReco_SF=&MCCorrection::ElectronReco_SF;
-    LeptonID_key="passMediumID_jihkim";
-    LeptonID_key_POG="passMediumID";
-    triggerSF_key0="Ele23_MediumID";
-    triggerSF_key1="Ele12_MediumID";
+    LeptonID_key="Strict_MediumID_pt10";
+    triggerSF_key0="Strict_LeadEle23_MediumID";
+    triggerSF_key1="Strict_TailEle12_MediumID";
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
     return;
@@ -240,67 +227,6 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   }
   FillHist(channelname+"/"+tauprefix+"cutflow",1.5,totalweight,20,0,20);
   
-  
-  /////////////////efficiency scale factors///////////////////
-  double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
-  double IDSF_POG=1.,IDSF_POG_up=1.,IDSF_POG_down=1.;
-  double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
-  double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
-  if(!IsDATA){
-    for(int i=0;i<(int)leps.size();i++){
-      double this_pt,this_eta;
-      if(leps[i]->LeptonFlavour()==Lepton::MUON){
-	this_pt=((Muon*)leps.at(i))->MiniAODPt();
-	this_eta=leps.at(i)->Eta();
-      }else if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
-	this_pt=leps.at(i)->Pt();
-	this_eta=((Electron*)leps.at(i))->scEta();
-      }else{
-	cout <<"[AFBAnalyzer::executeEventFromParameter] It is not lepton"<<endl;
-	exit(EXIT_FAILURE);
-      }
-
-      double this_RECOSF=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,0):1.;
-      double this_RECOSF_up=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,1):1.;
-      double this_RECOSF_down=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,-1):1.;
-      RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
-
-      double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key,this_eta,this_pt,0):1.;
-      double this_IDSF_up=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key,this_eta,this_pt,1):1.;
-      double this_IDSF_down=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key,this_eta,this_pt,-1):1.;
-      IDSF*=this_IDSF; IDSF_up*=this_IDSF_up; IDSF_down*=this_IDSF_down;
-      
-      if(LeptonID_key_POG!=""){
-	double this_IDSF_POG=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key_POG,this_eta,this_pt,0):1.;
-	double this_IDSF_POG_up=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key_POG,this_eta,this_pt,1):1.;
-	double this_IDSF_POG_down=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key_POG,this_eta,this_pt,-1):1.;
-	IDSF_POG*=this_IDSF_POG; IDSF_POG_up*=this_IDSF_POG_up; IDSF_POG_down*=this_IDSF_POG_down;
-      }
-
-      double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,0):1.;
-      double this_ISOSF_up=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,1):1.;
-      double this_ISOSF_down=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,-1):1.;
-      ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
-    }
-  }
-  totalweight*=RECOSF;
-  FillHist(channelname+"/"+tauprefix+"cutflow",2.5,totalweight,20,0,20);
-  totalweight*=IDSF;
-  FillHist(channelname+"/"+tauprefix+"cutflow",3.5,totalweight,20,0,20);
-  totalweight*=ISOSF;
-  FillHist(channelname+"/"+tauprefix+"cutflow",4.5,totalweight,20,0,20);
-
-  double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
-  if(!IsDATA){
-    triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
-    triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
-    triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
-  }
-  totalweight*=triggerSF;
-  FillHist(channelname+"/"+tauprefix+"cutflow",5.5,totalweight,20,0,20);
-
-
-
   //////////////////////PrefileWeight////////////////////
   double prefireweight=1.;
   double prefireweight_up=1.;
@@ -311,74 +237,125 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     prefireweight_down=L1PrefireReweight_Down;
   }
   totalweight*=prefireweight;
-  FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight,20,0,20);
+  FillHist(channelname+"/"+tauprefix+"cutflow",2.5,totalweight,20,0,20);
 
   totalweight*=zptcor;
-  FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight,20,0,20);
-
-  ///////////////////////weight systematics//////////////////
-  map<TString,double> map_weight_systematic;
-  if(!IsDATA){
-    map_weight_systematic["noPUreweight"]=weight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["PUreweight_up"]=weight*PUreweight_up*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["PUreweight_down"]=weight*PUreweight_down*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-  
-    map_weight_systematic["noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
-  
-    map_weight_systematic["noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-    
-    map_weight_systematic["noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor;
-
-    map_weight_systematic["IDSF_POG"]=weight*PUreweight*RECOSF*IDSF_POG*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["IDSF_POG_up"]=weight*PUreweight*RECOSF*IDSF_POG_up*ISOSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["IDSF_POG_down"]=weight*PUreweight*RECOSF*IDSF_POG_down*ISOSF*triggerSF*prefireweight*zptcor;
-    
-    map_weight_systematic["noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor;
-    map_weight_systematic["ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor;
-    
-    map_weight_systematic["notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor;
-    map_weight_systematic["triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor;
-    map_weight_systematic["triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor;
-
-    map_weight_systematic["noprefireweight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*zptcor;
-    map_weight_systematic["prefireweight_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_up*zptcor;
-    map_weight_systematic["prefireweight_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_down*zptcor;
-    
-    map_weight_systematic["nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
-    
-    if(PDFWeights_AlphaS->size()==2){
-      map_weight_systematic["alphaS_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(0);
-      map_weight_systematic["alphaS_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(1);
-    }
-  
-    for(int i=0;i<(int)PDFWeights_Scale->size();i++){
-      map_weight_systematic[Form("scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
-    }
-    /*
-    for(int i=0;i<(int)PDFWeights_Error->size();i++){
-      map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
-      }*/
-  }
+  FillHist(channelname+"/"+tauprefix+"cutflow",3.5,totalweight,20,0,20);
 
 
-  ///////////////////////fill hists///////////////////////
+  ///////////////////////lepton selection///////////////////////
   FillHist(channelname+"/"+tauprefix+"nlepton",leps.size(),totalweight,10,0,10);
   if(leps.size()==2){
     TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
-    FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight,20,0,20);
+    FillHist(channelname+"/"+tauprefix+"cutflow",4.5,totalweight,20,0,20);
     if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
+      FillHist(channelname+"/"+tauprefix+"cutflow",5.5,totalweight,20,0,20);
+
+      /////////////////efficiency scale factors///////////////////
+      double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
+      double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
+      double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
+      if(!IsDATA){
+	for(int i=0;i<(int)leps.size();i++){
+	  double this_pt,this_eta;
+	  TString chargesuffix;
+	  if(leps[i]->LeptonFlavour()==Lepton::MUON){
+	    this_pt=((Muon*)leps.at(i))->MiniAODPt();
+	    this_eta=leps.at(i)->Eta();
+	  }else if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
+	    this_pt=leps.at(i)->Pt();
+	    this_eta=((Electron*)leps.at(i))->scEta();
+	    if(leps[i]->Charge()>0) chargesuffix="_QPlus";
+	    else chargesuffix="_QMinus";
+	  }else{
+	    cout <<"[AFBAnalyzer::executeEventFromParameter] It is not lepton"<<endl;
+	    exit(EXIT_FAILURE);
+	  }
+	  
+	  double this_RECOSF=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,0):1.;
+	  double this_RECOSF_up=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,1):1.;
+	  double this_RECOSF_down=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,-1):1.;
+	  RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
+	  
+	  double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,0):1.;
+	  double this_IDSF_up=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,1):1.;
+	  double this_IDSF_down=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,-1):1.;
+	  IDSF*=this_IDSF; IDSF_up*=this_IDSF_up; IDSF_down*=this_IDSF_down;
+	  
+	  double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,0):1.;
+	  double this_ISOSF_up=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,1):1.;
+	  double this_ISOSF_down=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,-1):1.;
+	  ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
+	}
+      }
+      totalweight*=RECOSF;
+      FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight,20,0,20);
+      totalweight*=IDSF;
+      FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight,20,0,20);
+      totalweight*=ISOSF;
+      FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight,20,0,20);
+      
+      double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
+      if(!IsDATA){
+	triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
+	triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
+	triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
+      }
+      totalweight*=triggerSF;
       FillHist(channelname+"/"+tauprefix+"cutflow",9.5,totalweight,20,0,20);
+
+      ///////////////////////weight systematics//////////////////
+      map<TString,double> map_weight_systematic;
+      if(!IsDATA){
+	map_weight_systematic["noPUreweight"]=weight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["PUreweight_up"]=weight*PUreweight_up*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["PUreweight_down"]=weight*PUreweight_down*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	
+	map_weight_systematic["noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
+	
+	map_weight_systematic["noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	
+	map_weight_systematic["noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor;
+	
+	map_weight_systematic["noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor;
+	map_weight_systematic["ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor;
+	
+	map_weight_systematic["notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor;
+	map_weight_systematic["triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor;
+	map_weight_systematic["triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor;
+	
+	map_weight_systematic["noprefireweight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*zptcor;
+	map_weight_systematic["prefireweight_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_up*zptcor;
+	map_weight_systematic["prefireweight_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_down*zptcor;
+	
+	map_weight_systematic["nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
+	
+	if(PDFWeights_AlphaS->size()==2){
+	  map_weight_systematic["alphaS_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(0);
+	  map_weight_systematic["alphaS_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(1);
+	}
+	
+	for(int i=0;i<(int)PDFWeights_Scale->size();i++){
+	  map_weight_systematic[Form("scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
+	}
+	
+	for(int i=0;i<(int)PDFWeights_Error->size();i++){
+	  map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
+	}	
+      }
+
+      ///////////////////////fill hists///////////////////////
       TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
       double dimass=dilepton.M();
       double dirap=dilepton.Rapidity();
       double dipt=dilepton.Pt();
       if(dimass>=massrange[0]&&dimass<massrange[massbinnum]){
-	FillHist(channelname+"/"+tauprefix+"cutflow",13.5,totalweight,20,0,20);
+	FillHist(channelname+"/"+tauprefix+"cutflow",10.5,totalweight,20,0,20);
 	FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,totalweight);
 	if(MCSample.Contains("DYJets")&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
 	FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,map_weight_systematic);
@@ -412,10 +389,49 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   ///////////////////////leps systematic fill hists///////////////////////
   for(auto iter=map_lepton_systematic.begin();iter!=map_lepton_systematic.end();iter++){
+    totalweight=weight*PUreweight*prefireweight*zptcor;
     FillHist(channelname+"/"+tauprefix+"nlepton"+"_"+iter->first,iter->second.size(),totalweight,10,0,10);
     if(iter->second.size()==2){
       TString prefix=(iter->second.at(0)->Charge()*iter->second.at(1)->Charge()>0?"ss_":"")+tauprefix;
       if(iter->second.at(0)->Pt()>lep0ptcut&&iter->second.at(1)->Pt()>lep1ptcut){
+
+	/////////////////efficiency scale factors///////////////////
+	double IDSF=1.;double ISOSF=1.;double RECOSF=1.;
+	if(!IsDATA){
+	  for(int i=0;i<(int)iter->second.size();i++){
+	    double this_pt,this_eta;
+	    TString chargesuffix;
+	    if(iter->second.at(i)->LeptonFlavour()==Lepton::MUON){
+	      this_pt=((Muon*)iter->second.at(i))->MiniAODPt();
+	      this_eta=iter->second.at(i)->Eta();
+	    }else if(iter->second.at(i)->LeptonFlavour()==Lepton::ELECTRON){
+	      this_pt=iter->second.at(i)->Pt();
+	      this_eta=((Electron*)iter->second.at(i))->scEta();
+	      if(iter->second.at(i)->Charge()>0) chargesuffix="_QPlus";
+	      else chargesuffix="_QMinus";
+	    }else{
+	      cout <<"[AFBAnalyzer::executeEventFromParameter] It is not lepton"<<endl;
+	      exit(EXIT_FAILURE);
+	    }
+	    
+	    double this_RECOSF=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,0):1.;
+	    RECOSF*=this_RECOSF;
+	    double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,0):1.;
+	    IDSF*=this_IDSF;
+	    double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,0):1.;
+	    ISOSF*=this_ISOSF;
+	  }
+	}
+	totalweight*=RECOSF;
+	totalweight*=IDSF;
+	totalweight*=ISOSF;
+	
+	double triggerSF=1.;
+	if(!IsDATA){
+	  triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,iter->second,0);
+	}
+	totalweight*=triggerSF;
+
 	TLorentzVector dilepton=(*iter->second.at(0))+(*iter->second.at(1));
 	double dimass=dilepton.M();
 	double dirap=dilepton.Rapidity();
@@ -465,8 +481,6 @@ double AFBAnalyzer::GetCosThetaCS(const vector<Lepton*>& leps){
       l0=leps.at(1);
       l1=leps.at(0);
     }      
-    //cout <<"[AFBAnalyzer::GetCosThetaCS] same sign event"<<endl;
-    //exit(EXIT_FAILURE);
   }
 
   TLorentzVector dilepton=*l0+*l1;
@@ -479,119 +493,6 @@ double AFBAnalyzer::GetCosThetaCS(const vector<Lepton*>& leps){
   double direction=dilepton.Pz()/fabs(dilepton.Pz());
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 } 
-/*
-double AFBAnalyzer::GetCosThetaA(const vector<Lepton*>& leps){
-  TLorentzVector *l0,*l1;
-  if(leps.at(0)->Charge()<0&&leps.at(1)->Charge()>0){
-    l0=leps.at(0);
-    l1=leps.at(1);
-  }else if(leps.at(0)->Charge()>0&&leps.at(1)->Charge()<0){
-    l0=leps.at(1);
-    l1=leps.at(0);
-  }else{
-    if(random->Rndm()<0.5){
-      l0=leps.at(0);
-      l1=leps.at(1);
-    }else{
-      l0=leps.at(1);
-      l1=leps.at(0);
-    }      
-    //cout <<"[AFBAnalyzer::GetCosThetaCS] same sign event"<<endl;
-    //exit(EXIT_FAILURE);
-  }
-  TLorentzVector dilepton=*l0+*l1;
-  double direction=dilepton.Pz()/fabs(dilepton.Pz());
-  double dimass=dilepton.M();
-  double dipt=dilepton.Pt();
-  double dipz=dilepton.Pz();
-  TLorentzVector p0(0,0,(sqrt(dimass*dimass+dipz*dipz)+dipz)/2.,(sqrt(dimass*dimass+dipz*dipz)+dipz)/2.);
-  TLorentzVector p1(0,0,-(sqrt(dimass*dimass+dipz*dipz)-dipz)/2.,(sqrt(dimass*dimass+dipz*dipz)-dipz)/2.);
-  TLorentzVector particle=*l0;
-  TVector3 b=dilepton.BoostVector();
-  dilepton.Boost(-b);
-  p0.Boost(-b);p1.Boost(-b);particle.Boost(-b);
-  return direction*cos(particle.Angle(p0.Vect().Unit()-p1.Vect().Unit()));
-} 
-double AFBAnalyzer::GetCosThetaB(const vector<Lepton*>& leps,const vector<Jet>& jets){
-  TLorentzVector *l0,*l1;
-  if(leps.at(0)->Charge()<0&&leps.at(1)->Charge()>0){
-    l0=leps.at(0);
-    l1=leps.at(1);
-  }else if(leps.at(0)->Charge()>0&&leps.at(1)->Charge()<0){
-    l0=leps.at(1);
-    l1=leps.at(0);
-  }else{
-    if(random->Rndm()<0.5){
-      l0=leps.at(0);
-      l1=leps.at(1);
-    }else{
-      l0=leps.at(1);
-      l1=leps.at(0);
-    }      
-    //cout <<"[AFBAnalyzer::GetCosThetaCS] same sign event"<<endl;
-    //exit(EXIT_FAILURE);
-  }
-
-  TLorentzVector dilepton=*l0+*l1;
-  double l0pp=(l0->E()+l0->Pz())/sqrt(2);
-  double l0pm=(l0->E()-l0->Pz())/sqrt(2);
-  double l1pp=(l1->E()+l1->Pz())/sqrt(2);
-  double l1pm=(l1->E()-l1->Pz())/sqrt(2);
-  double dimass=dilepton.M();
-  double dipt=dilepton.Pt();
-  double direction=dilepton.Pz()/fabs(dilepton.Pz());
-  if(jets.size()>0){
-    direction=dilepton.Eta()>jets[0].Eta()?1:-1;
-  }
-  return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
-} 
-double AFBAnalyzer::GetCosThetaC(const vector<Lepton*>& leps,const vector<Jet>& jets){
-  TLorentzVector *l0,*l1;
-  if(leps.at(0)->Charge()<0&&leps.at(1)->Charge()>0){
-    l0=leps.at(0);
-    l1=leps.at(1);
-  }else if(leps.at(0)->Charge()>0&&leps.at(1)->Charge()<0){
-    l0=leps.at(1);
-    l1=leps.at(0);
-  }else{
-    if(random->Rndm()<0.5){
-      l0=leps.at(0);
-      l1=leps.at(1);
-    }else{
-      l0=leps.at(1);
-      l1=leps.at(0);
-    }      
-    //cout <<"[AFBAnalyzer::GetCosThetaCS] same sign event"<<endl;
-    //exit(EXIT_FAILURE);
-  }
-  TLorentzVector j0;
-  if(jets.size()>0){
-    j0=jets[0];
-  }
-  TLorentzVector dilepton=*l0+*l1;
-  TLorentzVector system=dilepton+j0;
-  double direction=dilepton.Pz()/fabs(dilepton.Pz());
-  double systemmass=system.M();
-  double systempt=system.Pt();
-  double systempz=system.Pz();
-  TLorentzVector p0(0,0,(sqrt(systemmass*systemmass+systempz*systempz)+systempz)/2.,(sqrt(systemmass*systemmass+systempz*systempz)+systempz)/2.);
-  TLorentzVector p1(0,0,-(sqrt(systemmass*systemmass+systempz*systempz)-systempz)/2.,(sqrt(systemmass*systemmass+systempz*systempz)-systempz)/2.);
-  TLorentzVector particle=*l0;
-  TVector3 b1=system.BoostVector();
-  dilepton.Boost(-b1);particle.Boost(-b1);
-  p0.Boost(-b1);p1.Boost(-b1);j0.Boost(-b1);
-  if(jets.size()>0){
-    if(p0.Angle(j0.Vect())<p1.Angle(j0.Vect())){
-      p0-=j0;
-    }else{
-      p1-=j0;
-    }
-  }
-  TVector3 b2=dilepton.BoostVector();
-  p0.Boost(-b2);p1.Boost(-b2);particle.Boost(-b2);
-  return direction*cos(particle.Angle(p0.Vect().Unit()-p1.Vect().Unit()));
-} 
-*/
 double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut){
   TLorentzVector *l0,*l1;
   if(leps.at(0)->Charge()<0&&leps.at(1)->Charge()>0){
@@ -608,8 +509,6 @@ double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& j
       l0=leps.at(1);
       l1=leps.at(0);
     }      
-    //cout <<"[AFBAnalyzer::GetCosThetaCS] same sign event"<<endl;
-    //exit(EXIT_FAILURE);
   }
   TLorentzVector dilepton=*l0+*l1;
   TLorentzVector j0;
@@ -684,68 +583,6 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
       }   
     }
   }
-  /*
-  double costA=GetCosTheta(leps,jets,);
-  FillHist(pre+"costhetaA"+suf,costA,w,40,-1,1);
-  FillHist(pre+"abscosthetaA"+suf,fabs(costA),w,20,0,1);
-  if(pre.Contains("m60to120")){
-    double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*costA*costA);
-    if(costA>0){
-      FillHist(pre+"forward_A"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den_A"+suf,dimass,w*0.5*fabs(costA)/pow(1+costA*costA+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num_A"+suf,dimass,w*0.5*costA*costA/pow(1+costA*costA+h,3),massbinnum,(double*)massrange);    
-    }else{
-      FillHist(pre+"backward_A"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den_A"+suf,dimass,w*0.5*fabs(costA)/pow(1+costA*costA+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num_A"+suf,dimass,w*0.5*costA*costA/pow(1+costA*costA+h,3),massbinnum,(double*)massrange);   
-    }
-  }
-  double costB=GetCosThetaB(leps,jets);
-  FillHist(pre+"costhetaB"+suf,costB,w,40,-1,1);
-  FillHist(pre+"abscosthetaB"+suf,fabs(costB),w,20,0,1);
-  if(pre.Contains("m60to120")){
-    double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*costB*costB);
-    if(costB>0){
-      FillHist(pre+"forward_B"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den_B"+suf,dimass,w*0.5*fabs(costB)/pow(1+costB*costB+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num_B"+suf,dimass,w*0.5*costB*costB/pow(1+costB*costB+h,3),massbinnum,(double*)massrange);    
-    }else{
-      FillHist(pre+"backward_B"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den_B"+suf,dimass,w*0.5*fabs(costB)/pow(1+costB*costB+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num_B"+suf,dimass,w*0.5*costB*costB/pow(1+costB*costB+h,3),massbinnum,(double*)massrange);   
-    }
-  }
-  double costC=GetCosThetaC(leps,jets);
-  FillHist(pre+"costhetaC"+suf,costC,w,40,-1,1);
-  FillHist(pre+"abscosthetaC"+suf,fabs(costC),w,20,0,1);
-  if(pre.Contains("m60to120")){
-    double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*costC*costC);
-    if(costC>0){
-      FillHist(pre+"forward_C"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den_C"+suf,dimass,w*0.5*fabs(costC)/pow(1+costC*costC+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num_C"+suf,dimass,w*0.5*costC*costC/pow(1+costC*costC+h,3),massbinnum,(double*)massrange);    
-    }else{
-      FillHist(pre+"backward_C"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den_C"+suf,dimass,w*0.5*fabs(costC)/pow(1+costC*costC+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num_C"+suf,dimass,w*0.5*costC*costC/pow(1+costC*costC+h,3),massbinnum,(double*)massrange);   
-    }
-  }
-  double costBC=GetCosThetaBC(leps,jets);
-  FillHist(pre+"costhetaBC"+suf,costBC,w,40,-1,1);
-  FillHist(pre+"abscosthetaBC"+suf,fabs(costBC),w,20,0,1);
-  if(pre.Contains("m60to120")){
-    double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*costBC*costBC);
-    if(costBC>0){
-      FillHist(pre+"forward_BC"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den_BC"+suf,dimass,w*0.5*fabs(costBC)/pow(1+costBC*costBC+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num_BC"+suf,dimass,w*0.5*costBC*costBC/pow(1+costBC*costBC+h,3),massbinnum,(double*)massrange);    
-    }else{
-      FillHist(pre+"backward_BC"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den_BC"+suf,dimass,w*0.5*fabs(costBC)/pow(1+costBC*costBC+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num_BC"+suf,dimass,w*0.5*costBC*costBC/pow(1+costBC*costBC+h,3),massbinnum,(double*)massrange);   
-    }
-  }
-  */
 
   //for jets
   FillHist(pre+"njet"+suf,jets.size(),w,10,0,10);
@@ -805,7 +642,7 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
     
 void AFBAnalyzer::FillAFBSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,map<TString,double> map_weight_systematic){
   for(auto iter=map_weight_systematic.begin();iter!=map_weight_systematic.end();iter++){
-    //FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
+    FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
   }
 }
 

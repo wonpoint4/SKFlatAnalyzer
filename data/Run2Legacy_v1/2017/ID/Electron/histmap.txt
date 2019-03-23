@@ -4,6 +4,25 @@ ID	SF	passTightID	2017_ElectronTight.root	EGamma_SF2D	TH2F
 ID	SF	passMediumID	2017_ElectronMedium.root	EGamma_SF2D	TH2F
 RECO	SF	ptgt20	egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root	EGamma_SF2D	TH2F
 RECO	SF	ptlt20	egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root	EGamma_SF2D	TH2F
-Trigger SF      Ele23_MediumID  egammaEffi.txt_EGM2D_runBCDEF_passingEle23_MediumID.root        EGamma_SF2D     TH2F
-Trigger SF      Ele12_MediumID  egammaEffi.txt_EGM2D_runBCDEF_passingEle12_MediumID.root        EGamma_SF2D     TH2F
-ID      SF      passMediumID_jihkim  egammaEffi.txt_EGM2D_runBCDEF_passingMedium94X_jihkim.root EGamma_SF2D     TH2F
+################################
+## SMP private: charge inclusive
+################################
+## charge inclusive
+Trigger        SF      LeadEle23_MediumID      EGM_TrigEff_runBCDEF_LeadEle23_Medium94X_jihkim_v1.root EGamma_SF2D     TH2F
+Trigger        SF      TailEle12_MediumID      EGM_TrigEff_runBCDEF_TailEle12_Medium94X_jihkim_v1.root EGamma_SF2D     TH2F
+## pt 10, 15,... (charge inclusive)
+ID     SF      MediumID_pt10   EGM_IdIso_runBCDEF_Medium94X_jihkim_V1.root     EGamma_SF2D     TH2F
+#ID     SF      TightID_pt10    EGM_IdIso_runBCDEF_Tight94X_jihkim_V1.root      EGamma_SF2D     TH2F
+
+################################
+## Strict charge separate
+################################
+Trigger        SF      Strict_LeadEle23_MediumID_QPlus EGMstrict_TrigEff_runBCDEF_LeadEle23_Medium94X_QPlus_jihkim_v1.root     EGamma_SF2D     TH2F
+Trigger        SF      Strict_LeadEle23_MediumID_QMinus        EGMstrict_TrigEff_runBCDEF_LeadEle23_Medium94X_QMinus_jihkim_v1.root    EGamma_SF2D     TH2F
+Trigger        SF      Strict_TailEle12_MediumID_QPlus EGMstrict_TrigEff_runBCDEF_TailEle12_Medium94X_QPlus_jihkim_v1.root     EGamma_SF2D     TH2F
+Trigger        SF      Strict_TailEle12_MediumID_QMinus        EGMstrict_TrigEff_runBCDEF_TailEle12_Medium94X_QMinus_jihkim_v1.root    EGamma_SF2D     TH2F
+## pt 10, 15, ...
+ID     SF      Strict_MediumID_pt10_QPlus      EGMstrict_IdIso_runBCDEF_Medium94X_QPlus_jihkim_v1.root EGamma_SF2D     TH2F
+ID     SF      Strict_MediumID_pt10_QMinus     EGMstrict_IdIso_runBCDEF_Medium94X_QMinus_jihkim_v1.root        EGamma_SF2D     TH2F
+#ID     SF      Strict_TightID_pt10_QPlus       EGMstrict_IdIso_runBCDEF_Tight94X_QPlus_jihkim_v1.root  EGamma_SF2D     TH2F
+#ID     SF      Strict_TightID_pt10_QMinus      EGMstrict_IdIso_runBCDEF_Tight94X_QMinus_jihkim_v1.root EGamma_SF2D     TH2F

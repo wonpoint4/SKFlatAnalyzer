@@ -5,8 +5,6 @@ mkdir -p $SKFlat_LIB_PATH
 export SKFlatV="Run2Legacy_v1"
 mkdir -p $SKFlat_WD/data/$SKFlatV
 
-export SKFlatSEDir="/xrootd/store/user/$USER/SKFlatOutput/"
-
 #### USER INFO ####
 export SKFlatLogEmail=''
 export SKFlatLogWeb='' # leave if blank if you don't have webpage
@@ -29,7 +27,7 @@ if [[ $HOSTNAME == *"ui"*".sdfarm.kr"* ]]; then
 
 elif [[ $HOSTNAME == *"cms.snu.ac.kr"* ]]; then
 
-  echo "Working on 42cluster"
+  echo "Working on tamsa1"
   export SKFlatRunlogDir="/data7/Users/$USER/SKFlatRunlog/"
   export SKFlatOutputDir="/data7/Users/$USER/SKFlatOutput/"
   export DATA_DIR=$SKFlat_WD/data/$SKFlatV
@@ -44,24 +42,24 @@ elif [[ $HOSTNAME == *"cms.snu.ac.kr"* ]]; then
 
 elif [[ $HOSTNAME == *"tamsa2"* ]]; then
 
-  echo "Working on 67cluster"
-  export SKFlatRunlogDir="/data9/Users/$USER/SKFlatRunlog/"
-  export SKFlatOutputDir="/data9/Users/$USER/SKFlatOutput/"
+  echo "Working on tamsa2"
+  export SKFlatRunlogDir="/data7/Users/$USER/SKFlatRunlog/"
+  export SKFlatOutputDir="/data7/Users/$USER/SKFlatOutput/"
   export DATA_DIR=$SKFlat_WD/data/$SKFlatV
 
   export CMS_PATH=/cvmfs/cms.cern.ch
   source $CMS_PATH/cmsset_default.sh
-  export SCRAM_ARCH=slc6_amd64_gcc630
-  cd /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_9_4_9_cand2/src/
+  export SCRAM_ARCH=slc7_amd64_gcc630
+  cd /cvmfs/cms.cern.ch/slc7_amd64_gcc630/cms/cmssw/CMSSW_9_4_9/src/
   eval `scramv1 runtime -sh`
   cd -
-  source /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_9_4_9_cand2/external/slc6_amd64_gcc630/bin/thisroot.sh
+  source /cvmfs/cms.cern.ch/slc7_amd64_gcc630/cms/cmssw/CMSSW_9_4_9/external/slc7_amd64_gcc630/bin/thisroot.sh
 
 elif [[ $HOSTNAME == *"knu"* ]]; then
 
   echo "Working on KNU"
   export SKFlatRunlogDir="/u/user/$USER/scratch/SKFlatRunlog/"
-  export SKFlatOutputDir="/u/user/$USER/scratch//SKFlatOutput/"
+  export SKFlatOutputDir="/u/user/$USER/scratch/SKFlatOutput/"
   export DATA_DIR=$SKFlat_WD/data/$SKFlatV
 
   export CMS_PATH=/cvmfs/cms.cern.ch
