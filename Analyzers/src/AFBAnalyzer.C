@@ -541,6 +541,10 @@ double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& j
   return direction*cos(particle.Angle(p0.Vect().Unit()-p1.Vect().Unit()));
 } 
 void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,double w){
+  if(leps.at(0)->Pt()>60){
+    if(leps.at(0)->Charge()>0) FillHist(pre+"l0eta_pt60_plus"+suf,leps.at(0)->Eta(),w,60,-3,3);
+    else FillHist(pre+"l0eta_pt60_minus"+suf,leps.at(0)->Eta(),w,60,-3,3);
+  }
   //for leptons
   FillBasicHists(pre,suf,leps,w);
   TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
@@ -642,7 +646,7 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
     
 void AFBAnalyzer::FillAFBSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,map<TString,double> map_weight_systematic){
   for(auto iter=map_weight_systematic.begin();iter!=map_weight_systematic.end();iter++){
-    FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
+    //FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
   }
 }
 

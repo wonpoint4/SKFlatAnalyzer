@@ -16,8 +16,6 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
 
 void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZPtWeight();
-  if(getenv("reduction")) MaxEvent=fChain->GetEntries()/atof(getenv("reduction"));
-  cout<<"[SMPAnalyzerCore::initializeAnalyzer] MaxEvent="<<MaxEvent<<" "<<atof(getenv("reduction"))<<" "<<fChain->GetEntries()<<endl;
 }
 
 void SMPAnalyzerCore::FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w){

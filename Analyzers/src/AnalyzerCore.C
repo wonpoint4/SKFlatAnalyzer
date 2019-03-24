@@ -10,28 +10,32 @@ AnalyzerCore::AnalyzerCore(){
 }
 
 AnalyzerCore::~AnalyzerCore(){
-
+  cout<<"destructor1"<<endl;
   //=== hist maps
 
   for(std::map< TString, TH1D* >::iterator mapit = maphist_TH1D.begin(); mapit!=maphist_TH1D.end(); mapit++){
     delete mapit->second;
   }
   maphist_TH1D.clear();
+  cout<<"destructor2"<<endl;
 
   for(std::map< TString, TH2D* >::iterator mapit = maphist_TH2D.begin(); mapit!=maphist_TH2D.end(); mapit++){
     delete mapit->second;
   }
   maphist_TH2D.clear();
+  cout<<"destructor3"<<endl;
 
   //=== delete btag map
   for(std::map<TString,BTagSFUtil*>::iterator it = MapBTagSF.begin(); it!= MapBTagSF.end(); it++){
     delete it->second;
   }
   MapBTagSF.clear();
+  cout<<"destructor4"<<endl;
 
   //==== output rootfile
 
   outfile->Close();
+  cout<<"destructor5"<<endl;
 
   //==== Tools
 
@@ -39,6 +43,7 @@ AnalyzerCore::~AnalyzerCore(){
   delete fakeEst;
   delete cfEst;
   delete pdfReweight;
+  cout<<"destructor6"<<endl;
 
 }
 
@@ -1861,9 +1866,11 @@ void AnalyzerCore::WriteHist(){
     if(!dir){
       outfile->mkdir(this_suffix);
     }
+    cout<<this_suffix<<"/"<<this_name<<endl;
     outfile->cd(this_suffix);
     mapit->second->Write(this_name);
   }
+  cout<<"end1d"<<endl;
   for(std::map< TString, TH2D* >::iterator mapit = maphist_TH2D.begin(); mapit!=maphist_TH2D.end(); mapit++){
     TString this_fullname=mapit->second->GetName();
     TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());
@@ -1915,7 +1922,7 @@ void AnalyzerCore::WriteHist(){
     outfile->cd();
 
   }
-
+  cout<<"end writehist"<<endl;
 }
 
 

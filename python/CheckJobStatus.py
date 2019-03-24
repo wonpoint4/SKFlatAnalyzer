@@ -24,8 +24,6 @@ def GetJobID(logfiledir, cycle, jobnumber, hostname):
     jobid = open(logfiledir+'/submitlog.log').readlines()[0].split()[2]
   if hostname=="KNU":
     jobid = open(logfiledir+'/submitlog.log').readlines()[0].split('.')[0]
-  if hostname=="TAMSA2":
-    jobid = open(logfiledir+'/submitlog.log').readlines()[0].split('.')[0]
 
   return jobid
 
@@ -57,9 +55,6 @@ def CheckJobStatus(logfiledir, cycle, jobnumber, hostname):
     jobid = open(logfiledir+'/job_'+str(jobnumber)+'/submitlog.log').readlines()[0].split()[2]
     path_log_e = logfiledir+'job_'+str(jobnumber)+'/job_'+str(jobnumber)+'_'+cycle+'.e'+jobid
     path_log_o = logfiledir+'job_'+str(jobnumber)+'/job_'+str(jobnumber)+'_'+cycle+'.o'+jobid
-  if hostname=="TAMSA2":
-    path_log_e = logfiledir+'job_'+str(jobnumber)+'/stderr.log'
-    path_log_o = logfiledir+'job_'+str(jobnumber)+'/stdout.log'
   if hostname=="KNU":
     path_log_e = logfiledir+'job_'+str(jobnumber)+'/stderr.log'
     path_log_o = logfiledir+'job_'+str(jobnumber)+'/stdout.log'
