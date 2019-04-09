@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "TROOT.h"
 #include "TFile.h"
 #include "TString.h"
 #include "TH1D.h"
@@ -27,6 +28,7 @@ public:
   MCCorrection();
   ~MCCorrection();
 
+  TDirectory *histDir;
   void ReadHistograms();
 
   TString MCSample;
@@ -41,6 +43,8 @@ public:
   double MuonISO_SF(TString ID, double eta, double pt, int sys=0);
   double MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys=0);
   double MuonTrigger_SF(TString ID, TString trig, std::vector<Muon> muons, int sys=0);
+  double MuonTrigger_SF(TString ID, TString trig, std::vector<Muon *> muons, int sys=0);
+
   std::map< TString, TH2F* > map_hist_Muon;
 
   double ElectronReco_SF(double sceta, double pt, int sys=0);

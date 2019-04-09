@@ -83,3 +83,9 @@ void Gen::SetGenStatusFlag_fromHardProcessFinalState(int i){
 void Gen::SetGenStatusFlag_isMostlyLikePythia6Status3(int i){
   j_isMostlyLikePythia6Status3 = i;
 }
+
+void Gen::Print(){
+
+  cout << "(Index, PID, Status, MotherIndex, Pt, Eta, Phi, M) = " << Index() << "\t" << PID() << "\t" << Status() << "\t" << MotherIndex() << "\t" << Pt() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << endl;
+
+}

@@ -12,7 +12,7 @@ void AFBAnalyzer::executeEvent(){
     GetGenIndex(gens,parton0,parton1,hardl0,hardl1,l0,l1,photons);
     int hardj0=0,hardj1=0,hardj2=0;
     Gen genhardj0,genhardj1,genhardj2;
-    for(int i=parton1+1;i<(int)gens.size();i++){
+    for(unsigned int i=parton1+1;i<gens.size();i++){
       if(gens[i].isHardProcess()){
 	if(gens[i].PID()==21||abs(gens[i].PID())<7){
 	  if(!hardj0){
@@ -33,7 +33,7 @@ void AFBAnalyzer::executeEvent(){
       Gen genparton0=gens[parton0],genparton1=gens[parton1],genhardl0=gens[hardl0],genhardl1=gens[hardl1],genl0=gens[l0],genl1=gens[l1],genphotons;
       genparton0.SetPxPyPzE(0,0,genWeight_X1*6500.,genWeight_X1*6500.);
       genparton1.SetPxPyPzE(0,0,-genWeight_X2*6500.,genWeight_X2*6500.);
-      for(int i=0;i<(int)photons.size();i++) genphotons+=gens[photons[i]];
+      for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
       TLorentzVector genZ=(genl0+genl1+genphotons);
       zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
       TString slepton=abs(genhardl0.PID())==13?"muon":"electron";
@@ -52,8 +52,10 @@ void AFBAnalyzer::executeEvent(){
       }
       int nhardjet=(hardj0?1:0)+(hardj1?1:0)+(hardj2?1:0);
 
+      ///////////////////////FillGenHist////////////////
       //FillGenHists(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
       //FillGenHists(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+      /*
       FillHist(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix+"dipty",genZ.Pt(),fabs(genZ.Rapidity()),weight_norm_1invpb*gen_weight*zptcor,zptcor_nptbin,(double*)zptcor_ptbin,zptcor_nybin,(double*)zptcor_ybin);
       FillHist(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix+"dipty_nozptcor",genZ.Pt(),fabs(genZ.Rapidity()),weight_norm_1invpb*gen_weight,zptcor_nptbin,(double*)zptcor_ptbin,zptcor_nybin,(double*)zptcor_ybin);
 
@@ -101,6 +103,7 @@ void AFBAnalyzer::executeEvent(){
 	if(nhardjet==0) hardprefix+="0j_";
 	else hardprefix+="nj_";
       }
+      */
     }else{
       tauprefix="tau_";
     }
@@ -143,7 +146,7 @@ void AFBAnalyzer::executeEvent(){
 
 void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   std::vector<Muon> muons,muons_scale_up,muons_scale_down;
-  std::vector<Electron> electrons_all,electrons,electrons_scale_up,electrons_scale_down,electrons_smear_up,electrons_smear_down,electrons_selective;
+  std::vector<Electron> electrons,electrons_scale_up,electrons_scale_down,electrons_smear_up,electrons_smear_down;
 
   std::vector<Jet> jets=GetJets("tightLepVeto",30,2.7);
   std::sort(jets.begin(),jets.end(),PtComparing);
@@ -177,7 +180,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     triggerSF_key0="IsoMu17_POGTight";
     triggerSF_key1="Mu8_POGTight";
  }else if(channelname.Contains("electron")){
-    electrons=SelectElectrons(electrons_all,"passMediumID_selective",0.0,2.5);
+    electrons=SMPGetElectrons("passMediumID_selective",0.0,2.5);
     std::sort(electrons.begin(),electrons.end(),PtComparing);
     leps=MakeLeptonPointerVector(electrons);
 
@@ -256,7 +259,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
       double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
       if(!IsDATA){
-	for(int i=0;i<(int)leps.size();i++){
+	for(unsigned int i=0;i<leps.size();i++){
 	  double this_pt,this_eta;
 	  TString chargesuffix;
 	  if(leps[i]->LeptonFlavour()==Lepton::MUON){
@@ -340,12 +343,12 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	  map_weight_systematic["alphaS_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(1);
 	}
 	
-	for(int i=0;i<(int)PDFWeights_Scale->size();i++){
+	for(unsigned int i=0;i<PDFWeights_Scale->size();i++){
 	  map_weight_systematic[Form("scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
 	}
 	
-	for(int i=0;i<(int)PDFWeights_Error->size();i++){
-	  map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
+	for(unsigned int i=0;i<PDFWeights_Error->size();i++){
+	  //map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
 	}	
       }
 
@@ -398,7 +401,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.;double ISOSF=1.;double RECOSF=1.;
 	if(!IsDATA){
-	  for(int i=0;i<(int)iter->second.size();i++){
+	  for(unsigned int i=0;i<iter->second.size();i++){
 	    double this_pt,this_eta;
 	    TString chargesuffix;
 	    if(iter->second.at(i)->LeptonFlavour()==Lepton::MUON){
@@ -554,18 +557,21 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
   double cost=GetCosThetaCS(leps);
   FillHist(pre+"costhetaCS"+suf,cost,w,40,-1,1);
   FillHist(pre+"abscosthetaCS"+suf,fabs(cost),w,20,0,1);
-  if(pre.Contains("m60to120")){
+  if(pre.Contains(TRegexp("m60to..."))){
     double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*cost*cost);
+    double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
+    double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
     if(cost>0){
       FillHist(pre+"forward"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den"+suf,dimass,w*0.5*fabs(cost)/pow(1+cost*cost+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num"+suf,dimass,w*0.5*cost*cost/pow(1+cost*cost+h,3),massbinnum,(double*)massrange);    
+      FillHist(pre+"forward_den"+suf,dimass,w*den_weight,massbinnum,(double*)massrange);
+      FillHist(pre+"forward_num"+suf,dimass,w*num_weight,massbinnum,(double*)massrange);    
     }else{
       FillHist(pre+"backward"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den"+suf,dimass,w*0.5*fabs(cost)/pow(1+cost*cost+h,2),massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num"+suf,dimass,w*0.5*cost*cost/pow(1+cost*cost+h,3),massbinnum,(double*)massrange);   
+      FillHist(pre+"backward_den"+suf,dimass,w*den_weight,massbinnum,(double*)massrange);
+      FillHist(pre+"backward_num"+suf,dimass,w*num_weight,massbinnum,(double*)massrange);   
     }
   }
+  /*
   TString options[]={"A","B","C","BC"};
   double fcuts[]={0.5,1,100};
   for(int i=0;i<sizeof(options)/sizeof(TString);i++){
@@ -590,7 +596,7 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
 
   //for jets
   FillHist(pre+"njet"+suf,jets.size(),w,10,0,10);
-  for(int i=0;i<(int)jets.size();i++){
+  for(unsigned int i=0;i<jets.size();i++){
     if(i>2) break;
     FillHist(pre+Form("j%dpt",i)+suf,jets[i].Pt(),w,200,0,200);
     FillHist(pre+Form("j%deta",i)+suf,jets[i].Eta(),w,100,-5,5);
@@ -642,11 +648,12 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
     //cout<<"###############after boost2#########"<<endl;
     //p0.Print();p1.Print();system.Print();dilepton.Print();j0.Print();
   }
+  */
 }
     
 void AFBAnalyzer::FillAFBSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,map<TString,double> map_weight_systematic){
   for(auto iter=map_weight_systematic.begin();iter!=map_weight_systematic.end();iter++){
-    //FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
+    FillAFBHists(pre,"_"+iter->first+suf,leps,jets,iter->second);
   }
 }
 

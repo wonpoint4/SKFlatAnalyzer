@@ -51,3 +51,10 @@ void Lepton::SetMiniIso(double ch, double nh, double ph, double pu, double rho, 
 void Lepton::SetLeptonFlavour(Flavour f){
   j_LeptonFlavour = f;
 }
+
+void Lepton::Print(){
+  if(IsElectron()) cout << "Electron\t";
+  else if(IsMuon()) cout << "Muon\t";
+  else cout << "NoFlav\t";
+  cout << "(Pt, Eta, Phi, M, Charge) = " << Pt() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << "\t" << Charge() << endl;
+}

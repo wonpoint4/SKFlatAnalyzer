@@ -20,8 +20,10 @@ public:
   double GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut);
   void FillAFBHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,double w);
   void FillAFBSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,map<TString,double> map_systematic);
-  static const int massbinnum=12;
-  const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120};
+  //static const int massbinnum=12;
+  //const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120};
+  static const int massbinnum=14;
+  const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120,200,350};
   void FillHardHists(TString pre,TString suf,Gen genparton0,Gen genparton1,Gen genhardl0,Gen genhardl1,Gen genhardj0,double w);
   TRandom3* random;
   TString hardprefix;

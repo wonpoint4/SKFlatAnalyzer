@@ -4,12 +4,29 @@ MCCorrection::MCCorrection() :
 IgnoreNoHist(false)
 {
 
+  gROOT->cd();
+  histDir = NULL;
+  int counter = 0;
+  while (!histDir) {
+    //==== First, let's find a directory name that doesn't exist yet
+    std::stringstream dirname;
+    dirname << "MCCorrection" << counter;
+    if (gROOT->GetDirectory((dirname.str()).c_str())) {
+      ++counter;
+      continue;
+    }
+    //==== Let's try to make this directory
+    histDir = gROOT->mkdir((dirname.str()).c_str());
+  }
+  cout << "[MCCorrection::MCCorrection()] histDir name = " << histDir->GetName() << endl;
+
 }
 
 void MCCorrection::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
 
+  TDirectory* origDir = gDirectory;
 
   //==== ID/Trigger
   TString IDpath = datapath+"/"+TString::Itoa(DataYear,10)+"/ID/";
@@ -32,14 +49,19 @@ void MCCorrection::ReadHistograms(){
     TFile *file = new TFile(IDpath+"/Electron/"+d);
 
     if(f=="TH2F"){
-      map_hist_Electron[a+"_"+b+"_"+c] = (TH2F *)file->Get(e);
+      histDir->cd();
+      map_hist_Electron[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
     }
     else if(f=="TGraphAsymmErrors"){
-      map_graph_Electron[a+"_"+b+"_"+c] = (TGraphAsymmErrors *)file->Get(e);
+      histDir->cd();
+      map_graph_Electron[a+"_"+b+"_"+c] = (TGraphAsymmErrors *)file->Get(e)->Clone();
     }
     else{
       cout << "[MCCorrection::MCCorrection] Wrong class type : " << elline << endl;
     }
+    file->Close();
+    delete file;
+    origDir->cd();
   }
 
   cout << "[MCCorrection::MCCorrection] map_hist_Electron :" << endl;
@@ -67,7 +89,11 @@ void MCCorrection::ReadHistograms(){
     is >> d; // <rootfilename>
     is >> e; // <histname>
     TFile *file = new TFile(IDpath+"/Muon/"+d);
-    map_hist_Muon[a+"_"+b+"_"+c] = (TH2F *)file->Get(e);
+    histDir->cd();
+    map_hist_Muon[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
+    file->Close();
+    delete file;
+    origDir->cd();
   }
 
   cout << "[MCCorrection::MCCorrection] map_hist_Muon :" << endl;
@@ -93,7 +119,11 @@ void MCCorrection::ReadHistograms(){
     is >> c; // <histname>
     
     TFile *file = new TFile(PrefirePath+b);
-    map_hist_prefire[a + "_prefire"] = (TH2F *)file->Get(c);
+    histDir->cd();
+    map_hist_prefire[a + "_prefire"] = (TH2F *)file->Get(c)->Clone();
+    file->Close();
+    delete file;
+    origDir->cd();
   }
 
 
@@ -116,8 +146,16 @@ void MCCorrection::ReadHistograms(){
     if(DataYear == 2017 && a!=MCSample) continue;
     
     TFile *file = new TFile(PUReweightPath+c);
-    if((TH1D *)file->Get(a+"_"+b)) map_hist_pileup[a+"_"+b+"_pileup"] = (TH1D *)file->Get(a+"_"+b);
-    else cout << "[MCCorrection::ReadHistograms] No : " << a + "_" + b << endl;
+    if( (TH1D *)file->Get(a+"_"+b) ){
+      histDir->cd();
+      map_hist_pileup[a+"_"+b+"_pileup"] = (TH1D *)file->Get(a+"_"+b)->Clone();
+    }
+    else{
+      cout << "[MCCorrection::ReadHistograms] No : " << a + "_" + b << endl;
+    }
+    file->Close();
+    delete file;
+    origDir->cd();
   }
 /*
   cout << "[MCCorrection::MCCorrection] map_hist_pileup :" << endl;
@@ -289,6 +327,27 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
 
     }
   }
+  else if(DataYear==2018){
+    if(trig=="IsoMu24"){
+      if(pt<26.) return 1.; //FIXME
+      if(eta>=2.4) eta = 2.39;
+
+      if(pt>1200.) pt = 1199.;
+    }
+    else if(trig=="Mu50"){
+      if(pt<52.) return 1.; //FIXME
+      if(eta>=2.4) eta = 2.39;
+
+      if(pt>1200.) pt = 1199.;
+    }
+    else{
+
+    }
+  }
+  else{
+    cout << "[MCCorrection::MuonTrigger_Eff] Wrong year : " << DataYear << endl;
+    exit(EXIT_FAILURE);
+  }
 
   TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID;
   if(DataOrMC==1) histkey = "Trigger_Eff_MC_"+trig+"_"+ID;
@@ -351,6 +410,18 @@ double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon> 
 
 }
 
+double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon *> muons, int sys){
+
+  std::vector<Muon> muvec;
+  for(unsigned int i=0; i<muons.size(); i++){
+    Muon this_muon = *(muons.at(i));
+    muvec.push_back( this_muon );
+  }
+
+  return MuonTrigger_SF(ID, trig, muvec, sys);
+
+}
+
 double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys){
 
   if(ID=="Default") return 1.;
@@ -371,11 +442,6 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
     //==== As a result the HEEP differs in that it provides just a single number for the barrel and a single number for the endcap.
     //==== * note there almost certainly will have to be a retune for 2018 due to HCAL data/MC disagreements
     //==== * 2018 prompt: expected Dec 2018
-
-/*
-    if(fabs(sceta) < 1.479) this_key += "_Barrel";
-    else                    this_key += "_Endcap";
-*/
 
     bool IsBarrel = fabs(sceta) < 1.479;
     double this_SF(1.);
@@ -403,6 +469,18 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
     }
     else if(DataYear==2018){
       //==== TODO not yet supported
+      //==== copying 2017
+      this_SF         = (IsBarrel ? 0.967 : 0.973);
+      this_SF_staterr = (IsBarrel ? 0.001 : 0.002);
+
+      if(IsBarrel) this_SF_systerr = (pt<90. ? 0.01 : min(1.+(pt-90.)*0.0022,3.)*0.01) * this_SF;
+      else         this_SF_systerr = (pt<90. ? 0.02 : min(1.+(pt-90.)*0.0143,5.)*0.01) * this_SF;
+
+      this_SF_err = sqrt(this_SF_staterr*this_SF_staterr+this_SF_systerr*this_SF_systerr);
+    }
+    else{
+      cout << "[MCCorrection::ElectronID_SF] (Hist) Wrong year "<< DataYear << endl;
+      exit(EXIT_FAILURE);
     }
 
     return this_SF+double(sys)*this_SF_err;

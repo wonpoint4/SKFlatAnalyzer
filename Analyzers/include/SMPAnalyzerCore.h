@@ -2,6 +2,7 @@
 #define SMPAnalyzerCore_h
 
 #include "AnalyzerCore.h"
+#include "TRegexp.h"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 

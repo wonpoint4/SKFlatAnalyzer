@@ -30,6 +30,9 @@ public:
   void SetCharge(int q);
   inline int Charge() const {return j_Charge;}
 
+  //==== Print four vector
+  virtual void Print();
+
 private:
   int j_Charge;
 

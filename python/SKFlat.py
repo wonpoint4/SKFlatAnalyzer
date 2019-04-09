@@ -98,7 +98,6 @@ if IsSkimTree:
   if not IsSNU:
     print "Skimming only possible in SNU"
     exit()
-  args.NJobs = 999999
 
 ## Machine-dependent variables
 
@@ -107,7 +106,7 @@ if IsKNU:
 
 ## Make Sample List
 
-InputSample_Data = ["DoubleMuon", "DoubleEG", "SingleMuon", "SingleElectron", "SinglePhoton", "MuonEG"]
+InputSample_Data = ["DoubleMuon", "DoubleEG", "SingleMuon", "SingleElectron", "SinglePhoton", "MuonEG", "EGamma"]
 AvailableDataPeriods = []
 if args.Year == "2016":
   AvailableDataPeriods = ["B_ver2","C","D","E","F","G","H"]
@@ -147,9 +146,9 @@ FileRangesForEachSample = []
 
 ## Get Random Number for webdir
 
-random.seed(StringForHash+args.Year)
-RandomNumber = random.random()
-str_RandomNumber = str(RandomNumber).replace('0.','')
+random.seed(hash(StringForHash+timestamp+args.Year))
+RandomNumber = int(random.random()*10000)
+str_RandomNumber = str(RandomNumber)
 webdirname = timestamp+"_"+str_RandomNumber
 webdirpathbase = SKFlatRunlogDir+'/www/SKFlatAnalyzerJobLogs/'+webdirname
 
@@ -161,7 +160,7 @@ if args.Skim!="":
 
 ## Define MasterJobDir
 
-MasterJobDir = SKFlatRunlogDir+'/'+timestamp+'__'+args.Analyzer+'__'+'Year'+args.Year
+MasterJobDir = SKFlatRunlogDir+'/'+timestamp+'__'+str_RandomNumber+"__"+args.Analyzer+'__'+'Year'+args.Year
 if args.Skim!="":
   MasterJobDir += "__"+args.Skim
 for flag in Userflags:
@@ -175,16 +174,15 @@ if IsKISTI or IsTAMSA2:
 
   cwd = os.getcwd()
   os.chdir(SKFlat_WD)
-  os.system('tar --exclude=data/'+SKFlatV+'/Sample -czf '+str_RandomNumber+'_data.tar.gz data/'+SKFlatV+'/')
-  os.system('tar -czf '+str_RandomNumber+'_lib.tar.gz lib/*')
+  os.system('make -s CondorTar')
   os.chdir(cwd)
 
   ## Copy shared library file
 
   os.system('mkdir -p '+MasterJobDir)
 
-  os.system('cp '+SKFlat_WD+'/'+str_RandomNumber+'_data.tar.gz '+MasterJobDir+'/data.tar.gz')
-  os.system('cp '+SKFlat_WD+'/'+str_RandomNumber+'_lib.tar.gz '+MasterJobDir+'/lib.tar.gz')
+  os.system('cp '+SKFlat_WD+'/tar/data.tar.gz '+MasterJobDir+'/data.tar.gz')
+  os.system('cp '+SKFlat_WD+'/tar/lib.tar.gz '+MasterJobDir+'/lib.tar.gz')
   os.system('cp '+SKFlat_WD+'/lib/DataFormats.tar.gz '+MasterJobDir)
   os.system('cp '+SKFlat_WD+'/lib/AnalyzerTools.tar.gz '+MasterJobDir)
   os.system('cp '+SKFlat_WD+'/lib/Analyzers.tar.gz '+MasterJobDir)
@@ -291,8 +289,9 @@ for InputSample in InputSamples:
 
   ## Get xsec and SumW
 
-  this_xsec = 1.;
-  this_sumw = 1.;
+  this_dasname = ""
+  this_xsec = 1.
+  this_sumw = 1.
   if not IsDATA:
     lines_SamplePath = open(SAMPLE_DATA_DIR+'/CommonSampleInfo/'+InputSample+'.txt').readlines()
     for line in lines_SamplePath:
@@ -300,6 +299,7 @@ for InputSample in InputSamples:
         continue
       words = line.split()
       if InputSample==words[0]:
+        this_dasname = words[1]
         this_xsec = words[2]
         this_sumw = words[4]
         break
@@ -332,17 +332,17 @@ tar -zxf data.tar.gz
 echo "#### cmsenv ####"
 export CMS_PATH=/cvmfs/cms.cern.ch
 source $CMS_PATH/cmsset_default.sh
-export SCRAM_ARCH=slc6_amd64_gcc630
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_9_4_4/src/
+export SCRAM_ARCH=slc6_amd64_gcc700
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc700/cms/cmssw-patch/CMSSW_10_4_0_patch1/src/
 eval `scramv1 runtime -sh`
 cd -
 echo "#### setup root ####"
-source /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_9_4_4/external/slc6_amd64_gcc630/bin/thisroot.sh
+source /cvmfs/cms.cern.ch/slc6_amd64_gcc700/cms/cmssw-patch/CMSSW_10_4_0_patch1/external/slc6_amd64_gcc700/bin/thisroot.sh
 
 export SKFlatV="{0}"
 export SKFlat_WD=`pwd`
 export SKFlat_LIB_PATH=$SKFlat_WD/lib/
-export DATA_DIR=data/$SKFlatV
+export DATA_DIR=$SKFlat_WD/data/$SKFlatV
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/DataFormats/include/:$SKFlat_WD/Analyzers/include/:$SKFlat_WD/AnalyzerTools/include/
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SKFlat_LIB_PATH
 
@@ -357,7 +357,7 @@ while [ "$SumNoAuth" -ne 0 ]; do
 
   echo "#### running ####"
   echo "root -l -b -q run_${{SECTION}}.C"
-  root -l -b -q run_${{SECTION}}.C 2> err.log
+  root -l -b -q run_${{SECTION}}.C 2> err.log || echo "EXIT_FAILURE" >> err.log
   NoAuthError_Open=`grep "Error in <TNetXNGFile::Open>" err.log -R | wc -l`
   NoAuthError_Close=`grep "Error in <TNetXNGFile::Close>" err.log -R | wc -l`
 
@@ -492,22 +492,20 @@ void {2}(){{
 
     if IsSkimTree:
       tmp_filename = lines_files[ FileRanges[it_job][0] ].strip('\n')
-      ## /data7/DATA/SKFlat/v949cand2_2/2017/DATA/SingleMuon/periodB/181107_231447/0000
+      ## /data7/DATA/SKFlat/v949cand2_2/2017/DATA/SingleMuon/periodB/181107_231447/0000/SKFlatNtuple_2017_DATA_100.root
       ## /data7/DATA/SKFlat/v949cand2_2/2017/MC/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/181108_152345/0000/SKFlatNtuple_2017_MC_100.root
-      dir1 = '/data7/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
-      dir2 = dir1
+      skimoutdir = '/data8/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
+      skimoutfilename = ""
       if IsDATA:
-        dir1 += "DATA/"
-        dir2 += "DATA_"+args.Analyzer+"/"
+        skimoutdir += "DATA_"+args.Analyzer+"/"+InputSample+"/period"+DataPeriod+"/"
+        skimoutfilename = "SKFlatNtuple_"+args.Year+"_DATA_"+str(it_job)+".root"
       else:
-        dir1 += "MC/"
-        dir2 += "MC_"+args.Analyzer+"/"
+        skimoutdir += "MC_"+args.Analyzer+"/"+this_dasname+"/"
+        skimoutfilename = "SKFlatNtuple_"+args.Year+"_MC_"+str(it_job)+".root"
+      skimoutdir += timestamp+"/"
 
-      skimoutname = tmp_filename.replace(dir1,dir2)
-
-      tmp_filename = skimoutname.split('/')[-1]
-      os.system('mkdir -p '+skimoutname.replace(tmp_filename,''))
-      out.write('  m.SetOutfilePath("'+skimoutname+'");\n')
+      os.system('mkdir -p '+skimoutdir)
+      out.write('  m.SetOutfilePath("'+skimoutdir+skimoutfilename+'");\n')
 
     else:
       if IsKISTI or IsTAMSA2:
@@ -518,15 +516,16 @@ void {2}(){{
     if args.Reduction>1:
       out.write('  m.MaxEvent=m.fChain->GetEntries()/'+str(args.Reduction)+';\n')
 
-    out.write('  m.Init();'+'\n')
-    if not IsSkimTree:
-      out.write('  m.initializeAnalyzerTools();'+'\n')
-    print>>out,'''  m.initializeAnalyzer();
+    print>>out,'''  m.Init();
+  m.initializeAnalyzerTools();
+  m.initializeAnalyzer();
+  m.SwitchToTempDir();
   m.Loop();
 
   m.WriteHist();
 
 }'''
+
     out.close()
 
     if IsTAMSA1:
@@ -593,11 +592,6 @@ root -l -b -q run.C 1>stdout.log 2>stderr.log
       KillCommand.write('qdel '+jobid+' ## job_'+str(it_job)+' ##\n')
     KillCommand.close()
 
-## remove tar.gz
-
-os.system('rm -f '+SKFlat_WD+'/'+str_RandomNumber+'_data.tar.gz')
-os.system('rm -f '+SKFlat_WD+'/'+str_RandomNumber+'_lib.tar.gz')
-
 if args.no_exec:
   exit()
 
@@ -615,6 +609,7 @@ os.system('mkdir -p '+FinalOutputPath)
 
 print '##################################################'
 print 'Submission Finished'
+print '- JobID = '+str_RandomNumber
 print '- Analyzer = '+args.Analyzer
 print '- Skim = '+args.Skim
 print '- InputSamples =',
@@ -896,12 +891,13 @@ except KeyboardInterrupt:
 from SendEmail import *
 JobFinishEmail = '''#### Job Info ####
 HOST = {3}
+JobID = {6}
 Analyzer = {0}
 Skim = {5}
 # of Jobs = {4}
 InputSample = {1}
 Output sent to : {2}
-'''.format(args.Analyzer,InputSamples,FinalOutputPath,HOSTNAME,NJobs,args.Skim)
+'''.format(args.Analyzer,InputSamples,FinalOutputPath,HOSTNAME,NJobs,args.Skim,str_RandomNumber)
 JobFinishEmail += '''##################
 Job started at {0}
 Job finished at {1}
@@ -910,11 +906,11 @@ Job finished at {1}
 if IsTAMSA1 or IsKNU:
   JobFinishEmail += 'Queue = '+args.Queue+'\n'
 
-EmailTitle = '['+HOSTNAME+']'+' Job Summary'
+EmailTitle = '['+HOSTNAME+']'+' Summary of JobID '+str_RandomNumber
 if GotError:
   JobFinishEmail = "#### ERROR OCCURED ####\n"+JobFinishEmail
   JobFinishEmail = ErrorLog+"\n------------------------------------------------\n"+JobFinishEmail
-  EmailTitle = '[ERROR] Job Summary'
+  EmailTitle = '[ERROR] Summary of JobID '+str_RandomNumber
 
 if IsKNU:
   SendEmailbyGMail(USER,SKFlatLogEmail,EmailTitle,JobFinishEmail)

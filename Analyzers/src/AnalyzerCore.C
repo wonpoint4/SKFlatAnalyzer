@@ -14,6 +14,7 @@ AnalyzerCore::~AnalyzerCore(){
   //=== hist maps
 
   for(std::map< TString, TH1D* >::iterator mapit = maphist_TH1D.begin(); mapit!=maphist_TH1D.end(); mapit++){
+    cout<<"deleting "<<mapit->first<<" "<<mapit->second<<endl;
     delete mapit->second;
   }
   maphist_TH1D.clear();
@@ -44,6 +45,28 @@ AnalyzerCore::~AnalyzerCore(){
   delete cfEst;
   delete pdfReweight;
   cout<<"destructor6"<<endl;
+
+}
+
+//==== Attach the historams to ai different direcotry, not outfile
+//==== We will write these histograms in WriteHist() to outfile
+void AnalyzerCore::SwitchToTempDir(){
+
+  gROOT->cd();
+  TDirectory *tempDir = NULL;
+  int counter = 0;
+  while (!tempDir) {
+    //==== First, let's find a directory name that doesn't exist yet
+    std::stringstream dirname;
+    dirname << "AnalyzerCore" << counter;
+    if (gROOT->GetDirectory((dirname.str()).c_str())) {
+      ++counter;
+      continue;
+    }
+    //==== Let's try to make this directory
+    tempDir = gROOT->mkdir((dirname.str()).c_str());
+  }
+  tempDir->cd();
 
 }
 
@@ -1233,7 +1256,7 @@ void AnalyzerCore::PrintGen(std::vector<Gen> gens){
   cout << "===========================================================" << endl;
   cout << "RunNumber:EventNumber = " << run << ":" << event << endl;
   cout << "index\tPID\tStatus\tMIdx\tMPID\tStart\tPt\tEta\tPhi\tM" << endl;
-  for(unsigned int i=0; i<gens.size(); i++){
+  for(unsigned int i=2; i<gens.size(); i++){
     Gen gen = gens.at(i);
     vector<int> history = TrackGenSelfHistory(gen, gens);
     cout << i << "\t" << gen.PID() << "\t" << gen.Status() << "\t" << gen.MotherIndex() << "\t" << gens.at(gen.MotherIndex()).PID()<< "\t" << history[0] << "\t";
@@ -1869,6 +1892,7 @@ void AnalyzerCore::WriteHist(){
     cout<<this_suffix<<"/"<<this_name<<endl;
     outfile->cd(this_suffix);
     mapit->second->Write(this_name);
+    outfile->cd();
   }
   cout<<"end1d"<<endl;
   for(std::map< TString, TH2D* >::iterator mapit = maphist_TH2D.begin(); mapit!=maphist_TH2D.end(); mapit++){
@@ -1881,6 +1905,7 @@ void AnalyzerCore::WriteHist(){
     }
     outfile->cd(this_suffix);
     mapit->second->Write(this_name);
+    outfile->cd();
   }
 
   outfile->cd();

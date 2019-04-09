@@ -26,3 +26,14 @@ distclean::
 	(cd DataFormats; make distclean)
 	(cd AnalyzerTools; make distclean)
 	(cd Analyzers; make distclean)
+
+LibTarFile = tar/lib.tar.gz
+$(LibTarFile): $(wildcard ./lib/*)
+	tar -czf $@ ./lib/*
+
+DataTarFile = tar/data.tar.gz
+DataFiles = $(shell find data/$(SKFlatV)/ -type f -name '*')
+$(DataTarFile): $(DataFiles)
+	tar --exclude=data/$(SKFlatV)/Sample -czf $@ ./data/$(SKFlatV)/
+
+CondorTar: $(LibTarFile) $(DataTarFile)

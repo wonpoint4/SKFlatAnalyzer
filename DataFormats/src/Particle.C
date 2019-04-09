@@ -49,3 +49,7 @@ Particle::~Particle()
 void Particle::SetCharge(int q){
   j_Charge = q;
 }
+
+void Particle::Print(){
+  cout << "(Pt, Eta, Phi, M, Charge) = " << Pt() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << "\t" << Charge() << endl;
+}

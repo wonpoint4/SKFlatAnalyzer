@@ -33,8 +33,10 @@ public:
   enum Flavour{
     NONE, ELECTRON, MUON
   };
-  Flavour LeptonFlavour() const {return j_LeptonFlavour;}
+  inline Flavour LeptonFlavour() const {return j_LeptonFlavour;}
   void SetLeptonFlavour(Flavour f);
+  inline bool IsElectron() const {return j_LeptonFlavour==ELECTRON;}
+  inline bool IsMuon() const {return j_LeptonFlavour==MUON;}
 
   inline float miniIsoDr() const {
     float mindr = 0.05;
@@ -58,6 +60,8 @@ public:
   inline double CalcPtCone(double this_reliso, double Tight_reliso){
     return ( this->Pt() ) * ( 1. + max(0., (this_reliso-Tight_reliso)) );
   }
+
+  virtual void Print();
 
 private:
   double j_dXY, j_dXYerr;

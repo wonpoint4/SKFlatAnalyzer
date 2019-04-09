@@ -1,28 +1,42 @@
 #include"plot.cc"
 int MODE=0;
-bool SSELECTRON=false;
+bool SSELECTRON=true;
 ////////////////////////////// Setup function for AFBAnalyzer/////////////////////////////
 void SetupSamples(int channel,int year,TString skim);
 void SetupSystematics(int channel,int year);
-void SetupDirectories(int channel,int year);
+void SetupPlots(int channel,int year);
 TString Setup(int channel,int year,TString skim="SkimTree_SMP"){
   samples.clear();
   systematics.clear();
-  directories.clear();
+  plots.clear();
 
   SetupSamples(channel,year,skim);
   SetupSystematics(channel,year);
-  SetupDirectories(channel,year);
+  //SetupPlots(channel,year);
 
   cout<<"[Setup] nsample: "<<samples.size()<<endl;
   cout<<"[Setup] nsys: "<<systematics.size()<<endl;
-  cout<<"[Setup] ndirectories: "<<directories.size()<<endl;
+  cout<<"[Setup] nplot: "<<plots.size()<<endl;
 
   TString schannel=GetStringChannel((Channel)channel);
   TString syear=Form("%d",year);
   return schannel+syear;
 }
-
+void SetupPlots(int channel,int year){
+  if(channel==0){
+    set<TString> excludes={"^/electron..../","/qqbar","/qbarq","/gq","/qg","/gqbar","/qbarg","/qq","/gg"};
+    AddPlotsAuto(excludes);
+  }else if(channel==1){
+    set<TString> excludes={"^/muon..../","/qqbar","/qbarq","/gq","/qg","/gqbar","/qbarg","/qq","/gg"};
+    AddPlotsAuto(excludes);
+  }
+}
+void SavePlotsCondor(int channel,int year,int njob){
+  system("mkdir -p condor");
+  for(int i=0;i<njob;i++){
+    system(Form("cd condor;echo 'echo $SKFlat_WD;cd $SKFlat_WD;source setup.sh;echo \".L Plotter/AFBAnalyzer_plot.cc \nSetup(%d,%d) \nSavePlots(\\\"AFBAnalyzer_plot\\\",%d,%d)\n.q\"|root -b'|condor_qsub --cwd -V",channel,year,njob,i));
+  }
+} 
 void SetupSamples(int channel,int year,TString skim){
   TString syear=Form("%d",year);
   TString analyzer="AFBAnalyzer";
@@ -34,14 +48,14 @@ void SetupSamples(int channel,int year,TString skim){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2017/DATA/"+analyzer+skim+"_DoubleMuon_B.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleMuon_C.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleMuon_D.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleMuon_E.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleMuon_F.root");
     }else if(channel==Channel::ELECTRON){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2017/DATA/"+analyzer+skim+"_DoubleEG_B.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleEG_C.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleEG_D.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleEG_E.root",filedir+"2017/DATA/"+analyzer+skim+"_DoubleEG_F.root");
-    }else return "";
+    }else return;
   }else if(year==2016){
     if(channel==Channel::MUON){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_B_ver2.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_C.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_D.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_E.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_F.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_G.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleMuon_H.root");
     }else if(channel==Channel::ELECTRON){
       AddSample("data",SampleType::DATA,EColor::kBlack,filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_B_ver2.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_C.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_D.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_E.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_F.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_G.root",filedir+"2016/DATA/"+analyzer+skim+"_DoubleEG_H.root");
-    }else return "";
-  }else return "";
+    }else return;
+  }else return;
   TString dytitle=(channel==Channel::MUON)?"#gamma*/Z#rightarrow#mu#mu":"#gamma*/Z#rightarrowee";
   if(MODE==0) AddSample(dytitle,SampleType::SIGNAL,(EColor)(EColor::kRed),filedir+syear+"/"+analyzer+skim+"_DYJets.root");
   else if(MODE==1){
@@ -87,7 +101,7 @@ void SetupSystematics(int channel,int year){
   AddSystematic("scale",SystematicType::ENVELOPE,"_scale_up _scale_down",false,true,true);
   if(channel==Channel::ELECTRON) AddSystematic("smear",SystematicType::ENVELOPE,"_smear_up _smear_down",false,true,true);
   AddSystematic("alphaS",SystematicType::ENVELOPE,"_alphaS_up _alphaS_down",false,true,false);
-  AddSystematic("scalevariation",SystematicType::ENVELOPE,"_scalevariation0 _scalevariation1 _scalevariation2 _scalevariation3 _scalevariation5 _scalevariation6 _scalevariation7",false,true,false);
+  AddSystematic("scalevariation",SystematicType::ENVELOPE,"_scalevariation0 _scalevariation1 _scalevariation2 _scalevariation3 _scalevariation4 _scalevariation6 _scalevariation8",false,true,false);
 
   vector<TString> prefixes;
   for(int i=0;i<100;i++) prefixes.push_back(Form("_pdf%d",i));
@@ -108,45 +122,7 @@ void SetupSystematics(int channel,int year){
   AddSystematic("efficiencySF",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF",false,false,false);
   AddSystematic("totalsys",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF PUreweight prefireweight scale smear alphaS scalevariation pdf nozptcor",false,false,false);
 }
-void SetupDirectories(int channel,int year){
-  cout<<"[SetupDirectoriesAFBAnalyzer] AFBAnalyzer "<<GetStringChannel((Channel)channel)<<year<<endl;
-  const int ybinnum=6;
-  double yrange[ybinnum+1]={0.0,0.4,0.8,1.2,1.6,2.0,2.4};
-  const int mbinnum=12;
-  double massrange[mbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120};
-  vector<TString> region;
-  region.push_back(Form("m%.0fto%.0f",massrange[0],massrange[mbinnum]));
-  region.push_back(Form("m%.0fto%.0f_pt50",massrange[0],massrange[mbinnum]));
-  for(int iy=0;iy<ybinnum;iy++){
-    region.push_back(Form("m%.0fto%.0f_y%.1fto%.1f",massrange[0],massrange[mbinnum],yrange[iy],yrange[iy+1]));
-    region.push_back(Form("m%.0fto%.0f_y%.1fto%.1f_pt50",massrange[0],massrange[mbinnum],yrange[iy],yrange[iy+1]));
-    for(int im=0;im<mbinnum;im++){
-      //region.push_back(Form("OS_m%.0fto%.0f_y%.1fto%.1f",massrange[im],massrange[im+1],yrange[iy],yrange[iy+1]));
-    }
-  }
-  for(int i=0;i<region.size();i++){
-    Directory directory;
-    directory.name=GetStringChannel((Channel)channel)+Form("%d",year)+"/"+region[i]+"/";
-    cout<<directory.name<<" ";
-    AddPlot(directory,"dimass",2,60,120);
-    AddPlot(directory,"dipt",4,0,200);
-    AddPlot(directory,"dirap",0,0,0);
-    AddPlot(directory,"l0pt",2,0,100);
-    AddPlot(directory,"l0eta",0,0,0);
-    AddPlot(directory,"l0riso",0,0,0);
-    AddPlot(directory,"l1pt",2,0,100);
-    AddPlot(directory,"l1eta",0,0,0);
-    AddPlot(directory,"l1riso",0,0,0);
-    AddPlot(directory,"lldelR",0,0,0);
-    AddPlot(directory,"lldelphi",0,0,0);
-    AddPlot(directory,"nPV",0,0,0,"widey");
-    AddPlot(directory,"costhetaCS",0,0,0,"1:noleg");
-    AddPlot(directory,"abscosthetaCS",0,0,0,"1:noleg");
-    if(region[i].Contains("m60to120")) AddPlot(directory,"AFB",0,0,0,"AFB");
-    directories.push_back(directory);
-  }
-  cout<<endl;
-}
+/*
 void SaveAFB(TString outputdir="AFBAnalyzer_plot"){
   int oldlevel=gErrorIgnoreLevel;
   gErrorIgnoreLevel=kWarning;
@@ -157,7 +133,7 @@ void SaveAFB(TString outputdir="AFBAnalyzer_plot"){
   std::cout<<"mkdir -p "+outputdir+"/"+dirname<<endl;
   system("mkdir -p "+outputdir+"/"+dirname);
   for(int j=0;j<sizeof(AFB)/sizeof(TString);j++){
-    c=GetCompareAFBAll("_y...to.../",AFB[j],0,AFB[j]);
+    c=GetCompareAFBAll("_y...to.../.*"+AFB[j],0,AFB[j]);
     c->SaveAs(outputdir+"/"+dirname+AFB[j]+".png");
     delete c;
   }
@@ -171,3 +147,5 @@ void SaveAFB(TString outputdir="AFBAnalyzer_plot"){
   }
   gErrorIgnoreLevel=oldlevel;
 }
+
+*/

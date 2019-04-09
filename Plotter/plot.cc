@@ -8,6 +8,9 @@
 #include"TLegend.h"
 #include"TCanvas.h"
 #include"TLine.h"
+#include"TRegexp.h"
+#include"TPaveText.h"
+#include"TLegendEntry.h"
 using namespace std;
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// struct and enum ///////////////////////////////
@@ -18,7 +21,7 @@ TString GetStringSampleType(SampleType type){
   case DATA: return "DATA";
   case SIGNAL: return "SIGNAL";
   case BG: return "BG";
-  default: return "###WARNING### Bad SampleType";
+  default: return "###ERROR### Bad SampleType";
   }
 }
 TString GetStringEColor(EColor color){
@@ -49,7 +52,7 @@ TString GetStringSystematicType(SystematicType type){
   case GAUSSIAN: return "GAUSSIAN";
   case HESSIAN: return "HESSIAN";
   case MULTI: return "MULTI";
-  default: return "###WARNING### Bad SystematicType";
+  default: return "###ERROR### Bad SystematicType";
   }
 }
 struct Systematic{
@@ -68,16 +71,12 @@ struct Plot{
   double xmax;
   TString option;
 };
-struct Directory{
-  TString name;
-  vector<Plot> plots;
-};
 enum Channel{MUON,ELECTRON};
 TString GetStringChannel(Channel channel){
   switch(channel){
   case MUON: return "muon";
   case ELECTRON: return "electron";
-  default: return "###WARNING### Bad Channel";
+  default: return "###ERROR### Bad Channel";
   }
 }
 
@@ -86,8 +85,8 @@ TString GetStringChannel(Channel channel){
 /////////////////////////////////////////////////////////////////////////////
 vector<Sample> samples;
 vector<Systematic> systematics;
-vector<Directory> directories;
-bool DEBUG=false;
+map<TString,Plot> plots;
+int DEBUG=0;
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////// Add functions for global variables//////////////////////
@@ -171,7 +170,7 @@ void AddSystematic(TString name_,SystematicType type_,TString includes_,bool var
   AddSystematic(name_,type_,includes,vary_data_,vary_signal_,vary_bg_);
 }
 
-void AddPlot(Directory& directory,TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
+void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
   Plot plot;
   plot.name=name_;
   plot.rebin=rebin_;
@@ -179,7 +178,7 @@ void AddPlot(Directory& directory,TString name_,int rebin_,double xmin_,double x
   plot.xmax=xmax_;
   plot.option=option_;
   if(DEBUG) std::cout<<" [AddPlot] to "<<plot.name<<" "<<plot.rebin<<" "<<plot.xmin<<" "<<plot.xmax<<endl;
-  directory.plots.push_back(plot);
+  plots["/"+name_]=plot;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -191,8 +190,9 @@ TH1* GetHist(TString filename,TString histname){
   if(hist){
     hist->SetDirectory(0);
     hist->SetBit(kCanDelete);
+    if(DEBUG>1) cout<<"###INFO### [GetHist] get "<<histname<<" in "<<filename<<endl;
   }else{
-    cout<<"###WARNING### [GetHist] no "<<histname<<" in "<<filename<<endl;
+    if(DEBUG>0) cout<<"###WARNING### [GetHist] no "<<histname<<" in "<<filename<<endl;
   }
   f->Close();
   delete f;
@@ -243,14 +243,16 @@ vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bgh
       if(samples[i].type==SampleType::DATA) histname=datahistname;
       else if(samples[i].type==SampleType::SIGNAL) histname=signalhistname;
       else if(samples[i].type==SampleType::BG) histname=bghistname;
-      else cout<<"###WARNING### [GetHists] invalid SampleType "<<samples[i].type<<endl;
+      else cout<<"###ERROR### [GetHists] invalid SampleType "<<samples[i].type<<endl;
       for(int j=0;j<samples[i].files.size();j++){
 	TString this_histname=histname(0,histname.Last('/')+1)+samples[i].prefixes[j]+histname(histname.Last('/')+1,histname.Length());
 	if(!hist) hist=GetHist(samples[i].files[j],this_histname);
 	else{
 	  TH1* this_hist=GetHist(samples[i].files[j],this_histname);
-	  hist->Add(this_hist,samples[i].weights[j]);
-	  delete this_hist;
+	  if(this_hist){
+	    hist->Add(this_hist,samples[i].weights[j]);
+	    delete this_hist;
+	  }
 	}
       }
       if(hist){
@@ -293,6 +295,9 @@ TH1* GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_backward_num,TH1* hist_f
   return hist;
 }
 TH1* GetHistAFB(TH1* hist_forward,TH1* hist_backward){
+  if(!hist_forward||!hist_backward){
+    return NULL;
+  }
   TH1* hist=(TH1*)hist_forward->Clone();
   hist->SetBit(kCanDelete);
   hist->Reset();
@@ -488,7 +493,7 @@ TH1* GetRMSError(TH1* central,const vector<TH1*>& variations){
 int AddError(TH1* hist,TH1* sys){
   for(int i=1;i<hist->GetNbinsX()+1;i++){
     if(fabs(hist->GetBinContent(i)-sys->GetBinContent(i))*1000000>fabs(hist->GetBinContent(i))){
-      cout<<"###WARNING### [AddError] sys hist is wrong"<<endl;
+      cout<<"###ERROR### [AddError] systematic hist is wrong"<<endl;
       cout.precision(20);
       cout<<i<<" "<<hist->GetBinContent(i)<<" "<<sys->GetBinContent(i)<<" "<<fabs(hist->GetBinContent(i)-sys->GetBinContent(i))<<endl;
       return -1;
@@ -640,9 +645,23 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option){
   if(h2sys) delete h2sys;
   return c1;
 }
+bool CheckHists(vector<TH1*> hists){
+  bool flag_data=false,flag_signal=false;
+  for(unsigned int i=0;i<samples.size();i++){
+    if(!hists.at(i)) continue;
+    if(samples[i].type==SampleType::DATA) flag_data=true;
+    if(samples[i].type==SampleType::SIGNAL) flag_signal=true;
+  }
+  if(flag_data&&flag_signal) return true;
+  else return false;
+}
 TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
   if(option.Contains("AFB")) option+=" BGSub diff leftleg";
   vector<TH1*> hists_central=GetHists(datahistname,signalhistname,bghistname,rebin,xmin,xmax,option);
+  if(!CheckHists(hists_central)){
+    if(DEBUG) cout<<"###WARNING### [GetCompare] Not enough hists for compare ("<<datahistname<<","<<signalhistname<<","<<bghistname<<")"<<endl;
+    return NULL;
+  }
   TH1* hdata_central=GetHData(hists_central,option);
   TH1* hmc_central=GetHMC(hists_central,option);
   THStack* hstack_central=option.Contains("BGSub")?NULL:(THStack*)GetHMC(hists_central,"stack");
@@ -659,6 +678,10 @@ TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistna
 	TString bghistnamesys=bghistname+(systematics[i].vary_bg?systematics[i].suffixes[j]:"");
 	if(DEBUG) std::cout<<datahistnamesys<<" "<<signalhistnamesys<<" "<<bghistnamesys<<endl;
 	vector<TH1*> gethists=GetHists(datahistnamesys,signalhistnamesys,bghistnamesys,rebin,xmin,xmax,option);
+	if(!CheckHists(gethists)){
+	  if(DEBUG) cout<<"###WARNING### [GetCompare] Not enough hists for compare ("<<datahistnamesys<<","<<signalhistnamesys<<","<<bghistnamesys<<")"<<endl;
+	  return NULL;
+	}
 	hdata_variations.push_back(GetHData(gethists,option));
 	hmc_variations.push_back(GetHMC(gethists,option));
 	for(int k=0;k<(int)gethists.size();k++) delete gethists.at(k);
@@ -673,7 +696,7 @@ TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistna
 	hdata_syss.push_back(GetHessianError(hdata_central,hdata_variations));
 	hmc_syss.push_back(GetHessianError(hmc_central,hmc_variations));
       }else{
-	cout<<"###WARNING### [GetCompare] Wrong SystematicType "<<systematics[i].type<<endl;
+	cout<<"###ERROR### [GetCompare] Wrong SystematicType "<<systematics[i].type<<endl;
       }
       for(int j=0;j<(int)hdata_variations.size();j++){
 	delete hdata_variations.at(j);
@@ -706,7 +729,7 @@ TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,doub
 }
 TH1* GetAxisParent(TVirtualPad* pad){
   TList* list=pad->GetListOfPrimitives();
-  for(int i=0;i<list->GetSize();i){
+  for(int i=0;i<list->GetSize();i++){
     if(strstr(list->At(i)->ClassName(),"TH")!=NULL) return (TH1*)list->At(i);
   }
   return NULL;
@@ -792,49 +815,61 @@ TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=
   pavetitle->Draw();
   return c1;
 }
-TCanvas* GetCompareAFBAll(TRegexp regexp,TString name,int sysbit=0,TString option=""){
+
+TCanvas* GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option=""){
   vector<TString> histnames;
-  for(int i=0;i<directories.size();i++){
-    if(directories[i].name.Contains(regexp)){
-      histnames.push_back(directories[i].name+name);
+  for(auto it=plots.begin();it!=plots.end();it++){
+    if(it->first.Contains(regexp)){
+      histnames.push_back(it->second.name);
     }
   }
-  return GetCompareAFBAll(histnames,0,option);
+  return GetCompareAFBAll(histnames,sysbit,option);
 }
 
-void SaveAll(TString outputdir="plot"){
+
+void SavePlots(TString outputdir="plot",int njob=1,int ijob=0){
   int oldlevel=gErrorIgnoreLevel;
   if(!DEBUG) gErrorIgnoreLevel=kWarning;
-  int dmax=directories.size();
+
+  set<TString> dirs;
   int smax=systematics.size();
   TCanvas* c=NULL;
-  for(int id=0;id<dmax;id++){
-    std::cout<<"mkdir -p "+outputdir+"/"+directories[id].name<<endl;
-    system("mkdir -p "+outputdir+"/"+directories[id].name);
-    int hmax=directories[id].plots.size();
-    for(int ih=0;ih<hmax;ih++){
-      Plot *plot=&(directories[id].plots[ih]);
-      TString this_histname=directories[id].name+plot->name;
-      c=GetCompare(this_histname,0,plot->rebin,plot->xmin,plot->xmax,plot->option);
-      c->SaveAs(outputdir+"/"+this_histname+".png");
-      THStack* hstack=(THStack*)c->GetPad(1)->GetPrimitive("hstack");
-      if(hstack) hstack->GetHists()->Clear();
-      delete c;      
+  int nplot=(plots.size()+1)/njob;
+  for(auto ip=next(plots.begin(),ijob*nplot);ip!=next(plots.begin(),(ijob+1)*nplot)&&ip!=plots.end();ip++){
+    Plot *plot=&ip->second;
+    TString histname=plot->name;
+    TString dir=outputdir+"/"+histname(0,histname.Last('/'));
+    if(dirs.find(dir)==dirs.end()){
+      std::cout<<"mkdir -p "+dir<<endl;
+      system("mkdir -p "+dir);
+      dirs.insert(dir);
     }
+    if(DEBUG>1) cout<<"###INFO### [SavePlots] save "<<outputdir+"/"+histname+".png"<<endl;
+    c=GetCompare(histname,0,plot->rebin,plot->xmin,plot->xmax,plot->option);
+    c->SaveAs(outputdir+"/"+histname+".png");
+    THStack* hstack=(THStack*)c->GetPad(1)->GetPrimitive("hstack");
+    if(hstack) hstack->GetHists()->Clear();
+    delete c;
     for(int is=0;is<smax;is++){
-      if(DEBUG) std::cout<<"mkdir -p "+outputdir+"/"+directories[id].name+systematics[is].name<<endl;
-      system("mkdir -p "+outputdir+"/"+directories[id].name+systematics[is].name);
-      for(int ih=0;ih<hmax;ih++){
-	Plot *plot=&(directories[id].plots[ih]);
-	TString this_histname=directories[id].name+plot->name;
-	c=GetCompare(this_histname,systematics[is].sysbit,plot->rebin,plot->xmin,plot->xmax,plot->option);
-	c->SaveAs(outputdir+"/"+this_histname(0,this_histname.Last('/')+1)+systematics[is].name+this_histname(this_histname.Last('/'),this_histname.Length())+".png");
+      TString this_dir=dir+"/"+systematics[is].name;
+      if(dirs.find(this_dir)==dirs.end()){
+	if(DEBUG) std::cout<<"mkdir -p "+this_dir<<endl;
+	system("mkdir -p "+this_dir);
+	dirs.insert(this_dir);
+      }
+      if(DEBUG>1) cout<<"###INFO### [SavePlots] save "<<this_dir+"/"+histname(histname.Last('/'),histname.Length())+".png"<<endl;
+      c=GetCompare(histname,systematics[is].sysbit,plot->rebin,plot->xmin,plot->xmax,plot->option);
+      if(c){
+	c->SaveAs(this_dir+"/"+histname(histname.Last('/'),histname.Length())+".png");
 	THStack* hstack=(THStack*)c->GetPad(1)->GetPrimitive("hstack");
 	if(hstack) hstack->GetHists()->Clear();
 	delete c;
-	if(systematics[is].suffixes.size()==1){
-	  c=GetCompare(this_histname+(systematics[is].vary_data?systematics[is].suffixes[0]:""),this_histname+(systematics[is].vary_signal?systematics[is].suffixes[0]:""),this_histname+(systematics[is].vary_bg?systematics[is].suffixes[0]:""),0,plot->rebin,plot->xmin,plot->xmax,plot->option);
-	  c->SaveAs(outputdir+"/"+this_histname(0,this_histname.Last('/')+1)+systematics[is].name+this_histname(this_histname.Last('/'),this_histname.Length())+"_raw.png");
+      }
+      if(systematics[is].suffixes.size()==1){
+	if(DEBUG>1) cout<<"###INFO### [SavePlots] save "<<this_dir+"/"+histname(histname.Last('/'),histname.Length())+"_raw.png"<<endl;
+	c=GetCompare(histname+(systematics[is].vary_data?systematics[is].suffixes[0]:""),histname+(systematics[is].vary_signal?systematics[is].suffixes[0]:""),histname+(systematics[is].vary_bg?systematics[is].suffixes[0]:""),0,plot->rebin,plot->xmin,plot->xmax,plot->option);
+	if(c){
+	  c->SaveAs(this_dir+"/"+histname(histname.Last('/'),histname.Length())+"_raw.png");
 	  THStack* hstack=(THStack*)c->GetPad(1)->GetPrimitive("hstack");
 	  if(hstack) hstack->GetHists()->Clear();
 	  delete c;
@@ -848,19 +883,91 @@ void SaveAll(TString outputdir="plot"){
 /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// etc.//////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-void PrintKeys(TList* keys,TRegexp regexp){
+
+set<TString> GetHistKeys(TList* keys,TRegexp regexp=".*"){
+  set<TString> histkeys;
   for(int i=0;i<keys->GetSize();i++){
     TKey* key=(TKey*)keys->At(i);
-    if(strcmp(key->GetClassName(),"TDirectoryFile")==0) PrintKeys(((TDirectoryFile*)key->ReadObj())->GetListOfKeys(),regexp);   
-    else{
+    if(strcmp(key->GetClassName(),"TDirectoryFile")==0){
+      set<TString> this_histkeys=GetHistKeys(((TDirectoryFile*)key->ReadObj())->GetListOfKeys(),regexp);
+      histkeys.insert(this_histkeys.begin(),this_histkeys.end());
+    }else{
       TString path=key->GetMotherDir()->GetPath();
       path=path(path.Index(":")+1,path.Length())+"/"+key->GetName();
-      if(path.Contains(regexp)) cout<<" "<<path<<"\n";
+      if(path.Contains(regexp)) histkeys.insert(path);
+    }
+  }
+  return histkeys;
+}
+set<TString> GetHistKeys(int samplenum=1,TRegexp regexp=".*"){
+  TFile f(samples.at(samplenum).files.at(0));
+  cout<<f.GetName()<<"/"<<f.GetTitle()<<endl;
+  TList* keys=f.GetListOfKeys();
+  set<TString> histkeys=GetHistKeys(keys,regexp);
+  f.Close();
+  return histkeys;
+}
+void PrintHistKeys(int samplenum=1,TRegexp regexp=".*"){
+  set<TString> histkeys=GetHistKeys(samplenum,regexp);
+  for(auto it=histkeys.begin();it!=histkeys.end();it++){
+    cout<<*it<<endl;
+  }
+}
+set<TString> ParseHistKeys(set<TString> histkeys_raw,set<TString> prefixes,set<TString> suffixes,set<TString> excludes){
+  set<TString> histkeys;
+  for(auto it=histkeys_raw.begin();it!=histkeys_raw.end();it++){
+    bool next_flag=false;
+    TString histkey=*it;
+    for(auto ite=excludes.begin();!next_flag&&ite!=excludes.end();ite++){
+      if(histkey.Contains(*ite)){
+	next_flag=true;
+	break;
+      }
+    }
+    for(auto its=suffixes.begin();!next_flag&&its!=suffixes.end();its++){
+      if(histkey.Contains(TRegexp(*its+"$"))){
+	next_flag=true;
+	break;
+      }
+    }
+    if(next_flag) continue;
+    for(auto itp=prefixes.begin();itp!=prefixes.end();itp++){
+      int extent,preindex=histkey.Index(TRegexp("/"+*itp),&extent);
+      if(preindex!=-1) histkey.Remove(preindex+1,extent-1);
+    }
+    histkey.ReplaceAll("forward","AFB");
+    histkey.ReplaceAll("backward","AFB");
+    histkey.ReplaceAll("AFB_num","weightedAFB");
+    histkey.ReplaceAll("AFB_den","weightedAFB");
+    histkeys.insert(histkey);
+  }
+  return histkeys;
+}
+void AddPlotsAuto(set<TString> excludes={"^/electron..../","/qqbar","/qbarq","/gq","/qg","/gqbar","/qbarg","/qq","/gg"}){
+  set<TString> data_histkeys_raw=GetHistKeys(0), signal_histkeys_raw=GetHistKeys(1);
+  set<TString> prefixes,suffixes;
+  for(unsigned int i=0;i<samples.size();i++)
+    for(unsigned int j=0;j<samples[i].prefixes.size();j++)
+      if(samples[i].prefixes[j]!="")
+	prefixes.insert(samples[i].prefixes[j]);
+  for(unsigned int i=0;i<systematics.size();i++)
+    for(unsigned int j=0;j<systematics[i].suffixes.size();j++)
+      if(systematics[i].suffixes[j]!="")
+	suffixes.insert(systematics[i].suffixes[j]);
+  set<TString> data_histkeys=ParseHistKeys(data_histkeys_raw,prefixes,suffixes,excludes);
+  set<TString> signal_histkeys=ParseHistKeys(signal_histkeys_raw,prefixes,suffixes,excludes);
+  for(auto it=signal_histkeys.begin();it!=signal_histkeys.end();it++){
+    if(data_histkeys.find(*it)!=data_histkeys.end()){
+      Plot plot;
+      plot.name=*it;plot.name=plot.name(1,plot.name.Length());plot.rebin=0;plot.xmin=0;plot.xmax=0;
+      if((*it).Contains("weightedAFB")) plot.option="weightedAFB ";
+      else if((*it).Contains("AFB")) plot.option="AFB ";
+      plots[*it]=plot;
     }
   }
 }
-void PrintHistList(int samplenum=1,TRegexp regexp=".*"){
-  TFile f(samples.at(samplenum).files.at(0));
-  cout<<f.GetName()<<"/"<<f.GetTitle()<<endl;
-  PrintKeys(f.GetListOfKeys(),regexp);
+void PrintPlots(TRegexp reg){
+  for(auto it=plots.begin();it!=plots.end();it++){
+    if(it->first.Contains(reg)) cout<<it->first<<endl;
+  }
 }

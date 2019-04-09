@@ -70,12 +70,8 @@ void SKFlatValidation::initializeAnalyzer(){
     Triggers_POG_Muon = {
       "HLT_IsoMu24_v",
     };
-/*
     TriggerNameForSF_POG_Electron = "Ele32_WPTight_Gsf";
     TriggerNameForSF_POG_Muon = "IsoMu24";
-*/
-    TriggerNameForSF_POG_Electron = "Default";
-    TriggerNameForSF_POG_Muon = "Default";
     TriggerSafePt_POG_Electron = 35.;
     TriggerSafePt_POG_Muon = 26.;
 
@@ -87,10 +83,8 @@ void SKFlatValidation::initializeAnalyzer(){
       "HLT_OldMu100_v",
       "HLT_TkMu100_v",
     };
-/*
     TriggerNameForSF_POGHighPt_Electron = "Ele35_WPTight_Gsf";
     TriggerNameForSF_POGHighPt_Muon = "Mu50";
-*/
     TriggerNameForSF_POG_Electron = "Default";
     TriggerNameForSF_POG_Muon = "Default";
     TriggerSafePt_POGHighPt_Electron = 35.;
@@ -148,7 +142,7 @@ void SKFlatValidation::executeEvent(){
   param.Name = "POGHighPt";
 
   param.Electron_Tight_ID = "passHEEPID";
-  param.Electron_ID_SF_Key = "Default";
+  param.Electron_ID_SF_Key = "HEEP";
 
   param.Muon_Tight_ID = "POGHighPtWithLooseTrkIso";
   param.Muon_ID_SF_Key = "NUM_HighPtID_DEN_genTracks";
@@ -194,6 +188,7 @@ void SKFlatValidation::executeEventFromParameter(AnalyzerParameter param){
   }
 
   std::vector<Muon> muons = GetMuons(param.Muon_Tight_ID, MinLeptonPt, 2.4);
+  if(param.Muon_UseTuneP) muons = UseTunePMuon(muons);
   std::vector<Electron> electrons = GetElectrons(param.Electron_Tight_ID, MinLeptonPt, 2.5);
 
   std::vector<Jet> myjets = JetsVetoLeptonInside( GetJets("tight", 30., 2.4), electrons, muons);
@@ -285,12 +280,6 @@ void SKFlatValidation::executeEventFromParameter(AnalyzerParameter param){
 
           double this_pt = muons.at(i).MiniAODPt();
           double this_eta = muons.at(i).Eta();
-
-          if(param.Muon_UseTuneP){
-            Particle this_tuneP = muons.at(i).TuneP4();
-            this_pt = this_tuneP.Pt();
-            this_eta = this_tuneP.Eta();
-          }
 
           double this_idsf  = mcCorr->MuonID_SF (param.Muon_ID_SF_Key,  this_eta, this_pt);
           double this_isosf = mcCorr->MuonISO_SF(param.Muon_ISO_SF_Key, this_eta, this_pt);

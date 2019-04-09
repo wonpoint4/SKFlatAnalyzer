@@ -231,7 +231,7 @@ public:
   void FillJetPlots(std::vector<Jet> jets, std::vector<FatJet> fatjets, TString this_region, double weight);
 
   //==== Output rootfile
-
+  void SwitchToTempDir();
   TFile *outfile;
   void SetOutfilePath(TString outname);
 

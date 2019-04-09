@@ -230,7 +230,7 @@ double Event::GetTriggerLumi(TString trig){
   else if(j_DataYear==2018){
 
     if(trig=="Full"){
-      return 59966.161000;
+      return 59735.969;
     }
     else{
       cout << "[Event::GetTriggerLumi] Wrong trigger (DataYear=" << j_DataYear << ", trig=" << trig << ")" << endl;
