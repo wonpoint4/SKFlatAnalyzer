@@ -77,13 +77,11 @@ public:
   inline double MiniAODPt() const {return j_MiniAODPt;}
   inline double MiniAODTunePPt() const {return j_MiniAODTunePPt;}
 
-  void SetMomentumScaleAndError(double rc, double rc_err);
-  inline double MomentumScale() const {return j_rc;}
-  inline double MomentumScaleError() const {return j_rc_err;}
+  void SetMomentumScaleUpDown(double pt_up, double pt_down);
   inline double MomentumShift(int s) const {
-    if(s==0) return 1.;
-    else if(s>0) return Pt() * (j_rc + j_rc_err) / j_rc;
-    else         return Pt() * (j_rc - j_rc_err) / j_rc;
+    if(s==0) return Pt();
+    else if(s>0) return j_MomentumScaleUp;
+    else         return j_MomentumScaleDown;
   }
 
   void SetTuneP4(double pt, double pt_err, double eta, double phi, double q);
@@ -102,7 +100,7 @@ private:
   unsigned int j_TypeBit, j_IDBit;
   double j_chi2;
   double j_PFCH04, j_PFNH04, j_PFPH04, j_PU04, j_trkiso;
-  double j_MiniAODPt, j_MiniAODTunePPt, j_rc, j_rc_err, j_MomentumUp, j_MomentumDown;
+  double j_MiniAODPt, j_MiniAODTunePPt, j_MomentumScaleUp, j_MomentumScaleDown;
   Particle j_TuneP4;
   double j_TunePPtError;
 

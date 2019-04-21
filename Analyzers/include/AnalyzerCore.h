@@ -22,6 +22,7 @@
 #include "FakeBackgroundEstimator.h"
 #include "CFBackgroundEstimator.h"
 #include "BTagSFUtil.h"
+#include "GeneralizedEndpoint.h"
 #include "PDFReweight.h"
 
 #define M_Z 91.1876
@@ -134,6 +135,8 @@ public:
   //==== PU Reweight
   double GetPileUpWeight(int N_pileup, int syst);
 
+  //==== Muon GeneralizedEngpoint momentum scaling
+  GeneralizedEndpoint *muonGE;
 
   //==== Btag setup
   void SetupBTagger(std::vector<Jet::Tagger> taggers, std::vector<Jet::WP> wps, bool setup_systematics, bool period_dependant);
