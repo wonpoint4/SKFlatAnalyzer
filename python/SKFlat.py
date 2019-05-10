@@ -494,7 +494,7 @@ void {2}(){{
       tmp_filename = lines_files[ FileRanges[it_job][0] ].strip('\n')
       ## /data7/DATA/SKFlat/v949cand2_2/2017/DATA/SingleMuon/periodB/181107_231447/0000/SKFlatNtuple_2017_DATA_100.root
       ## /data7/DATA/SKFlat/v949cand2_2/2017/MC/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/181108_152345/0000/SKFlatNtuple_2017_MC_100.root
-      skimoutdir = '/data8/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
+      skimoutdir = '/data9/Users/hsseo/SKFlat/'+SKFlatV+'/'+args.Year+'/'
       skimoutfilename = ""
       if IsDATA:
         skimoutdir += "DATA_"+args.Analyzer+"/"+InputSample+"/period"+DataPeriod+"/"

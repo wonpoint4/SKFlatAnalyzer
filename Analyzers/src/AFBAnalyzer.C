@@ -5,7 +5,7 @@ void AFBAnalyzer::executeEvent(){
   hardprefix="";
   ////////////////////////check genlevel//////////////////
   zptcor=1.;
-  if(MCSample.Contains("DYJets")){
+  if(IsDYSample){
     vector<Gen> gens=GetGens();
     int parton0,parton1,hardl0,hardl1,l0,l1;
     vector<int> photons;
@@ -222,7 +222,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   /////////////////PUreweight///////////////////
   double PUreweight=1.,PUreweight_up=1.,PUreweight_down=1.;
-  if(!IsDATA){
+  if(!IsDATA&&!MCSample.Contains("ZToEE")&&!MCSample.Contains("ZToMuMu")){
     PUreweight=GetPileUpWeight(nPileUp,0);
     PUreweight_up=GetPileUpWeight(nPileUp,1);
     PUreweight_down=GetPileUpWeight(nPileUp,-1);
@@ -360,21 +360,21 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       if(dimass>=massrange[0]&&dimass<massrange[massbinnum]){
 	FillHist(channelname+"/"+tauprefix+"cutflow",10.5,totalweight,20,0,20);
 	FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,totalweight);
-	if(MCSample.Contains("DYJets")&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
+	if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
 	FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,map_weight_systematic);
 	if(dipt>50){
 	  FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,totalweight);
-	  if(MCSample.Contains("DYJets")&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
+	  if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
 	  FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,map_weight_systematic);	  
 	}	
 	for(int iy=0;iy<zptcor_nybin;iy++){
 	  if(fabs(dirap)>=zptcor_ybin[iy]&&fabs(dirap)<zptcor_ybin[iy+1]){
 	    FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,totalweight);
-	    if(MCSample.Contains("DYJets")&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
+	    if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
 	    FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,map_weight_systematic);
 	    if(dipt>50){
 	      FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,totalweight);
-	      if(MCSample.Contains("DYJets")&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
+	      if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
 	      FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,map_weight_systematic);
 	    }
 	    for(int im=0;im<massbinnum;im++){

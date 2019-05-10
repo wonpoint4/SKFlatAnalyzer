@@ -16,6 +16,8 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
 
 void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZPtWeight();
+  IsDYSample=false;
+  if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")) IsDYSample=true;
 }
 
 void SMPAnalyzerCore::FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w){

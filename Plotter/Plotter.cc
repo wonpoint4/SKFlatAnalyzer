@@ -1,29 +1,9 @@
-#include<iostream>
-#include<vector>
-#include"TH2D.h"
-#include"TFile.h"
-#include"TKey.h"
-#include"TString.h"
-#include"THStack.h"
-#include"TLegend.h"
-#include"TCanvas.h"
-#include"TLine.h"
-#include"TRegexp.h"
-#include"TPaveText.h"
-#include"TLegendEntry.h"
-using namespace std;
+#include"Global.h"
+#include"Sample.cc"
+
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// struct and enum ///////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-enum SampleType{DATA,SIGNAL,BG};
-TString GetStringSampleType(SampleType type){
-  switch(type){
-  case DATA: return "DATA";
-  case SIGNAL: return "SIGNAL";
-  case BG: return "BG";
-  default: return "###ERROR### Bad SampleType";
-  }
-}
 TString GetStringEColor(EColor color){
   switch(color){
   case kBlack: return "kBlack";
@@ -36,14 +16,6 @@ TString GetStringEColor(EColor color){
   default: return "###WARNING### Bad EColor";
   }
 }
-struct Sample{
-  TString name;
-  SampleType type;
-  EColor color;
-  vector<TString> files;
-  vector<TString> prefixes;
-  vector<double> weights;
-};
 
 enum SystematicType{ENVELOPE,GAUSSIAN,HESSIAN,MULTI};
 TString GetStringSystematicType(SystematicType type){
@@ -81,35 +53,67 @@ TString GetStringChannel(Channel channel){
 }
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////// global variables ///////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-vector<Sample> samples;
-vector<Systematic> systematics;
-map<TString,Plot> plots;
-int DEBUG=0;
-
-/////////////////////////////////////////////////////////////////////////////
 //////////////////// Add functions for global variables//////////////////////
 /////////////////////////////////////////////////////////////////////////////
-void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,vector<TString> files_,vector<TString> prefixes_,vector<double> weights_){
-  Sample sample;
-  if(files_.size()!=prefixes_.size()||files_.size()!=weights_.size()){
-    cout<<"###ERROR### [AddSampleWithPrefixAndWeight] different number of size"<<endl;
-    exit(1);
-  }
-  sample.name=name_;
-  sample.type=type_;
-  sample.color=color_;
-  sample.files=files_;
-  sample.prefixes=prefixes_;
-  sample.weights=weights_;
-  cout<<" [AddSample] "<<sample.name<<" "<<GetStringSampleType((SampleType)sample.type)<<" "<<GetStringEColor((EColor)sample.color)<<endl;
-  for(int i=0;i<sample.files.size();i++){
-    cout<<"   "<<sample.files.at(i)<<" prefix:"<<sample.prefixes.at(i)<<" weight:"<<sample.weights.at(i)<<endl;
-  }    
-  samples.push_back(sample);
-  }
-void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,TString file1,TString prefix1,double weight1,TString file2="",TString prefix2="",double weight2=1.,TString file3="",TString prefix3="",double weight3=1.,TString file4="",TString prefix4="",double weight4=1.,TString file5="",TString prefix5="",double weight5=1.,TString file6="",TString prefix6="",double weight6=1.,TString file7="",TString prefix7="",double weight7=1.,TString file8="",TString prefix8="",double weight8=1.,TString file9="",TString prefix9="",double weight9=1.,TString file10="",TString prefix10="",double weight10=1.,TString file11="",TString prefix11="",double weight11=1.,TString file12="",TString prefix12="",double weight12=1.,TString file13="",TString prefix13="",double weight13=1.,TString file14="",TString prefix14="",double weight14=1.,TString file15="",TString prefix15="",double weight15=1.,TString file16="",TString prefix16="",double weight16=1.,TString file17="",TString prefix17="",double weight17=1.,TString file18="",TString prefix18="",double weight18=1.,TString file19="",TString prefix19="",double weight19=1.){
+class Plotter{
+public:
+  Plotter();
+  ~Plotter();
+  map<TString,class Sample> samples;
+  map<TString,Systematic> systematics;
+  map<TString,Plot> plots;
+
+  /*
+  void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,vector<TString> files_,vector<TString> prefixes_,vector<double> weights_);
+  void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,TString file1,TString prefix1,double weight1,TString file2="",TString prefix2="",double weight2=1.,TString file3="",TString prefix3="",double weight3=1.,TString file4="",TString prefix4="",double weight4=1.,TString file5="",TString prefix5="",double weight5=1.,TString file6="",TString prefix6="",double weight6=1.,TString file7="",TString prefix7="",double weight7=1.,TString file8="",TString prefix8="",double weight8=1.,TString file9="",TString prefix9="",double weight9=1.,TString file10="",TString prefix10="",double weight10=1.,TString file11="",TString prefix11="",double weight11=1.,TString file12="",TString prefix12="",double weight12=1.,TString file13="",TString prefix13="",double weight13=1.,TString file14="",TString prefix14="",double weight14=1.,TString file15="",TString prefix15="",double weight15=1.,TString file16="",TString prefix16="",double weight16=1.,TString file17="",TString prefix17="",double weight17=1.,TString file18="",TString prefix18="",double weight18=1.,TString file19="",TString prefix19="",double weight19=1.);
+  //void AddSample(TString name_,SampleType type_,EColor color_,TString file1,TString file2="",TString file3="",TString file4="",TString file5="",TString file6="",TString file7="");
+  //AddSystematic
+  void AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+  void AddSystematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+  //AddPlot
+  void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_="");
+  */
+  //Hist
+  TH1* GetHistRaw(TString filename,TString histname);  
+  TH1* GetHist(TString samplekey,TString histname);
+  //  vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bghistname="",int rebin=0,double xmin=0,double xmax=0,TString option="");
+  TH1* GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den);
+  TH1* GetHistAFB(TH1* hist_forward,TH1* hist_backward);
+  TH1* GetHMC(const vector<TH1*>& hists,TString option="");
+  TH1* GetHMC(THStack* hstack);
+  TH1* GetHData(const vector<TH1*>& hists,TString option="");
+  TLegend* GetLegend(const vector<TH1*>& hists,TString option);
+  TLegend* GetLegend(TH1* h1,TH1* h2,TString option);
+  TH1* GetEnvelope(TH1* central,const vector<TH1*>& variations);
+  TH1* GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1* variation3=NULL,TH1* variation4=NULL,TH1* variation5=NULL,TH1* variation6=NULL,TH1* variation7=NULL,TH1* variation8=NULL,TH1* variation9=NULL);
+  TH1* GetHessianError(TH1* central,const vector<TH1*>& variations);
+  TH1* GetRMSError(TH1* central,const vector<TH1*>& variations);
+  int AddError(TH1* hist,TH1* sys);
+  bool CheckHists(vector<TH1*> hists);
+  /*
+  TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option);
+  TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option="");
+  TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option="");
+  TH1* GetAxisParent(TVirtualPad* pad);
+  void SavePlots(TString outputdir="plot",int njob=1,int ijob=0);
+  
+  set<TString> GetHistKeys(TList* keys,TRegexp regexp=".*");
+  set<TString> GetHistKeys(int samplenum=1,TRegexp regexp=".*");
+  void PrintHistKeys(int samplenum=1,TRegexp regexp=".*");
+  set<TString> ParseHistKeys(set<TString> histkeys_raw,set<TString> prefixes,set<TString> suffixes,set<TString> excludes);
+  void AddPlotsAuto(set<TString> excludes);
+  void PrintPlots(TRegexp reg);
+  */
+  //TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option="");
+  //TCanvas* GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option="");
+  TString GetHistNameWithPrefix(TString prefix,TString histname);
+};
+Plotter::Plotter(){
+}
+Plotter::~Plotter(){
+}
+/*
+void Plotter::AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,TString file1,TString prefix1,double weight1,TString file2="",TString prefix2="",double weight2=1.,TString file3="",TString prefix3="",double weight3=1.,TString file4="",TString prefix4="",double weight4=1.,TString file5="",TString prefix5="",double weight5=1.,TString file6="",TString prefix6="",double weight6=1.,TString file7="",TString prefix7="",double weight7=1.,TString file8="",TString prefix8="",double weight8=1.,TString file9="",TString prefix9="",double weight9=1.,TString file10="",TString prefix10="",double weight10=1.,TString file11="",TString prefix11="",double weight11=1.,TString file12="",TString prefix12="",double weight12=1.,TString file13="",TString prefix13="",double weight13=1.,TString file14="",TString prefix14="",double weight14=1.,TString file15="",TString prefix15="",double weight15=1.,TString file16="",TString prefix16="",double weight16=1.,TString file17="",TString prefix17="",double weight17=1.,TString file18="",TString prefix18="",double weight18=1.,TString file19="",TString prefix19="",double weight19=1.){
   vector<TString> files;
   vector<TString> prefixes;
   vector<double> weights;
@@ -134,10 +138,7 @@ void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,T
   if(file19!=""){files.push_back(file19);prefixes.push_back(prefix19);weights.push_back(weight19);}
   AddSampleWithPrefixAndWeight(name_,type_,color_,files,prefixes,weights);
 }
-void AddSample(TString name_,SampleType type_,EColor color_,TString file1,TString file2="",TString file3="",TString file4="",TString file5="",TString file6="",TString file7=""){
-  AddSampleWithPrefixAndWeight(name_,type_,color_,file1,"",1.,file2,"",1.,file3,"",1.,file4,"",1.,file5,"",1.,file6,"",1.,file7,"",1.);
-}
-void AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
+void Plotter::AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
   Systematic systematic;
   systematic.name=name_;
   systematic.type=type_;
@@ -161,7 +162,7 @@ void AddSystematic(TString name_,SystematicType type_,vector<TString> includes,b
   cout<<endl;
   systematics.push_back(systematic);
 }
-void AddSystematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
+void Plotter::AddSystematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
   TObjArray* arr=includes_.Tokenize(" ");
   vector<TString> includes;
   for(int i=0;i<arr->GetEntries();i++){
@@ -170,7 +171,7 @@ void AddSystematic(TString name_,SystematicType type_,TString includes_,bool var
   AddSystematic(name_,type_,includes,vary_data_,vary_signal_,vary_bg_);
 }
 
-void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
+void Plotter::AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
   Plot plot;
   plot.name=name_;
   plot.rebin=rebin_;
@@ -180,11 +181,11 @@ void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=
   if(DEBUG) std::cout<<" [AddPlot] to "<<plot.name<<" "<<plot.rebin<<" "<<plot.xmin<<" "<<plot.xmax<<endl;
   plots["/"+name_]=plot;
 }
-
+*/
 /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// Core functions////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-TH1* GetHist(TString filename,TString histname){
+TH1* Plotter::GetHistRaw(TString filename,TString histname){
   TFile *f=new TFile(filename);
   TH1* hist=(TH1*)f->Get(histname);
   if(hist){
@@ -198,7 +199,45 @@ TH1* GetHist(TString filename,TString histname){
   delete f;
   return hist;
 }
-vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bghistname="",int rebin=0,double xmin=0,double xmax=0,TString option=""){
+TH1* Plotter::GetHist(TString samplekey,TString histname){
+  TH1* hist=NULL;
+  class Sample* this_sample=&samples[samplekey];
+  if(histname.Contains("weightedAFB")){
+    TString histname_forward_num=histname; histname_forward_num.ReplaceAll("weightedAFB","forward_num");
+    TString histname_forward_den=histname; histname_forward_num.ReplaceAll("weightedAFB","forward_den");
+    TString histname_backward_num=histname; histname_backward_num.ReplaceAll("weightedAFB","backward_num");
+    TString histname_backward_den=histname; histname_backward_num.ReplaceAll("weightedAFB","backward_den");
+    TH1* hist_forward_num=GetHist(samplekey,histname_forward_num);
+    TH1* hist_forward_den=GetHist(samplekey,histname_forward_den);
+    TH1* hist_backward_num=GetHist(samplekey,histname_backward_num);
+    TH1* hist_backward_den=GetHist(samplekey,histname_backward_den);
+    hist=GetHistWeightedAFB(hist_forward_num,hist_forward_den,hist_backward_num,hist_backward_den);
+    delete hist_forward_num; delete hist_forward_den; delete hist_backward_num; delete hist_backward_den;
+    return hist;
+  }else if(histname.Contains("AFB")){
+    TString histname_forward=histname; histname.ReplaceAll("AFB","forward");
+    TString histname_backward=histname; histname.ReplaceAll("AFB","backward");
+    TH1* hist_forward=GetHist(samplekey,histname_forward);
+    TH1* hist_backward=GetHist(samplekey,histname_backward);
+    hist=GetHistAFB(hist_forward,hist_backward);
+    delete hist_forward; delete hist_backward;
+    return hist;
+  }else{
+    for(unsigned int i=0;i<this_sample->files.size();i++){
+      TString filepath=get<0>(this_sample->files[i]);
+      TString histnamewithprefix=GetHistNameWithPrefix(get<1>(this_sample->files[i]),histname);
+      double weight=get<2>(this_sample->files[i]);
+      TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
+      if(hist){
+	hist->Add(this_hist,weight);
+	delete this_hist;
+      }else hist=this_hist;
+    }
+    return hist;
+  }
+}   
+/*
+vector<TH1*> Plotter::GetHists(TString datahistname,TString signalhistname="",TString bghistname="",int rebin=0,double xmin=0,double xmax=0,TString option=""){
   if(signalhistname=="") signalhistname=datahistname;
   if(bghistname=="") bghistname=datahistname;
   vector<TH1*> hists;
@@ -240,9 +279,9 @@ vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bgh
     for(int i=0;i<samples.size();i++){
       TH1* hist=NULL;
       TString histname;
-      if(samples[i].type==SampleType::DATA) histname=datahistname;
-      else if(samples[i].type==SampleType::SIGNAL) histname=signalhistname;
-      else if(samples[i].type==SampleType::BG) histname=bghistname;
+      if(samples[i].type==SampleFrag::Type::DATA) histname=datahistname;
+      else if(samples[i].type==SampleFrag::Type::SIGNAL) histname=signalhistname;
+      else if(samples[i].type==SampleFrag::Type::BG) histname=bghistname;
       else cout<<"###ERROR### [GetHists] invalid SampleType "<<samples[i].type<<endl;
       for(int j=0;j<samples[i].files.size();j++){
 	TString this_histname=histname(0,histname.Last('/')+1)+samples[i].prefixes[j]+histname(histname.Last('/')+1,histname.Length());
@@ -278,7 +317,8 @@ vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bgh
   }
   return hists;
 }
-TH1* GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_backward_num,TH1* hist_forward_den,TH1* hist_backward_den){
+*/
+TH1* Plotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den){
   TH1* hist=(TH1*)hist_forward_num->Clone();
   hist->SetBit(kCanDelete);
   hist->Reset();
@@ -294,7 +334,7 @@ TH1* GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_backward_num,TH1* hist_f
   }
   return hist;
 }
-TH1* GetHistAFB(TH1* hist_forward,TH1* hist_backward){
+TH1* Plotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward){
   if(!hist_forward||!hist_backward){
     return NULL;
   }
@@ -311,7 +351,8 @@ TH1* GetHistAFB(TH1* hist_forward,TH1* hist_backward){
   }
   return hist;
 }
-TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
+/*
+TH1* Plotter::GetHMC(const vector<TH1*>& hists,TString option=""){
   TH1* hist=NULL;
   if(option.Contains("weightedAFB")){
     vector<TH1*> hists_forward_num(hists.begin(),hists.begin()+samples.size());
@@ -322,7 +363,7 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
     TH1* hist_backward_num=GetHMC(hists_backward_num,"BGSub");
     TH1* hist_forward_den=GetHMC(hists_forward_den,"BGSub");
     TH1* hist_backward_den=GetHMC(hists_backward_den,"BGSub");
-    hist=GetHistWeightedAFB(hist_forward_num,hist_backward_num,hist_forward_den,hist_backward_den);
+    hist=GetHistWeightedAFB(hist_forward_num,hist_forward_den,hist_backward_num,hist_backward_den);
     delete hist_forward_num;delete hist_backward_num;delete hist_forward_den;delete hist_backward_den;
   }else if(option.Contains("AFB")){
     vector<TH1*> hists_forward(hists.begin(),hists.begin()+samples.size());
@@ -335,10 +376,10 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
     THStack* hstack=new THStack("hstack","hstack");
     hstack->SetBit(kCanDelete);
     for(int i=(int)samples.size()-1;i>=0;i--){
-      if(samples[i].type==SampleType::DATA) continue;
+      if(samples[i].type==SampleFrag::Type::DATA) continue;
       if(hists.at(i)){
 	TH1* this_hist=(TH1*)hists.at(i)->Clone();
-	if(samples.at(i).type==SampleType::SIGNAL) this_hist->SetFillColor(samples.at(i).color-9);
+	if(samples.at(i).type==SampleFrag::Type::SIGNAL) this_hist->SetFillColor(samples.at(i).color-9);
 	this_hist->SetBit(kCanDelete);
 	hstack->Add(this_hist,"HIST");
       }
@@ -346,7 +387,7 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
     return (TH1*)hstack;
   }else if(option.Contains("BGSub")){
     for(int i=0;i<(int)samples.size();i++){
-      if(samples[i].type==SampleType::SIGNAL&&hists.at(i)){
+      if(samples[i].type==SampleFrag::Type::SIGNAL&&hists.at(i)){
 	if(hist) hist->Add(hists.at(i));
 	else{
 	  hist=(TH1*)hists.at(i)->Clone("hmc");
@@ -356,7 +397,7 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
     }
   }else{
     for(int i=0;i<(int)samples.size();i++){
-      if(samples[i].type!=SampleType::DATA&&hists.at(i)){
+      if(samples[i].type!=SampleFrag::Type::DATA&&hists.at(i)){
 	if(hist) hist->Add(hists.at(i));
 	else{
 	  hist=(TH1*)hists.at(i)->Clone("hmc");
@@ -367,7 +408,8 @@ TH1* GetHMC(const vector<TH1*>& hists,TString option=""){
   }
   return hist;
 }
-TH1* GetHMC(THStack* hstack){
+*/
+TH1* Plotter::GetHMC(THStack* hstack){
   TList* list=hstack->GetHists();
   TH1* hist=(TH1*)list->At(list->GetSize()-1)->Clone("hmc");
   hist->SetBit(kCanDelete);
@@ -376,7 +418,7 @@ TH1* GetHMC(THStack* hstack){
   }
   return hist;
 }
-TH1* GetHData(const vector<TH1*>& hists,TString option=""){
+TH1* Plotter::GetHData(const vector<TH1*>& hists,TString option=""){
   TH1* hist=NULL;
   if(option.Contains("weightedAFB")){
     vector<TH1*> hists_forward_num(hists.begin(),hists.begin()+samples.size());
@@ -387,7 +429,7 @@ TH1* GetHData(const vector<TH1*>& hists,TString option=""){
     TH1* hist_backward_num=GetHData(hists_backward_num,"BGSub");
     TH1* hist_forward_den=GetHData(hists_forward_den,"BGSub");
     TH1* hist_backward_den=GetHData(hists_backward_den,"BGSub");
-    hist=GetHistWeightedAFB(hist_forward_num,hist_backward_num,hist_forward_den,hist_backward_den);
+    hist=GetHistWeightedAFB(hist_forward_num,hist_forward_den,hist_backward_num,hist_backward_den);
     delete hist_forward_num;delete hist_backward_num;delete hist_forward_den;delete hist_backward_den;
   }else if(option.Contains("AFB")){
     vector<TH1*> hists_forward(hists.begin(),hists.begin()+samples.size());
@@ -398,10 +440,10 @@ TH1* GetHData(const vector<TH1*>& hists,TString option=""){
     delete hist_forward;delete hist_backward;
   }else if(option.Contains("BGSub")){
     hist=GetHData(hists,"");
-    for(int i=0;i<(int)samples.size();i++) if(samples[i].type==SampleType::BG&&hists.at(i)) hist->Add(hists.at(i),-1.);
+    for(int i=0;i<(int)samples.size();i++) if(samples[i].type==SampleFrag::Type::BG&&hists.at(i)) hist->Add(hists.at(i),-1.);
   }else{
     for(int i=0;i<(int)samples.size();i++){
-      if(samples[i].type==SampleType::DATA&&hists.at(i)){
+      if(samples[i].type==SampleFrag::Type::DATA&&hists.at(i)){
 	if(hist) hist->Add(hists.at(i));
 	else{
 	  hist=(TH1*)hists.at(i)->Clone();
@@ -412,7 +454,7 @@ TH1* GetHData(const vector<TH1*>& hists,TString option=""){
   }
   return hist;
 }
-TLegend* GetLegend(const vector<TH1*>& hists,TString option){
+TLegend* Plotter::GetLegend(const vector<TH1*>& hists,TString option){
   int histssize=hists.size();
   if(option.Contains("BGSub")) histssize=2;
   double horizontalshift=0;
@@ -426,7 +468,7 @@ TLegend* GetLegend(const vector<TH1*>& hists,TString option){
   legend->SetBorderSize(0);
   return legend;
 }
-TLegend* GetLegend(TH1* h1,TH1* h2,TString option){
+TLegend* Plotter::GetLegend(TH1* h1,TH1* h2,TString option){
   vector<TH1*> hists;
   hists.push_back(h1);
   if(strstr(h2->ClassName(),"THStack")){
@@ -437,7 +479,7 @@ TLegend* GetLegend(TH1* h1,TH1* h2,TString option){
   }else hists.push_back(h2);
   return GetLegend(hists,option);
 }
-TH1* GetEnvelope(TH1* central,const vector<TH1*>& variations){
+TH1* Plotter::GetEnvelope(TH1* central,const vector<TH1*>& variations){
   if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
@@ -450,7 +492,7 @@ TH1* GetEnvelope(TH1* central,const vector<TH1*>& variations){
   }
   return syshist;
 }
-TH1* GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1* variation3=NULL,TH1* variation4=NULL,TH1* variation5=NULL,TH1* variation6=NULL,TH1* variation7=NULL,TH1* variation8=NULL,TH1* variation9=NULL){
+TH1* Plotter::GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1* variation3=NULL,TH1* variation4=NULL,TH1* variation5=NULL,TH1* variation6=NULL,TH1* variation7=NULL,TH1* variation8=NULL,TH1* variation9=NULL){
   vector<TH1*> variations;
   if(variation1) variations.push_back(variation1);
   if(variation2) variations.push_back(variation2);
@@ -463,7 +505,7 @@ TH1* GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1* variatio
   if(variation9) variations.push_back(variation9);
   return GetEnvelope(central,variations);
 }    
-TH1* GetHessianError(TH1* central,const vector<TH1*>& variations){
+TH1* Plotter::GetHessianError(TH1* central,const vector<TH1*>& variations){
   if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
@@ -476,7 +518,7 @@ TH1* GetHessianError(TH1* central,const vector<TH1*>& variations){
   }
   return syshist;
 }  
-TH1* GetRMSError(TH1* central,const vector<TH1*>& variations){
+TH1* Plotter::GetRMSError(TH1* central,const vector<TH1*>& variations){
   if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
@@ -490,7 +532,7 @@ TH1* GetRMSError(TH1* central,const vector<TH1*>& variations){
   for(int i=1;i<syshist->GetNbinsX()+1;i++) syshist->SetBinError(i,syshist->GetBinError(i)/sqrt(variations.size()));
   return syshist;
 }  
-int AddError(TH1* hist,TH1* sys){
+int Plotter::AddError(TH1* hist,TH1* sys){
   for(int i=1;i<hist->GetNbinsX()+1;i++){
     if(fabs(hist->GetBinContent(i)-sys->GetBinContent(i))*1000000>fabs(hist->GetBinContent(i))){
       cout<<"###ERROR### [AddError] systematic hist is wrong"<<endl;
@@ -506,7 +548,8 @@ int AddError(TH1* hist,TH1* sys){
   }
   return 1;
 }
-TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option){
+/*
+TCanvas* Plotter::GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option){
   THStack *hstack=NULL;
   if(strstr(h2->ClassName(),"THStack")!=NULL){
     hstack=(THStack*)h2;
@@ -645,17 +688,17 @@ TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option){
   if(h2sys) delete h2sys;
   return c1;
 }
-bool CheckHists(vector<TH1*> hists){
+bool Plotter::CheckHists(vector<TH1*> hists){
   bool flag_data=false,flag_signal=false;
   for(unsigned int i=0;i<samples.size();i++){
     if(!hists.at(i)) continue;
-    if(samples[i].type==SampleType::DATA) flag_data=true;
-    if(samples[i].type==SampleType::SIGNAL) flag_signal=true;
+    if(samples[i].type==SampleFrag::Type::DATA) flag_data=true;
+    if(samples[i].type==SampleFrag::Type::SIGNAL) flag_signal=true;
   }
   if(flag_data&&flag_signal) return true;
   else return false;
 }
-TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
+TCanvas* Plotter::GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
   if(option.Contains("AFB")) option+=" BGSub diff leftleg";
   vector<TH1*> hists_central=GetHists(datahistname,signalhistname,bghistname,rebin,xmin,xmax,option);
   if(!CheckHists(hists_central)){
@@ -724,17 +767,17 @@ TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistna
   for(int i=0;i<(int)hists_central.size();i++) delete hists_central.at(i);
   return GetCompare(hdata_central,hdata_sys,hstack_central?(TH1*)hstack_central:hmc_central,hmc_sys,option);
 }
-TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
+TCanvas* Plotter::GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
   return GetCompare(histname,histname,histname,sysbit,rebin,xmin,xmax,option);
 }
-TH1* GetAxisParent(TVirtualPad* pad){
+TH1* Plotter::GetAxisParent(TVirtualPad* pad){
   TList* list=pad->GetListOfPrimitives();
   for(int i=0;i<list->GetSize();i++){
     if(strstr(list->At(i)->ClassName(),"TH")!=NULL) return (TH1*)list->At(i);
   }
   return NULL;
 }
-TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=""){
+TCanvas* Plotter::GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=""){
   TString canvasname=histnames[0];
   canvasname.ReplaceAll("_y0.0to0.4","");
   int nhist=histnames.size();
@@ -756,7 +799,9 @@ TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=
     hdata->GetXaxis()->SetNdivisions(503);
 
     TString ratiotitle=hratio->GetXaxis()->GetTitle();
-    ratiotitle=ratiotitle("_y.*/");
+*/
+//    ratiotitle=ratiotitle("_y.*/");
+/*
     ratiotitle=ratiotitle(1,ratiotitle.Length()-2);
     hratio->GetXaxis()->SetTitle(ratiotitle);
     hratio->GetXaxis()->CenterTitle();
@@ -816,7 +861,7 @@ TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=
   return c1;
 }
 
-TCanvas* GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option=""){
+TCanvas* Plotter::GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option=""){
   vector<TString> histnames;
   for(auto it=plots.begin();it!=plots.end();it++){
     if(it->first.Contains(regexp)){
@@ -827,7 +872,7 @@ TCanvas* GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option=""){
 }
 
 
-void SavePlots(TString outputdir="plot",int njob=1,int ijob=0){
+void Plotter::SavePlots(TString outputdir="plot",int njob=1,int ijob=0){
   int oldlevel=gErrorIgnoreLevel;
   if(!DEBUG) gErrorIgnoreLevel=kWarning;
 
@@ -879,12 +924,12 @@ void SavePlots(TString outputdir="plot",int njob=1,int ijob=0){
   }  
   gErrorIgnoreLevel=oldlevel;
 }
-
+*/
 /////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// etc.//////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
-
-set<TString> GetHistKeys(TList* keys,TRegexp regexp=".*"){
+/*
+set<TString> Plotter::GetHistKeys(TList* keys,TRegexp regexp=".*"){
   set<TString> histkeys;
   for(int i=0;i<keys->GetSize();i++){
     TKey* key=(TKey*)keys->At(i);
@@ -899,7 +944,8 @@ set<TString> GetHistKeys(TList* keys,TRegexp regexp=".*"){
   }
   return histkeys;
 }
-set<TString> GetHistKeys(int samplenum=1,TRegexp regexp=".*"){
+
+set<TString> Plotter::GetHistKeys(int samplenum=1,TRegexp regexp=".*"){
   TFile f(samples.at(samplenum).files.at(0));
   cout<<f.GetName()<<"/"<<f.GetTitle()<<endl;
   TList* keys=f.GetListOfKeys();
@@ -907,13 +953,13 @@ set<TString> GetHistKeys(int samplenum=1,TRegexp regexp=".*"){
   f.Close();
   return histkeys;
 }
-void PrintHistKeys(int samplenum=1,TRegexp regexp=".*"){
+void Plotter::PrintHistKeys(int samplenum=1,TRegexp regexp=".*"){
   set<TString> histkeys=GetHistKeys(samplenum,regexp);
   for(auto it=histkeys.begin();it!=histkeys.end();it++){
     cout<<*it<<endl;
   }
 }
-set<TString> ParseHistKeys(set<TString> histkeys_raw,set<TString> prefixes,set<TString> suffixes,set<TString> excludes){
+set<TString> Plotter::ParseHistKeys(set<TString> histkeys_raw,set<TString> prefixes,set<TString> suffixes,set<TString> excludes){
   set<TString> histkeys;
   for(auto it=histkeys_raw.begin();it!=histkeys_raw.end();it++){
     bool next_flag=false;
@@ -943,7 +989,7 @@ set<TString> ParseHistKeys(set<TString> histkeys_raw,set<TString> prefixes,set<T
   }
   return histkeys;
 }
-void AddPlotsAuto(set<TString> excludes={"^/electron..../","/qqbar","/qbarq","/gq","/qg","/gqbar","/qbarg","/qq","/gg"}){
+void Plotter::AddPlotsAuto(set<TString> excludes={"^/electron..../","/qqbar","/qbarq","/gq","/qg","/gqbar","/qbarg","/qq","/gg"}){
   set<TString> data_histkeys_raw=GetHistKeys(0), signal_histkeys_raw=GetHistKeys(1);
   set<TString> prefixes,suffixes;
   for(unsigned int i=0;i<samples.size();i++)
@@ -966,8 +1012,14 @@ void AddPlotsAuto(set<TString> excludes={"^/electron..../","/qqbar","/qbarq","/g
     }
   }
 }
-void PrintPlots(TRegexp reg){
+void Plotter::PrintPlots(TRegexp reg){
   for(auto it=plots.begin();it!=plots.end();it++){
     if(it->first.Contains(reg)) cout<<it->first<<endl;
   }
 }
+*/
+TString Plotter::GetHistNameWithPrefix(TString prefix,TString histname){
+  TString this_histname=histname(0,histname.Last('/')+1)+prefix+histname(histname.Last('/')+1,histname.Length());
+  return this_histname;
+}
+

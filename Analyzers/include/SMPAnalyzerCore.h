@@ -28,6 +28,7 @@ public:
   TH2D *hzpt_muon,*hzpt_electron,*hzpt_norm_muon,*hzpt_norm_electron;
   TString tauprefix;
   double zptcor;
+  bool IsDYSample=false;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();
