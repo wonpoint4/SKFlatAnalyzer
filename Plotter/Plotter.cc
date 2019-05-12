@@ -63,16 +63,13 @@ public:
   map<TString,Systematic> systematics;
   map<TString,Plot> plots;
 
-  /*
-  void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,vector<TString> files_,vector<TString> prefixes_,vector<double> weights_);
-  void AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,TString file1,TString prefix1,double weight1,TString file2="",TString prefix2="",double weight2=1.,TString file3="",TString prefix3="",double weight3=1.,TString file4="",TString prefix4="",double weight4=1.,TString file5="",TString prefix5="",double weight5=1.,TString file6="",TString prefix6="",double weight6=1.,TString file7="",TString prefix7="",double weight7=1.,TString file8="",TString prefix8="",double weight8=1.,TString file9="",TString prefix9="",double weight9=1.,TString file10="",TString prefix10="",double weight10=1.,TString file11="",TString prefix11="",double weight11=1.,TString file12="",TString prefix12="",double weight12=1.,TString file13="",TString prefix13="",double weight13=1.,TString file14="",TString prefix14="",double weight14=1.,TString file15="",TString prefix15="",double weight15=1.,TString file16="",TString prefix16="",double weight16=1.,TString file17="",TString prefix17="",double weight17=1.,TString file18="",TString prefix18="",double weight18=1.,TString file19="",TString prefix19="",double weight19=1.);
-  //void AddSample(TString name_,SampleType type_,EColor color_,TString file1,TString file2="",TString file3="",TString file4="",TString file5="",TString file6="",TString file7="");
   //AddSystematic
-  void AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
-  void AddSystematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+  struct Systematic Systematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+  struct Systematic Systematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+
   //AddPlot
   void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_="");
-  */
+  
   //Hist
   TH1* GetHistRaw(TString filename,TString histname);  
   TH1* GetHist(TString samplekey,TString histname);
@@ -112,34 +109,8 @@ Plotter::Plotter(){
 }
 Plotter::~Plotter(){
 }
-/*
-void Plotter::AddSampleWithPrefixAndWeight(TString name_,SampleType type_,EColor color_,TString file1,TString prefix1,double weight1,TString file2="",TString prefix2="",double weight2=1.,TString file3="",TString prefix3="",double weight3=1.,TString file4="",TString prefix4="",double weight4=1.,TString file5="",TString prefix5="",double weight5=1.,TString file6="",TString prefix6="",double weight6=1.,TString file7="",TString prefix7="",double weight7=1.,TString file8="",TString prefix8="",double weight8=1.,TString file9="",TString prefix9="",double weight9=1.,TString file10="",TString prefix10="",double weight10=1.,TString file11="",TString prefix11="",double weight11=1.,TString file12="",TString prefix12="",double weight12=1.,TString file13="",TString prefix13="",double weight13=1.,TString file14="",TString prefix14="",double weight14=1.,TString file15="",TString prefix15="",double weight15=1.,TString file16="",TString prefix16="",double weight16=1.,TString file17="",TString prefix17="",double weight17=1.,TString file18="",TString prefix18="",double weight18=1.,TString file19="",TString prefix19="",double weight19=1.){
-  vector<TString> files;
-  vector<TString> prefixes;
-  vector<double> weights;
-  if(file1!=""){files.push_back(file1);prefixes.push_back(prefix1);weights.push_back(weight1);}
-  if(file2!=""){files.push_back(file2);prefixes.push_back(prefix2);weights.push_back(weight2);}
-  if(file3!=""){files.push_back(file3);prefixes.push_back(prefix3);weights.push_back(weight3);}
-  if(file4!=""){files.push_back(file4);prefixes.push_back(prefix4);weights.push_back(weight4);}
-  if(file5!=""){files.push_back(file5);prefixes.push_back(prefix5);weights.push_back(weight5);}
-  if(file6!=""){files.push_back(file6);prefixes.push_back(prefix6);weights.push_back(weight6);}
-  if(file7!=""){files.push_back(file7);prefixes.push_back(prefix7);weights.push_back(weight7);}
-  if(file8!=""){files.push_back(file8);prefixes.push_back(prefix8);weights.push_back(weight8);}
-  if(file9!=""){files.push_back(file9);prefixes.push_back(prefix9);weights.push_back(weight9);}
-  if(file10!=""){files.push_back(file10);prefixes.push_back(prefix10);weights.push_back(weight10);}
-  if(file11!=""){files.push_back(file11);prefixes.push_back(prefix11);weights.push_back(weight11);}
-  if(file12!=""){files.push_back(file12);prefixes.push_back(prefix12);weights.push_back(weight12);}
-  if(file13!=""){files.push_back(file13);prefixes.push_back(prefix13);weights.push_back(weight13);}
-  if(file14!=""){files.push_back(file14);prefixes.push_back(prefix14);weights.push_back(weight14);}
-  if(file15!=""){files.push_back(file15);prefixes.push_back(prefix15);weights.push_back(weight15);}
-  if(file16!=""){files.push_back(file16);prefixes.push_back(prefix16);weights.push_back(weight16);}
-  if(file17!=""){files.push_back(file17);prefixes.push_back(prefix17);weights.push_back(weight17);}
-  if(file18!=""){files.push_back(file18);prefixes.push_back(prefix18);weights.push_back(weight18);}
-  if(file19!=""){files.push_back(file19);prefixes.push_back(prefix19);weights.push_back(weight19);}
-  AddSampleWithPrefixAndWeight(name_,type_,color_,files,prefixes,weights);
-}
-void Plotter::AddSystematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
-  Systematic systematic;
+struct Systematic Plotter::Systematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
+  struct Systematic systematic;
   systematic.name=name_;
   systematic.type=type_;
   if(systematic.type==SystematicType::MULTI){
@@ -160,17 +131,17 @@ void Plotter::AddSystematic(TString name_,SystematicType type_,vector<TString> i
   cout<<" [AddSystematic] "<<systematic.name<<" "<<GetStringSystematicType(systematic.type)<<" sysbit:"<<systematic.sysbit<<" data:"<<(systematic.vary_data?"vary":"not_vary")<<" signal:"<<(systematic.vary_signal?"vary":"not_vary")<<" bg:"<<(systematic.vary_bg?"vary":"not_vary")<<endl;
   cout<<"  INCLUDE=";for(int i=0;i<includes.size();i++) cout<<includes[i]<<" ";
   cout<<endl;
-  systematics.push_back(systematic);
+  return systematic;
 }
-void Plotter::AddSystematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
+struct Systematic Plotter::Systematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
   TObjArray* arr=includes_.Tokenize(" ");
   vector<TString> includes;
   for(int i=0;i<arr->GetEntries();i++){
     includes.push_back(((TObjString*)arr->At(i))->String());
   }
-  AddSystematic(name_,type_,includes,vary_data_,vary_signal_,vary_bg_);
+  return Systematic(name_,type_,includes,vary_data_,vary_signal_,vary_bg_);
 }
-
+/*
 void Plotter::AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
   Plot plot;
   plot.name=name_;
@@ -223,15 +194,19 @@ TH1* Plotter::GetHist(TString samplekey,TString histname){
     delete hist_forward; delete hist_backward;
     return hist;
   }else{
-    for(unsigned int i=0;i<this_sample->files.size();i++){
-      TString filepath=get<0>(this_sample->files[i]);
-      TString histnamewithprefix=GetHistNameWithPrefix(get<1>(this_sample->files[i]),histname);
-      double weight=get<2>(this_sample->files[i]);
-      TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
-      if(hist){
-	hist->Add(this_hist,weight);
-	delete this_hist;
-      }else hist=this_hist;
+    for(unsigned int i=0;i<this_sample->frags.size();i++){
+      SampleFrag *frag=&this_sample->frags[i]->first;
+      double fragweight=this_sample->frags[i]->second;
+      for(unsigned int j=0;j<frag->files.size();j++){
+	TString filepath=get<0>(frag->files[j]);
+	TString histnamewithprefix=GetHistNameWithPrefix(get<1>(frag->files[j]),histname);
+	double fileweight=get<2>(frag->files[i]);
+	TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
+	if(hist){
+	  hist->Add(this_hist,fileweight*fragweight);
+	  delete this_hist;
+	}else hist=this_hist;
+      }
     }
     return hist;
   }

@@ -53,6 +53,7 @@ void SampleFrag::Add(TRegexp samplefragkeyexp,double weight){
     if(it->first.Contains(samplefragkeyexp)) Add(it->first,weight);
   }
 }
+
 class SampleFrag SampleFrag(TString title,SampleFrag::Type type,int color,vector<tuple<TString,TString,double>> files){
   class SampleFrag samplefrag;
   samplefrag.title=title;samplefrag.type=type;
@@ -83,6 +84,9 @@ class SampleFrag SampleFrag(TString title,SampleFrag::Type type,int color,tuple<
   return frag;
 }
 
+
+
+
 class Sample:public SampleFrag{
 public:
   vector<tuple<SampleFrag,double>> frags;
@@ -97,14 +101,12 @@ void Sample::Add(TString samplefragkey,double weight){
   }
   return;
 }
-
 class Sample Sample(TString title,Sample::Type type,int color){
   class Sample sample;
   sample.title=title;sample.type=type;
   sample.DefaultSetup(color);
   return sample;
 }
-
 class Sample Sample(TString title,Sample::Type type,int color,tuple<TString,double> frag1,tuple<TString,double> frag2=make_tuple("",0.),tuple<TString,double> frag3=make_tuple("",0.),tuple<TString,double> frag4=make_tuple("",0.),tuple<TString,double> frag5=make_tuple("",0.),tuple<TString,double> frag6=make_tuple("",0.),tuple<TString,double> frag7=make_tuple("",0.)){
   class Sample sample=Sample(title,type,color);
   if(get<0>(frag1)!="") sample.Add(get<0>(frag1),get<1>(frag1));
