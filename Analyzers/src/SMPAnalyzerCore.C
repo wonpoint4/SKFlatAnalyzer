@@ -213,7 +213,7 @@ double SMPAnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int 
 
 void SMPAnalyzerCore::GetGenIndex(const vector<Gen>& gens,int& parton0,int& parton1,int& hardl0,int& hardl1,int& l0,int& l1,vector<int>& photons){
   parton0=0;parton1=0;hardl0=0;hardl1=0;l0=0;l1=0;photons.clear();
-  if(!MCSample.Contains("DYJets")){
+  if(!IsDYSample){
     cout <<"[SMPAnalyzerCore::GetGenIndex] this is for DY event"<<endl;
     return;
   }

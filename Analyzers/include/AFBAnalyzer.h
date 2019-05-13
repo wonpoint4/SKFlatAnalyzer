@@ -24,7 +24,8 @@ public:
   //const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120};
   static const int massbinnum=14;
   const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120,200,350};
-  void FillHardHists(TString pre,TString suf,Gen genparton0,Gen genparton1,Gen genhardl0,Gen genhardl1,Gen genhardj0,double w);
+  void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
+  void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
   TRandom3* random;
   TString hardprefix;
 };

@@ -35,6 +35,7 @@ void AFBAnalyzer::executeEvent(){
       genparton1.SetPxPyPzE(0,0,-genWeight_X2*6500.,genWeight_X2*6500.);
       for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
       TLorentzVector genZ=(genl0+genl1+genphotons);
+      //if(MCSample.Contains("DYJets")) 
       zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
       TString slepton=abs(genhardl0.PID())==13?"muon":"electron";
       if(genparton0.PID()==21){
@@ -53,6 +54,24 @@ void AFBAnalyzer::executeEvent(){
       int nhardjet=(hardj0?1:0)+(hardj1?1:0)+(hardj2?1:0);
 
       ///////////////////////FillGenHist////////////////
+      if(genZ.M()>=massrange[0]&&genZ.M()<massrange[massbinnum]){
+	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	if(genZ.Pt()>50){
+	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	}	
+	for(int iy=0;iy<zptcor_nybin;iy++){
+	  if(fabs(genZ.Rapidity())>=zptcor_ybin[iy]&&fabs(genZ.Rapidity())<zptcor_ybin[iy+1]){
+	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	    if(genZ.Pt()>50){
+	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	    }
+	  }
+	}
+      }
       //FillGenHists(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
       //FillGenHists(Form("%s%dgen/",slepton.Data(),DataYear)+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
       /*
@@ -657,7 +676,7 @@ void AFBAnalyzer::FillAFBSystematicHists(TString pre,TString suf,const vector<Le
   }
 }
 
-void AFBAnalyzer::FillHardHists(TString pre,TString suf,Gen genparton0,Gen genparton1,Gen genhardl0,Gen genhardl1,Gen genhardj0,double w){
+void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w){
   Gen genhardl=genhardl0.PID()>0?genhardl0:genhardl1;
   TLorentzVector genZ=genhardl0+genhardl1;
   TLorentzVector genpp=genparton0+genparton1;
@@ -715,3 +734,25 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,Gen genparton0,Gen genpa
     FillHist(pre+"jeta_asym"+suf,-1.*genhardj0.Eta(),-w/2,100,-5,5);
   }
 }
+void AFBAnalyzer::FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w){
+  TLorentzVector genZ=genl0+genl1+genphotons;
+  double genZmass=genZ.M();
+  double genZpt=genZ.Pt();
+  vector<Lepton*> leps={(Lepton*)&genl0,(Lepton*)&genl1};
+  double cost=GetCosThetaCS(leps);
+  FillHist(pre+"costhetaCS"+suf,cost,w,40,-1,1);
+  FillHist(pre+"abscosthetaCS"+suf,fabs(cost),w,20,0,1);
+  double h=0.5*pow(genZpt/genZmass,2)/(1+pow(genZpt/genZmass,2))*(1-3*cost*cost);
+  double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
+  double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
+  if(cost>0){
+    FillHist(pre+"forward"+suf,genZmass,w,massbinnum,(double*)massrange);
+    FillHist(pre+"forward_den"+suf,genZmass,w*den_weight,massbinnum,(double*)massrange);
+    FillHist(pre+"forward_num"+suf,genZmass,w*num_weight,massbinnum,(double*)massrange);    
+  }else{
+    FillHist(pre+"backward"+suf,genZmass,w,massbinnum,(double*)massrange);
+    FillHist(pre+"backward_den"+suf,genZmass,w*den_weight,massbinnum,(double*)massrange);
+    FillHist(pre+"backward_num"+suf,genZmass,w*num_weight,massbinnum,(double*)massrange);   
+  }
+}
+  

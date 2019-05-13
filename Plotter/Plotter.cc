@@ -31,17 +31,21 @@ struct Systematic{
   TString name;
   SystematicType type;
   vector<TString> suffixes;
-  bool vary_data;
-  bool vary_signal;
-  bool vary_bg;
   int sysbit;
+  int varibit;
 };
 struct Plot{
+  enum Type{Compare,Ratio,CompareAndRatio,CompareAndDiff};
+  Type type;
   TString name;
+  TString histname;
+  TString sysname;
   int rebin;
   double xmin;
   double xmax;
   TString option;
+  int npad;
+  
 };
 enum Channel{MUON,ELECTRON};
 TString GetStringChannel(Channel channel){
@@ -59,39 +63,49 @@ class Plotter{
 public:
   Plotter();
   ~Plotter();
-  map<TString,class Sample> samples;
+  map<TString,Sample> samples;
   map<TString,Systematic> systematics;
   map<TString,Plot> plots;
 
   //AddSystematic
-  struct Systematic Systematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
-  struct Systematic Systematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true);
+  Systematic MakeSystematic(TString name_,SystematicType type_,vector<TString> includes,int varibit);
+  Systematic MakeSystematic(TString name_,SystematicType type_,TString includes_,int varibit);
 
   //AddPlot
   void AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_="");
   
   //Hist
   TH1* GetHistRaw(TString filename,TString histname);  
-  TH1* GetHist(TString samplekey,TString histname);
+  TH1* GetHistSampleFrag(const SampleFrag& frag,TString histname);
+  TH1* GetHist(TString samplekey,TString histname,TString suffix="",int varibit=0);
+  tuple<TH1*,TH1*> GetHistWithTotal(TString samplekey,TString histname,TString sysname);
   //  vector<TH1*> GetHists(TString datahistname,TString signalhistname="",TString bghistname="",int rebin=0,double xmin=0,double xmax=0,TString option="");
   TH1* GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den);
   TH1* GetHistAFB(TH1* hist_forward,TH1* hist_backward);
   TH1* GetHMC(const vector<TH1*>& hists,TString option="");
-  TH1* GetHMC(THStack* hstack);
+  static TH1* GetTH1(TH1* hstack);
   TH1* GetHData(const vector<TH1*>& hists,TString option="");
-  TLegend* GetLegend(const vector<TH1*>& hists,TString option);
-  TLegend* GetLegend(TH1* h1,TH1* h2,TString option);
+  static TLegend* GetLegend(const vector<TH1*>& hists,TString option);
+  static TLegend* GetLegend(const vector<tuple<TH1*,TH1*>>& hists,TString option);
   TH1* GetEnvelope(TH1* central,const vector<TH1*>& variations);
   TH1* GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1* variation3=NULL,TH1* variation4=NULL,TH1* variation5=NULL,TH1* variation6=NULL,TH1* variation7=NULL,TH1* variation8=NULL,TH1* variation9=NULL);
   TH1* GetHessianError(TH1* central,const vector<TH1*>& variations);
   TH1* GetRMSError(TH1* central,const vector<TH1*>& variations);
   int AddError(TH1* hist,TH1* sys);
   bool CheckHists(vector<TH1*> hists);
+  void PrintSampleFrags();
+  void PrintSamples(bool detail=false);
+  static TCanvas* GetCompare(vector<tuple<TH1*,TH1*>> hists,TString option);
+  static TCanvas* GetRatio(vector<tuple<TH1*,TH1*>> hists,TString option);
+  static TCanvas* GetCompareAndRatio(vector<tuple<TH1*,TH1*>> hists,TString option);
+  TCanvas* GetCanvas(TCanvas* (*func)(vector<tuple<TH1*,TH1*>>,TString),TString histname,TString sysname,int rebin,double xmin,double xmax,TString option);
+  TCanvas* GetCanvas(TString plotkey);
+  static TH1* GetAxisParent(TVirtualPad* pad);
+  void RebinXminXmax(TH1* hist,int rebin,double xmin,double xmax);
   /*
   TCanvas* GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option);
   TCanvas* GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option="");
   TCanvas* GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option="");
-  TH1* GetAxisParent(TVirtualPad* pad);
   void SavePlots(TString outputdir="plot",int njob=1,int ijob=0);
   
   set<TString> GetHistKeys(TList* keys,TRegexp regexp=".*");
@@ -106,11 +120,12 @@ public:
   TString GetHistNameWithPrefix(TString prefix,TString histname);
 };
 Plotter::Plotter(){
+  TH1::SetDefaultSumw2(kTRUE);
 }
 Plotter::~Plotter(){
 }
-struct Systematic Plotter::Systematic(TString name_,SystematicType type_,vector<TString> includes,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
-  struct Systematic systematic;
+Systematic Plotter::MakeSystematic(TString name_,SystematicType type_,vector<TString> includes,int varibit_){
+  Systematic systematic;
   systematic.name=name_;
   systematic.type=type_;
   if(systematic.type==SystematicType::MULTI){
@@ -125,21 +140,19 @@ struct Systematic Plotter::Systematic(TString name_,SystematicType type_,vector<
     systematic.sysbit=1<<systematics.size();
     systematic.suffixes=includes;
   }    
-  systematic.vary_data=vary_data_;
-  systematic.vary_signal=vary_signal_;
-  systematic.vary_bg=vary_bg_;
-  cout<<" [AddSystematic] "<<systematic.name<<" "<<GetStringSystematicType(systematic.type)<<" sysbit:"<<systematic.sysbit<<" data:"<<(systematic.vary_data?"vary":"not_vary")<<" signal:"<<(systematic.vary_signal?"vary":"not_vary")<<" bg:"<<(systematic.vary_bg?"vary":"not_vary")<<endl;
+  systematic.varibit=varibit_;
+  cout<<" [AddSystematic] "<<systematic.name<<" "<<GetStringSystematicType(systematic.type)<<" sysbit:"<<systematic.sysbit<<" varibit:"<<systematic.varibit<<endl;
   cout<<"  INCLUDE=";for(int i=0;i<includes.size();i++) cout<<includes[i]<<" ";
   cout<<endl;
   return systematic;
 }
-struct Systematic Plotter::Systematic(TString name_,SystematicType type_,TString includes_,bool vary_data_=false,bool vary_signal_=true,bool vary_bg_=true){
+Systematic Plotter::MakeSystematic(TString name_,SystematicType type_,TString includes_,int varibit_){
   TObjArray* arr=includes_.Tokenize(" ");
   vector<TString> includes;
   for(int i=0;i<arr->GetEntries();i++){
     includes.push_back(((TObjString*)arr->At(i))->String());
   }
-  return Systematic(name_,type_,includes,vary_data_,vary_signal_,vary_bg_);
+  return MakeSystematic(name_,type_,includes,varibit_);
 }
 /*
 void Plotter::AddPlot(TString name_,int rebin_,double xmin_,double xmax_,TString option_=""){
@@ -161,7 +174,6 @@ TH1* Plotter::GetHistRaw(TString filename,TString histname){
   TH1* hist=(TH1*)f->Get(histname);
   if(hist){
     hist->SetDirectory(0);
-    hist->SetBit(kCanDelete);
     if(DEBUG>1) cout<<"###INFO### [GetHist] get "<<histname<<" in "<<filename<<endl;
   }else{
     if(DEBUG>0) cout<<"###WARNING### [GetHist] no "<<histname<<" in "<<filename<<endl;
@@ -170,129 +182,126 @@ TH1* Plotter::GetHistRaw(TString filename,TString histname){
   delete f;
   return hist;
 }
-TH1* Plotter::GetHist(TString samplekey,TString histname){
+TH1* Plotter::GetHistSampleFrag(const SampleFrag& frag,TString histname){
   TH1* hist=NULL;
-  class Sample* this_sample=&samples[samplekey];
+  for(unsigned int i=0;i<frag.files.size();i++){
+    TString filepath=get<0>(frag.files[i]);
+    TString histnamewithprefix=GetHistNameWithPrefix(get<1>(frag.files[i]),histname);
+    double fileweight=get<2>(frag.files[i]);
+    TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
+    if(!hist){
+      hist=(TH1*)this_hist->Clone();
+      hist->Reset();
+    }
+    hist->Add(this_hist,fileweight);
+    delete this_hist;
+  }
+  frag.ApplyHistStyle(hist);
+  return hist;
+} 
+TH1* Plotter::GetHist(TString samplekey,TString histname,TString suffix,int varibit){
+  TH1* hist=NULL;
+  Sample* this_sample=&samples[samplekey];
   if(histname.Contains("weightedAFB")){
     TString histname_forward_num=histname; histname_forward_num.ReplaceAll("weightedAFB","forward_num");
     TString histname_forward_den=histname; histname_forward_num.ReplaceAll("weightedAFB","forward_den");
     TString histname_backward_num=histname; histname_backward_num.ReplaceAll("weightedAFB","backward_num");
     TString histname_backward_den=histname; histname_backward_num.ReplaceAll("weightedAFB","backward_den");
-    TH1* hist_forward_num=GetHist(samplekey,histname_forward_num);
-    TH1* hist_forward_den=GetHist(samplekey,histname_forward_den);
-    TH1* hist_backward_num=GetHist(samplekey,histname_backward_num);
-    TH1* hist_backward_den=GetHist(samplekey,histname_backward_den);
+    TH1* hist_forward_num=GetHist(samplekey,histname_forward_num,suffix,varibit);
+    TH1* hist_forward_den=GetHist(samplekey,histname_forward_den,suffix,varibit);
+    TH1* hist_backward_num=GetHist(samplekey,histname_backward_num,suffix,varibit);
+    TH1* hist_backward_den=GetHist(samplekey,histname_backward_den,suffix,varibit);
     hist=GetHistWeightedAFB(hist_forward_num,hist_forward_den,hist_backward_num,hist_backward_den);
     delete hist_forward_num; delete hist_forward_den; delete hist_backward_num; delete hist_backward_den;
     return hist;
   }else if(histname.Contains("AFB")){
-    TString histname_forward=histname; histname.ReplaceAll("AFB","forward");
-    TString histname_backward=histname; histname.ReplaceAll("AFB","backward");
-    TH1* hist_forward=GetHist(samplekey,histname_forward);
-    TH1* hist_backward=GetHist(samplekey,histname_backward);
+    TString histname_forward=histname; histname_forward.ReplaceAll("AFB","forward");
+    TString histname_backward=histname; histname_backward.ReplaceAll("AFB","backward");
+    TH1* hist_forward=GetHist(samplekey,histname_forward,suffix,varibit);
+    TH1* hist_backward=GetHist(samplekey,histname_backward,suffix,varibit);
     hist=GetHistAFB(hist_forward,hist_backward);
     delete hist_forward; delete hist_backward;
     return hist;
   }else{
-    for(unsigned int i=0;i<this_sample->frags.size();i++){
-      SampleFrag *frag=&this_sample->frags[i]->first;
-      double fragweight=this_sample->frags[i]->second;
-      for(unsigned int j=0;j<frag->files.size();j++){
-	TString filepath=get<0>(frag->files[j]);
-	TString histnamewithprefix=GetHistNameWithPrefix(get<1>(frag->files[j]),histname);
-	double fileweight=get<2>(frag->files[i]);
-	TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
-	if(hist){
-	  hist->Add(this_hist,fileweight*fragweight);
-	  delete this_hist;
-	}else hist=this_hist;
+    for(int i=this_sample->frags.size()-1;i>=0;i--){
+      SampleFrag *frag=&get<0>(this_sample->frags[i]);
+      double fragweight=get<1>(this_sample->frags[i]);
+      TString histnamewithsuffix=histname;
+      if((1<<frag->type)&varibit) histnamewithsuffix+=suffix;
+      TH1* this_hist=GetHistSampleFrag(*frag,histnamewithsuffix);
+      if(this_sample->type==Sample::Type::SUM){
+	if(!hist){
+	  hist=(TH1*)this_hist->Clone();
+	  hist->Reset();
+	}
+	hist->Add(this_hist,fragweight);
+	delete this_hist;
+      }else if(this_sample->type==Sample::Type::STACK){
+	if(!hist){
+	  hist=(TH1*)new THStack(this_sample->title,this_sample->title);
+	}
+	THStack* hstack=(THStack*)hist;
+	if(fragweight!=1.) if(DEBUG>0) cout<<"###WARNING### [Plotter::GetHist] STACK with weight!=1. is not possible yet (weight="<<fragweight<<")"<<endl;
+	hstack->Add(this_hist,"HIST");
+      }else{
+	if(DEBUG>0) cout<<"###WARNING### [Plotter::GetHist] wrong Sample::Type "<<this_sample->type<<endl;
       }
     }
+    this_sample->ApplyHistStyle(hist);
+    hist->SetTitle(histname+suffix);
     return hist;
   }
-}   
-/*
-vector<TH1*> Plotter::GetHists(TString datahistname,TString signalhistname="",TString bghistname="",int rebin=0,double xmin=0,double xmax=0,TString option=""){
-  if(signalhistname=="") signalhistname=datahistname;
-  if(bghistname=="") bghistname=datahistname;
-  vector<TH1*> hists;
-  if(option.Contains("weightedAFB")){
-    TString datahistname_num=datahistname;
-    TString signalhistname_num=signalhistname;
-    TString bghistname_num=bghistname;
-    datahistname_num.ReplaceAll("weightedAFB","AFB_num");
-    signalhistname_num.ReplaceAll("weightedAFB","AFB_num");
-    bghistname_num.ReplaceAll("weightedAFB","AFB_num");
-    TString datahistname_den=datahistname;
-    TString signalhistname_den=signalhistname;
-    TString bghistname_den=bghistname;
-    datahistname_den.ReplaceAll("weightedAFB","AFB_den");
-    signalhistname_den.ReplaceAll("weightedAFB","AFB_den");
-    bghistname_den.ReplaceAll("weightedAFB","AFB_den");
-    option.ReplaceAll("weightedAFB","AFB");  
-    hists=GetHists(datahistname_num,signalhistname_num,bghistname_num,rebin,xmin,xmax,option);
-    vector<TH1*> hists_den=GetHists(datahistname_den,signalhistname_den,bghistname_den,rebin,xmin,xmax,option);
-    hists.insert(hists.end(),hists_den.begin(),hists_den.end());
-  }else if(option.Contains("AFB")){
-    TString datahistname_forward=datahistname;
-    TString signalhistname_forward=signalhistname;
-    TString bghistname_forward=bghistname;
-    datahistname_forward.ReplaceAll("AFB","forward");
-    signalhistname_forward.ReplaceAll("AFB","forward");
-    bghistname_forward.ReplaceAll("AFB","forward");
-    TString datahistname_backward=datahistname;
-    TString signalhistname_backward=signalhistname;
-    TString bghistname_backward=bghistname;
-    datahistname_backward.ReplaceAll("AFB","backward");
-    signalhistname_backward.ReplaceAll("AFB","backward");
-    bghistname_backward.ReplaceAll("AFB","backward");
-    hists=GetHists(datahistname_forward,signalhistname_forward,bghistname_forward,rebin,xmin,xmax,"");
-    vector<TH1*> hists_backward=GetHists(datahistname_backward,signalhistname_backward,bghistname_backward,rebin,xmin,xmax,"");
-    hists.insert(hists.end(),hists_backward.begin(),hists_backward.end());
-  }else{
-    TString longhistname=signalhistname.Length()>=bghistname.Length()?signalhistname:bghistname;
-    for(int i=0;i<samples.size();i++){
-      TH1* hist=NULL;
-      TString histname;
-      if(samples[i].type==SampleFrag::Type::DATA) histname=datahistname;
-      else if(samples[i].type==SampleFrag::Type::SIGNAL) histname=signalhistname;
-      else if(samples[i].type==SampleFrag::Type::BG) histname=bghistname;
-      else cout<<"###ERROR### [GetHists] invalid SampleType "<<samples[i].type<<endl;
-      for(int j=0;j<samples[i].files.size();j++){
-	TString this_histname=histname(0,histname.Last('/')+1)+samples[i].prefixes[j]+histname(histname.Last('/')+1,histname.Length());
-	if(!hist) hist=GetHist(samples[i].files[j],this_histname);
-	else{
-	  TH1* this_hist=GetHist(samples[i].files[j],this_histname);
-	  if(this_hist){
-	    hist->Add(this_hist,samples[i].weights[j]);
-	    delete this_hist;
-	  }
-	}
+}
+tuple<TH1*,TH1*> Plotter::GetHistWithTotal(TString samplekey,TString histname,TString sysname){
+  TH1* central=GetHist(samplekey,histname);
+  THStack* hstack=NULL;
+  if(strstr(central->ClassName(),"THStack")!=NULL){
+    hstack=(THStack*)central;
+    central=GetTH1((TH1*)hstack);
+  }
+  int sysbit=systematics[sysname].sysbit;
+  vector<TH1*> syss;
+  for(const auto& sysmap:systematics){
+    const Systematic& systematic=sysmap.second;
+    if(systematic.type==SystematicType::MULTI) continue;
+    if(sysbit&systematic.sysbit){
+      if(DEBUG>1) std::cout<<"###INFO### [Plotter::GetHistWithSys] sysname="<<systematic.name<<" systype="<<GetStringSystematicType(systematic.type)<<endl;
+      vector<TH1*> variations;
+      for(const auto& suffix:systematic.suffixes){
+	TH1* this_hist=GetHist(samplekey,histname,suffix,systematic.varibit);
+	variations.push_back(GetTH1(this_hist));
+	delete this_hist;
       }
-      if(hist){
-	hist->SetName(samples[i].name);
-	hist->SetTitle(signalhistname);
-	hist->GetXaxis()->SetTitle(longhistname);
-	hist->SetLineColor(samples[i].color);
-	hist->SetFillColor(samples[i].color);
-	if(samples[i].type==SampleType::DATA){
-	  hist->SetMarkerStyle(20);
-	  hist->SetMarkerSize(0.7);
-	  hist->SetFillColor(0);
-	}
+      if(systematic.type==SystematicType::ENVELOPE){
+	syss.push_back(GetEnvelope(central,variations));
+      }else if(systematic.type==SystematicType::GAUSSIAN){
+	syss.push_back(GetRMSError(central,variations));
+      }else if(systematic.type==SystematicType::HESSIAN){
+	syss.push_back(GetHessianError(central,variations));
+      }else{
+	cout<<"###ERROR### [GetCompare] Wrong SystematicType "<<systematic.type<<endl;
       }
-      hists.push_back(hist);
-    }
-    for(int i=0;i<hists.size();i++){
-      if(hists.at(i)){
-	if(rebin) hists.at(i)->Rebin(rebin);
-	if(xmin||xmax) hists.at(i)->GetXaxis()->SetRangeUser(xmin,xmax);
+      if(DEBUG>1) std::cout<<"###INFO### [Plotter::GetHistWithSys] "<<systematic.name+": "<<variations.size()<<" variations"<<endl;
+      for(unsigned int j=0;j<variations.size();j++){
+	delete variations.at(j);
       }
     }
   }
-  return hists;
+  TH1 *total=NULL;
+  if(syss.size()>0){
+    total=(TH1*)central->Clone();
+    for(int i=0;i<(int)syss.size();i++){
+      AddError(total,syss.at(i));
+      delete syss.at(i);
+    }
+  }
+  if(hstack){
+    delete central;
+    central=(TH1*)hstack;
+  }
+  return make_tuple(central,total);
 }
-*/
+
 TH1* Plotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den){
   TH1* hist=(TH1*)hist_forward_num->Clone();
   hist->SetBit(kCanDelete);
@@ -307,6 +316,8 @@ TH1* Plotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1
     hist->SetBinContent(i,3./8.*(valfd-valbd)/(valfn+valbn));
     hist->SetBinError(i,3./8.*(valbn*valfd+valfn*valbd)/pow(valfn+valbn,2)*sqrt(pow(efd/valfd,2)+pow(ebd/valbd,2)));
   }
+  TString this_title=hist_forward_num->GetTitle();
+  hist->SetTitle(this_title.ReplaceAll("forward_num","weightedAFB"));
   return hist;
 }
 TH1* Plotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward){
@@ -324,6 +335,8 @@ TH1* Plotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward){
     hist->SetBinContent(i,(valf-valb)/(valf+valb));
     hist->SetBinError(i,2*sqrt(ef*ef*valb*valb+eb*eb*valf*valf)/pow(valf+valb,2));
   }
+  TString this_title=hist_forward->GetTitle();
+  hist->SetTitle(this_title.ReplaceAll("forward","AFB"));
   return hist;
 }
 /*
@@ -384,12 +397,16 @@ TH1* Plotter::GetHMC(const vector<TH1*>& hists,TString option=""){
   return hist;
 }
 */
-TH1* Plotter::GetHMC(THStack* hstack){
-  TList* list=hstack->GetHists();
-  TH1* hist=(TH1*)list->At(list->GetSize()-1)->Clone("hmc");
-  hist->SetBit(kCanDelete);
-  for(int i=0;i<list->GetSize()-1;i++){
-    hist->Add((TH1*)list->At(i));
+TH1* Plotter::GetTH1(TH1* hstack){
+  TH1* hist=NULL;
+  if(strstr(hstack->ClassName(),"THStack")!=NULL){
+    hist=(TH1*)((THStack*)hstack)->GetHists()->Last()->Clone();
+    hist->Reset();
+    for(const auto& this_hist:*((THStack*)hstack)->GetHists()){
+      hist->Add((TH1*)this_hist);
+    }
+  }else{
+    hist=(TH1*)hstack->Clone();
   }
   return hist;
 }
@@ -430,32 +447,30 @@ TH1* Plotter::GetHData(const vector<TH1*>& hists,TString option=""){
   return hist;
 }
 TLegend* Plotter::GetLegend(const vector<TH1*>& hists,TString option){
-  int histssize=hists.size();
-  if(option.Contains("BGSub")) histssize=2;
   double horizontalshift=0;
   if(option.Contains("leftleg")) horizontalshift=-0.53;
-  TLegend* legend=new TLegend(0.67+horizontalshift,0.88-histssize*0.07,0.89+horizontalshift,0.88);
-  for(int i=0;i<histssize;i++){
-    //TString att="f";
-    //if(i==0) att="lp";
-    legend->AddEntry(hists.at(i),hists.at(i)->GetName());
+  TLegend* legend=new TLegend(0.67+horizontalshift,0.88-0.07,0.89+horizontalshift,0.88);
+  for(const auto& hist:hists){
+    if(strstr(hist->ClassName(),"THStack")){
+      TIter next(((THStack*)hist)->GetHists(),kIterBackward);
+      while(TObject *obj = next()){
+	legend->AddEntry(obj,obj->GetName());
+      }
+    }else legend->AddEntry(hist,hist->GetName());
   }
+  legend->SetY1(0.88-legend->GetNRows()*0.07);
   legend->SetBorderSize(0);
   return legend;
 }
-TLegend* Plotter::GetLegend(TH1* h1,TH1* h2,TString option){
-  vector<TH1*> hists;
-  hists.push_back(h1);
-  if(strstr(h2->ClassName(),"THStack")){
-    TList* list=((THStack*)h2)->GetHists();
-    for(int i=list->GetSize()-1;i>=0;i--){
-      hists.push_back((TH1*)list->At(i));
-    }
-  }else hists.push_back(h2);
-  return GetLegend(hists,option);
+TLegend* Plotter::GetLegend(const vector<tuple<TH1*,TH1*>>& hists,TString option){
+  vector<TH1*> hists_final;
+  for(const auto& histtuple : hists){
+    hists_final.push_back(get<0>(histtuple));
+  }
+  return GetLegend(hists_final,option);
 }
 TH1* Plotter::GetEnvelope(TH1* central,const vector<TH1*>& variations){
-  if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
+  if(strstr(central->ClassName(),"THStack")) central=GetTH1(central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
   for(int i=1;i<syshist->GetNbinsX()+1;i++) syshist->SetBinError(i,0);
@@ -481,7 +496,7 @@ TH1* Plotter::GetEnvelope(TH1* central,TH1* variation1,TH1* variation2=NULL,TH1*
   return GetEnvelope(central,variations);
 }    
 TH1* Plotter::GetHessianError(TH1* central,const vector<TH1*>& variations){
-  if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
+  if(strstr(central->ClassName(),"THStack")) central=GetTH1(central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
   for(int i=1;i<syshist->GetNbinsX()+1;i++) syshist->SetBinError(i,0);
@@ -494,7 +509,7 @@ TH1* Plotter::GetHessianError(TH1* central,const vector<TH1*>& variations){
   return syshist;
 }  
 TH1* Plotter::GetRMSError(TH1* central,const vector<TH1*>& variations){
-  if(strstr(central->ClassName(),"THStack")) central=GetHMC((THStack*)central);
+  if(strstr(central->ClassName(),"THStack")) central=GetTH1(central);
   TH1* syshist=(TH1*)central->Clone("sys");
   syshist->SetBit(kCanDelete);
   for(int i=1;i<syshist->GetNbinsX()+1;i++) syshist->SetBinError(i,0);
@@ -523,42 +538,29 @@ int Plotter::AddError(TH1* hist,TH1* sys){
   }
   return 1;
 }
-/*
-TCanvas* Plotter::GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString option){
-  THStack *hstack=NULL;
-  if(strstr(h2->ClassName(),"THStack")!=NULL){
-    hstack=(THStack*)h2;
-    h2=GetHMC(hstack);
+TCanvas* Plotter::GetCompare(vector<tuple<TH1*,TH1*>> hists,TString option){
+  if(hists.size()==0){
+    cout<<"zero length"<<endl;
+    return NULL;
   }
+  TH1* axisowner=get<1>(hists[0]);
+  if(!axisowner) axisowner=get<0>(hists[0]);
 
-  h1->SetStats(0);
-  TH1 *h1total=NULL,*h2total=NULL;
-  if(h1sys){
-    h1total=(TH1*)h1->Clone("h1total");
-    h1total->SetBit(kCanDelete);
-    AddError(h1total,h1sys);
-  }else{
-    h1total=h1;
+  TCanvas* c=new TCanvas;
+  axisowner->SetStats(0);
+  axisowner->Draw();
+  for(unsigned int i=0;i<hists.size();i++){
+    if(strstr(get<0>(hists[i])->ClassName(),"THStack"))
+      get<0>(hists[i])->Draw("same e");
   }
-  if(h2sys){
-    h2total=(TH1*)h2->Clone("h2total");
-    h2total->SetBit(kCanDelete);
-    AddError(h2total,h2sys);
-  }else{
-    h2total=h2;
+  for(unsigned int i=0;i<hists.size();i++){
+    if(get<1>(hists[i])){
+      get<1>(hists[i])->Draw("same e");
+    }
+    if(strstr(get<0>(hists[i])->ClassName(),"THStack")==NULL)
+      get<0>(hists[i])->Draw("same e");
   }
-
-  TCanvas* c1=new TCanvas(h2->GetTitle(),h2->GetTitle(),800,800);
-  c1->Divide(1,2);
-  c1->cd(1);
-  gPad->SetPad(0,0.35,1,1);
-  gPad->SetBottomMargin(0.02);
-
-  h1total->Draw("e");
-  h1total->GetXaxis()->SetLabelSize(0);
-  h1total->GetXaxis()->SetTitle("");
-  if(h1sys) h1->Draw("same e1");
-
+  /*
   if(hstack){
     hstack->Draw("same");
     h2->SetFillStyle(3144);
@@ -577,34 +579,89 @@ TCanvas* Plotter::GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString optio
   }
   h2total->Draw("same e2");
   if(h2sys) h2->Draw("same e2");
-
-  TLegend* legend=GetLegend(h1,hstack?(TH1*)hstack:h2,option);
+*/
+  TLegend* legend=GetLegend(hists,option);
   if(!option.Contains("1:noleg")) legend->Draw();
 
   if(option.Contains("logy")){
-    gPad->SetLogy();
+    c->SetLogy();
   }else{
-    double maximum=h1total->GetMaximum()>h2total->GetMaximum()?h1total->GetMaximum():h2total->GetMaximum();
-    double minimum=h1total->GetMinimum()<h2total->GetMinimum()?h1total->GetMinimum():h2total->GetMinimum();
-    double range=fabs(maximum-minimum);
-    h1total->GetYaxis()->SetRangeUser(minimum<0?minimum-0.1*range:0,maximum+0.1*range);
+    //double maximum=h1total->GetMaximum()>h2total->GetMaximum()?h1total->GetMaximum():h2total->GetMaximum();
+    //double minimum=h1total->GetMinimum()<h2total->GetMinimum()?h1total->GetMinimum():h2total->GetMinimum();
+    //double range=fabs(maximum-minimum);
+    //h1total->GetYaxis()->SetRangeUser(minimum<0?minimum-0.1*range:0,maximum+0.1*range);
   }
-  h1total->Draw("same a e");
+  //h1total->Draw("same a e");
+  return c;
+}
+TCanvas* Plotter::GetRatio(vector<tuple<TH1*,TH1*>> hists,TString option){
+  vector<tuple<TH1*,TH1*>> hists_new;
+  TH1* base=NULL;
+  if(strstr(get<0>(hists[0])->GetName(),"data")&&!strstr(get<0>(hists[1])->GetName(),"data"))
+    base=GetTH1(get<0>(hists[1]));
+  else 
+    base=GetTH1(get<0>(hists[0]));
+  
+  for(int i=0;i<base->GetNbinsX()+2;i++){
+    base->SetBinError(i,0);
+  }
+  for(const auto& histtuple:hists){
+    TH1 *hist0=NULL,*hist1=NULL;
+    if(get<0>(histtuple)){
+      if(strstr(get<0>(histtuple)->ClassName(),"THStack")) hist0=GetTH1(get<0>(histtuple));
+      else hist0=(TH1*)get<0>(histtuple)->Clone();
+      hist0->Divide(base);
+    }
+    if(get<1>(histtuple)){
+      hist1=(TH1*)get<1>(histtuple)->Clone();
+      hist1->Divide(base);
+    }
+    hists_new.push_back(make_tuple(hist0,hist1));
+  }  
+  delete base;
+  TCanvas* c=GetCompare(hists_new,option);
+  TH1* axisowner=GetAxisParent(c);
+  if(option.Contains("widewidey")){
+    axisowner->GetYaxis()->SetRangeUser(0.01,1.99);
+    axisowner->GetYaxis()->SetNdivisions(506);
+  }else if(option.Contains("widey")){
+    axisowner->GetYaxis()->SetRangeUser(0.501,1.499);
+    axisowner->GetYaxis()->SetNdivisions(506);
+  }else{
+    axisowner->GetYaxis()->SetRangeUser(0.801,1.199);
+    axisowner->GetYaxis()->SetNdivisions(504);
+  }
+  return c;
+}
+TCanvas* Plotter::GetCompareAndRatio(vector<tuple<TH1*,TH1*>> hists,TString option){
+  TCanvas* c=new TCanvas;
+  c->Divide(1,2);
+  TCanvas* c1temp=GetCompare(hists,option);
+  c->cd(1);
+  c1temp->DrawClonePad();
+  delete c1temp;
+  gPad->SetPad(0,0.35,1,1);
+  gPad->SetBottomMargin(0.02);
+  TH1* axisparent=GetAxisParent(gPad);
+  axisparent->GetXaxis()->SetLabelSize(0);
+  axisparent->GetXaxis()->SetTitle("");
 
-  c1->cd(2);
+
+  TCanvas* c2temp=GetRatio(hists,option);
+  c->cd(2);
+  c2temp->DrawClonePad();
+  delete c2temp;
   gPad->SetPad(0,0,1,0.365);
   gPad->SetTopMargin(0.02);
   gPad->SetBottomMargin(0.2);
   gPad->SetGridx();gPad->SetGridy();
   gPad->SetFillStyle(0);
 
-  TH1* ratio1=(TH1*)h1->Clone("ratio1");
-  ratio1->SetBit(kCanDelete);
-  TH1* ratio2=(TH1*)h2->Clone("ratio2");
-  ratio2->SetBit(kCanDelete);
-  ratio2->SetFillStyle(0);
-  ratio2->SetTitle("");
-  ratio2->SetStats(0);
+  axisparent=GetAxisParent(gPad);
+  axisparent->SetTitle("");
+  axisparent->SetStats(0);
+  axisparent->GetYaxis()->SetLabelSize(0.1);
+  /*
   double defaultval=1.;
   if(option.Contains("diff")){
     defaultval=0.;
@@ -613,31 +670,16 @@ TCanvas* Plotter::GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString optio
     ratio2->GetYaxis()->SetRangeUser(-0.067,0.067);
     ratio2->GetYaxis()->SetLabelSize(0.06);
   }else{
-    defaultval=1.;
-    ratio1->Divide(h2);
     ratio2->GetYaxis()->SetTitle("Data/Simulation");
-    if(option.Contains("widewidey")){
-      ratio2->GetYaxis()->SetRangeUser(0.01,1.99);
-      ratio2->GetYaxis()->SetNdivisions(506);
-    }else if(option.Contains("widey")){
-      ratio2->GetYaxis()->SetRangeUser(0.501,1.499);
-      ratio2->GetYaxis()->SetNdivisions(506);
-    }else{
-      ratio2->GetYaxis()->SetRangeUser(0.801,1.199);
-      ratio2->GetYaxis()->SetNdivisions(504);
-    }
     ratio2->GetYaxis()->SetLabelSize(0.1);
   }
-  for(int i=1;i<ratio2->GetNbinsX()+1;i++){
-    ratio2->SetBinContent(i,defaultval);
-    ratio2->SetBinError(i,0);
-  }
-  ratio2->GetYaxis()->SetTitleSize(0.1);
-  ratio2->GetYaxis()->SetTitleOffset(0.5);
-  ratio2->GetXaxis()->SetTitle(h2->GetTitle());
-  ratio2->GetXaxis()->SetTitleSize(0.09);
-  ratio2->GetXaxis()->SetLabelSize(0.09);
-  ratio2->Draw();
+  */
+  axisparent->GetYaxis()->SetTitleSize(0.1);
+  axisparent->GetYaxis()->SetTitleOffset(0.5);
+  axisparent->GetXaxis()->SetTitle(axisparent->GetTitle());
+  axisparent->GetXaxis()->SetTitleSize(0.09);
+  axisparent->GetXaxis()->SetLabelSize(0.09);
+  /*
   if(h1sys||h2sys){
     TH1* ratiosys=(TH1*)h2->Clone("ratiosys");
     ratiosys->SetBit(kCanDelete);
@@ -658,11 +700,39 @@ TCanvas* Plotter::GetCompare(TH1* h1,TH1* h1sys,TH1* h2,TH1* h2sys,TString optio
     if(!option.Contains("2:noleg")) syslegend->Draw();
     ratiosys->Draw("same e2");
   }
-  ratio1->Draw("same");
-  if(h1sys) delete h1sys;
-  if(h2sys) delete h2sys;
-  return c1;
+  */
+  return c;
 }
+TCanvas* Plotter::GetCanvas(TCanvas* (*func)(vector<tuple<TH1*,TH1*>>,TString),TString histname,TString sysname,int rebin,double xmin,double xmax,TString option){
+  vector<tuple<TH1*,TH1*>> hists;
+  for(const auto& samplemap:samples){
+    hists.push_back(GetHistWithTotal(samplemap.first,histname,sysname));
+    RebinXminXmax(get<0>(hists.back()),rebin,xmin,xmax);
+    RebinXminXmax(get<1>(hists.back()),rebin,xmin,xmax);
+  }
+  return func(hists,option);
+}
+void Plotter::RebinXminXmax(TH1* hist,int rebin,double xmin,double xmax){
+  if(hist){
+    if(strstr(hist->ClassName(),"THStack")){
+      for(const auto& obj:*((THStack*)hist)->GetHists())
+	RebinXminXmax((TH1*)obj,rebin,xmin,xmax);
+    }else{
+      if(rebin) hist->Rebin(rebin);
+      if(xmin||xmax) hist->GetXaxis()->SetRangeUser(xmin,xmax);
+    }
+  }
+}
+TCanvas* Plotter::GetCanvas(TString plotkey){
+  Plot& plot=plots[plotkey];
+  TCanvas* c=new TCanvas(plot.name,plot.name);
+  c->Divide(plot.npad);
+  for(int i=1;i<=plot.npad;i++){
+    c->cd(i);
+    if(plot.type==Plot::Type::CompareAndRatio) GetCanvas(GetCompareAndRatio,plot.histname,plot.sysname,plot.rebin,plot.xmin,plot.xmax,plot.option)->Draw();
+  }
+  return c;
+}  
 bool Plotter::CheckHists(vector<TH1*> hists){
   bool flag_data=false,flag_signal=false;
   for(unsigned int i=0;i<samples.size();i++){
@@ -673,6 +743,7 @@ bool Plotter::CheckHists(vector<TH1*> hists){
   if(flag_data&&flag_signal) return true;
   else return false;
 }
+/*
 TCanvas* Plotter::GetCompare(TString datahistname,TString signalhistname,TString bghistname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
   if(option.Contains("AFB")) option+=" BGSub diff leftleg";
   vector<TH1*> hists_central=GetHists(datahistname,signalhistname,bghistname,rebin,xmin,xmax,option);
@@ -745,6 +816,7 @@ TCanvas* Plotter::GetCompare(TString datahistname,TString signalhistname,TString
 TCanvas* Plotter::GetCompare(TString histname,int sysbit=0,int rebin=0,double xmin=0,double xmax=0,TString option=""){
   return GetCompare(histname,histname,histname,sysbit,rebin,xmin,xmax,option);
 }
+*/
 TH1* Plotter::GetAxisParent(TVirtualPad* pad){
   TList* list=pad->GetListOfPrimitives();
   for(int i=0;i<list->GetSize();i++){
@@ -752,6 +824,7 @@ TH1* Plotter::GetAxisParent(TVirtualPad* pad){
   }
   return NULL;
 }
+/*
 TCanvas* Plotter::GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option=""){
   TString canvasname=histnames[0];
   canvasname.ReplaceAll("_y0.0to0.4","");
@@ -998,3 +1071,16 @@ TString Plotter::GetHistNameWithPrefix(TString prefix,TString histname){
   return this_histname;
 }
 
+void Plotter::PrintSampleFrags(){
+  for(auto it=samplefrags.begin();it!=samplefrags.end();it++){
+    cout<<"@ Key: "<<it->first<<" ";
+    it->second.Print();
+  }
+}
+
+void Plotter::PrintSamples(bool detail){
+  for(auto it=samples.begin();it!=samples.end();it++){
+    cout<<"@ Key: "<<it->first<<" ";
+    it->second.Print(detail);
+  }
+}
