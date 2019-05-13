@@ -2,6 +2,8 @@
 
 void SkimTree_LRSMHighPt::initializeAnalyzer(){
 
+  outfile->cd();
+  cout << "[SkimTree_LRSMHighPt::initializeAnalyzer()] gDirectory = " << gDirectory->GetName() << endl;
   newtree = fChain->CloneTree(0);
 
   triggers.clear();
@@ -23,6 +25,19 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
       "HLT_Photon200_v",
       "HLT_DoublePhoton70_v",
     };
+  }
+  else if(DataYear==2018){
+    triggers = {
+      "HLT_Mu50_v",
+      "HLT_OldMu100_v",
+      "HLT_TkMu100_v",
+      "HLT_Ele32_WPTight_Gsf_v",
+      "HLT_Photon200_v",
+      "HLT_DoublePhoton70_v",
+    };
+  }
+  else{
+    cout << "[SkimTree_LRSMHighPt::initializeAnalyzer] DataYear is wrong : " << DataYear << endl;
   }
 
   cout << "[SkimTree_LRSMHighPt::initializeAnalyzer] triggers to skim = " << endl;
@@ -48,6 +63,8 @@ void SkimTree_LRSMHighPt::executeEventFromParameter(AnalyzerParameter param){
 }
 
 SkimTree_LRSMHighPt::SkimTree_LRSMHighPt(){
+
+  newtree = NULL;
 
 }
 

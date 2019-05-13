@@ -3,6 +3,7 @@
 AnalyzerCore::AnalyzerCore(){
 
   mcCorr = new MCCorrection();
+  puppiCorr = new PuppiSoftdropMassCorr();
   fakeEst = new FakeBackgroundEstimator();
   cfEst = new CFBackgroundEstimator();
   pdfReweight = new PDFReweight();
@@ -37,6 +38,7 @@ AnalyzerCore::~AnalyzerCore(){
   //==== Tools
 
   delete mcCorr;
+  delete puppiCorr;
   delete fakeEst;
   delete cfEst;
   delete pdfReweight;
@@ -108,6 +110,7 @@ std::vector<Muon> AnalyzerCore::GetAllMuons(){
     mu.SetIP3D(muon_3DIPVTX->at(i), muon_3DIPerrVTX->at(i));
     mu.SetTypeBit(muon_TypeBit->at(i));
     mu.SetIDBit(muon_IDBit->at(i));
+    mu.SetisPOGHighPt(muon_ishighpt->at(i));
     mu.SetChi2(muon_normchi->at(i));
     mu.SetIso(muon_PfChargedHadronIsoR04->at(i),muon_PfNeutralHadronIsoR04->at(i),muon_PfGammaIsoR04->at(i),muon_PFSumPUIsoR04->at(i),muon_trkiso->at(i));
 
@@ -825,18 +828,18 @@ std::vector<FatJet> AnalyzerCore::SmearSDMassFatJets(std::vector<FatJet> jets, i
 bool AnalyzerCore::PassMETFilter(){
 
   //==== https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Moriond_2018
-  //==== TODO If FastSIM, it should be changed
 
   if(!Flag_goodVertices) return false;
-  if(!Flag_globalSuperTightHalo2016Filter) return false;
+  if(!IsFastSim){
+    if(!Flag_globalSuperTightHalo2016Filter) return false;
+  }
   if(!Flag_HBHENoiseFilter) return false;
   if(!Flag_HBHENoiseIsoFilter) return false;
   if(!Flag_EcalDeadCellTriggerPrimitiveFilter) return false;
   if(!Flag_BadPFMuonFilter) return false;
-  if(!Flag_BadChargedCandidateFilter) return false;
+  //if(!Flag_BadChargedCandidateFilter) return false; // TODO 19/05/04 twiki says this is under review, and not recommended
   if(IsDATA && !Flag_eeBadScFilter) return false;
 
-  //TODO Check this
   if(DataYear>=2017){
     if(!Flag_ecalBadCalibReducedMINIAODFilter) return false;
   }
@@ -855,6 +858,9 @@ void AnalyzerCore::initializeAnalyzerTools(){
     cout<<"init histograms"<<endl;
     mcCorr->ReadHistograms();
   }
+
+  puppiCorr->SetDataYear(DataYear);
+  puppiCorr->ReadHistograms();
 
   //==== FakeBackgroundEstimator
   fakeEst->SetDataYear(DataYear);

@@ -37,6 +37,7 @@ public :
    bool IsDATA;
    TString DataStream;
    TString MCSample;
+   bool IsFastSim;
    int DataYear;
    double xsec, sumW, weight_norm_1invpb;
    vector<TString> Userflags;
@@ -263,6 +264,7 @@ public :
    vector<double>  *muon_PFSumPUIsoR03;
    vector<unsigned int> *muon_TypeBit;
    vector<unsigned int> *muon_IDBit;
+   vector<bool> *muon_ishighpt;
    vector<double>  *muon_dB;
    vector<double>  *muon_phi;
    vector<double>  *muon_eta;
@@ -600,6 +602,7 @@ public :
    TBranch        *b_muon_PFSumPUIsoR03;   //!
    TBranch        *b_muon_TypeBit;   //!
    TBranch        *b_muon_IDBit;   //!
+   TBranch        *b_muon_ishighpt;
    TBranch        *b_muon_dB;   //!
    TBranch        *b_muon_phi;   //!
    TBranch        *b_muon_eta;   //!

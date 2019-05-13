@@ -9,6 +9,7 @@
 #pragma link C++ class FakeBackgroundEstimator+;
 #pragma link C++ class CFBackgroundEstimator+;
 #pragma link C++ class MCCorrection+;
+#pragma link C++ class PuppiSoftdropMassCorr+;
 #pragma link C++ class LHAPDFHandler+;
 #pragma link C++ class PDFReweight+;
 #pragma link C++ class GeneralizedEndpoint+;

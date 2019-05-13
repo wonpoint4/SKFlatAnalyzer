@@ -15,7 +15,7 @@ public:
   bool MCCorrrectionIgnoreNoHist;
 
   TString Electron_Tight_ID, Electron_Loose_ID, Electron_Veto_ID;
-  TString Electron_ID_SF_Key;
+  TString Electron_ID_SF_Key, Electron_Trigger_SF_Key;
   TString Electron_FR_ID, Electron_FR_Key;
   TString Electron_CF_ID, Electron_CF_Key;
   double Electron_Tight_RelIso, Electron_Loose_RelIso, Electron_Veto_RelIso;

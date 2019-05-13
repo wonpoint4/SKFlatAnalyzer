@@ -4,21 +4,7 @@ MCCorrection::MCCorrection() :
 IgnoreNoHist(false)
 {
 
-  gROOT->cd();
-  histDir = NULL;
-  int counter = 0;
-  while (!histDir) {
-    //==== First, let's find a directory name that doesn't exist yet
-    std::stringstream dirname;
-    dirname << "MCCorrection" << counter;
-    if (gROOT->GetDirectory((dirname.str()).c_str())) {
-      ++counter;
-      continue;
-    }
-    //==== Let's try to make this directory
-    histDir = gROOT->mkdir((dirname.str()).c_str());
-  }
-  cout << "[MCCorrection::MCCorrection()] histDir name = " << histDir->GetName() << endl;
+  histDir = TDirectoryHelper::GetTempDirectory("MCCorrection");
 
 }
 
@@ -539,6 +525,97 @@ double MCCorrection::ElectronReco_SF(double sceta, double pt, int sys){
 
 }
 
+double MCCorrection::ElectronTrigger_Eff(TString ID, TString trig, int DataOrMC, double sceta, double pt, int sys){
+
+  if(ID=="Default") return 1.;
+  if(trig=="Default") return 1.;
+
+  //cout << "[MCCorrection::ElectronTrigger_Eff] ID = " << ID << "\t" << "trig = " << trig << endl;
+  //cout << "[MCCorrection::ElectronTrigger_Eff] DataOrMC = " << DataOrMC << endl;
+  //cout << "[MCCorrection::ElectronTrigger_Eff] sceta = " << sceta << ", pt = " << pt << endl;
+
+  double value = 1.;
+  double error = 0.;
+
+  //==== XXX If you have min pt, apply it here
+  if(pt<50.) pt = 50.;
+  if(pt>=500.) pt = 499.;
+
+  if(sceta<-2.5) sceta = -2.5;
+  if(sceta>=2.5) sceta = 2.49;
+
+  TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID;
+  if(DataOrMC==1) histkey = "Trigger_Eff_MC_"+trig+"_"+ID;
+  //cout << "[MCCorrection::ElectronTrigger_Eff] histkey = " << histkey << endl;
+  TH2F *this_hist = map_hist_Electron[histkey];
+  if(!this_hist){
+    if(IgnoreNoHist) return 1.;
+    else{
+      cout << "[MCCorrection::ElectronTrigger_Eff] No "<<histkey<<endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  int this_bin = this_hist->FindBin(sceta, pt);
+
+  value = this_hist->GetBinContent(this_bin);
+  error = this_hist->GetBinError(this_bin);
+
+  //cout << "[MCCorrection::ElectronTrigger_Eff] value = " << value << endl;
+
+  return value+double(sys)*error;
+
+
+}
+
+double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<Electron> electrons, int sys){
+
+  if(ID=="Default") return 1.;
+  if(trig=="Default") return 1.;
+
+  double value = 1.;
+
+  if(trig=="Ele27_WPTight_Gsf" || trig=="Ele35_WPTight_Gsf" || trig=="Ele32_WPTight_Gsf"){
+
+    double eff_DATA = 1.;
+    double eff_MC = 1.;
+
+    for(unsigned int i=0; i<electrons.size(); i++){
+      eff_DATA *= ( 1.-ElectronTrigger_Eff(ID, trig, 0, electrons.at(i).scEta(), electrons.at(i).Pt(), sys) );
+      eff_MC   *= ( 1.-ElectronTrigger_Eff(ID, trig, 1, electrons.at(i).scEta(), electrons.at(i).Pt(), -sys) );
+    }
+
+    eff_DATA = 1.-eff_DATA;
+    eff_MC = 1.-eff_MC;
+
+    value = eff_DATA/eff_MC;
+
+/*
+    if(eff_DATA==0||eff_MC==0){
+      cout << "==== Zero Trigger Eff ====" << endl;
+      for(unsigned int i=0;i<electrons.size();i++){
+        cout << electrons.at(i).Pt() << "\t" << electrons.at(i).Pt() << endl;
+      }
+    }
+*/
+
+  }
+
+  return value;
+
+}
+
+double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<Electron *> electrons, int sys){
+
+  std::vector<Electron> muvec;
+  for(unsigned int i=0; i<electrons.size(); i++){
+    Electron this_electron = *(electrons.at(i));
+    muvec.push_back( this_electron );
+  }
+
+  return ElectronTrigger_SF(ID, trig, muvec, sys);
+
+}
 
 double MCCorrection::GetPrefireWeight(std::vector<Photon> photons, std::vector<Jet> jets, int sys){
 

@@ -20,6 +20,7 @@ parser.add_argument('-q', dest='Queue', default="fastq")
 parser.add_argument('-y', dest='Year', default="2017")
 parser.add_argument('--skim', dest='Skim', default="")
 parser.add_argument('--no_exec', action='store_true')
+parser.add_argument('--FastSim', action='store_true')
 parser.add_argument('--userflags', dest='Userflags', default="")
 parser.add_argument('--reduction', dest='Reduction', default=1, type=float)
 args = parser.parse_args()
@@ -47,9 +48,14 @@ string_ThisTime = ""
 ## Environment Variables
 
 USER = os.environ['USER']
-SKFlatLogEmail = os.environ['SKFlatLogEmail']
-SKFlatLogWeb = os.environ['SKFlatLogWeb']
-SKFlatLogWebDir = os.environ['SKFlatLogWebDir']
+exec('from UserInfo_'+USER+' import *')
+SKFlatLogEmail = UserInfo['SKFlatLogEmail']
+SKFlatLogWeb = UserInfo['SKFlatLogWeb']
+SKFlatLogWebDir = UserInfo['SKFlatLogWebDir']
+LogEvery = UserInfo['LogEvery']
+
+SCRAM_ARCH = os.environ['SCRAM_ARCH']
+cmsswrel = os.environ['cmsswrel']
 SKFlat_WD = os.environ['SKFlat_WD']
 SKFlatV = os.environ['SKFlatV']
 SAMPLE_DATA_DIR = SKFlat_WD+'/data/'+SKFlatV+'/'+args.Year+'/Sample/'
@@ -74,14 +80,14 @@ if SKFlatLogWeb=='' or SKFlatLogWebDir=='':
 IsKISTI = ("sdfarm.kr" in HOSTNAME)
 IsUI10 = ("ui10.sdfarm.kr" in HOSTNAME)
 IsUI20 = ("ui20.sdfarm.kr" in HOSTNAME)
-IsTAMSA1 = ("snu" in HOSTNAME)
+IsTAMSA1 = ("tamsa1" in HOSTNAME)
 IsTAMSA2 = ("tamsa2" in HOSTNAME)
-IsSNU = IsTAMSA1 or IsTAMSA2
+IsTAMSA = IsTAMSA1 or IsTAMSA2
 IsKNU = ("knu" in HOSTNAME)
 if IsKISTI:
   HOSTNAME = "KISTI"
   SampleHOSTNAME = "KISTI"
-if IsSNU:
+if IsTAMSA:
   if IsTAMSA1:
     HOSTNAME = "TAMSA1"
   elif IsTAMSA2:
@@ -95,7 +101,7 @@ if IsKNU:
 
 IsSkimTree = "SkimTree" in args.Analyzer
 if IsSkimTree:
-  if not IsSNU:
+  if not IsTAMSA:
     print "Skimming only possible in SNU"
     exit()
 
@@ -147,10 +153,12 @@ FileRangesForEachSample = []
 ## Get Random Number for webdir
 
 random.seed(hash(StringForHash+timestamp+args.Year))
-RandomNumber = int(random.random()*10000)
+RandomNumber = int(random.random()*1000000)
 str_RandomNumber = str(RandomNumber)
 webdirname = timestamp+"_"+str_RandomNumber
 webdirpathbase = SKFlatRunlogDir+'/www/SKFlatAnalyzerJobLogs/'+webdirname
+while os.path.isdir(webdirpathbase):
+  webdirpathbase += '_'
 
 ## skim string
 
@@ -167,32 +175,10 @@ for flag in Userflags:
   MasterJobDir += '__'+flag
 MasterJobDir += '__'+HOSTNAME+'/'
 
-## Condor
-if IsKISTI or IsTAMSA2:
+## Copy libray
 
-  ## If condor, compress files
-
-  cwd = os.getcwd()
-  os.chdir(SKFlat_WD)
-  os.system('make -s CondorTar')
-  os.chdir(cwd)
-
-  ## Copy shared library file
-
-  os.system('mkdir -p '+MasterJobDir)
-
-  os.system('cp '+SKFlat_WD+'/tar/data.tar.gz '+MasterJobDir+'/data.tar.gz')
-  os.system('cp '+SKFlat_WD+'/tar/lib.tar.gz '+MasterJobDir+'/lib.tar.gz')
-  os.system('cp '+SKFlat_WD+'/lib/DataFormats.tar.gz '+MasterJobDir)
-  os.system('cp '+SKFlat_WD+'/lib/AnalyzerTools.tar.gz '+MasterJobDir)
-  os.system('cp '+SKFlat_WD+'/lib/Analyzers.tar.gz '+MasterJobDir)
-
-else:
-
-  ## Else, we only have to copy libray
-
-  os.system('mkdir -p '+MasterJobDir+'/lib/')
-  os.system('cp '+SKFlat_LIB_PATH+'/* '+MasterJobDir+'/lib')
+os.system('mkdir -p '+MasterJobDir+'/lib/')
+os.system('cp '+SKFlat_LIB_PATH+'/* '+MasterJobDir+'/lib')
 
 ## Loop over samples
 
@@ -306,7 +292,7 @@ for InputSample in InputSamples:
 
   ## Write run script
 
-  if IsKISTI or IsTAMSA2:
+  if IsKISTI or IsTAMSA:
 
     commandsfilename = args.Analyzer+'_'+args.Year+'_'+InputSample
     if IsDATA:
@@ -315,39 +301,27 @@ for InputSample in InputSamples:
       commandsfilename += '__'+flag
     run_commands = open(base_rundir+'/'+commandsfilename+'.sh','w')
     print>>run_commands,'''#!/bin/bash
-SECTION=`printf %03d $1`
+SECTION=`printf $1`
 WORKDIR=`pwd`
-echo "#### Extracting DataFormats ####"
-tar -zxf DataFormats.tar.gz
-echo "####  Extracting AnalyzerTools ####"
-tar -zxf AnalyzerTools.tar.gz
-echo "####  Extracting Analyzers ####"
-tar -zxf Analyzers.tar.gz
-echo "#### Extracting libraries ####"
-tar -zxf lib.tar.gz
-echo "#### Extracting run files ####"
-tar -zxf runFile.tar.gz
-echo "#### Extracting data files ####"
-tar -zxf data.tar.gz
-echo "#### cmsenv ####"
-export CMS_PATH=/cvmfs/cms.cern.ch
-source $CMS_PATH/cmsset_default.sh
-export SCRAM_ARCH=slc6_amd64_gcc700
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc700/cms/cmssw-patch/CMSSW_10_4_0_patch1/src/
-eval `scramv1 runtime -sh`
-cd -
-echo "#### setup root ####"
-source /cvmfs/cms.cern.ch/slc6_amd64_gcc700/cms/cmssw-patch/CMSSW_10_4_0_patch1/external/slc6_amd64_gcc700/bin/thisroot.sh
-
-export SKFlatV="{0}"
-export SKFlat_WD=`pwd`
-export SKFlat_LIB_PATH=$SKFlat_WD/lib/
-export DATA_DIR=$SKFlat_WD/data/$SKFlatV
-export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/DataFormats/include/:$SKFlat_WD/Analyzers/include/:$SKFlat_WD/AnalyzerTools/include/
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SKFlat_LIB_PATH
 
 SumNoAuth=999
 Trial=0
+
+#### make sure use C locale
+export LC_ALL=C
+
+#### use cvmfs for root ####
+export CMS_PATH=/cvmfs/cms.cern.ch
+source $CMS_PATH/cmsset_default.sh
+export SCRAM_ARCH={2}
+export cmsswrel={3}
+cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/$cmsswrel/src
+echo "@@@@ SCRAM_ARCH = "$SCRAM_ARCH
+echo "@@@@ cmsswrel = "$cmsswrel
+echo "@@@@ scram..."
+eval `scramv1 runtime -sh`
+cd -
+source /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/$cmsswrel/external/$SCRAM_ARCH/bin/thisroot.sh
 
 while [ "$SumNoAuth" -ne 0 ]; do
 
@@ -356,8 +330,8 @@ while [ "$SumNoAuth" -ne 0 ]; do
   fi
 
   echo "#### running ####"
-  echo "root -l -b -q run_${{SECTION}}.C"
-  root -l -b -q run_${{SECTION}}.C 2> err.log || echo "EXIT_FAILURE" >> err.log
+  echo "root -l -b -q {1}/run_${{SECTION}}.C"
+  root -l -b -q {1}/run_${{SECTION}}.C 2> err.log || echo "EXIT_FAILURE" >> err.log
   NoAuthError_Open=`grep "Error in <TNetXNGFile::Open>" err.log -R | wc -l`
   NoAuthError_Close=`grep "Error in <TNetXNGFile::Close>" err.log -R | wc -l`
 
@@ -373,60 +347,57 @@ while [ "$SumNoAuth" -ne 0 ]; do
 done
 
 cat err.log >&2
-'''.format(SKFlatV)
+'''.format(SKFlatV, base_rundir, SCRAM_ARCH, cmsswrel)
     run_commands.close()
 
     submit_command = open(base_rundir+'/submit.jds','w')
     if IsUI10:
-      print>>submit_command,'''executable = {3}.sh
+      print>>submit_command,'''executable = {1}.sh
 universe   = vanilla
 arguments  = $(Process)
 requirements = OpSysMajorVer == 6
 log = condor.log
-getenv     = False
+getenv     = True
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 output = job_$(Process).log
 error = job_$(Process).err
-transfer_input_files = {0}, {1}, {4}, {5}, {6}, {7}
 transfer_output_remaps = "hists.root = output/hists_$(Process).root"
-queue {2}
-'''.format(base_rundir+'/runFile.tar.gz', MasterJobDir+'/lib.tar.gz',str(NJobs), commandsfilename, MasterJobDir+'/data.tar.gz', MasterJobDir+'/Analyzers.tar.gz', MasterJobDir+'/AnalyzerTools.tar.gz', MasterJobDir+'/DataFormats.tar.gz')
+queue {0}
+'''.format(str(NJobs), commandsfilename)
       submit_command.close()
     elif IsUI20:
-      print>>submit_command,'''executable = {3}.sh
+      print>>submit_command,'''executable = {1}.sh
 universe   = vanilla
 requirements = ( HasSingularity == true )
 arguments  = $(Process)
 log = condor.log
-getenv     = False
+getenv     = True
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 output = job_$(Process).log
 error = job_$(Process).err
-transfer_input_files = {0}, {1}, {4}, {5}, {6}, {7}
 accounting_group=group_cms
 +SingularityImage = "/cvmfs/singularity.opensciencegrid.org/opensciencegrid/osgvo-el6:latest"
 +SingularityBind = "/cvmfs, /cms, /share"
 transfer_output_remaps = "hists.root = output/hists_$(Process).root"
-queue {2}
-'''.format(base_rundir+'/runFile.tar.gz', MasterJobDir+'/lib.tar.gz',str(NJobs), commandsfilename, MasterJobDir+'/data.tar.gz', MasterJobDir+'/Analyzers.tar.gz', MasterJobDir+'/AnalyzerTools.tar.gz', MasterJobDir+'/DataFormats.tar.gz')
+queue {0}
+'''.format(str(NJobs), commandsfilename)
       submit_command.close()
-    elif IsTAMSA2:
-      print>>submit_command,'''executable = {3}.sh
+    elif IsTAMSA:
+      print>>submit_command,'''executable = {1}.sh
 universe   = vanilla
 arguments  = $(Process)
 log = condor.log
-getenv     = False
+getenv     = True
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 output = job_$(Process).log
 error = job_$(Process).err
-transfer_input_files = {0}, {1}, {4}, {5}, {6}, {7}
 accounting_group=group_cms
 transfer_output_remaps = "hists.root = output/hists_$(Process).root"
-queue {2}
-'''.format(base_rundir+'/runFile.tar.gz', MasterJobDir+'/lib.tar.gz',str(NJobs), commandsfilename, MasterJobDir+'/data.tar.gz', MasterJobDir+'/Analyzers.tar.gz', MasterJobDir+'/AnalyzerTools.tar.gz', MasterJobDir+'/DataFormats.tar.gz')
+queue {0}
+'''.format(str(NJobs), commandsfilename)
       submit_command.close()
 
   CheckTotalNFile=0
@@ -443,10 +414,9 @@ queue {2}
     runfunctionname = "run"
     libdir = (MasterJobDir+'/lib').replace('///','/').replace('//','/')+'/'
     runCfileFullPath = ""
-    if IsKISTI or IsTAMSA2:
-      libdir = './lib/'
-      runfunctionname = "run_"+str(it_job).zfill(3)
-      runCfileFullPath = base_rundir+'/run_'+str(it_job).zfill(3)+'.C'
+    if IsKISTI or IsTAMSA:
+      runfunctionname = "run_"+str(it_job)
+      runCfileFullPath = base_rundir+'/run_'+str(it_job)+'.C'
     else:
       os.system('mkdir -p '+thisjob_dir)
       runCfileFullPath = thisjob_dir+'run.C'
@@ -469,6 +439,8 @@ void {2}(){{
   m.SetTreeName("recoTree/SKFlat");
 '''.format(args.Analyzer, libdir, runfunctionname, IncludeLine)
 
+    out.write('  m.LogEvery = '+str(LogEvery)+';\n')
+
     if IsDATA:
       out.write('  m.IsDATA = true;\n')
       out.write('  m.DataStream = "'+InputSample+'";\n')
@@ -477,6 +449,11 @@ void {2}(){{
       out.write('  m.IsDATA = false;\n')
       out.write('  m.xsec = '+str(this_xsec)+';\n')
       out.write('  m.sumW = '+str(this_sumw)+';\n')
+
+      if args.FastSim:
+        out.write('  m.IsFastSim = true;\n')
+      else:
+        out.write('  m.IsFastSim = false;\n')
 
     out.write('  m.DataYear = '+str(args.Year)+';\n')
 
@@ -508,7 +485,7 @@ void {2}(){{
       out.write('  m.SetOutfilePath("'+skimoutdir+skimoutfilename+'");\n')
 
     else:
-      if IsKISTI or IsTAMSA2:
+      if IsKISTI or IsTAMSA:
         out.write('  m.SetOutfilePath("hists.root");\n')
       else:
         out.write('  m.SetOutfilePath("'+thisjob_dir+'/hists.root");\n')
@@ -528,27 +505,7 @@ void {2}(){{
 
     out.close()
 
-    if IsTAMSA1:
-      run_commands = open(thisjob_dir+'commands.sh','w')
-      print>>run_commands,'''cd {0}
-echo "[SKFlat.py] Okay, let's run the analysis"
-root -l -b -q run.C
-'''.format(thisjob_dir)
-      run_commands.close()
-
-      jobname = 'job_'+str(it_job)+'_'+args.Analyzer
-      cmd = 'qsub -V -q '+args.Queue+' -N '+jobname+' -wd '+thisjob_dir+' commands.sh '
-
-      if not args.no_exec:
-        cwd = os.getcwd()
-        os.chdir(thisjob_dir)
-        os.system(cmd+' > submitlog.log')
-        os.chdir(cwd)
-      sublog = open(thisjob_dir+'/submitlog.log','a')
-      sublog.write('\nSubmission command was : '+cmd+'\n')
-      sublog.close()
-
-    elif IsKNU:
+    if IsKNU:
       run_commands = open(thisjob_dir+'commands.sh','w')
       print>>run_commands,'''cd {0}
 cp ../x509up_u{1} /tmp/
@@ -569,11 +526,10 @@ root -l -b -q run.C 1>stdout.log 2>stderr.log
       sublog.write('\nSubmission command was : '+cmd+'\n')
       sublog.close()
 
-  if IsKISTI or IsTAMSA2:
+  if IsKISTI or IsTAMSA:
 
     cwd = os.getcwd()
     os.chdir(base_rundir)
-    os.system('tar -czf runFile.tar.gz run_*.C')
     if not args.no_exec:
       os.system('condor_submit submit.jds')
     os.chdir(cwd)
@@ -605,6 +561,9 @@ if args.Outputdir=="":
     FinalOutputPath += flag+"__"
   if IsDATA:
     FinalOutputPath += '/DATA/'
+if IsSkimTree:
+  FinalOutputPath = '/data8/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
+
 os.system('mkdir -p '+FinalOutputPath)
 
 print '##################################################'
@@ -618,7 +577,7 @@ print '- NJobs = '+str(NJobs)
 print '- Year = '+args.Year
 print '- UserFlags =',
 print Userflags
-if IsTAMSA1 or IsKNU:
+if IsKNU:
   print '- Queue = '+args.Queue
 print '- output will be send to : '+FinalOutputPath
 print '##################################################'
@@ -703,7 +662,7 @@ try:
         for it_job in range(0,len(FileRanges)):
 
           thisjob_dir = base_rundir+'/'
-          if IsKISTI or IsTAMSA2:
+          if IsKISTI or IsTAMSA:
             thisjob_dir = base_rundir
 
           this_status = ""
@@ -862,12 +821,28 @@ try:
             cwd = os.getcwd()
             os.chdir(base_rundir)
 
-            if IsKISTI or IsTAMSA2:
-              os.system('hadd -j 4 -f '+outputname+'.root output/*.root >> JobStatus.log')
-              os.system('rm output/*.root')
+            #### if number of job is 1, we can just move the file, not hadd
+            nFiles = len( FileRangesForEachSample[it_sample] )
+            if nFiles==1:
+              if IsKISTI or IsTAMSA:
+                os.system('echo "nFiles = 1, so skipping hadd and just move the file" >> JobStatus.log')
+                os.system('ls -1 output/*.root >> JobStatus.log')
+                os.system('mv output/hists_0.root '+outputname+'.root')
+              else:
+                os.system('echo "nFiles = 1, so skipping hadd and just move the file" >> JobStatus.log')
+                os.system('ls -1 job_0/*.root >> JobStatus.log')
+                os.system('mv job_0/hists.root '+outputname+'.root')
+
             else:
-              os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')
-              os.system('rm job_*/*.root')
+              if IsKISTI or IsTAMSA2:
+                os.system('hadd -j 4 -f '+outputname+'.root output/*.root >> JobStatus.log')
+                os.system('rm output/*.root')
+              else if IsTAMSA1:
+                os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
+                os.system('rm output/*.root')
+              else:
+                os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')
+                os.system('rm job_*/*.root')
 
             ## Final Outputpath
 
@@ -903,7 +878,7 @@ Job started at {0}
 Job finished at {1}
 '''.format(string_JobStartTime,string_ThisTime)
 
-if IsTAMSA1 or IsKNU:
+if IsKNU:
   JobFinishEmail += 'Queue = '+args.Queue+'\n'
 
 EmailTitle = '['+HOSTNAME+']'+' Summary of JobID '+str_RandomNumber

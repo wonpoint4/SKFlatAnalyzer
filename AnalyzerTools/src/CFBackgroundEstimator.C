@@ -3,12 +3,16 @@
 CFBackgroundEstimator::CFBackgroundEstimator()
 {
 
+  histDir = TDirectoryHelper::GetTempDirectory("CFBackgroundEstimator");
+
 }
 
 void CFBackgroundEstimator::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
   datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/CFRate/";
+
+  TDirectory* origDir = gDirectory;
 
   string elline;
   ifstream in(datapath+"/histmap_Electron.txt");
@@ -21,7 +25,11 @@ void CFBackgroundEstimator::ReadHistograms(){
     TList *histlist = file->GetListOfKeys();
     for(int i=0;i<histlist->Capacity();i++){
       TString this_cfname = histlist->At(i)->GetName();
-      map_hist_Electron[a+"_"+this_cfname] = (TH1D *)file->Get(this_cfname);
+      histDir->cd();
+      map_hist_Electron[a+"_"+this_cfname] = (TH1D *)file->Get(this_cfname)->Clone();
+      file->Close();
+      delete file;
+      origDir->cd();
       //cout << "[CFBackgroundEstimator::CFBackgroundEstimator] map_hist_Electron : " << a+"_"+this_cfname << endl;
     }
   }
@@ -37,7 +45,11 @@ void CFBackgroundEstimator::ReadHistograms(){
     TList *histlist = file->GetListOfKeys();
     for(int i=0;i<histlist->Capacity();i++){
       TString this_cfname = histlist->At(i)->GetName();
+      histDir->cd();
       map_hist_Muon[a+"_"+this_cfname] = (TH1D *)file->Get(this_cfname);
+      file->Close();
+      delete file;
+      origDir->cd();
       //cout << "[CFBackgroundEstimator::CFBackgroundEstimator] map_hist_Muon : " << a+"_"+this_cfname << endl;
     }
   }

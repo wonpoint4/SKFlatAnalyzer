@@ -27,6 +27,10 @@ void Muon::SetIDBit(unsigned int idbit){
   j_IDBit = idbit;
 }
 
+void Muon::SetisPOGHighPt(bool b){
+  j_isPOGHighPt = b;
+}
+
 void Muon::SetIso(double ch04, double nh04, double ph04, double pu04, double trkiso){
   j_PFCH04 = ch04;
   j_PFNH04 = nh04;

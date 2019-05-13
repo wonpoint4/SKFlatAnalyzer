@@ -14,7 +14,9 @@
 #include "Lepton.h"
 #include "Muon.h"
 #include "Electron.h"
+
 #include "AnalyzerParameter.h"
+#include "TDirectoryHelper.h"
 
 class CFBackgroundEstimator{
 
@@ -23,6 +25,7 @@ public:
   CFBackgroundEstimator();
   ~CFBackgroundEstimator();
 
+  TDirectory *histDir;
   void ReadHistograms();
 
   int DataYear;

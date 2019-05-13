@@ -1,0 +1,15 @@
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_0.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_1.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_10.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_11.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_12.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_13.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_14.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_2.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_3.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_4.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_5.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_6.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_7.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_8.root
+/data8/DATA/SKFlat/Run2Legacy_v3/2018/MC_SkimTree_LRSMHighPt/WWZ_TuneCP5_13TeV-amcatnlo-pythia8/2019_04_26_152609/SKFlatNtuple_2018_MC_9.root

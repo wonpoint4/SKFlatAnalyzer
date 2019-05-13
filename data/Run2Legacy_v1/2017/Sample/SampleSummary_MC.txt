@@ -9,6 +9,11 @@ DYJets_MG_HT-400To600	DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pyth
 DYJets_MG_HT-600To800	DYJetsToLL_M-50_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8	1.68141	8153358	8104916
 DYJets_MG_HT-70To100	DYJetsToLL_M-50_HT-70to100_TuneCP5_13TeV-madgraphMLM-pythia8	208.977	9344037	9333543
 DYJets_MG_HT-800To1200	DYJetsToLL_M-50_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8	0.775392	3089861	3064779
+SingleTop_sch	        ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia  6.35    9883805 9883805
+SingleTop_tch_top	    ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8  136.02   5865875 5865875
+SingleTop_tch_antitop	ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8  80.95   3939990 3939990
+SingleTop_tW_top	    ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8   35.85   7794186 7794186
+SingleTop_tW_antitop    ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8   35.85   7977430 7977430 
 TTG	TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8	3.697	9402772	3646050
 TTJJ_powheg	TTToHadronic_TuneCP5_13TeV-powheg-pythia8	377.96	42357944	42357944
 TTLJ_powheg	TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8	365.34	111325048	110424244
@@ -51,3 +56,5 @@ ZZZ	ZZZ_TuneCP5_13TeV-amcatnlo-pythia8	0.01398	250000	213514
 ZZ_pythia	ZZ_TuneCP5_13TeV-pythia8	16.523	1949768	1949768
 ttW	ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8	0.61	9425384	9384328
 ttZ	ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8	0.780	9698473	9678691
+ttH_bb  ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8   0.2953  8000000 8000000 
+ttH_nonbb   ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8    0.2118  8000000 7669336

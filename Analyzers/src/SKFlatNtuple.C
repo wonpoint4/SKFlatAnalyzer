@@ -14,6 +14,25 @@ void SKFlatNtuple::Loop(){
     nentries = std::min(nentries,MaxEvent);
   }
 
+  //==== Before starting the loop, print setups
+  cout << "[SKFlatNtuple::Loop] MaxEvent = " << MaxEvent << endl;
+  cout << "[SKFlatNtuple::Loop] NSkipEvent = " << NSkipEvent << endl;
+  cout << "[SKFlatNtuple::Loop] LogEvery = " << LogEvery << endl;
+  cout << "[SKFlatNtuple::Loop] IsDATA = " << IsDATA << endl;
+  cout << "[SKFlatNtuple::Loop] DataStream = " << DataStream << endl;
+  cout << "[SKFlatNtuple::Loop] MCSample = " << MCSample << endl;
+  cout << "[SKFlatNtuple::Loop] IsFastSim = " << IsFastSim << endl;
+  cout << "[SKFlatNtuple::Loop] DataYear = " << DataYear << endl;
+  cout << "[SKFlatNtuple::Loop] xsec = " << xsec << endl;
+  cout << "[SKFlatNtuple::Loop] sumW = " << sumW << endl;
+  cout << "[SKFlatNtuple::Loop] weight_norm_1invpb = " << weight_norm_1invpb << endl;
+  cout << "[SKFlatNtuple::Loop] Userflags = {" << endl;
+  for(unsigned int i=0; i<Userflags.size(); i++){
+    cout << "[SKFlatNtuple::Loop]   \"" << Userflags.at(i) << "\"," << endl;
+  }
+  cout << "[SKFlatNtuple::Loop] }" << endl;
+
+
   cout << "[SKFlatNtuple::Loop] Event Loop Started " << printcurrunttime() << endl;
 
   for(Long64_t jentry=0; jentry<nentries;jentry++){
@@ -49,6 +68,7 @@ SKFlatNtuple::SKFlatNtuple(){
   IsDATA = false;
   DataStream = "";
   MCSample = "";
+  IsFastSim = false;
   DataYear = 2017;
   xsec = 1.;
   sumW = 1.;
@@ -247,6 +267,7 @@ void SKFlatNtuple::Init()
    muon_PFSumPUIsoR03 = 0;
    muon_TypeBit = 0;
    muon_IDBit = 0;
+   muon_ishighpt = 0;
    muon_dB = 0;
    muon_phi = 0;
    muon_eta = 0;
@@ -567,6 +588,7 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("muon_PFSumPUIsoR03", &muon_PFSumPUIsoR03, &b_muon_PFSumPUIsoR03);
    fChain->SetBranchAddress("muon_TypeBit", &muon_TypeBit, &b_muon_TypeBit);
    fChain->SetBranchAddress("muon_IDBit", &muon_IDBit, &b_muon_IDBit);
+   fChain->SetBranchAddress("muon_ishighpt", &muon_ishighpt, &b_muon_ishighpt);
    fChain->SetBranchAddress("muon_dB", &muon_dB, &b_muon_dB);
    fChain->SetBranchAddress("muon_phi", &muon_phi, &b_muon_phi);
    fChain->SetBranchAddress("muon_eta", &muon_eta, &b_muon_eta);

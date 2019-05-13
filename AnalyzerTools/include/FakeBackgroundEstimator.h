@@ -14,7 +14,9 @@
 #include "Lepton.h"
 #include "Muon.h"
 #include "Electron.h"
+
 #include "AnalyzerParameter.h"
+#include "TDirectoryHelper.h"
 
 class FakeBackgroundEstimator{
 
@@ -23,6 +25,7 @@ public:
   FakeBackgroundEstimator();
   ~FakeBackgroundEstimator();
 
+  TDirectory *histDir;
   void ReadHistograms();
 
   bool IgnoreNoHist;

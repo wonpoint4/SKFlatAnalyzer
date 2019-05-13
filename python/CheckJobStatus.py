@@ -20,8 +20,6 @@ def GetJobID(logfiledir, cycle, jobnumber, hostname):
 
   jobid = ""
 
-  if hostname=="TAMSA1":
-    jobid = open(logfiledir+'/submitlog.log').readlines()[0].split()[2]
   if hostname=="KNU":
     jobid = open(logfiledir+'/submitlog.log').readlines()[0].split('.')[0]
 
@@ -48,13 +46,9 @@ def CheckJobStatus(logfiledir, cycle, jobnumber, hostname):
   path_log_e = ""
   path_log_o = ""
 
-  if hostname=="KISTI" or hostname=="TAMSA2":
+  if hostname=="KISTI" or hostname=="TAMSA1" or hostname=="TAMSA2":
     path_log_e = logfiledir+"/job_"+str(jobnumber)+".err"
     path_log_o = logfiledir+"/job_"+str(jobnumber)+".log"
-  if hostname=="TAMSA1":
-    jobid = open(logfiledir+'/job_'+str(jobnumber)+'/submitlog.log').readlines()[0].split()[2]
-    path_log_e = logfiledir+'job_'+str(jobnumber)+'/job_'+str(jobnumber)+'_'+cycle+'.e'+jobid
-    path_log_o = logfiledir+'job_'+str(jobnumber)+'/job_'+str(jobnumber)+'_'+cycle+'.o'+jobid
   if hostname=="KNU":
     path_log_e = logfiledir+'job_'+str(jobnumber)+'/stderr.log'
     path_log_o = logfiledir+'job_'+str(jobnumber)+'/stdout.log'
@@ -89,7 +83,7 @@ def CheckJobStatus(logfiledir, cycle, jobnumber, hostname):
 
   IsCycleRan = False
   for l in log_o:
-    if "Processing run" in l:
+    if "Processing " in l:
       IsCycleRan = True
       break
 

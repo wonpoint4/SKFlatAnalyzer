@@ -1,0 +1,3 @@
+rm *VeryLoose*.root
+rm Muon_HNPair_ElectronLooseNoIP_FakeRates.root
+rm Muon_HNPair_ElectronLooseNoIP_PtCut_FakeRates.root

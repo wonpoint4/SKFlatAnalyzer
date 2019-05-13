@@ -5,12 +5,16 @@ IgnoreNoHist(false),
 HasLooseLepton(false)
 {
 
+  histDir = TDirectoryHelper::GetTempDirectory("FakeBackgroundEstimator");
+
 }
 
 void FakeBackgroundEstimator::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
   datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/FakeRate/";
+
+  TDirectory* origDir = gDirectory;
 
   string elline;
   ifstream in(datapath+"/histmap_Electron.txt");
@@ -23,7 +27,11 @@ void FakeBackgroundEstimator::ReadHistograms(){
     TList *histlist = file->GetListOfKeys();
     for(int i=0;i<histlist->Capacity();i++){
       TString this_frname = histlist->At(i)->GetName();
-      map_hist_Electron[a+"_"+this_frname] = (TH2D *)file->Get(this_frname);
+      histDir->cd();
+      map_hist_Electron[a+"_"+this_frname] = (TH2D *)file->Get(this_frname)->Clone();
+      file->Close();
+      delete file;
+      origDir->cd();
       //cout << "[FakeBackgroundEstimator::FakeBackgroundEstimator] map_hist_Electron : " << a+"_"+this_frname << endl;
     }
   }
@@ -39,7 +47,11 @@ void FakeBackgroundEstimator::ReadHistograms(){
     TList *histlist = file->GetListOfKeys();
     for(int i=0;i<histlist->Capacity();i++){
       TString this_frname = histlist->At(i)->GetName();
-      map_hist_Muon[a+"_"+this_frname] = (TH2D *)file->Get(this_frname);
+      histDir->cd();
+      map_hist_Muon[a+"_"+this_frname] = (TH2D *)file->Get(this_frname)->Clone();
+      file->Close();
+      delete file;
+      origDir->cd();
       //cout << "[FakeBackgroundEstimator::FakeBackgroundEstimator] map_hist_Muon : " << a+"_"+this_frname << endl;
     }
   }

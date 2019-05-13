@@ -4,59 +4,31 @@
 
 https://jskim.web.cern.ch/jskim/SKFlat/Manual/Manual_SKFlat.pdf
 
+## Where to put the analyzer
+TAMSA 1/2 : /data6/Users/$USER/
+
+KISTI : ~/ # home directory
+
+KNU :  ~/scartch/
+
 ## First time setup
 ```
-cp setup_tmp.sh setup.sh
+source setup.sh # This should be done for every new shell
+#### Setup user info
+#### Need to be done only once
+cp $SKFlat_WD/python/UserInfo_template.py $SKFlat_WD/python/UserInfo_${USER}.py 
+# edit $SKFlat_WD/python/UserInfo_${USER}.py
+source setup.sh
 ```
-
-Edit setup.sh :
-```
-export SKFlatLogEmail='' # <- put your email address here
-```
-
-Making libraries
+Compile
 ```
 make clean
 make
 ```
 
-## Initializing
-Everytime when using new shell,
-```bash
-source setup.sh
-# If in KNU, need proxy
-# voms-proxy-init --voms cms -valid 24:00
-=======
-make
-voms-proxy-init --voms cms -valid 24:00
-```
-
 ## Test job
 ```bash
-SKFlat.py -a ExampleRun -i DYJets -n 50 &
-```
-
-## SMPValidation job
-```bash
-source SMPValidationSubmit.sh
-```
-
-### SMPValidation plotting
-Draw a plot
-```bash
-source setup.sh //if you haven't
-root -l
-.L plot.cc
-Setup(Channel::ELECTRON,2017)
-GetCompare("electron2017/OS_Z/dirap")
-```
-Save all plots
-```bash
-source setup.sh //if you haven't
-root -b
-.L plot.cc
-Setup(Channel::ELECTRON,2017)
-SaveAll()
+SKFlat.py -a ExampleRun -i DYJets -n 50 -y 2016 &
 ```
 
 ## Making a new Ananlyzer
