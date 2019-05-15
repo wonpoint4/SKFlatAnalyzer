@@ -128,8 +128,10 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1
   }else{
     TH2F* this_hist[2]={NULL,NULL};
     double triggerSF=1.;
-    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey0+this_charge[0]];
-    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey1+this_charge[1]];
+    //    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey0+this_charge[0]];
+    //    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey1+this_charge[1]];
+    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey0];
+    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey1];
     if(!this_hist[0]||!this_hist[1]){
       cout << "[SMPAnalyzerCore::Trigger_SF] No Trigger_SF_"<<SFhistkey0<<" or Trigger_SF_"<<SFhistkey1<<endl;
       exit(EXIT_FAILURE);

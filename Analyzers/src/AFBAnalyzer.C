@@ -239,9 +239,9 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     lep1ptcut=15.;
     LeptonID_SF=&MCCorrection::ElectronID_SF;
     LeptonReco_SF=&MCCorrection::ElectronReco_SF;
-    LeptonID_key="Strict_MediumID_pt10";
-    triggerSF_key0="Strict_LeadEle23_MediumID";
-    triggerSF_key1="Strict_TailEle12_MediumID";
+    LeptonID_key="MediumID_pt10";
+    triggerSF_key0="LeadEle23_MediumID";
+    triggerSF_key1="TailEle12_MediumID";
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
     return;
