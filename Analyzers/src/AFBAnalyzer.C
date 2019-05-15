@@ -159,13 +159,25 @@ void AFBAnalyzer::executeEvent(){
       channelname="electron2017";
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(channelname,ev);
     }
-  }
+  }else if(DataYear==2018){
+    muontrigger="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v";
+    electrontrigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
+    if(ev->PassTrigger(muontrigger)){
+      channelname="muon2018";
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(channelname,ev);
+    }
+    if(ev->PassTrigger(electrontrigger)){
+      channelname="electron2018";
+      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter(channelname,ev);
+    }
+  }    
+
   delete ev;
 }
 
 void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   std::vector<Muon> muons,muons_scale_up,muons_scale_down;
-  std::vector<Electron> electrons,electrons_scale_up,electrons_scale_down,electrons_smear_up,electrons_smear_down;
+  std::vector<Electron> electrons,electrons_scale_up,electrons_scale_down,electrons_smear_up,electrons_smear_down,electrons_selective;
 
   std::vector<Jet> jets=GetJets("tightLepVeto",30,2.7);
   std::sort(jets.begin(),jets.end(),PtComparing);
@@ -199,14 +211,18 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     triggerSF_key0="IsoMu17_POGTight";
     triggerSF_key1="Mu8_POGTight";
  }else if(channelname.Contains("electron")){
-    electrons=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    electrons=SMPGetElectrons("passMediumID",0.0,2.5);
     std::sort(electrons.begin(),electrons.end(),PtComparing);
     leps=MakeLeptonPointerVector(electrons);
 
+    electrons_selective=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    std::sort(electrons_selective.begin(),electrons_selective.end(),PtComparing);
+    map_lepton_systematic["selective"]=MakeLeptonPointerVector(electrons_selective);
+
     electrons_scale_up=ScaleElectrons(electrons,1);
     std::sort(electrons_scale_up.begin(),electrons_scale_up.end(),PtComparing);
-    map_lepton_systematic["scale_up"]=MakeLeptonPointerVector(electrons_scale_up);
-
+   map_lepton_systematic["scale_up"]=MakeLeptonPointerVector(electrons_scale_up);
+ 
     electrons_scale_down=ScaleElectrons(electrons,-1);
     std::sort(electrons_scale_down.begin(),electrons_scale_down.end(),PtComparing);
     map_lepton_systematic["scale_down"]=MakeLeptonPointerVector(electrons_scale_down);

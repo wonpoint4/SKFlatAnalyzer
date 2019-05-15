@@ -837,7 +837,7 @@ try:
               if IsKISTI or IsTAMSA2:
                 os.system('hadd -j 4 -f '+outputname+'.root output/*.root >> JobStatus.log')
                 os.system('rm output/*.root')
-              else if IsTAMSA1:
+              elif IsTAMSA1:
                 os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
                 os.system('rm output/*.root')
               else:

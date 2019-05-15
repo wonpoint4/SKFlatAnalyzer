@@ -2,7 +2,10 @@
 
 void SkimTree_GEN::initializeAnalyzer(){
 
+  outfile->cd();
+  cout << "[SkimTree_GEN::initializeAnalyzer()] gDirectory = " << gDirectory->GetName() << endl;
   newtree = fChain->CloneTree(0);
+
   newtree->SetBranchStatus("*",0);
   newtree->SetBranchStatus("gen*",1);
 }

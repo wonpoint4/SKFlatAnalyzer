@@ -2,7 +2,10 @@
 
 void SkimTree_SMP::initializeAnalyzer(){
 
+  outfile->cd();
+  cout << "[SkimTree_SMP::initializeAnalyzer()] gDirectory = " << gDirectory->GetName() << endl;
   newtree = fChain->CloneTree(0);
+
   triggers.clear();
   if(DataYear==2016){
     triggers = {
@@ -12,12 +15,18 @@ void SkimTree_SMP::initializeAnalyzer(){
       "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",
       "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"
     };
-  }
-  else if(DataYear==2017){
+  }else if(DataYear==2017){
     triggers = {
       "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v",
       "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"
     };
+  }else if(DataYear==2018){
+    triggers = {
+      "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v",
+      "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v "
+    };
+  }else{
+    cout<<"[SkimTree_SMP::initializeAnalyzer] DataYear is wrong : " << DataYear << endl;
   }
 
   cout << "[SkimTree_SMP::initializeAnalyzer] triggers to skim = " << endl;
@@ -43,7 +52,7 @@ void SkimTree_SMP::executeEventFromParameter(AnalyzerParameter param){
 }
 
 SkimTree_SMP::SkimTree_SMP(){
-
+  newtree=NULL;
 }
 
 SkimTree_SMP::~SkimTree_SMP(){
