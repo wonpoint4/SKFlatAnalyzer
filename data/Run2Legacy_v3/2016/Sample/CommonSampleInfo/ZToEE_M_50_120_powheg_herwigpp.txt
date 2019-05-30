@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumw
+ZToEE_M_50_120_powheg_herwigpp ZToEE_M_50_120_NNPDF30_13TeV_powheg_herwigpp 1975 2985202.000000 2985202.000000

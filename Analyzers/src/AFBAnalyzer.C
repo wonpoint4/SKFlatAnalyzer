@@ -35,8 +35,8 @@ void AFBAnalyzer::executeEvent(){
       genparton1.SetPxPyPzE(0,0,-genWeight_X2*6500.,genWeight_X2*6500.);
       for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
       TLorentzVector genZ=(genl0+genl1+genphotons);
-      //if(MCSample.Contains("DYJets")) 
-      zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+      //FIXME need to get Zptcor for 2018
+      if(DataYear!=2018) zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
       TString slepton=abs(genhardl0.PID())==13?"muon":"electron";
       if(genparton0.PID()==21){
 	if(genparton1.PID()==21) hardprefix="gg_";
@@ -55,19 +55,19 @@ void AFBAnalyzer::executeEvent(){
 
       ///////////////////////FillGenHist////////////////
       if(genZ.M()>=massrange[0]&&genZ.M()<massrange[massbinnum]){
-	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
-	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum]),"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	FillGenAFBHists(Form("%s%d/m%.0fto%.0f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum]),"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
 	if(genZ.Pt()>50){
-	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
-	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum]),"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	  FillGenAFBHists(Form("%s%d/m%.0fto%.0f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum]),"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
 	}	
 	for(int iy=0;iy<zptcor_nybin;iy++){
 	  if(fabs(genZ.Rapidity())>=zptcor_ybin[iy]&&fabs(genZ.Rapidity())<zptcor_ybin[iy+1]){
-	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
-	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1]),"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	    FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1]),"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
 	    if(genZ.Pt()>50){
-	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
-	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
+	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1]),"",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight*zptcor);
+	      FillGenAFBHists(Form("%s%d/m%.0fto%.0f_y%.1fto%.1f_pt50/gen_",slepton.Data(),DataYear,massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1]),"_nozptcor",genl0,genl1,genphotons,weight_norm_1invpb*gen_weight);
 	    }
 	  }
 	}
@@ -176,7 +176,7 @@ void AFBAnalyzer::executeEvent(){
 }
 
 void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
-  std::vector<Muon> muons,muons_scale_up,muons_scale_down;
+  std::vector<Muon> muons,muons_scale_up,muons_scale_down,muons_trkiso;
   std::vector<Electron> electrons,electrons_scale_up,electrons_scale_down,electrons_smear_up,electrons_smear_down,electrons_selective;
 
   std::vector<Jet> jets=GetJets("tightLepVeto",30,2.7);
@@ -187,61 +187,89 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   double (MCCorrection::*LeptonID_SF)(TString,double,double,int)=NULL;
   double (MCCorrection::*LeptonISO_SF)(TString,double,double,int)=NULL;
   double (MCCorrection::*LeptonReco_SF)(double,double,int)=NULL;
-  TString LeptonID_key,LeptonISO_key,LeptonReco_key,triggerSF_key0,triggerSF_key1;
-  map<TString,vector<Lepton*>> map_lepton_systematic;
+  TString LeptonIDSF_key,LeptonISOSF_key,triggerSF_key0,triggerSF_key1;
+  map<TString,tuple<vector<Lepton*>,TString,TString,TString,TString>> map_leps;
   if(channelname.Contains("muon")){
-    muons=GetMuons("POGTightWithTightIso",0.0,2.4);
-    std::sort(muons.begin(),muons.end(),PtComparing);
-    leps=MakeLeptonPointerVector(muons);
-    
-    muons_scale_up=ScaleMuons(muons,1);
-    std::sort(muons_scale_up.begin(),muons_scale_up.end(),PtComparing);
-    map_lepton_systematic["scale_up"]=MakeLeptonPointerVector(muons_scale_up);
-
-    muons_scale_down=ScaleMuons(muons,-1);
-    std::sort(muons_scale_down.begin(),muons_scale_down.end(),PtComparing);
-    map_lepton_systematic["scale_down"]=MakeLeptonPointerVector(muons_scale_down);
-    
     lep0ptcut=20.;
     lep1ptcut=10.;
     LeptonID_SF=&MCCorrection::MuonID_SF;
     LeptonISO_SF=&MCCorrection::MuonISO_SF;
-    LeptonID_key="NUM_TightID_DEN_genTracks";
-    LeptonISO_key="NUM_TightRelIso_DEN_TightIDandIPCut";
-    triggerSF_key0="IsoMu17_POGTight";
-    triggerSF_key1="Mu8_POGTight";
+    TString LeptonIDSF_key="NUM_TightID_DEN_genTracks";
+    TString LeptonISOSF_key="NUM_TightRelIso_DEN_TightIDandIPCut";
+    TString triggerSF_key0=DataYear==2018?"":"IsoMu17_POGTight";
+    TString triggerSF_key1=DataYear==2018?"":"Mu8_POGTight";
+    switch(DataYear){
+    case 2016: LeptonIDSF_key="NUM_TightID_DEN_genTracks";LeptonISOSF_key="NUM_TightRelIso_DEN_TightIDandIPCut";triggerSF_key0="LeadMu17_POGTight";triggerSF_key1="TailMu8_POGTight"; break;
+    case 2017: LeptonIDSF_key="NUM_TightID_DEN_genTracks";LeptonISOSF_key="NUM_TightRelIso_DEN_TightIDandIPCut";triggerSF_key0="LeadMu17_POGTight";triggerSF_key1="TailMu8_POGTight"; break;
+    case 2018: LeptonIDSF_key="NUM_TightID_DEN_genTracks";LeptonISOSF_key="NUM_TightRelIso_DEN_TightIDandIPCut";triggerSF_key0="";triggerSF_key1=""; break;
+    default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
+    }
+
+    muons=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
+    std::sort(muons.begin(),muons.end(),PtComparing);
+    map_leps["default"]=make_tuple(MakeLeptonPointerVector(muons),LeptonIDSF_key,LeptonISOSF_key,triggerSF_key0,triggerSF_key1);
+
+    /*
+    muons_scale_up=ScaleMuons(muons,1);
+    std::sort(muons_scale_up.begin(),muons_scale_up.end(),PtComparing);
+    map_leps["scale_up"]=make_tuple(MakeLeptonPointerVector(muons_scale_up),LeptonIDSF_key,LeptonISOSF_key,triggerSF_key0,triggerSF_key1);
+
+    muons_scale_down=ScaleMuons(muons,-1);
+    std::sort(muons_scale_down.begin(),muons_scale_down.end(),PtComparing);
+    map_leps["scale_down"]=make_tuple(MakeLeptonPointerVector(muons_scale_down),LeptonIDSF_key,LeptonISOSF_key,triggerSF_key0,triggerSF_key1);
+    */
+
+    muons_trkiso=SMPGetMuons("POGTightWithLooseTrkIso",0.0,2.4);
+    std::sort(muons_trkiso.begin(),muons_trkiso.end(),PtComparing);
+    switch(DataYear){
+    case 2016: map_leps["trkiso"]=make_tuple(MakeLeptonPointerVector(muons_trkiso),"Default","Default","",""); break;
+    case 2017: map_leps["trkiso"]=make_tuple(MakeLeptonPointerVector(muons_trkiso),"TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q"); break;
+    case 2018: map_leps["trkiso"]=make_tuple(MakeLeptonPointerVector(muons_trkiso),"Default","Default","",""); break;
+    default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE); break;
+    }
  }else if(channelname.Contains("electron")){
-    electrons=SMPGetElectrons("passMediumID",0.0,2.5);
-    std::sort(electrons.begin(),electrons.end(),PtComparing);
-    leps=MakeLeptonPointerVector(electrons);
-
-    electrons_selective=SMPGetElectrons("passMediumID_selective",0.0,2.5);
-    std::sort(electrons_selective.begin(),electrons_selective.end(),PtComparing);
-    map_lepton_systematic["selective"]=MakeLeptonPointerVector(electrons_selective);
-
-    electrons_scale_up=ScaleElectrons(electrons,1);
-    std::sort(electrons_scale_up.begin(),electrons_scale_up.end(),PtComparing);
-   map_lepton_systematic["scale_up"]=MakeLeptonPointerVector(electrons_scale_up);
- 
-    electrons_scale_down=ScaleElectrons(electrons,-1);
-    std::sort(electrons_scale_down.begin(),electrons_scale_down.end(),PtComparing);
-    map_lepton_systematic["scale_down"]=MakeLeptonPointerVector(electrons_scale_down);
-
-    electrons_smear_up=SmearElectrons(electrons,1);
-    std::sort(electrons_smear_up.begin(),electrons_smear_up.end(),PtComparing);
-    map_lepton_systematic["smear_up"]=MakeLeptonPointerVector(electrons_smear_up);
-
-    electrons_smear_down=SmearElectrons(electrons,-1);
-    std::sort(electrons_smear_down.begin(),electrons_smear_down.end(),PtComparing);
-    map_lepton_systematic["smear_down"]=MakeLeptonPointerVector(electrons_smear_down);
-
     lep0ptcut=25.;
     lep1ptcut=15.;
     LeptonID_SF=&MCCorrection::ElectronID_SF;
     LeptonReco_SF=&MCCorrection::ElectronReco_SF;
-    LeptonID_key="MediumID_pt10";
-    triggerSF_key0="LeadEle23_MediumID";
-    triggerSF_key1="TailEle12_MediumID";
+    TString LeptonIDSF_key,triggerSF_key0,triggerSF_key1;
+    switch(DataYear){
+    case 2016: LeptonIDSF_key="MediumID_pt10";triggerSF_key0="LeadEle23_MediumID";triggerSF_key1="TailEle12_MediumID"; break;
+    case 2017: LeptonIDSF_key="MediumID_pt10_Q";triggerSF_key0="LeadEle23_MediumID_Q";triggerSF_key1="TailEle12_MediumID_Q"; break;
+    case 2018: LeptonIDSF_key="passMediumID";triggerSF_key0="";triggerSF_key1=""; break;
+    default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
+    }
+
+    electrons=SMPGetElectrons("passMediumID",0.0,2.5);
+    std::sort(electrons.begin(),electrons.end(),PtComparing);
+    map_leps["default"]=make_tuple(MakeLeptonPointerVector(electrons),LeptonIDSF_key,"",triggerSF_key0,triggerSF_key1);
+
+    /*
+    electrons_scale_up=ScaleElectrons(electrons,1);
+    std::sort(electrons_scale_up.begin(),electrons_scale_up.end(),PtComparing);
+    map_leps["scale_up"]=make_tuple(MakeLeptonPointerVector(electrons_scale_up),LeptonIDSF_key,"",triggerSF_key0,triggerSF_key1);
+ 
+    electrons_scale_down=ScaleElectrons(electrons,-1);
+    std::sort(electrons_scale_down.begin(),electrons_scale_down.end(),PtComparing);
+    map_leps["scale_down"]=make_tuple(MakeLeptonPointerVector(electrons_scale_down),LeptonIDSF_key,"",triggerSF_key0,triggerSF_key1);
+
+    electrons_smear_up=SmearElectrons(electrons,1);
+    std::sort(electrons_smear_up.begin(),electrons_smear_up.end(),PtComparing);
+    map_leps["scale_smear_up"]=make_tuple(MakeLeptonPointerVector(electrons_smear_up),LeptonIDSF_key,"",triggerSF_key0,triggerSF_key1);
+
+    electrons_smear_down=SmearElectrons(electrons,-1);
+    std::sort(electrons_smear_down.begin(),electrons_smear_down.end(),PtComparing);
+    map_leps["scale_smear_down"]=make_tuple(MakeLeptonPointerVector(electrons_smear_down),LeptonIDSF_key,"",triggerSF_key0,triggerSF_key1);
+    */
+
+    electrons_selective=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    std::sort(electrons_selective.begin(),electrons_selective.end(),PtComparing);
+    switch(DataYear){
+    case 2016: map_leps["selective"]=make_tuple(MakeLeptonPointerVector(electrons_selective),"Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); break;
+    case 2017: map_leps["selective"]=make_tuple(MakeLeptonPointerVector(electrons_selective),"Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); break;
+    case 2018: map_leps["selective"]=make_tuple(MakeLeptonPointerVector(electrons_selective),"passMediumID","","",""); break;
+    default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE); break;
+    }
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
     return;
@@ -257,10 +285,10 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   /////////////////PUreweight///////////////////
   double PUreweight=1.,PUreweight_up=1.,PUreweight_down=1.;
-  if(!IsDATA&&!MCSample.Contains("ZToEE")&&!MCSample.Contains("ZToMuMu")){
-    PUreweight=GetPileUpWeight(nPileUp,0);
-    PUreweight_up=GetPileUpWeight(nPileUp,1);
-    PUreweight_down=GetPileUpWeight(nPileUp,-1);
+  if(!IsDATA&&DataYear==2016){
+    PUreweight=mcCorr->GetPileUpWeight(nPileUp,0);
+    PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
+    PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
     totalweight*=PUreweight;
   }
   FillHist(channelname+"/"+tauprefix+"cutflow",1.5,totalweight,20,0,20);
@@ -269,7 +297,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   double prefireweight=1.;
   double prefireweight_up=1.;
   double prefireweight_down=1.;
-  if(!IsDATA){
+  if(!IsDATA&&DataYear<2018){
     prefireweight=L1PrefireReweight_Central;
     prefireweight_up=L1PrefireReweight_Up;
     prefireweight_down=L1PrefireReweight_Down;
@@ -280,214 +308,160 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   totalweight*=zptcor;
   FillHist(channelname+"/"+tauprefix+"cutflow",3.5,totalweight,20,0,20);
 
-
   ///////////////////////lepton selection///////////////////////
-  FillHist(channelname+"/"+tauprefix+"nlepton",leps.size(),totalweight,10,0,10);
-  if(leps.size()==2){
-    TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
-    FillHist(channelname+"/"+tauprefix+"cutflow",4.5,totalweight,20,0,20);
-    if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
-      FillHist(channelname+"/"+tauprefix+"cutflow",5.5,totalweight,20,0,20);
-
-      /////////////////efficiency scale factors///////////////////
-      double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
-      double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
-      double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
-      if(!IsDATA){
-	for(unsigned int i=0;i<leps.size();i++){
-	  double this_pt,this_eta;
-	  TString chargesuffix;
-	  if(leps[i]->LeptonFlavour()==Lepton::MUON){
-	    this_pt=((Muon*)leps.at(i))->MiniAODPt();
-	    this_eta=leps.at(i)->Eta();
-	  }else if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
-	    this_pt=leps.at(i)->Pt();
-	    this_eta=((Electron*)leps.at(i))->scEta();
-	    if(leps[i]->Charge()>0) chargesuffix="_QPlus";
-	    else chargesuffix="_QMinus";
-	  }else{
-	    cout <<"[AFBAnalyzer::executeEventFromParameter] It is not lepton"<<endl;
-	    exit(EXIT_FAILURE);
-	  }
-	  
-	  double this_RECOSF=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,0):1.;
-	  double this_RECOSF_up=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,1):1.;
-	  double this_RECOSF_down=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,-1):1.;
-	  RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
-	  
-	  double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,0):1.;
-	  double this_IDSF_up=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,1):1.;
-	  double this_IDSF_down=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,-1):1.;
-	  IDSF*=this_IDSF; IDSF_up*=this_IDSF_up; IDSF_down*=this_IDSF_down;
-	  
-	  double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,0):1.;
-	  double this_ISOSF_up=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,1):1.;
-	  double this_ISOSF_down=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,-1):1.;
-	  ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
-	}
-      }
-      totalweight*=RECOSF;
-      FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight,20,0,20);
-      totalweight*=IDSF;
-      FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight,20,0,20);
-      totalweight*=ISOSF;
-      FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight,20,0,20);
-      
-      double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
-      if(!IsDATA){
-	triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
-	triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
-	triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
-      }
-      totalweight*=triggerSF;
-      FillHist(channelname+"/"+tauprefix+"cutflow",9.5,totalweight,20,0,20);
-
-      ///////////////////////weight systematics//////////////////
-      map<TString,double> map_weight_systematic;
-      if(!IsDATA){
-	map_weight_systematic["noPUreweight"]=weight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["PUreweight_up"]=weight*PUreweight_up*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["PUreweight_down"]=weight*PUreweight_down*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	
-	map_weight_systematic["noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
-	
-	map_weight_systematic["noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	
-	map_weight_systematic["noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor;
-	
-	map_weight_systematic["noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor;
-	map_weight_systematic["ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor;
-	
-	map_weight_systematic["notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor;
-	map_weight_systematic["triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor;
-	map_weight_systematic["triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor;
-	
-	map_weight_systematic["noprefireweight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*zptcor;
-	map_weight_systematic["prefireweight_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_up*zptcor;
-	map_weight_systematic["prefireweight_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_down*zptcor;
-	
-	map_weight_systematic["nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
-	
-	if(PDFWeights_AlphaS->size()==2){
-	  map_weight_systematic["alphaS_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(0);
-	  map_weight_systematic["alphaS_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(1);
-	}
-	
-	for(unsigned int i=0;i<PDFWeights_Scale->size();i++){
-	  map_weight_systematic[Form("scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
-	}
-	
-	for(unsigned int i=0;i<PDFWeights_Error->size();i++){
-	  //map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
-	}	
-      }
-
-      ///////////////////////fill hists///////////////////////
-      TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
-      double dimass=dilepton.M();
-      double dirap=dilepton.Rapidity();
-      double dipt=dilepton.Pt();
-      if(dimass>=massrange[0]&&dimass<massrange[massbinnum]){
-	FillHist(channelname+"/"+tauprefix+"cutflow",10.5,totalweight,20,0,20);
-	FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,totalweight);
-	if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
-	FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,map_weight_systematic);
-	if(dipt>50){
-	  FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,totalweight);
-	  if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+hardprefix,"",leps,jets,totalweight);
-	  FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,"",leps,jets,map_weight_systematic);	  
-	}	
-	for(int iy=0;iy<zptcor_nybin;iy++){
-	  if(fabs(dirap)>=zptcor_ybin[iy]&&fabs(dirap)<zptcor_ybin[iy+1]){
-	    FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,totalweight);
-	    if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
-	    FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,map_weight_systematic);
-	    if(dipt>50){
-	      FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,totalweight);
-	      if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,"",leps,jets,totalweight);
-	      FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,map_weight_systematic);
-	    }
-	    for(int im=0;im<massbinnum;im++){
-	      if(dimass>=massrange[im]&&dimass<massrange[im+1]){
-		//FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[im],massrange[im+1],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,totalweight);
-		//FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[im],massrange[im+1],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"",leps,jets,map_weight_systematic);
-	      }
-	    }
-	  }
-	}
-      }
+  for(const auto& element_leps: map_leps){
+    TString suffix="_"+element_leps.first;
+    bool dosys=false;
+    if(suffix=="_default"){
+      suffix="";
+      dosys=true;
     }
-  }
+    auto const& leps=get<0>(element_leps.second);
 
-
-  ///////////////////////leps systematic fill hists///////////////////////
-  for(auto iter=map_lepton_systematic.begin();iter!=map_lepton_systematic.end();iter++){
-    totalweight=weight*PUreweight*prefireweight*zptcor;
-    FillHist(channelname+"/"+tauprefix+"nlepton"+"_"+iter->first,iter->second.size(),totalweight,10,0,10);
-    if(iter->second.size()==2){
-      TString prefix=(iter->second.at(0)->Charge()*iter->second.at(1)->Charge()>0?"ss_":"")+tauprefix;
-      if(iter->second.at(0)->Pt()>lep0ptcut&&iter->second.at(1)->Pt()>lep1ptcut){
-
+    FillHist(channelname+"/"+tauprefix+"nlepton"+suffix,leps.size(),totalweight,10,0,10);
+    if(leps.size()==2){
+      TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
+      if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",4.5,totalweight,20,0,20);
+      if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",5.5,totalweight,20,0,20);
 	/////////////////efficiency scale factors///////////////////
-	double IDSF=1.;double ISOSF=1.;double RECOSF=1.;
+	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
+	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
+	double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
 	if(!IsDATA){
-	  for(unsigned int i=0;i<iter->second.size();i++){
+	  TString LeptonIDSF_key=get<1>(element_leps.second);
+	  TString LeptonISOSF_key=get<2>(element_leps.second);
+	  for(unsigned int i=0;i<leps.size();i++){
 	    double this_pt,this_eta;
-	    TString chargesuffix;
-	    if(iter->second.at(i)->LeptonFlavour()==Lepton::MUON){
-	      this_pt=((Muon*)iter->second.at(i))->MiniAODPt();
-	      this_eta=iter->second.at(i)->Eta();
-	    }else if(iter->second.at(i)->LeptonFlavour()==Lepton::ELECTRON){
-	      this_pt=iter->second.at(i)->Pt();
-	      this_eta=((Electron*)iter->second.at(i))->scEta();
-	      if(iter->second.at(i)->Charge()>0) chargesuffix="_QPlus";
-	      else chargesuffix="_QMinus";
+	    if(leps[i]->LeptonFlavour()==Lepton::MUON){
+	      this_pt=((Muon*)leps.at(i))->MiniAODPt();
+	      this_eta=leps.at(i)->Eta();
+	    }else if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
+	      this_pt=leps.at(i)->Pt();
+	      this_eta=((Electron*)leps.at(i))->scEta();
 	    }else{
 	      cout <<"[AFBAnalyzer::executeEventFromParameter] It is not lepton"<<endl;
 	      exit(EXIT_FAILURE);
 	    }
-	    
+	    if(LeptonIDSF_key.Contains(TRegexp("_Q$"))){
+	      if(leps[i]->Charge()>0) LeptonIDSF_key+="Plus";
+	      else LeptonIDSF_key+="Minus";
+	    }
+	    if(LeptonISOSF_key.Contains(TRegexp("_Q$"))){
+	      if(leps[i]->Charge()>0) LeptonISOSF_key+="Plus";
+	      else LeptonISOSF_key+="Minus";
+	    }
+	  
 	    double this_RECOSF=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,0):1.;
-	    RECOSF*=this_RECOSF;
-	    double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonID_key+chargesuffix,this_eta,this_pt,0):1.;
-	    IDSF*=this_IDSF;
-	    double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISO_key,this_eta,this_pt,0):1.;
-	    ISOSF*=this_ISOSF;
+	    double this_RECOSF_up=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,1):1.;
+	    double this_RECOSF_down=LeptonReco_SF?(mcCorr->*LeptonReco_SF)(this_eta,this_pt,-1):1.;
+	    RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
+	  
+	    double this_IDSF=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonIDSF_key,this_eta,this_pt,0):1.;
+	    double this_IDSF_up=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonIDSF_key,this_eta,this_pt,1):1.;
+	    double this_IDSF_down=LeptonID_SF?(mcCorr->*LeptonID_SF)(LeptonIDSF_key,this_eta,this_pt,-1):1.;
+	    IDSF*=this_IDSF; IDSF_up*=this_IDSF_up; IDSF_down*=this_IDSF_down;
+	  
+	    double this_ISOSF=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISOSF_key,this_eta,this_pt,0):1.;
+	    double this_ISOSF_up=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISOSF_key,this_eta,this_pt,1):1.;
+	    double this_ISOSF_down=LeptonISO_SF?(mcCorr->*LeptonISO_SF)(LeptonISOSF_key,this_eta,this_pt,-1):1.;
+	    ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
 	  }
 	}
 	totalweight*=RECOSF;
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight,20,0,20);
 	totalweight*=IDSF;
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight,20,0,20);
 	totalweight*=ISOSF;
-	
-	double triggerSF=1.;
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight,20,0,20);
+      
+	double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
 	if(!IsDATA){
-	  triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,iter->second,0);
+	  TString triggerSF_key0=get<3>(element_leps.second);
+	  TString triggerSF_key1=get<4>(element_leps.second);
+	  triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
+	  triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
+	  triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
 	}
 	totalweight*=triggerSF;
+	FillHist(channelname+"/"+tauprefix+"cutflow",9.5,totalweight,20,0,20);
 
-	TLorentzVector dilepton=(*iter->second.at(0))+(*iter->second.at(1));
+	///////////////////////weight systematics//////////////////
+	map<TString,double> map_weight_systematic;
+	if(dosys&&!IsDATA){
+	  map_weight_systematic["noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
+	
+	  map_weight_systematic["noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	
+	  map_weight_systematic["noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor;
+	  
+	  map_weight_systematic["noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor;
+	
+	  map_weight_systematic["notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor;
+	  map_weight_systematic["triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor;
+	  map_weight_systematic["triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor;
+	  
+	  map_weight_systematic["nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
+
+	  /*
+	  map_weight_systematic["noPUreweight"]=weight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["PUreweight_up"]=weight*PUreweight_up*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight_systematic["PUreweight_down"]=weight*PUreweight_down*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	
+	  map_weight_systematic["noprefireweight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*zptcor;
+	  map_weight_systematic["prefireweight_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_up*zptcor;
+	  map_weight_systematic["prefireweight_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight_down*zptcor;
+		  
+	  if(PDFWeights_AlphaS->size()==2){
+	    map_weight_systematic["alphaS_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(0);
+	    map_weight_systematic["alphaS_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_AlphaS->at(1);
+	  }
+	
+	  for(unsigned int i=0;i<PDFWeights_Scale->size();i++){
+	    map_weight_systematic[Form("scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
+	  }
+	
+	  for(unsigned int i=0;i<PDFWeights_Error->size();i++){
+	    //map_weight_systematic[Form("pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
+	  }
+	  */	
+	}
+
+	///////////////////////fill hists///////////////////////
+	TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
 	double dimass=dilepton.M();
 	double dirap=dilepton.Rapidity();
 	double dipt=dilepton.Pt();
 	if(dimass>=massrange[0]&&dimass<massrange[massbinnum]){
-	  FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,"_"+iter->first,iter->second,jets,totalweight);
+	  if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",10.5,totalweight,20,0,20);
+	  FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,suffix,leps,jets,totalweight);
+	  if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+hardprefix,suffix,leps,jets,totalweight);
+	  FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+prefix,suffix,leps,jets,map_weight_systematic);
 	  if(dipt>50){
-	    FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,"_"+iter->first,iter->second,jets,totalweight);
+	    FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,suffix,leps,jets,totalweight);
+	    if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+hardprefix,suffix,leps,jets,totalweight);
+	    FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_pt50/",massrange[0],massrange[massbinnum])+prefix,suffix,leps,jets,map_weight_systematic);	  
 	  }	
 	  for(int iy=0;iy<zptcor_nybin;iy++){
 	    if(fabs(dirap)>=zptcor_ybin[iy]&&fabs(dirap)<zptcor_ybin[iy+1]){
-	      FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"_"+iter->first,iter->second,jets,totalweight);
+	      FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,totalweight);
+	      if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,suffix,leps,jets,totalweight);
+	      FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,map_weight_systematic);
 	      if(dipt>50){
-		FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"_"+iter->first,iter->second,jets,totalweight);
+		FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,totalweight);
+		if(IsDYSample&&prefix=="") FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+hardprefix,suffix,leps,jets,totalweight);
+		FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,map_weight_systematic);
 	      }
 	      for(int im=0;im<massbinnum;im++){
 		if(dimass>=massrange[im]&&dimass<massrange[im+1]){
-		  //FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[im],massrange[im+1],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,"_"+iter->first,iter->second,jets,totalweight);
+		  //FillAFBHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[im],massrange[im+1],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,totalweight);
+		  //FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[im],massrange[im+1],zptcor_ybin[iy],zptcor_ybin[iy+1])+prefix,suffix,leps,jets,map_weight_systematic);
 		}
 	      }
 	    }
@@ -585,6 +559,21 @@ void AFBAnalyzer::FillAFBHists(TString pre,TString suf,const vector<Lepton*>& le
   }
   //for leptons
   FillBasicHists(pre,suf,leps,w);
+  for(int i=0;i<(int)leps.size();i++){
+    TString charge=leps.at(i)->Charge()>0?"p":"m";
+    FillHist(Form("%sl%d%spt%s",pre.Data(),i,charge.Data(),suf.Data()),leps.at(i)->Pt(),w,1000,0,1000);
+    FillHist(Form("%sl%d%seta%s",pre.Data(),i,charge.Data(),suf.Data()),leps.at(i)->Eta(),w,200,-5,5);
+    FillHist(Form("%sl%d%sriso%s",pre.Data(),i,charge.Data(),suf.Data()),leps.at(i)->RelIso(),w,30,0,0.3);
+    FillHist(Form("%sl%spt%s",pre.Data(),charge.Data(),suf.Data()),leps.at(i)->Pt(),w,1000,0,1000);
+    FillHist(Form("%sl%seta%s",pre.Data(),charge.Data(),suf.Data()),leps.at(i)->Eta(),w,200,-5,5);
+    FillHist(Form("%sl%sriso%s",pre.Data(),charge.Data(),suf.Data()),leps.at(i)->RelIso(),w,30,0,0.3);
+    if(leps.at(i)->LeptonFlavour()==Lepton::Flavour::MUON){
+      double rtrkiso=((Muon*)leps.at(i))->TrkIso()/leps.at(i)->Pt();
+      FillHist(Form("%sl%drtrkiso%s",pre.Data(),i,suf.Data()),rtrkiso,w,40,0,0.2);
+      FillHist(Form("%sl%d%srtrkiso%s",pre.Data(),i,charge.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
+      FillHist(Form("%sl%srtrkiso%s",pre.Data(),charge.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
+    }
+  }
   TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
   double dimass=dilepton.M();
   double dipt=dilepton.Pt();

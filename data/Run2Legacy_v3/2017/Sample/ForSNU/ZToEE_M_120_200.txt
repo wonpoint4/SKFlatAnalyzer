@@ -1,0 +1,2 @@
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2017/MC/ZToEE_NNPDF31_13TeV-powheg_M_120_200/190514_101832/0000/SKFlatNtuple_2017_MC_1.root
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2017/MC/ZToEE_NNPDF31_13TeV-powheg_M_120_200/190514_101832/0000/SKFlatNtuple_2017_MC_2.root

@@ -10,46 +10,48 @@ public:
   int mode;
   int channel,year;
   TString schannel,syear;
+  TString analyzer;
   AFBPlotter();
+
+  double GetChi2(TH1* h1,TH1* h2=NULL);
 };
 AFBPlotter::AFBPlotter(){
-  TString filedir=TString(getenv("SKFlatOutputDir"))+getenv("SKFlatV")+"/AFBAnalyzer/";
-  TString channels[]={"DoubleMuon","DoubleEG"};
-  vector<tuple<TString,TString>> periods={make_tuple("2016","B_ver2"),make_tuple("2016","C"),make_tuple("2016","D"),make_tuple("2016","E"),make_tuple("2016","F"),make_tuple("2016","G"),make_tuple("2016","H"),make_tuple("2017","B"),make_tuple("2017","C"),make_tuple("2017","D"),make_tuple("2017","E"),make_tuple("2017","F")};
-  for(int ic=0;ic<sizeof(channels)/sizeof(TString);ic++){
-    for(unsigned int ip=0;ip<periods.size();ip++){
-      TString path=filedir+get<0>(periods[ip])+"/DATA/AFBAnalyzer_SkimTree_SMP_"+channels[ic]+"_";
-      TString samplefragkey=channels[ic]+get<0>(periods[ip])+get<1>(periods[ip]);
-      samplefrags[samplefragkey]=MakeSampleFrag(samplefragkey,SampleFrag::Type::DATA,kBlack,make_tuple(path+get<1>(periods[ip])+".root","",1.));
-    }
+  analyzer="AFBAnalyzer";
+  TObjArray* arr=gSystem->GetFromPipe("find $SKFlatOutputDir$SKFlatV/"+analyzer+"/ -type f").Tokenize("\n");
+  for(int i=0;i<arr->GetEntries();i++){
+    TString file=((TObjString*)arr->At(i))->String();
+    TString year=file("/"+analyzer+"/[0-9]+/"); year=year(analyzer.Length()+2,4);
+    TString key=file(analyzer+"_.*\\.root");
+    key=key(analyzer.Length()+1,key.Index(".root")-analyzer.Length()-1)+"_"+year;
+    SampleFrag frag;
+    frag.files.push_back(make_tuple(file,"",1.));
+    samplefrags[key]=frag;
+  } 
+  
+  vector<TString> syears={"2016","2017","2018"};
+  for(const auto& syear:syears){
+    samplefrags["muon"+syear]=MakeSampleFrag("muon"+syear,SampleFrag::Type::DATA,kBlack,TRegexp("SkimTree_SMP_DoubleMuon_[A-Z].*_"+syear));
+    samplefrags["electron"+syear]=MakeSampleFrag("electron"+syear,SampleFrag::Type::DATA,kBlack,TRegexp("SkimTree_SMP_.*EG.*_[A-Z].*_"+syear));
+
+    samplefrags["amc"+syear]=MakeSampleFrag("amc"+syear,SampleFrag::Type::SIGNAL,kRed,TRegexp("SkimTree_SMP_DYJets_"+syear)); //FIXME no 2018
+    samplefrags["amcPt"+syear]=MakeSampleFrag("amc"+syear,SampleFrag::Type::SIGNAL,kRed,TRegexp("SkimTree_SMP_DYJets_Pt-[0-9]+To[0-9]+_"+syear));
+    samplefrags["mg"+syear]=MakeSampleFrag("mg"+syear,SampleFrag::Type::SIGNAL,kRed,TRegexp("SkimTree_SMP_DYJets_MG_"+syear));
+    samplefrags["powhegmuon"+syear]=MakeSampleFrag("powhegmuon"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToMuMu_M_[0-9]+_[0-9]+_"+syear));
+    samplefrags["powhegelectron"+syear]=MakeSampleFrag("powhegelectron"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToEE_M_[0-9]+_[0-9]+_"+syear));
+
+    samplefrags["genamc"+syear]=MakeSampleFrag("amc"+syear,SampleFrag::Type::GEN,kRed,TRegexp("SkimTree_GEN_DYJets_"+syear),"gen_"); //FIXME no 2018
+    samplefrags["genpowhegmuon"+syear]=MakeSampleFrag("powhegmuon"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToMuMu_M_[0-9]+_[0-9]+_"+syear),"gen_");
+    samplefrags["genpowhegelectron"+syear]=MakeSampleFrag("genpowhegelectron"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToEE_M_[0-9]+_[0-9]+_"+syear),"gen_");
+
+    //FIXME no 2018
+    //if(syear!="2018") samplefrags["amctt"+syear]=MakeSampleFrag("#gamma*/Z#rightarrow#tau#tau",SampleFrag::Type::BG,EColor::kGreen,"SkimTree_SMP_DYJets_"+syear,"tau_");
+    //FIXME no 2016
+    //samplefrags["mgtt"+syear]=MakeSampleFrag("#gamma*/Z#rightarrow#tau#tau",SampleFrag::Type::BG,EColor::kGreen,TRegexp("SkimTree_SMP_DYJets_MG_"+syear),"tau_");
+
+    samplefrags["vv"+syear]=MakeSampleFrag("Diboson",SampleFrag::Type::BG,kBlue,TRegexp("SkimTree_SMP_[W-Z][W-Z]_pythia_"+syear));
+    samplefrags["wjets"+syear]=MakeSampleFrag("W",SampleFrag::Type::BG,kYellow,"SkimTree_SMP_WJets_MG_"+syear);
+    samplefrags["tt"+syear]=MakeSampleFrag("t#bar{t}",SampleFrag::Type::BG,kMagenta,"SkimTree_SMP_TTLL_powheg_"+syear);
   }
-
-  TString syears[]={"2016","2017"};
-  for(int i=0;i<sizeof(syears)/sizeof(TString);i++){
-    samplefrags["muon"+syears[i]]=MakeSampleFrag("muon"+syears[i],SampleFrag::Type::DATA,kBlack);
-    samplefrags["muon"+syears[i]].Add(TRegexp("DoubleMuon"+syears[i]+"[A-Z]"),1);
-    samplefrags["electron"+syears[i]]=MakeSampleFrag("electron"+syears[i],SampleFrag::Type::DATA,kBlack);
-    samplefrags["electron"+syears[i]].Add(TRegexp("DoubleElectron"+syears[i]+"[A-Z]"),1);
-
-    samplefrags["dy"+syears[i]]=MakeSampleFrag("dy"+syears[i],SampleFrag::Type::SIGNAL,kRed,make_tuple(filedir+syears[i]+"/AFBAnalyzer_SkimTree_SMP_DYJets.root","",1.));
-    samplefrags["powheg"+syears[i]+"muon"]=MakeSampleFrag("powheg"+syears[i]+"muon",SampleFrag::Type::SIGNAL,kBlue,make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_50_120.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_120_200.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_200_400.root","",1.));
-    samplefrags["powheg"+syears[i]+"electron"]=MakeSampleFrag("powheg"+syears[i]+"electron",SampleFrag::Type::SIGNAL,kBlue,make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_50_120.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_120_200.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_200_400.root","",1.));
-
-    samplefrags["powheg"+syears[i]+"muon"]=MakeSampleFrag("powheg"+syears[i]+"muon",SampleFrag::Type::SIGNAL,kBlue,make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_50_120.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_120_200.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToMuMu_M_200_400.root","",1.));
-    samplefrags["powheg"+syears[i]+"electron"]=MakeSampleFrag("powheg"+syears[i]+"electron",SampleFrag::Type::SIGNAL,kBlue,make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_50_120.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_120_200.root","",1.),make_tuple(filedir+syears[i]+"/AFBAnalyzer_ZToEE_M_200_400.root","",1.));
-
-    samplefrags["dytt"+syears[i]]=MakeSampleFrag("#gamma*/Z#rightarrow#tau#tau",SampleFrag::Type::BG,EColor::kGreen,make_tuple(filedir+syears[i]+"/AFBAnalyzer_SkimTree_SMP_DYJets.root","tau_",1.));
-					       
-    TString path=filedir+syears[i]+"/AFBAnalyzer_SkimTree_SMP_";
-    samplefrags["ww"+syears[i]]=MakeSampleFrag("ww"+syears[i],SampleFrag::Type::BG,kBlue,make_tuple(path+"WW_pythia.root","",1.));
-    samplefrags["wz"+syears[i]]=MakeSampleFrag("wz"+syears[i],SampleFrag::Type::BG,kGreen,make_tuple(path+"WZ_pythia.root","",1.));
-    samplefrags["zz"+syears[i]]=MakeSampleFrag("zz"+syears[i],SampleFrag::Type::BG,kYellow,make_tuple(path+"ZZ_pythia.root","",1.));
-    samplefrags["vv"+syears[i]]=MakeSampleFrag("Diboson",SampleFrag::Type::BG,kBlue,make_tuple("ww"+syears[i],1.),make_tuple("wz"+syears[i],1.),make_tuple("zz"+syears[i],1.));
-
-    samplefrags["wjets"+syears[i]]=MakeSampleFrag("W",SampleFrag::Type::BG,kYellow,make_tuple(path+"WJets_MG.root","",1.));
-  }
-  samplefrags["tt2016"]=MakeSampleFrag("t#bar{t}",SampleFrag::Type::BG,kMagenta,make_tuple(filedir+"2016/AFBAnalyzer_SkimTree_SMP_TT_powheg.root","",1.));
-  samplefrags["tt2017"]=MakeSampleFrag("t#bar{t}",SampleFrag::Type::BG,kMagenta,make_tuple(filedir+"2017/AFBAnalyzer_SkimTree_SMP_TTLL_powheg.root","",1.));
 }
 
 int AFBPlotter::Setup(int channel_,int year_,int mode_){
@@ -66,46 +68,74 @@ int AFBPlotter::Setup(int channel_,int year_,int mode_){
   SetupSystematics();
   //SetupPlots();
 
-  cout<<"[Setup] nsample: "<<samples.size()<<endl;
-  cout<<"[Setup] nsys: "<<systematics.size()<<endl;
-  cout<<"[Setup] nplot: "<<plots.size()<<endl;
+  if(DEBUG) cout<<"[Setup] nsample: "<<samples.size()<<endl;
+  if(DEBUG) cout<<"[Setup] nsys: "<<systematics.size()<<endl;
+  if(DEBUG) cout<<"[Setup] nplot: "<<plots.size()<<endl;
 
   return 1;
 }
 
 void AFBPlotter::SetupSamples(){
-  cout<<"[AFBPlotter::SetupSamples]"<<endl;
+  if(DEBUG)  cout<<"[AFBPlotter::SetupSamples]"<<endl;
   if(mode==0){
     samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.));
     samples["data"].markerstyle=20;
     samples["data"].markersize=0.7;
-    TString dytitle=(channel==Channel::MUON)?"#gamma*/Z#rightarrow#mu#mu":"#gamma*/Z#rightarrowee";
-    samplefrags["dy"+syear].title=dytitle;
-    samples["sim"]=MakeSample("sim",Sample::Type::STACK,kBlue,make_tuple("dy"+syear,1.),make_tuple("dytt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+    if(syear=="2018") samples["sim"]=MakeSample("sim",Sample::Type::STACK,kBlue,make_tuple("mg"+syear,1.),make_tuple("mgtt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+    else samples["sim"]=MakeSample("sim",Sample::Type::STACK,kBlue,make_tuple("amc"+syear,1.),make_tuple("amctt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+    get<0>(samples["sim"].frags[0]).title=(channel==Channel::MUON)?"#gamma*/Z#rightarrow#mu#mu":"#gamma*/Z#rightarrowee";
   }else if(mode==1){
-    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("dytt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
+    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("amctt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
     samples["data"].markerstyle=20;
     samples["data"].markersize=0.7;
-    TString dytitle=(channel==Channel::MUON)?"#gamma*/Z#rightarrow#mu#mu":"#gamma*/Z#rightarrowee";
-    samples["dy"]=MakeSample(dytitle,Sample::Type::SUM,kRed,make_tuple("dy"+syear,1.));
+    samples["amc"]=MakeSample((channel==Channel::MUON)?"#gamma*/Z#rightarrow#mu#mu":"#gamma*/Z#rightarrowee",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.));
   }else if(mode==2){
-    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("dytt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
+    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("amctt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
     samples["data"].markerstyle=20;
     samples["data"].markersize=0.7;
-    samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("dy"+syear,1.));
-    samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+syear+schannel,1.));
+    samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.));
+    samples["genamc"]=MakeSample("aMC@NLO(Gen)",Sample::Type::SUM,kMagenta,make_tuple("genamc"+syear,1.));
   }else if(mode==3){
-    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("dytt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
+    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("amctt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
     samples["data"].markerstyle=20;
     samples["data"].markersize=0.7;
-    samples["data"].AddPrePrefix(schannel+syear+"/m60to350");
-    samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("dy"+syear,1.));
-    samples["amc"].AddPrePrefix(schannel+syear+"/m60to350");
-    samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+syear+schannel,1.));
-    samples["powheg"].AddPrePrefix(schannel+syear+"/m60to350");
-    samples["powheg(GEN)"]=MakeSample("powheg(GEN)",Sample::Type::SUM,kBlue,make_tuple("powhegGEN"+syear+schannel,1.));
-    samples["powheg(GEN)"].AddPrePrefix(schannel+syear+"gen");
-  }    
+    samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.));
+    samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+schannel+syear,1.));
+  }else if(mode==4){
+    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("amctt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
+    samples["data"].markerstyle=20;
+    samples["data"].markersize=0.7;
+    samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.));
+    samples["genamc"]=MakeSample("aMC@NLO(Gen)",Sample::Type::SUM,kMagenta,make_tuple("genamc"+syear,1.));
+    samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+schannel+syear,1.));
+    samples["powheg(GEN)"]=MakeSample("powheg(GEN)",Sample::Type::SUM,kGreen,make_tuple("genpowheg"+schannel+syear,1.));
+  }else if(mode==10){ // with and without EfficiencySF
+    samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.));
+    samples["data"].markerstyle=20;
+    samples["data"].markersize=0.7;
+
+    if(syear=="2018") samples["sim"]=MakeSample("sim",Sample::Type::SUM,kRed,make_tuple("mg"+syear,1.),make_tuple("mgtt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+    else samples["sim"]=MakeSample("sim",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.),make_tuple("amctt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+
+    if(syear=="2018") samples["sim2"]=MakeSample("sim (w/o EffiSF)",Sample::Type::SYS,kBlue,make_tuple("mg"+syear,1.),make_tuple("mgtt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+    else samples["sim2"]=MakeSample("sim (w/o EffiSF)",Sample::Type::SYS,kBlue,make_tuple("amc"+syear,1.),make_tuple("amctt"+syear,1.),make_tuple("vv"+syear,1.),make_tuple("wjets"+syear,1.),make_tuple("tt"+syear,1.));
+  }else if(mode==11){ // majority vs selective
+    samples["data"]=MakeSample("data (majority)",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.));
+    samples["data"].markerstyle=20;
+    samples["data"].markersize=0.7;
+
+    samples["data2"]=MakeSample("data (selective)",Sample::Type::SYS,kRed,make_tuple(schannel+syear,1.));
+    samples["data2"].markerstyle=23;
+    samples["data2"].markersize=0.7;
+  }else if(mode==12){ // PFISO vs trkISO
+    samples["data"]=MakeSample("data (PFISO)",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.));
+    samples["data"].markerstyle=20;
+    samples["data"].markersize=0.7;
+
+    samples["data2"]=MakeSample("data (TrkISO)",Sample::Type::SYS,kRed,make_tuple(schannel+syear,1.));
+    samples["data2"].markerstyle=23;
+    samples["data2"].markersize=0.7;
+  }
   
 
   /*
@@ -153,7 +183,7 @@ void AFBPlotter::SavePlotsCondor(int channel,int year,int njob){
 } 
 */
 void AFBPlotter::SetupSystematics(){
-  cout<<"[SetupSystematics]"<<endl;
+  if(DEBUG)  cout<<"[SetupSystematics]"<<endl;
   if(channel==Channel::ELECTRON) systematics["RECOSF"]=MakeSystematic("RECOSF",SystematicType::ENVELOPE,"_RECOSF_up _RECOSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
   systematics["IDSF"]=MakeSystematic("IDSF",SystematicType::ENVELOPE,"_IDSF_up _IDSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
   if(channel==Channel::MUON) systematics["ISOSF"]=MakeSystematic("ISOSF",SystematicType::ENVELOPE,"_ISOSF_up _ISOSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
@@ -212,3 +242,17 @@ void SaveAFB(TString outputdir="AFBAnalyzer_plot"){
 }
 
 */
+double AFBPlotter::GetChi2(TH1* h1,TH1* h2){
+  double chi2=0;
+  for(int i=h1->GetXaxis()->GetFirst();i<h1->GetXaxis()->GetLast()+1;i++){
+    double x1=h1->GetBinContent(i);
+    double ex1=h1->GetBinError(i);
+    double x2=h2?h2->GetBinContent(i):0.;
+    double ex2=h2?h2->GetBinError(i):0.;
+    chi2+=pow((x1-x2)/(ex1-ex2),2);
+  }
+  chi2/=h1->GetXaxis()->GetLast()-h1->GetXaxis()->GetFirst()+1;
+  return chi2;
+}
+    
+  

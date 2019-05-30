@@ -6,4 +6,5 @@
   gSystem->Load("./lib/libAnalyzerTools.so");
   gSystem->Load("./lib/libAnalyzers.so");
   gSystem->Load("/cvmfs/cms.cern.ch/slc6_amd64_gcc630/external/lhapdf/6.2.1-fmblme/lib/libLHAPDF.so");
+  gROOT->ProcessLine(".L Plotter/AFBPlotter.cc");
 }

@@ -1,14 +1,18 @@
+#ifndef __SAMPLE_CC__
+#define __SAMPLE_CC__
 #include"Global.h"
 class SampleFrag{
 public:
-  enum Type{DATA,SIGNAL,BG,SUM,STACK};
+  enum Type{DATA,SIGNAL,BG,GEN,SUM,STACK,SYS};
   TString GetTypeString() const{
     switch(type){
     case DATA: return "DATA";
     case SIGNAL: return "SIGNAL";
     case BG: return "BG";
+    case GEN: return "GEN";
     case SUM: return "SUM";
     case STACK: return "STACK";
+    case SYS: return "SYS";
     default: return "###ERROR### Bad SampleFrag::Type";
     }
   }
@@ -26,8 +30,8 @@ public:
 
   SampleFrag();
   void SetColor(int color);
-  virtual void Add(TString samplefragkey,double weight);
-  virtual void Add(TRegexp samplefragkeyexp,double weight);
+  virtual void Add(TString samplefragkey,TString prefix="",double weight=1.);
+  virtual void Add(TRegexp samplefragkeyexp,TString prefix="",double weight=1.);
   void ApplyHistStyle(TH1* hist) const ;
   virtual void Print() const;
 };
@@ -63,25 +67,36 @@ SampleFrag MakeSampleFrag(TString title,SampleFrag::Type type,int color,tuple<TS
 }
 SampleFrag MakeSampleFrag(TString title,SampleFrag::Type type,int color,tuple<TString,double> frag1,tuple<TString,double> frag2=make_tuple("",0.),tuple<TString,double> frag3=make_tuple("",0.),tuple<TString,double> frag4=make_tuple("",0.),tuple<TString,double> frag5=make_tuple("",0.),tuple<TString,double> frag6=make_tuple("",0.),tuple<TString,double> frag7=make_tuple("",0.)){
   SampleFrag frag=MakeSampleFrag(title,type,color);
-  if(get<0>(frag1)!="") frag.Add(get<0>(frag1),get<1>(frag1));
-  if(get<0>(frag2)!="") frag.Add(get<0>(frag2),get<1>(frag2));
-  if(get<0>(frag3)!="") frag.Add(get<0>(frag3),get<1>(frag3));
-  if(get<0>(frag4)!="") frag.Add(get<0>(frag4),get<1>(frag4));
-  if(get<0>(frag5)!="") frag.Add(get<0>(frag5),get<1>(frag5));
-  if(get<0>(frag6)!="") frag.Add(get<0>(frag6),get<1>(frag6));
-  if(get<0>(frag7)!="") frag.Add(get<0>(frag7),get<1>(frag7));
+  if(get<0>(frag1)!="") frag.Add(get<0>(frag1),"",get<1>(frag1));
+  if(get<0>(frag2)!="") frag.Add(get<0>(frag2),"",get<1>(frag2));
+  if(get<0>(frag3)!="") frag.Add(get<0>(frag3),"",get<1>(frag3));
+  if(get<0>(frag4)!="") frag.Add(get<0>(frag4),"",get<1>(frag4));
+  if(get<0>(frag5)!="") frag.Add(get<0>(frag5),"",get<1>(frag5));
+  if(get<0>(frag6)!="") frag.Add(get<0>(frag6),"",get<1>(frag6));
+  if(get<0>(frag7)!="") frag.Add(get<0>(frag7),"",get<1>(frag7));
   return frag;
+}
+SampleFrag MakeSampleFrag(TString title,SampleFrag::Type type,int color,TString subsamplefragkey,TString prefix="",double weight=1.){
+  SampleFrag samplefrag=MakeSampleFrag(title,type,color);
+  samplefrag.Add(subsamplefragkey,prefix,weight);
+  return samplefrag;
+}
+SampleFrag MakeSampleFrag(TString title,SampleFrag::Type type,int color,TRegexp subsamplefragregexp,TString prefix="",double weight=1.){
+  SampleFrag samplefrag=MakeSampleFrag(title,type,color);
+  samplefrag.Add(subsamplefragregexp,prefix,weight);
+  return samplefrag;
 }
 void SampleFrag::SetColor(int color){
   linecolor=color;
   markercolor=color;
 }
-void SampleFrag::Add(TString samplefragkey,double weight){
+void SampleFrag::Add(TString samplefragkey,TString prefix,double weight){
   auto it=samplefrags.find(samplefragkey);
   if(it!=samplefrags.end()){
     auto tempfiles=it->second.files;
-    for(unsigned int i=tempfiles.size();i<tempfiles.size();i++){
-      get<2>(files[i])=get<2>(files[i])*weight;
+    for(unsigned int i=0;i<tempfiles.size();i++){
+      get<1>(tempfiles[i])=prefix+get<1>(tempfiles[i]);
+      get<2>(tempfiles[i])=get<2>(tempfiles[i])*weight;
     }
     files.insert(files.end(),tempfiles.begin(),tempfiles.end());
   }else{
@@ -89,9 +104,9 @@ void SampleFrag::Add(TString samplefragkey,double weight){
   }
   return;
 }
-void SampleFrag::Add(TRegexp samplefragkeyexp,double weight){
+void SampleFrag::Add(TRegexp samplefragkeyexp,TString prefix,double weight){
   for(auto it=samplefrags.begin();it!=samplefrags.end();it++){
-    if(it->first.Contains(samplefragkeyexp)) Add(it->first,weight);
+    if(it->first.Contains(samplefragkeyexp)) Add(it->first,prefix,weight);
   }
 }
 void SampleFrag::ApplyHistStyle(TH1* hist) const {
@@ -141,6 +156,11 @@ Sample MakeSample(TString title,Sample::Type type,int color,tuple<TString,double
   if(get<0>(frag5)!="") sample.Add(get<0>(frag5),get<1>(frag5));
   if(get<0>(frag6)!="") sample.Add(get<0>(frag6),get<1>(frag6));
   if(get<0>(frag7)!="") sample.Add(get<0>(frag7),get<1>(frag7));
+  if(type==Sample::Type::SYS){
+    for(auto& it:sample.frags){
+      get<0>(it).type=SampleFrag::Type::SYS;
+    }
+  }
   return sample;
 }
 void Sample::Add(TString samplefragkey,double weight){
@@ -161,3 +181,5 @@ void Sample::Print(bool detail) const{
     if(detail) get<0>(*it).Print();
   }
 }
+
+#endif

@@ -1,7 +1,7 @@
-/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_1.root
 /data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_0.root
-/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_6.root
-/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_5.root
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_1.root
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_2.root
 /data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_3.root
 /data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_4.root
-/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_2.root
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_5.root
+/data9/Users/hsseo/SKFlat/Run2Legacy_v3/2016/MC_SkimTree_SMP/ZZ_TuneCUETP8M1_13TeV-pythia8/2019_05_14_192930/SKFlatNtuple_2016_MC_6.root

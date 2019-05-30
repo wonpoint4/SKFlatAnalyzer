@@ -7,6 +7,7 @@ class GetEffLumi : public AnalyzerCore {
 
 public:
 
+  void initializeAnalyzer();
   void executeEvent();
 
 };

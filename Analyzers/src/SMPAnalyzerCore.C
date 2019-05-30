@@ -45,7 +45,7 @@ void SMPAnalyzerCore::FillBasicHists(TString pre,TString suf,const vector<Lepton
   FillHist(pre+"dirap"+suf,dilepton.Rapidity(),w,50,-5,5);
   for(int i=0;i<(int)leps.size();i++){
     FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),leps.at(i)->Pt(),w,1000,0,1000);
-    FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),leps.at(i)->Eta(),w,50,-5,5);
+    FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),leps.at(i)->Eta(),w,200,-5,5);
     FillHist(Form("%sl%driso%s",pre.Data(),i,suf.Data()),leps.at(i)->RelIso(),w,30,0,0.3);
   }
   FillHist(pre+"lldelR"+suf,leps.at(0)->DeltaR(*leps.at(1)),w,70,0,7);  
@@ -58,13 +58,14 @@ void SMPAnalyzerCore::FillSystematicHists(TString pre,TString suf,const vector<L
   }
 }
 
-double SMPAnalyzerCore::DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys){
+double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int sys){
   if(IsDATA) return 1;
+  if(triggerSF_key0==""&&triggerSF_key1=="") return 1;
   if(leps.size()<2){
-    //cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
-    return 0;
+    cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
+    return 1;
   }else if(leps.size()>2){
-    //cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
+    cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
   }
   map<TString,TH2F*>* map_hist_Lepton=NULL;
   if(leps[0]->LeptonFlavour()==Lepton::MUON){
@@ -72,12 +73,12 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1
   }else if(leps[0]->LeptonFlavour()==Lepton::ELECTRON){
     map_hist_Lepton=&mcCorr->map_hist_Electron;
   }else{
-    cout <<"[SMPAnalyzerCore::Trigger_SF] Not ready"<<endl;
+    cout <<"[SMPAnalyzerCore::Trigger_SF] Wrong flavour"<<endl;
     exit(EXIT_FAILURE);
   }    
       
   double this_pt[2]={},this_eta[2]={};
-  TString this_charge[2]={};
+  TString this_charge[2];
   for(int i=0;i<2;i++){
     if(leps[i]->LeptonFlavour()==Lepton::MUON){
       this_pt[i]=((Muon*)leps.at(i))->MiniAODPt();
@@ -85,25 +86,40 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1
     }else if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
       this_pt[i]=leps.at(i)->Pt();
       this_eta[i]=((Electron*)leps.at(i))->scEta();
-      if(leps.at(i)->Charge()>0) this_charge[i]="_QPlus";
-      else this_charge[i]="_QMinus";
     }else{
       cout << "[SMPAnalyzerCore::Trigger_SF] It is not lepton"<<endl;
       exit(EXIT_FAILURE);
     }
+    if(triggerSF_key0.Contains(TRegexp("_Q$"))&&triggerSF_key1.Contains(TRegexp("_Q$"))){
+      if(leps.at(i)->Charge()>0) this_charge[i]="Plus";
+      else this_charge[i]="Minus";
+    }
   }
-  if(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON){
+  if(!(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON)){
+    TH2F* this_hist[2]={NULL,NULL};
+    double triggerSF=1.;
+    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+triggerSF_key0+this_charge[0]];
+    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+triggerSF_key1+this_charge[1]];
+    if(!this_hist[0]||!this_hist[1]){
+      cout << "[SMPAnalyzerCore::Trigger_SF] No Trigger_SF_"<<triggerSF_key0<<" or Trigger_SF_"<<triggerSF_key1<<endl;
+      exit(EXIT_FAILURE);
+    }
+    for(int i=0;i<2;i++){
+      triggerSF*=GetBinContentUser(this_hist[i],this_eta[i],this_pt[i],sys);
+    }
+    return triggerSF;
+  }else{
     TH2F* this_hist[8]={};
     TString sdata[2]={"DATA","MC"};
     TString speriod[2]={"BCDEF","GH"};
     for(int id=0;id<2;id++){
       for(int ip=0;ip<2;ip++){
-	this_hist[4*id+2*ip]=(*map_hist_Lepton)["Trigger_Eff_"+sdata[id]+"_"+SFhistkey0+"_"+speriod[ip]];
-	this_hist[4*id+2*ip+1]=(*map_hist_Lepton)["Trigger_Eff_"+sdata[id]+"_"+SFhistkey1+"_"+speriod[ip]];
+	this_hist[4*id+2*ip]=(*map_hist_Lepton)["Trigger_Eff_"+sdata[id]+"_"+triggerSF_key0+this_charge[0]+"_"+speriod[ip]];
+	this_hist[4*id+2*ip+1]=(*map_hist_Lepton)["Trigger_Eff_"+sdata[id]+"_"+triggerSF_key1+this_charge[1]+"_"+speriod[ip]];
       }
     }
     if(!this_hist[0]||!this_hist[1]||!this_hist[2]||!this_hist[3]){
-      cout << "[SMPAnalyzerCore::Trigger_SF] No "<<SFhistkey0<<" or "<<SFhistkey1<<endl;
+      cout << "[SMPAnalyzerCore::Trigger_SF] No "<<triggerSF_key0<<" or "<<triggerSF_key1<<endl;
       exit(EXIT_FAILURE);
     }
     double lumi_periodB = 5.929001722;
@@ -125,22 +141,7 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1
       }
     }
     return (triggerEff[0]*WeightBtoF+triggerEff[1]*WeightGtoH)/(triggerEff[2]*WeightBtoF+triggerEff[3]*WeightGtoH);
-  }else{
-    TH2F* this_hist[2]={NULL,NULL};
-    double triggerSF=1.;
-    //    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey0+this_charge[0]];
-    //    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey1+this_charge[1]];
-    this_hist[0]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey0];
-    this_hist[1]=(*map_hist_Lepton)["Trigger_SF_"+SFhistkey1];
-    if(!this_hist[0]||!this_hist[1]){
-      cout << "[SMPAnalyzerCore::Trigger_SF] No Trigger_SF_"<<SFhistkey0<<" or Trigger_SF_"<<SFhistkey1<<endl;
-      exit(EXIT_FAILURE);
-    }
-    for(int i=0;i<2;i++){
-      triggerSF*=GetBinContentUser(this_hist[i],this_eta[i],this_pt[i],sys);
-    }
-    return triggerSF;
-  }   
+  }
 }
 void SMPAnalyzerCore::SetupZPtWeight(){
   cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting zptcor"<<endl;
@@ -265,3 +266,13 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
     return out;
   }else return GetElectrons(id,ptmin,fetamax);
 }    
+std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fetamax){
+  if(id=="POGTightWithLooseTrkIso"){
+    vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
+    vector<Muon> out;
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+    }
+    return out;
+  }else return GetMuons(id,ptmin,fetamax);
+}

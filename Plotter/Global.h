@@ -16,6 +16,6 @@
 #include"TLegendEntry.h"
 using namespace std;
 
-int DEBUG=0;
+int DEBUG=2;
 
 #endif

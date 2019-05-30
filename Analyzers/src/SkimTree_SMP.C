@@ -23,7 +23,7 @@ void SkimTree_SMP::initializeAnalyzer(){
   }else if(DataYear==2018){
     triggers = {
       "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v",
-      "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v "
+      "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"
     };
   }else{
     cout<<"[SkimTree_SMP::initializeAnalyzer] DataYear is wrong : " << DataYear << endl;
