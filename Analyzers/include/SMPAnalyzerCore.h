@@ -15,6 +15,7 @@ public:
   void FillSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,map<TString,double> map_systematic);
   void SetupZPtWeight();
   double GetZPtWeight(double zpt,double zrap,Lepton::Flavour flavour);
+  double Lepton_SF(TString histkey,const Lepton* lep,int sys);
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
   void PrintGens(const vector<Gen>& gens);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);

@@ -15,7 +15,7 @@ TString GetStringEColor(EColor color){
   case kYellow: return "kYellow";
   case kMagenta: return "kMagenta";
   case kOrange: return "kOrange";
-  default: return "###WARNING### Bad EColor";
+  default: return "UNKNOWN";
   }
 }
 
@@ -97,7 +97,7 @@ public:
   int AddError(TH1* hist,TH1* sys);
   bool CheckHists(vector<TH1*> hists);
   void PrintSampleFrags(TRegexp regexp=".*");
-  void PrintSamples(TRegexp regexp=".*",bool detail=false);
+  void PrintSamples(bool detail=false,TRegexp regexp=".*");
   static TCanvas* GetCompare(vector<tuple<TH1*,TH1*>> hists,TString option);
   static TCanvas* GetRatio(vector<tuple<TH1*,TH1*>> hists,TString option);
   static TCanvas* GetCompareAndRatio(vector<tuple<TH1*,TH1*>> hists,TString option);
@@ -123,7 +123,7 @@ public:
   */
   //TCanvas* GetCompareAFBAll(vector<TString> histnames,int sysbit=0,TString option="");
   //TCanvas* GetCompareAFBAll(TRegexp regexp,int sysbit=0,TString option="");
-  TString GetHistNameWithPrefix(TString prefix,TString histname);
+  TString GetHistNameWithPrefixAndSuffix(TString histname,TString prefix,TString suffix);
 };
 Plotter::Plotter(){
   TH1::SetDefaultSumw2(kTRUE);
@@ -197,8 +197,8 @@ TH1* Plotter::GetHistSampleFrag(const SampleFrag& frag,TString histname){
   TH1* hist=NULL;
   for(unsigned int i=0;i<frag.files.size();i++){
     TString filepath=get<0>(frag.files[i]);
-    TString histnamewithprefix=GetHistNameWithPrefix(get<1>(frag.files[i]),histname);
-    double fileweight=get<2>(frag.files[i]);
+    double fileweight=get<1>(frag.files[i]);
+    TString histnamewithprefix=GetHistNameWithPrefixAndSuffix(histname,get<2>(frag.files[i]),get<3>(frag.files[i]));
     TH1* this_hist=GetHistRaw(filepath,histnamewithprefix);
     if(!hist){
       hist=(TH1*)this_hist->Clone();
@@ -1143,8 +1143,8 @@ void Plotter::PrintPlots(TRegexp reg){
   }
 }
 */
-TString Plotter::GetHistNameWithPrefix(TString prefix,TString histname){
-  TString this_histname=histname(0,histname.Last('/')+1)+prefix+histname(histname.Last('/')+1,histname.Length());
+TString Plotter::GetHistNameWithPrefixAndSuffix(TString histname,TString prefix,TString suffix){
+  TString this_histname=histname(0,histname.Last('/')+1)+prefix+histname(histname.Last('/')+1,histname.Length())+suffix;
   return this_histname;
 }
 
@@ -1158,7 +1158,7 @@ void Plotter::PrintSampleFrags(TRegexp regexp){
   }
 }
 
-void Plotter::PrintSamples(TRegexp regexp,bool detail){
+void Plotter::PrintSamples(bool detail,TRegexp regexp){
   for(auto it=samples.begin();it!=samples.end();it++){
     if(it->first.Contains(regexp)){
       cout<<"@ Key: "<<it->first<<" ";

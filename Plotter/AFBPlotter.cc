@@ -24,7 +24,7 @@ AFBPlotter::AFBPlotter(){
     TString key=file(analyzer+"_.*\\.root");
     key=key(analyzer.Length()+1,key.Index(".root")-analyzer.Length()-1)+"_"+year;
     SampleFrag frag;
-    frag.files.push_back(make_tuple(file,"",1.));
+    frag.files.push_back(make_tuple(file,1.,"",""));
     samplefrags[key]=frag;
   } 
   
@@ -39,9 +39,9 @@ AFBPlotter::AFBPlotter(){
     samplefrags["powhegmuon"+syear]=MakeSampleFrag("powhegmuon"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToMuMu_M_[0-9]+_[0-9]+_"+syear));
     samplefrags["powhegelectron"+syear]=MakeSampleFrag("powhegelectron"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToEE_M_[0-9]+_[0-9]+_"+syear));
 
-    samplefrags["genamc"+syear]=MakeSampleFrag("amc"+syear,SampleFrag::Type::GEN,kRed,TRegexp("SkimTree_GEN_DYJets_"+syear),"gen_"); //FIXME no 2018
-    samplefrags["genpowhegmuon"+syear]=MakeSampleFrag("powhegmuon"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToMuMu_M_[0-9]+_[0-9]+_"+syear),"gen_");
-    samplefrags["genpowhegelectron"+syear]=MakeSampleFrag("genpowhegelectron"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToEE_M_[0-9]+_[0-9]+_"+syear),"gen_");
+    samplefrags["genamc"+syear]=MakeSampleFrag("amc"+syear,SampleFrag::Type::GEN,kRed,TRegexp("SkimTree_GEN_DYJets_"+syear),1.,"gen_"); //FIXME no 2018
+    samplefrags["genpowhegmuon"+syear]=MakeSampleFrag("powhegmuon"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToMuMu_M_[0-9]+_[0-9]+_"+syear),1.,"gen_");
+    samplefrags["genpowhegelectron"+syear]=MakeSampleFrag("genpowhegelectron"+syear,SampleFrag::Type::SIGNAL,kBlue,TRegexp("ZToEE_M_[0-9]+_[0-9]+_"+syear),1.,"gen_");
 
     //FIXME no 2018
     //if(syear!="2018") samplefrags["amctt"+syear]=MakeSampleFrag("#gamma*/Z#rightarrow#tau#tau",SampleFrag::Type::BG,EColor::kGreen,"SkimTree_SMP_DYJets_"+syear,"tau_");

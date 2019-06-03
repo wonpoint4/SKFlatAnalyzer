@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumw
+DYToLL_1J DYToLL_1J_13TeV-amcatnloFXFX-pythia8 859.59 50121080.000000 22770078.000000

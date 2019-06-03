@@ -16,5 +16,6 @@
 #pragma link C++ class SkimTree_SMP+;
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
+#pragma link C++ class EfficiencyValidation+;
 
 #endif

@@ -33,6 +33,9 @@ void SkimTree_SMP::initializeAnalyzer(){
   for(unsigned int i=0; i<triggers.size(); i++){
     cout << "[SkimTree_SMP::initializeAnalyzer]   " << triggers.at(i) << endl;
   }
+  
+  fChain->SetBranchStatus("*",0);
+  fChain->SetBranchStatus("HLT_TriggerName",1);
 
 }
 
@@ -42,6 +45,7 @@ void SkimTree_SMP::executeEvent(){
   ev.SetTrigger(*HLT_TriggerName);
 
   if( ev.PassTrigger(triggers) ){
+    fChain->GetEntry(fChain->GetReadEntry(),true);
     newtree->Fill();
   }
 
