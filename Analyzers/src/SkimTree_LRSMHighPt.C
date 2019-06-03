@@ -13,6 +13,7 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
       "HLT_TkMu50_v",
       "HLT_Ele27_WPTight_Gsf_v",
       "HLT_Photon175_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
       "HLT_DoublePhoton60_v",
     };
   }
@@ -23,6 +24,7 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
       "HLT_TkMu100_v",
       "HLT_Ele35_WPTight_Gsf_v",
       "HLT_Photon200_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
       "HLT_DoublePhoton70_v",
     };
   }
@@ -33,6 +35,7 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
       "HLT_TkMu100_v",
       "HLT_Ele32_WPTight_Gsf_v",
       "HLT_Photon200_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
       "HLT_DoublePhoton70_v",
     };
   }
@@ -44,6 +47,7 @@ void SkimTree_LRSMHighPt::initializeAnalyzer(){
   for(unsigned int i=0; i<triggers.size(); i++){
     cout << "[SkimTree_LRSMHighPt::initializeAnalyzer]   " << triggers.at(i) << endl;
   }
+
 
 }
 
