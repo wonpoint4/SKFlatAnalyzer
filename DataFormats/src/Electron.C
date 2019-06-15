@@ -119,7 +119,7 @@ double Electron::EA(){
 
 }
 
-bool Electron::PassID(TString ID){
+bool Electron::PassID(TString ID) const{
 
   //==== XXX veto Gap Always
   if(etaRegion()==GAP) return false;
@@ -146,7 +146,7 @@ bool Electron::PassID(TString ID){
   return false;
 }
 
-bool Electron::Pass_SUSYMVAWP(TString wp){
+bool Electron::Pass_SUSYMVAWP(TString wp) const{
 
   double sceta = fabs(scEta());
 
@@ -174,7 +174,7 @@ bool Electron::Pass_SUSYMVAWP(TString wp){
 
 }
 
-bool Electron::Pass_SUSYTight(){
+bool Electron::Pass_SUSYTight() const{
   if(! Pass_SUSYMVAWP("Tight") ) return false;
   if(! (MiniRelIso()<0.1) ) return false;	
   if(! (fabs(dXY())<0.05 && fabs(dZ())<0.1 && fabs(IP3D()/IP3Derr())<8.) ) return false;
@@ -184,7 +184,7 @@ bool Electron::Pass_SUSYTight(){
   return true;
 }
 
-bool Electron::Pass_SUSYLoose(){
+bool Electron::Pass_SUSYLoose() const{
   if(! Pass_SUSYMVAWP("Loose") ) return false;
   if(! (MiniRelIso()<0.4) ) return false;
   if(! (fabs(dXY())<0.05 && fabs(dZ())<0.1 && fabs(IP3D()/IP3Derr())<8.) ) return false;
@@ -196,13 +196,13 @@ bool Electron::Pass_SUSYLoose(){
 
 //==== TEST ID
 
-bool Electron::Pass_TESTID(){
+bool Electron::Pass_TESTID() const{
   return true;
 }
 
 
 
-bool Electron::Pass_CutBasedLooseNoIso(){
+bool Electron::Pass_CutBasedLooseNoIso() const{
 
   if( fabs(scEta()) <= 1.479 ){
 
@@ -233,7 +233,7 @@ bool Electron::Pass_CutBasedLooseNoIso(){
 
 }
 
-bool Electron::Pass_CutBasedVetoNoIso(){
+bool Electron::Pass_CutBasedVetoNoIso() const{
   
   if( fabs(scEta()) <= 1.479 ){
     
@@ -264,7 +264,7 @@ bool Electron::Pass_CutBasedVetoNoIso(){
 
 }
 
-bool Electron::Pass_CutBasedLoose(){
+bool Electron::Pass_CutBasedLoose() const{
 
   if( fabs(scEta()) <= 1.479 ){
 
@@ -297,7 +297,7 @@ bool Electron::Pass_CutBasedLoose(){
 
 }
 
-bool Electron::Pass_CutBasedVeto(){
+bool Electron::Pass_CutBasedVeto() const{
 
   if( fabs(scEta()) <= 1.479 ){
 

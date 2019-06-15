@@ -15,8 +15,8 @@ public:
   void SetEnergyFractions(double cH, double nH, double nEM, double cEM, double muE);
   void SetMultiplicities(double cM, double nM);
   void SetLSF(double lsf, int lsf_PID);
-  double LSF();
-  double LSF_PID();
+  double LSF() const;
+  double LSF_PID() const;
 
   void SetEnShift(double en_up, double en_down);
   double EnShift(int s){
@@ -36,7 +36,7 @@ public:
   inline bool Pass_tightJetID() const { return j_tightJetID; }
   inline bool Pass_tightLepVetoJetID() const { return j_tightLepVetoJetID; }
 
-  bool PassID(TString ID);
+  bool PassID(TString ID) const;
 
   enum Tagger{
     CSVv2,

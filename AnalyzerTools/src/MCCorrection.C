@@ -359,7 +359,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
 
 }
 
-double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon> muons, int sys){
+double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon>& muons, int sys){
 
   if(ID=="Default") return 1.;
   if(trig=="Default") return 1.;
@@ -396,7 +396,7 @@ double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon> 
 
 }
 
-double MCCorrection::MuonTrigger_SF(TString ID, TString trig, std::vector<Muon *> muons, int sys){
+double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon *>& muons, int sys){
 
   std::vector<Muon> muvec;
   for(unsigned int i=0; i<muons.size(); i++){
@@ -568,7 +568,7 @@ double MCCorrection::ElectronTrigger_Eff(TString ID, TString trig, int DataOrMC,
 
 }
 
-double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<Electron> electrons, int sys){
+double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, const std::vector<Electron>& electrons, int sys){
 
   if(ID=="Default") return 1.;
   if(trig=="Default") return 1.;
@@ -605,7 +605,7 @@ double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<El
 
 }
 
-double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<Electron *> electrons, int sys){
+double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, const std::vector<Electron *>& electrons, int sys){
 
   std::vector<Electron> muvec;
   for(unsigned int i=0; i<electrons.size(); i++){
@@ -617,7 +617,7 @@ double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, std::vector<El
 
 }
 
-double MCCorrection::GetPrefireWeight(std::vector<Photon> photons, std::vector<Jet> jets, int sys){
+double MCCorrection::GetPrefireWeight(const std::vector<Photon>& photons, const std::vector<Jet>& jets, int sys){
 
   double photon_weight = 1.;
   double jet_weight = 1.;
@@ -719,7 +719,7 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
 
 }
 
-double MCCorrection::GetTopPtReweight(std::vector<Gen> gens){
+double MCCorrection::GetTopPtReweight(const std::vector<Gen>& gens){
   //==== ref: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting2017
   //==== Only top quarks in SM ttbar events must be reweighted, 
   //==== not single tops or tops from BSM production mechanisms.
@@ -730,7 +730,7 @@ double MCCorrection::GetTopPtReweight(std::vector<Gen> gens){
   double toppt1=10000, toppt2=10000;
   bool found_top = false, found_atop = false;
 
-  for(vector<Gen>::iterator genit=gens.begin(); genit!=gens.end(); genit++){
+  for(vector<Gen>::const_iterator genit=gens.begin(); genit!=gens.end(); genit++){
     
     if(genit->Status() == 22){
       if(genit->PID() == 6){

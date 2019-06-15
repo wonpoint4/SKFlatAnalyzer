@@ -94,11 +94,10 @@ public:
   inline double TunePPtError() const {return j_TunePPtError;}
 
   //==== ID
-  bool PassID(TString ID);
-  bool Pass_POGTight();
-  bool Pass_POGTightWithTightIso();
-  bool Pass_POGHighPtWithLooseTrkIso();
-  bool Pass_TESTID();
+  bool PassID(TString ID) const;
+  bool Pass_POGTightWithTightIso() const;
+  bool Pass_POGHighPtWithLooseTrkIso() const;
+  bool Pass_TESTID() const;
 
 private:
 

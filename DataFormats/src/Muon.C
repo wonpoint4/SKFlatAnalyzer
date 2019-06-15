@@ -86,7 +86,7 @@ void Muon::SetTuneP4(double pt, double pt_err, double eta, double phi, double q)
   j_TunePPtError = pt_err;
 }
 
-bool Muon::PassID(TString ID){
+bool Muon::PassID(TString ID) const {
   //==== POG
   if(ID=="POGTight") return isPOGTight();
   if(ID=="POGHighPt") return isPOGHighPt();
@@ -103,12 +103,12 @@ bool Muon::PassID(TString ID){
   return false;
 
 }
-bool Muon::Pass_POGTightWithTightIso(){
+bool Muon::Pass_POGTightWithTightIso() const {
   if(!( isPOGTight() )) return false;
   if(!( RelIso()<0.15 ))  return false;
   return true;
 }
-bool Muon::Pass_POGHighPtWithLooseTrkIso(){
+bool Muon::Pass_POGHighPtWithLooseTrkIso() const {
   if(!( isPOGHighPt() )) return false;
   if(!( TrkIso()/TuneP4().Pt()<0.1 )) return false;
   return true;
@@ -116,6 +116,6 @@ bool Muon::Pass_POGHighPtWithLooseTrkIso(){
 
 //==== TEST ID
 
-bool Muon::Pass_TESTID(){
+bool Muon::Pass_TESTID() const {
   return true;
 }

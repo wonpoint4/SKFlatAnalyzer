@@ -71,8 +71,8 @@ public:
 
   //==== If TightIso is set, it calculate ptcone
   //==== If UseMini is true, Lepton::RelIso() returns MiniRelIso
-  std::vector<Lepton *> MakeLeptonPointerVector(std::vector<Muon>& muons, double TightIso=-999, bool UseMini=false);
-  std::vector<Lepton *> MakeLeptonPointerVector(std::vector<Electron>& electrons, double TightIso=-999, bool UseMini=false);
+  std::vector<Lepton *> MakeLeptonPointerVector(const std::vector<Muon>& muons, double TightIso=-999, bool UseMini=false);
+  std::vector<Lepton *> MakeLeptonPointerVector(const std::vector<Electron>& electrons, double TightIso=-999, bool UseMini=false);
 
   std::vector<Jet> GetAllJets();
   std::vector<Jet> GetJets(TString id, double ptmin, double fetamax);
@@ -87,31 +87,31 @@ public:
   //==== Get AllObject in the begining, and apply cut
   //==================================================+
 
-  std::vector<Electron> SelectElectrons(std::vector<Electron> electrons, TString id, double ptmin, double fetamax);
+  std::vector<Electron> SelectElectrons(const std::vector<Electron>& electrons, TString id, double ptmin, double fetamax);
 
-  std::vector<Muon> UseTunePMuon(std::vector<Muon> muons);
-  std::vector<Muon> SelectMuons(std::vector<Muon> muons, TString id, double ptmin, double fetamax);
+  std::vector<Muon> UseTunePMuon(const std::vector<Muon>& muons);
+  std::vector<Muon> SelectMuons(const std::vector<Muon>& muons, TString id, double ptmin, double fetamax);
 
-  std::vector<Jet> SelectJets(std::vector<Jet> jets, TString id, double ptmin, double fetamax);
+  std::vector<Jet> SelectJets(const std::vector<Jet>& jets, TString id, double ptmin, double fetamax);
 
-  std::vector<FatJet> SelectFatJets(std::vector<FatJet> jets, TString id, double ptmin, double fetamax);
+  std::vector<FatJet> SelectFatJets(const std::vector<FatJet>& jets, TString id, double ptmin, double fetamax);
 
   //==================
   //==== Systematics
   //==================
 
-  std::vector<Electron> ScaleElectrons(std::vector<Electron> electrons, int sys);
-  std::vector<Electron> SmearElectrons(std::vector<Electron> electrons, int sys);
+  std::vector<Electron> ScaleElectrons(const std::vector<Electron>& electrons, int sys);
+  std::vector<Electron> SmearElectrons(const std::vector<Electron>& electrons, int sys);
 
-  std::vector<Muon> ScaleMuons(std::vector<Muon> muons, int sys);
+  std::vector<Muon> ScaleMuons(const std::vector<Muon>& muons, int sys);
 
-  std::vector<Jet> ScaleJets(std::vector<Jet> jets, int sys);
-  std::vector<Jet> SmearJets(std::vector<Jet> jets, int sys);
+  std::vector<Jet> ScaleJets(const std::vector<Jet>& jets, int sys);
+  std::vector<Jet> SmearJets(const std::vector<Jet>& jets, int sys);
 
-  std::vector<FatJet> ScaleFatJets(std::vector<FatJet> jets, int sys);
-  std::vector<FatJet> SmearFatJets(std::vector<FatJet> jets, int sys);
-  std::vector<FatJet> ScaleSDMassFatJets(std::vector<FatJet> jets, int sys);
-  std::vector<FatJet> SmearSDMassFatJets(std::vector<FatJet> jets, int sys);
+  std::vector<FatJet> ScaleFatJets(const std::vector<FatJet>& jets, int sys);
+  std::vector<FatJet> SmearFatJets(const std::vector<FatJet>& jets, int sys);
+  std::vector<FatJet> ScaleSDMassFatJets(const std::vector<FatJet>& jets, int sys);
+  std::vector<FatJet> SmearSDMassFatJets(const std::vector<FatJet>& jets, int sys);
 
   //====================
   //==== Event Filters
@@ -164,30 +164,31 @@ public:
   double MT2(TLorentzVector a, TLorentzVector b, Particle METv, double METgap);
   double projectedMET(TLorentzVector a, TLorentzVector b, Particle METv);
   bool HasFlag(TString flag);
-  std::vector<Muon> MuonWithoutGap(std::vector<Muon> muons);
-  std::vector<Muon> MuonPromptOnly(std::vector<Muon> muons, std::vector<Gen> gens);
-  std::vector<Muon> MuonUsePtCone(std::vector<Muon> muons);
-  Muon MuonUsePtCone(Muon muon);
-  Particle UpdateMET(Particle METv, std::vector<Muon> muons);
-  std::vector<Muon> MuonApplyPtCut(std::vector<Muon> muons, double ptcut);
-  std::vector<Electron> ElectronPromptOnly(std::vector<Electron> electrons, std::vector<Gen> gens);
-  std::vector<Electron> ElectronUsePtCone(std::vector<Electron> electrons);
-  Electron ElectronUsePtCone(Electron electron);
-  std::vector<Electron> ElectronApplyPtCut(std::vector<Electron> electrons, double ptcut);
-  std::vector<Jet> JetsAwayFromFatJet(std::vector<Jet> jets, std::vector<FatJet> fatjets, double mindr=1.0);
-  std::vector<Jet> JetsVetoLeptonInside(std::vector<Jet> jets, std::vector<Electron> els, std::vector<Muon> mus);
-  std::vector<Jet> JetsAwayFromPhoton(std::vector<Jet> jets, std::vector<Photon> photons, double mindr);
-  Particle AddFatJetAndLepton(FatJet fatjet, Lepton lep);
+  std::vector<Muon> MuonWithoutGap(const std::vector<Muon>& muons);
+  std::vector<Muon> MuonPromptOnly(const std::vector<Muon>& muons, const std::vector<Gen>& gens);
+  std::vector<Muon> MuonUsePtCone(const std::vector<Muon>& muons);
+  Muon MuonUsePtCone(const Muon& muon);
+  Particle UpdateMET(const Particle& METv, const std::vector<Muon>& muons);
+  std::vector<Muon> MuonApplyPtCut(const std::vector<Muon>& muons, double ptcut);
+  std::vector<Electron> ElectronPromptOnly(const std::vector<Electron>& electrons, const std::vector<Gen>& gens);
+  std::vector<Electron> ElectronUsePtCone(const std::vector<Electron>& electrons);
+  Electron ElectronUsePtCone(const Electron& electron);
+  std::vector<Electron> ElectronApplyPtCut(const std::vector<Electron>& electrons, double ptcut);
+  std::vector<Jet> JetsAwayFromFatJet(const std::vector<Jet>& jets, const std::vector<FatJet>& fatjets, double mindr=1.0);
+  std::vector<Jet> JetsVetoLeptonInside(const std::vector<Jet>& jets, const std::vector<Electron>& els, const std::vector<Muon>& mus, double dR=0.4);
+  std::vector<FatJet> FatJetsVetoLeptonInside(const std::vector<FatJet>& jets, const std::vector<Electron>& els, const std::vector<Muon>& mus, double dR=0.8);
+  std::vector<Jet> JetsAwayFromPhoton(const std::vector<Jet>& jets, const std::vector<Photon>& photons, double mindr);
+  Particle AddFatJetAndLepton(const FatJet& fatjet, const Lepton& lep);
 
   //==== GenMatching
 
-  void PrintGen(std::vector<Gen> gens);
-  Gen GetGenMatchedLepton(Lepton lep, std::vector<Gen> gens);
-  Gen GetGenMatchedPhoton(Lepton lep, std::vector<Gen> gens);
-  vector<int> TrackGenSelfHistory(Gen me, std::vector<Gen> gens);
-  bool IsFromHadron(Gen me, std::vector<Gen> gens);
-  int GetLeptonType(Lepton lep, std::vector<Gen> gens);
-  int GetGenPhotonType(Gen genph, std::vector<Gen> gens);
+  void PrintGen(const std::vector<Gen>& gens);
+  Gen GetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens);
+  Gen GetGenMatchedPhoton(const Lepton& lep, const std::vector<Gen>& gens);
+  vector<int> TrackGenSelfHistory(const Gen& me, const std::vector<Gen>& gens);
+  bool IsFromHadron(const Gen& me, const std::vector<Gen>& gens);
+  int GetLeptonType(const Lepton& lep, const std::vector<Gen>& gens);
+  int GetGenPhotonType(const Gen& genph, const std::vector<Gen>& gens);
   bool IsSignalPID(int pid);
 
   //==== Plotting

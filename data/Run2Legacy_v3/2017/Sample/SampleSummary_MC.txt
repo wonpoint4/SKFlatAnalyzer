@@ -1,4 +1,8 @@
 # alias PD xsec nmc sumw
+DY1Jets_MG	DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8	1012.0	42331295	42299237
+DY2Jets_MG	DY2JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8	334.7	10037851	10027319
+DY3Jets_MG	DY3JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8	102.3	1149467	1147725
+DY4Jets_MG	DY4JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8	54.52	4328648	4317756
 DYJets	DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8	6225.42	182217609	123485957
 DYJets10to50_MG	DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8	18610	39521230	39489654
 SingleTop_sch_Lep	ST_s-channel_4f_leptonDecays_TuneCP5_PSweights_13TeV-amcatnlo-pythia8	3.36	9914948	6185062
