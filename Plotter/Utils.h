@@ -7,3 +7,10 @@ vector<TString> Split(TString s,TString del){
   array->Delete();
   return out;
 }
+
+TString Dirname(TString s){
+  return s(0,s.Last('/'));
+}
+TString Basename(TString s){
+  return s(s.Last('/')+1,s.Length());
+}

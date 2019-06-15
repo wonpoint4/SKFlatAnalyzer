@@ -13,7 +13,13 @@ void EfficiencyValidation::executeEvent(){
     int parton0,parton1,hardl0,hardl1,l0,l1;
     vector<int> photons;
     GetGenIndex(gens,parton0,parton1,hardl0,hardl1,l0,l1,photons);
-    if(abs(gens[hardl0].PID())==15){
+    if(abs(gens[hardl0].PID())!=15){
+      Gen genhardl0=gens[hardl0],genhardl1=gens[hardl1],genl0=gens[l0],genl1=gens[l1],genphotons;
+      for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
+      TLorentzVector genZ=(genl0+genl1+genphotons);
+      //FIXME need to get Zptcor for 2018
+      if(DataYear!=2018) zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+    }else{
       tauprefix="tau_";
     }
   }
