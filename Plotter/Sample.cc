@@ -27,6 +27,7 @@ public:
   int markercolor;
   int markerstyle;
   double markersize;
+  TString drawoption;
   vector<tuple<TString,double,TString,TString>> files; //filename,weight,prefix,suffix
 
   SampleFrag();
@@ -89,8 +90,22 @@ SampleFrag MakeSampleFrag(TString title,SampleFrag::Type type,int color,TRegexp 
   return samplefrag;
 }
 void SampleFrag::SetColor(int color){
-  linecolor=color;
-  markercolor=color;
+  if(color==kBlack){
+    linecolor=color;
+    markercolor=color;
+    markerstyle=20;
+    markersize=0.7;
+    drawoption="e";
+  }else{
+    fillcolor=color;
+    linecolor=color;
+    markercolor=color;
+    drawoption="e";
+  }
+  if(type==Type::STACK){
+    fillstyle=3001;
+    drawoption="e2";
+  }
 }
 void SampleFrag::Add(TString samplefragkey,double weight,TString prefix,TString suffix){
   auto it=samplefrags.find(samplefragkey);
@@ -113,8 +128,9 @@ void SampleFrag::Add(TRegexp samplefragkeyexp,double weight,TString prefix,TStri
   }
 }
 void SampleFrag::ApplyHistStyle(TH1* hist) const {
+  if(DEBUG>3) cout<<"###DEBUG### [SampleFrag::ApplyHistStyle(TH1* hist)]"<<endl;
   if(hist){
-    if(type!=Type::STACK){
+    if(strstr(hist->ClassName(),"THStack")==NULL){
       if(linecolor>=0) hist->SetLineColor(linecolor);
       if(linestyle>=0) hist->SetLineStyle(linestyle);
       if(linewidth>=0) hist->SetLineWidth(linewidth);
@@ -123,7 +139,8 @@ void SampleFrag::ApplyHistStyle(TH1* hist) const {
       if(markercolor>=0) hist->SetMarkerColor(markercolor);
       if(markerstyle>=0) hist->SetMarkerStyle(markerstyle);
       if(markersize>=0) hist->SetMarkerSize(markersize);
-    }
+      hist->SetOption(drawoption);
+    }      
     hist->SetNameTitle(title,title);
   }
 }
@@ -148,6 +165,7 @@ Sample MakeSample(TString title,Sample::Type type,int color){
   Sample sample;
   sample.title=title;sample.type=type;
   sample.SetColor(color);
+  
   return sample;
 }
 Sample MakeSample(TString title,Sample::Type type,int color,tuple<TString,double> frag1,tuple<TString,double> frag2=make_tuple("",0.),tuple<TString,double> frag3=make_tuple("",0.),tuple<TString,double> frag4=make_tuple("",0.),tuple<TString,double> frag5=make_tuple("",0.),tuple<TString,double> frag6=make_tuple("",0.),tuple<TString,double> frag7=make_tuple("",0.)){

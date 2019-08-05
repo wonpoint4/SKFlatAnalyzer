@@ -11,8 +11,7 @@ public:
 
   virtual void initializeAnalyzer();
   void FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w);
-  void FillBasicHists(TString pre,TString suf,const vector<Lepton*>& leps,double weight);
-  void FillSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,map<TString,double> map_systematic);
+  void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
   void SetupZPtWeight();
   double GetZPtWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double Lepton_SF(TString histkey,const Lepton* lep,int sys);

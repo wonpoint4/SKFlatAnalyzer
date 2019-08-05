@@ -29,6 +29,7 @@ TString GetStringEColor(EColor color){
   case kYellow: return "kYellow";
   case kMagenta: return "kMagenta";
   case kOrange: return "kOrange";
+  case kGray: return "kGray";
   default: return "UNKNOWN";
   }
 }

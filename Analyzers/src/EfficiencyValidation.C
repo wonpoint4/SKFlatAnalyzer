@@ -72,31 +72,32 @@ void EfficiencyValidation::executeEvent(){
 }
 
 void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* ev){
-  map< TString, std::vector<Muon> > muons;
-  map< TString, std::vector<Electron> > electrons;
+  map< TString, std::vector<Muon> > map_muons;
+  map< TString, std::vector<Electron> > map_electrons;
+  //suffix, lepton vector, SF1, SF2, TriggerSF1, TriggerSF2
+  map< TString, tuple<vector<Lepton*>,TString,TString,TString,TString> > map_leps;
+
 
   double lep0ptcut,lep1ptcut;
-  //TString LeptonIDSF_key,LeptonISOSF_key,triggerSF_key0,triggerSF_key1;
-  map< TString, tuple<vector<Lepton*>,TString,TString,TString,TString> > map_leps;
   if(channelname.Contains("muon")){
     lep0ptcut=20.;
     lep1ptcut=10.;
 
-    muons["POGTight_PFIsoTight"]=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
-    muons["POGTight_TrkIsoLoose"]=SMPGetMuons("POGTightWithLooseTrkIso",0.0,2.4);
+    map_muons["POGTight_PFIsoTight"]=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
+    map_muons["POGTight_TrkIsoLoose"]=SMPGetMuons("POGTightWithLooseTrkIso",0.0,2.4);
 
     switch(DataYear){
     case 2016: 
-      map_leps["POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
-      //map_leps["POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q"); 
+      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
+      //map_leps["_POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q"); 
       break;
     case 2017: 
-      map_leps["POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
-      map_leps["POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q");
+      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
+      map_leps["_POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q");
       break;
     case 2018: 
-      map_leps["POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","","");
-      map_leps["POGTight_TrkIsoLoose"]=make_tuple(MakeLeptonPointerVector(muons["POGTight_TrkIsoLoose"]),"ID_SF_NUM_TightID_DEN_genTracks","Default","","");
+      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","","");
+      map_leps["_POGTight_TrkIsoLoose"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"ID_SF_NUM_TightID_DEN_genTracks","Default","","");
       break;
     default: cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
     }
@@ -104,22 +105,22 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     lep0ptcut=25.;
     lep1ptcut=15.;
 
-    electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
-    electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
+    map_electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
 
     switch(DataYear){
     case 2016: 
-      map_leps["MediumID"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
-      map_leps["MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
+      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
+      map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
       break;
     case 2017: 
-      map_leps["MediumID"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
-      map_leps["MediumID_Q"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","LeadEle23_MediumID_Q","TailEle12_MediumID_Q"); 
-      map_leps["MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
+      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","LeadEle23_MediumID_Q","TailEle12_MediumID_Q"); 
+      map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
       break;
     case 2018: 
-      map_leps["MediumID"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID"]),"ID_SF_passMediumID","","",""); 
-      map_leps["MediumID_selective"]=make_tuple(MakeLeptonPointerVector(electrons["MediumID_selective"]),"","","",""); 
+      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","",""); 
+      map_leps["_MediumID_selective"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"","","",""); 
       break;
     default: 
       cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
@@ -165,7 +166,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 
   ///////////////////////lepton selection///////////////////////
   for(const auto& element_leps: map_leps){
-    TString idsuffix="_"+element_leps.first;
+    TString idsuffix=element_leps.first;
     auto const& leps=get<0>(element_leps.second);
 
     FillHist(channelname+"/"+tauprefix+"nlepton"+idsuffix,leps.size(),totalweight,10,0,10);
@@ -192,7 +193,6 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 	      double this_RECOSF_down=mcCorr->ElectronReco_SF(this_eta,this_pt,-1);
 	      RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
             }
-
 	  
 	    double this_IDSF=Lepton_SF(LeptonIDSF_key,leps.at(i),0);
 	    double this_IDSF_up=Lepton_SF(LeptonIDSF_key,leps.at(i),1);
@@ -327,7 +327,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
     FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
     FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
     
-    double cost=GetCosThetaCS(leps);
+    double cost=GetCosThetaCS((Particle*)leps.at(0),(Particle*)leps.at(1));
     FillHist(pre+"costhetaCS"+suf,cost,w,40,-1,1);
     FillHist(pre+"abscosthetaCS"+suf,fabs(cost),w,20,0,1);
     double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*cost*cost);

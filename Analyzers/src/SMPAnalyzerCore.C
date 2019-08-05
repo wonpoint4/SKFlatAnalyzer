@@ -17,45 +17,28 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
 void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZPtWeight();
   IsDYSample=false;
-  if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")) IsDYSample=true;
+  if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
 }
 
-void SMPAnalyzerCore::FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w){
-  TLorentzVector genZ=genl0+genl1+genfsr;
-  FillHist(pre+"genZmass"+suf,genZ.M(),w,400,0,400);
-  FillHist(pre+"genZpt"+suf,genZ.Pt(),w,400,0,400);
-  FillHist(pre+"genZrap"+suf,genZ.Rapidity(),w,60,-6,6);
-  if(genl0.Pt()<genl1.Pt()){
-    TLorentzVector temp=genl0;
-    genl0=genl1;
-    genl1=temp;
-  }
-  FillHist(Form("%sgenl0pt%s",pre.Data(),suf.Data()),genl0.Pt(),w,200,0,200);
-  FillHist(Form("%sgenl0eta%s",pre.Data(),suf.Data()),genl0.Eta(),w,200,-5,5);
-  FillHist(Form("%sgenl1pt%s",pre.Data(),suf.Data()),genl1.Pt(),w,200,0,200);
-  FillHist(Form("%sgenl1eta%s",pre.Data(),suf.Data()),genl1.Eta(),w,200,-5,5);
-  FillHist(pre+"lldelR"+suf,genl0.DeltaR(genl1),w,70,0,7);  
-  FillHist(pre+"lldelphi"+suf,genl0.DeltaPhi(genl1),w,80,-4,4);
-}
-
-void SMPAnalyzerCore::FillBasicHists(TString pre,TString suf,const vector<Lepton*>& leps,double w){
-  Particle dilepton=((*leps.at(0))+(*leps.at(1)));
-  FillHist(pre+"dimass"+suf,dilepton.M(),w,400,0,400);
-  FillHist(pre+"dipt"+suf,dilepton.Pt(),w,400,0,400);
-  FillHist(pre+"dirap"+suf,dilepton.Rapidity(),w,50,-5,5);
+void SMPAnalyzerCore::FillDileptonHists(TString pre,TString suf,Particle *l0,Particle *l1,double w){
+  TLorentzVector dilepton=*l0+*l1;
+  double dimass=dilepton.M();
+  double dipt=dilepton.Pt();
+  double dirap=dilepton.Rapidity();
+  FillHist(pre+"dimass"+suf,dimass,w,400,0,400);
+  FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
+  FillHist(pre+"dirap"+suf,dirap,w,120,-6,6);
+  vector<Particle*> leps;
+  if(l0->Pt()>l1->Pt()) leps={l0,l1};
+  else leps={l1,l0};
   for(int i=0;i<(int)leps.size();i++){
-    FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),leps.at(i)->Pt(),w,1000,0,1000);
+    FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),leps.at(i)->Pt(),w,400,0,400);
     FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),leps.at(i)->Eta(),w,200,-5,5);
-    FillHist(Form("%sl%driso%s",pre.Data(),i,suf.Data()),leps.at(i)->RelIso(),w,30,0,0.3);
+    FillHist(Form("%sl%dphi%s",pre.Data(),i,suf.Data()),leps.at(i)->Phi(),w,160,-4,4);
   }
-  FillHist(pre+"lldelR"+suf,leps.at(0)->DeltaR(*leps.at(1)),w,70,0,7);  
-  FillHist(pre+"lldelphi"+suf,leps.at(0)->DeltaPhi(*leps.at(1)),w,80,-4,4);
-  FillHist(pre+"nPV"+suf,nPV,w,60,0,60);
-}
-void SMPAnalyzerCore::FillSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,map<TString,double> map_systematic){
-  for(auto iter=map_systematic.begin();iter!=map_systematic.end();iter++){
-    FillBasicHists(pre,"_"+iter->first+suf,leps,iter->second);
-  }
+  FillHist(pre+"lldelR"+suf,l0->DeltaR(*l1),w,70,0,7);  
+  FillHist(pre+"lldelphi"+suf,l0->DeltaPhi(*l1),w,80,-4,4);
+  FillHist(pre+"lldeleta"+suf,fabs(l0->Eta()-l1->Eta()),w,100,-5,5);
 }
 double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   if(IsDATA) return 1.;

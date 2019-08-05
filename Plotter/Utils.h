@@ -1,3 +1,5 @@
+#ifndef __UTILS_H__
+#define __UTILS_H__
 vector<TString> Split(TString s,TString del){
   TObjArray* array=s.Tokenize(del);
   vector<TString> out;
@@ -9,8 +11,17 @@ vector<TString> Split(TString s,TString del){
 }
 
 TString Dirname(TString s){
-  return s(0,s.Last('/'));
+  if(s.Last('/')!=-1) return s(0,s.Last('/'));
+  else return ".";
 }
 TString Basename(TString s){
-  return s(s.Last('/')+1,s.Length());
+  if(s.Last('/')!=-1) return s(s.Last('/')+1,s.Length());
+  else return s;
 }
+TString Replace(TString str,TRegexp reg,TString repl){
+  int extent;
+  int start=str.Index(reg,&extent);
+  return str.Replace(start,extent,repl);
+}
+
+#endif

@@ -13,13 +13,12 @@ public:
   AFBAnalyzer();
   ~AFBAnalyzer();
 
-  double GetCosThetaCS(const vector<Lepton*>& leps);
-  //double GetCosThetaA(const vector<Lepton*>& leps);
-  //double GetCosThetaB(const vector<Lepton*>& leps,const vector<Jet>& jets);
-  //double GetCosThetaC(const vector<Lepton*>& leps,const vector<Jet>& jets);
+  //double GetCosThetaCS(const vector<Lepton*>& leps);
+  double GetCosThetaCS(const Particle *p0,const Particle *p1);
   double GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut);
-  void FillAFBHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,double w);
-  void FillAFBSystematicHists(TString pre,TString suf,const vector<Lepton*>& leps,const vector<Jet>& jets,map<TString,double> map_systematic);
+  void FillHistAll(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
+  void FillAFBSystematicHists(TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
+  void FillAFBHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
   //static const int massbinnum=12;
   //const double massrange[massbinnum+1]={60,70,78,84,87,89,91,93,95,98,104,112,120};
   static const int massbinnum=16;
