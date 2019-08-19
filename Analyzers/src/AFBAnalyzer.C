@@ -174,6 +174,23 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     map_muons["_scale_down"]=ScaleMuons(map_muons[""],-1);
     std::sort(map_muons["_scale_down"].begin(),map_muons["_scale_down"].end(),PtComparing);
     map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_down"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+
+    map_muons["_noroccor"]=MuonMomentumCorrection(map_muons[""],-1,0);
+    std::sort(map_muons["_noroccor"].begin(),map_muons["_noroccor"].end(),PtComparing);
+    map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_muons["_noroccor"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+
+    map_muons["_roccor0"]=MuonMomentumCorrection(map_muons[""],0,0);
+    std::sort(map_muons["_roccor0"].begin(),map_muons["_roccor0"].end(),PtComparing);
+    map_leps["_roccor0"]=make_tuple(MakeLeptonPointerVector(map_muons["_roccor0"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+
+    map_muons["_roccor3"]=MuonMomentumCorrection(map_muons[""],3,0);
+    std::sort(map_muons["_roccor3"].begin(),map_muons["_roccor3"].end(),PtComparing);
+    map_leps["_roccor3"]=make_tuple(MakeLeptonPointerVector(map_muons["_roccor3"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+
+    map_muons["_roccor5"]=MuonMomentumCorrection(map_muons[""],5,0);
+    std::sort(map_muons["_roccor5"].begin(),map_muons["_roccor5"].end(),PtComparing);
+    map_leps["_roccor5"]=make_tuple(MakeLeptonPointerVector(map_muons["_roccor5"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+
   }else if(channelname.Contains("electron")){
     lep0ptcut=25.;
     lep1ptcut=15.;
@@ -187,8 +204,11 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     
     map_electrons[""]=SMPGetElectrons("passMediumID",0.0,2.5);
     map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
-    
-    
+
+    map_electrons["_roccor0"]=ElectronEnergyCorrection(map_electrons[""],0,0);
+    std::sort(map_electrons["_roccor0"].begin(),map_electrons["_roccor0"].end(),PtComparing);
+    map_leps["_roccor0"]=make_tuple(MakeLeptonPointerVector(map_electrons["_roccor0"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+        
     map_electrons["_scale_up"]=ScaleElectrons(map_electrons[""],1);
     std::sort(map_electrons["_scale_up"].begin(),map_electrons["_scale_up"].end(),PtComparing);
     map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_scale_up"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
@@ -199,11 +219,11 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     
     map_electrons["_smear_up"]=SmearElectrons(map_electrons[""],1);
     std::sort(map_electrons["_smear_up"].begin(),map_electrons["_smear_up"].end(),PtComparing);
-    map_leps["_scale_smear_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_up"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+    map_leps["_smear_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_up"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
     
     map_electrons["_smear_down"]=SmearElectrons(map_electrons[""],-1);
     std::sort(map_electrons["_smear_down"].begin(),map_electrons["_smear_down"].end(),PtComparing);
-    map_leps["_scale_smear_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_down"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+    map_leps["_smear_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_down"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
     
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
@@ -287,12 +307,6 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
             ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
           }
 	}
-	totalweight*=RECOSF;
-	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight,20,0,20);
-	totalweight*=IDSF;
-	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight,20,0,20);
-	totalweight*=ISOSF;
-	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight,20,0,20);
       
 	double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
 	if(!IsDATA){
@@ -302,12 +316,15 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	  triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
 	  triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
 	}
-	totalweight*=triggerSF;
-	FillHist(channelname+"/"+tauprefix+"cutflow",9.5,totalweight,20,0,20);
+
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",6.5,totalweight*RECOSF,20,0,20);
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",7.5,totalweight*RECOSF*IDSF,20,0,20);
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",8.5,totalweight*RECOSF*IDSF*ISOSF,20,0,20);
+	if(dosys) FillHist(channelname+"/"+tauprefix+"cutflow",9.5,totalweight*RECOSF*IDSF*ISOSF*triggerSF,20,0,20);
 
 	///////////////////////map_weight//////////////////
 	map<TString,double> map_weight;
-	map_weight[suffix]=totalweight;
+	map_weight[suffix]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
 	if(dosys&&!IsDATA){
 	  map_weight["_noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
 	
@@ -346,10 +363,11 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	    for(unsigned int i=0;i<PDFWeights_Scale->size();i++){
 	      map_weight[Form("_scalevariation%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Scale->at(i);
 	    }
-	    
+	    /*
 	    for(unsigned int i=0;i<PDFWeights_Error->size();i++){
 	      map_weight[Form("_pdf%d",i)]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*PDFWeights_Error->at(i);
 	    }
+	    */
 	  }
 	}
 

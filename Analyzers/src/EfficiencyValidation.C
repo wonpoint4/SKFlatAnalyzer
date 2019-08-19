@@ -116,6 +116,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     case 2017: 
       map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","LeadEle23_MediumID_Q","TailEle12_MediumID_Q"); 
+      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID"]),"ID_SF_TightID_pt10_Q","","LeadEle23_TightID_Q","TailEle12_TightID_Q"); 
       map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
       break;
     case 2018: 
@@ -310,7 +311,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
 	}
       } 
       for(unsigned int ib=0;ib<etabin.size()-1;ib++){
-	if(eta>etabin[ib]&&pt<etabin[ib+1]){
+	if(eta>etabin[ib]&&eta<etabin[ib+1]){
 	  FillHist(Form("%sl%d%spt_eta%.2fto%.2f%s",pre.Data(),i,charge.Data(),etabin[ib],etabin[ib+1],suf.Data()),pt,w,500,0,500);
 	  FillHist(Form("%sl%dpt_eta%.2fto%.2f%s",pre.Data(),i,etabin[ib],etabin[ib+1],suf.Data()),pt,w,500,0,500);
 	  FillHist(Form("%sl%spt_eta%.2fto%.2f%s",pre.Data(),charge.Data(),etabin[ib],etabin[ib+1],suf.Data()),pt,w,500,0,500);

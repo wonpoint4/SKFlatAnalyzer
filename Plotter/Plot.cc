@@ -7,7 +7,7 @@ public:
   TString name;
   TString histname;
   TString sysname;
-  Type type;
+  Type type=Type::CompareAndRatio;
   int rebin=0;
   double xmin=0,xmax=0;
   TString option;

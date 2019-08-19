@@ -99,6 +99,9 @@ public:
   bool Pass_POGHighPtWithLooseTrkIso() const;
   bool Pass_TESTID() const;
 
+  void SetTrackerLayers(int trackerLayers);
+  inline int TrackerLayers() const { return j_trackerLayers; }
+
 private:
 
   unsigned int j_TypeBit, j_IDBit;
@@ -108,6 +111,7 @@ private:
   double j_MiniAODPt, j_MiniAODTunePPt, j_MomentumScaleUp, j_MomentumScaleDown;
   Particle j_TuneP4;
   double j_TunePPtError;
+  int j_trackerLayers;
 
   ClassDef(Muon,1);
 };

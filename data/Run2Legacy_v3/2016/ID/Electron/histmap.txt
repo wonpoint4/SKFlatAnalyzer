@@ -4,6 +4,8 @@ ID	SF	passMediumID	2016LegacyReReco_ElectronMedium_Fall17V2.root	EGamma_SF2D	TH2
 Trigger SF      LeadEle23_MediumID  EGM_TrigEff_runBCDEFGH_LegEle23_Medium80X_jihkim_v1.root        EGamma_SF2D     TH2F
 Trigger SF      TailEle12_MediumID  EGM_TrigEff_runBCDEFGH_LegEle12_Medium80X_jihkim_v1.root        EGamma_SF2D     TH2F
 ID      SF      MediumID_pt10  	    EGM_IdIso_runBCDEFGH_Medium80X_jihkim_v1.root            	    EGamma_SF2D     TH2F
+ID	SF	TightID_pt10_QPlus  EGM_IdIso_runBCDEFGH_Tight94XV2_QPlus_jihkim_v1.root	    EGamma_SF2D	    TH2F
+ID	SF	TightID_pt10_QMinus EGM_IdIso_runBCDEFGH_Tight94XV2_QMinus_jihkim_v1.root	    EGamma_SF2D	    TH2F
 ID 	SF 	Selective_MediumID_pt10_QPlus 	      EGMstrict_IdIso_runBCDEFGH_Medium94XV2_QPlus_jihkim_v2.root 	EGamma_SF2D     TH2F
 ID 	SF 	Selective_MediumID_pt10_QMinus 	      EGMstrict_IdIso_runBCDEFGH_Medium94XV2_QMinus_jihkim_v2.root 	EGamma_SF2D  	TH2F
 ID	SF	Selective_TightID_pt10_QPlus	      EGMstrict_IdIso_runBCDEFGH_Tight94XV2_QPlus_jihkim_v2.root	EGamma_SF2D	TH2F

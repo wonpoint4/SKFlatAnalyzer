@@ -100,7 +100,7 @@ void AFBPlotter::SetupSamples(){
     samples["amc"]=MakeSample("aMC@NLO",Sample::Type::SUM,kRed,make_tuple("amc"+syear,1.));
     samples["amcJet"]=MakeSample("aMC@NLO Jet-binned",Sample::Type::SUM,kGreen,make_tuple("amcJet"+syear,1.));
     //samples["mg"]=MakeSample("Madgraph",Sample::Type::SUM,kBlue,make_tuple("mg"+syear,1.));
-    samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+schannel+syear,1.));
+    //samples["powheg"]=MakeSample("powheg",Sample::Type::SUM,kBlue,make_tuple("powheg"+schannel+syear,1.));
   }else if(mode==4){ //data-bg vs amcJet vs truthamcJet vs genamcJet
     samples["data"]=MakeSample("data",Sample::Type::SUM,kBlack,make_tuple(schannel+syear,1.),make_tuple("amctt"+syear,-1.),make_tuple("vv"+syear,-1.),make_tuple("wjets"+syear,-1.),make_tuple("tt"+syear,-1.));
     samples["amcJet"]=MakeSample("aMC@NLO Jet-binned",Sample::Type::SUM,kGreen,make_tuple("amcJet"+syear,1.));
@@ -152,35 +152,35 @@ void AFBPlotter::SetupSamples(){
 
 void AFBPlotter::SetupSystematics(){
   if(DEBUG)  cout<<"[SetupSystematics]"<<endl;
-  if(channel==Channel::ELECTRON) systematics["RECOSF"]=MakeSystematic("RECOSF",SystematicType::ENVELOPE,"_RECOSF_up _RECOSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["IDSF"]=MakeSystematic("IDSF",SystematicType::ENVELOPE,"_IDSF_up _IDSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  if(channel==Channel::MUON) systematics["ISOSF"]=MakeSystematic("ISOSF",SystematicType::ENVELOPE,"_ISOSF_up _ISOSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["triggerSF"]=MakeSystematic("triggerSF",SystematicType::ENVELOPE,"_triggerSF_up _triggerSF_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["PUreweight"]=MakeSystematic("PUreweight",SystematicType::ENVELOPE,"_PUreweight_up _PUreweight_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["prefireweight"]=MakeSystematic("prefireweight",SystematicType::ENVELOPE,"_prefireweight_up _prefireweight_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["scale"]=MakeSystematic("scale",SystematicType::ENVELOPE,"_scale_up _scale_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  if(channel==Channel::ELECTRON) systematics["smear"]=MakeSystematic("smear",SystematicType::ENVELOPE,"_smear_up _smear_down",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["alphaS"]=MakeSystematic("alphaS",SystematicType::ENVELOPE,"_alphaS_up _alphaS_down",(1<<SampleFrag::Type::SIGNAL));
-  systematics["scalevariation"]=MakeSystematic("scalevariation",SystematicType::ENVELOPE,"_scalevariation0 _scalevariation1 _scalevariation2 _scalevariation3 _scalevariation4 _scalevariation6 _scalevariation8",(1<<SampleFrag::Type::SIGNAL));
+  if(channel==Channel::ELECTRON) systematics["RECOSF"]=MakeSystematic("RECOSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_RECOSF_up _RECOSF_down");
+  systematics["IDSF"]=MakeSystematic("IDSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_IDSF_up _IDSF_down");
+  if(channel==Channel::MUON) systematics["ISOSF"]=MakeSystematic("ISOSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_ISOSF_up _ISOSF_down");
+  systematics["triggerSF"]=MakeSystematic("triggerSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_triggerSF_up _triggerSF_down");
+  systematics["PUreweight"]=MakeSystematic("PUreweight",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_PUreweight_up _PUreweight_down");
+  systematics["prefireweight"]=MakeSystematic("prefireweight",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_prefireweight_up _prefireweight_down");
+  systematics["scale"]=MakeSystematic("scale",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_scale_up _scale_down");
+  if(channel==Channel::ELECTRON) systematics["smear"]=MakeSystematic("smear",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_smear_up _smear_down");
+  systematics["alphaS"]=MakeSystematic("alphaS",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL),"_alphaS_up _alphaS_down");
+  systematics["scalevariation"]=MakeSystematic("scalevariation",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL),"_scalevariation0 _scalevariation1 _scalevariation2 _scalevariation3 _scalevariation4 _scalevariation6 _scalevariation8");
 
   vector<TString> prefixes;
   for(int i=0;i<100;i++) prefixes.push_back(Form("_pdf%d",i));
-  if(year==2017) systematics["pdf"]=MakeSystematic("pdf",SystematicType::HESSIAN,prefixes,(1<<SampleFrag::Type::SIGNAL));
-  else if(year==2016) systematics["pdf"]=MakeSystematic("pdf",SystematicType::GAUSSIAN,prefixes,(1<<SampleFrag::Type::SIGNAL));
+  if(year==2017) systematics["pdf"]=MakeSystematic("pdf",Systematic::Type::HESSIAN,(1<<SampleFrag::Type::SIGNAL),prefixes);
+  else if(year==2016) systematics["pdf"]=MakeSystematic("pdf",Systematic::Type::GAUSSIAN,(1<<SampleFrag::Type::SIGNAL),prefixes);
   else cout<<"###WARNING### [SetupSystematics] wrong year"<<endl;
 
-  if(channel==Channel::ELECTRON) systematics["noRECOSF"]=MakeSystematic("noRECOSF",SystematicType::ENVELOPE,"_noRECOSF",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["noIDSF"]=MakeSystematic("noIDSF",SystematicType::ENVELOPE,"_noIDSF",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  if(channel==Channel::MUON) systematics["noISOSF"]=MakeSystematic("noISOSF",SystematicType::ENVELOPE,"_noISOSF",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["notriggerSF"]=MakeSystematic("notriggerSF",SystematicType::ENVELOPE,"_notriggerSF",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["noPUreweight"]=MakeSystematic("noPUreweight",SystematicType::ENVELOPE,"_noPUreweight",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["noprefireweight"]=MakeSystematic("noprefireweight",SystematicType::ENVELOPE,"_noprefireweight",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["nozptcor"]=MakeSystematic("nozptcor",SystematicType::ENVELOPE,"_nozptcor",(1<<SampleFrag::Type::SIGNAL));
-  systematics["noefficiencySF"]=MakeSystematic("noefficiencySF",SystematicType::ENVELOPE,"_noefficiencySF",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  if(channel==Channel::ELECTRON) systematics["IDSF_POG"]=MakeSystematic("IDSF_POG",SystematicType::ENVELOPE,"_IDSF_POG",(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  if(channel==Channel::ELECTRON) systematics["selective"]=MakeSystematic("selective",SystematicType::ENVELOPE,"_selective",(1<<SampleFrag::Type::DATA)+(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG));
-  systematics["efficiencySF"]=MakeSystematic("efficiencySF",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF",0);
-  systematics["totalsys"]=MakeSystematic("totalsys",SystematicType::MULTI,"RECOSF IDSF ISOSF triggerSF PUreweight prefireweight scale smear alphaS scalevariation pdf nozptcor",0);
+  if(channel==Channel::ELECTRON) systematics["noRECOSF"]=MakeSystematic("noRECOSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noRECOSF");
+  systematics["noIDSF"]=MakeSystematic("noIDSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noIDSF");
+  if(channel==Channel::MUON) systematics["noISOSF"]=MakeSystematic("noISOSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noISOSF");
+  systematics["notriggerSF"]=MakeSystematic("notriggerSF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_notriggerSF");
+  systematics["noPUreweight"]=MakeSystematic("noPUreweight",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noPUreweight");
+  systematics["noprefireweight"]=MakeSystematic("noprefireweight",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noprefireweight");
+  systematics["nozptcor"]=MakeSystematic("nozptcor",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL),"_nozptcor");
+  systematics["noefficiencySF"]=MakeSystematic("noefficiencySF",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_noefficiencySF");
+  if(channel==Channel::ELECTRON) systematics["IDSF_POG"]=MakeSystematic("IDSF_POG",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_IDSF_POG");
+  if(channel==Channel::ELECTRON) systematics["selective"]=MakeSystematic("selective",Systematic::Type::ENVELOPE,(1<<SampleFrag::Type::DATA)+(1<<SampleFrag::Type::SIGNAL)+(1<<SampleFrag::Type::BG),"_selective");
+  systematics["efficiencySF"]=MakeSystematic("efficiencySF",Systematic::Type::MULTI,0,"RECOSF IDSF ISOSF triggerSF");
+  systematics["totalsys"]=MakeSystematic("totalsys",Systematic::Type::MULTI,0,"RECOSF IDSF ISOSF triggerSF PUreweight prefireweight scale smear alphaS scalevariation pdf nozptcor");
 }
 
 /*

@@ -27,6 +27,7 @@ public:
   void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
   TRandom3* random;
   TString hardprefix;
+
 };
 
 

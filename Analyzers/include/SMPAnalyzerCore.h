@@ -4,6 +4,8 @@
 #include <tuple>
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
+#include "RoccoR.h"
+#include "RocelecoR.h"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 
@@ -13,6 +15,7 @@ public:
   void FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w);
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
   void SetupZPtWeight();
+  void SetupRoccoR();
   double GetZPtWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double Lepton_SF(TString histkey,const Lepton* lep,int sys);
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
@@ -31,6 +34,11 @@ public:
   TString tauprefix;
   double zptcor;
   bool IsDYSample=false;
+
+  RoccoR* roc;
+  RocelecoR* rocele;
+  std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int set,int member);
+  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set,int member);
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

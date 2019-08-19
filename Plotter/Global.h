@@ -33,23 +33,6 @@ TString GetStringEColor(EColor color){
   default: return "UNKNOWN";
   }
 }
-enum SystematicType{ENVELOPE,GAUSSIAN,HESSIAN,MULTI};
-TString GetStringSystematicType(SystematicType type){
-  switch(type){
-  case ENVELOPE: return "ENVELOPE";
-  case GAUSSIAN: return "GAUSSIAN";
-  case HESSIAN: return "HESSIAN";
-  case MULTI: return "MULTI";
-  default: return "###ERROR### Bad SystematicType";
-  }
-}
-struct Systematic{
-  TString name;
-  SystematicType type;
-  vector<TString> suffixes;
-  int sysbit;
-  int varibit;
-};
 enum Channel{MUON,ELECTRON};
 TString GetStringChannel(Channel channel){
   switch(channel){
@@ -58,6 +41,5 @@ TString GetStringChannel(Channel channel){
   default: return "###ERROR### Bad Channel";
   }
 }
-
 
 #endif

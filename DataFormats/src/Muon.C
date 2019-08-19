@@ -14,6 +14,7 @@ Muon::Muon() : Lepton() {
   j_MomentumScaleUp = -999.;
   j_MomentumScaleDown = -999.;
   j_TunePPtError = -999.;
+  j_trackerLayers = -999;
 }
 
 Muon::~Muon(){
@@ -118,4 +119,8 @@ bool Muon::Pass_POGHighPtWithLooseTrkIso() const {
 
 bool Muon::Pass_TESTID() const {
   return true;
+}
+
+void Muon::SetTrackerLayers(int trackerLayers){
+  j_trackerLayers = trackerLayers;
 }
