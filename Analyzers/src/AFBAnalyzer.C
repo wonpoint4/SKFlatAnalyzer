@@ -463,6 +463,7 @@ void AFBAnalyzer::FillHistAll(TString channelname,TString pre,TString suf,Partic
   double dimass=dilepton.M();
   double dirap=dilepton.Rapidity();
   double dipt=dilepton.Pt();
+  
   if(dimass>=massrange[0]&&dimass<massrange[massbinnum]){
     FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",massrange[0],massrange[massbinnum])+pre,suf,l0,l1,map_weight);
     if(dipt>50){
@@ -473,6 +474,22 @@ void AFBAnalyzer::FillHistAll(TString channelname,TString pre,TString suf,Partic
 	FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+pre,suf,l0,l1,map_weight);
 	if(dipt>50){
 	  FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",massrange[0],massrange[massbinnum],zptcor_ybin[iy],zptcor_ybin[iy+1])+pre,suf,l0,l1,map_weight);
+	}
+      }
+    }
+  }
+  
+  
+  if(dimass>=80&&dimass<100){
+    FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f/",80.,100.)+pre,suf,l0,l1,map_weight);
+    if(dipt>50){
+      FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_pt50/",80.,100.)+pre,suf,l0,l1,map_weight);	  
+    }
+    for(int iy=0;iy<zptcor_nybin;iy++){
+      if(fabs(dirap)>=zptcor_ybin[iy]&&fabs(dirap)<zptcor_ybin[iy+1]){
+	FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f/",80.,100.,zptcor_ybin[iy],zptcor_ybin[iy+1])+pre,suf,l0,l1,map_weight);
+	if(dipt>50){
+	  FillAFBSystematicHists(channelname+Form("/m%.0fto%.0f_y%.1fto%.1f_pt50/",80.,100.,zptcor_ybin[iy],zptcor_ybin[iy+1])+pre,suf,l0,l1,map_weight);
 	}
       }
     }
