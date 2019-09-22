@@ -5,7 +5,7 @@
 https://jskim.web.cern.ch/jskim/SKFlat/Manual/Manual_SKFlat.pdf
 
 ## Where to put the analyzer
-TAMSA 1/2 : /data6/Users/$USER/
+TAMSA 1/2 : /data4/Users/$USER/
 
 KISTI : ~/ # home directory
 

@@ -311,6 +311,9 @@ Trial=0
 #### make sure use C locale
 export LC_ALL=C
 
+#### Don't make root history
+export ROOT_HIST=0
+
 #### use cvmfs for root ####
 export CMS_PATH=/cvmfs/cms.cern.ch
 source $CMS_PATH/cmsset_default.sh

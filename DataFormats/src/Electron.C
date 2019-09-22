@@ -29,6 +29,7 @@ Electron::Electron(){
   j_dr03HcalDepth1TowerSumEt = -999.;
   j_IDBit = 0;
   j_Rho = -999.;
+  j_isGsfCtfScPixChargeConsistent = false;
   this->SetLeptonFlavour(ELECTRON);
 }
 
@@ -332,4 +333,8 @@ bool Electron::Pass_CutBasedVeto() const{
 
 void Electron::SetRho(double r){
   j_Rho = r;
+}
+
+void Electron::SetIsGsfCtfScPixChargeConsistent(bool b){
+  j_isGsfCtfScPixChargeConsistent = b;
 }

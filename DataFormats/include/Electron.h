@@ -122,6 +122,9 @@ public:
   void SetRho(double r);
   inline double Rho() const { return j_Rho; }
 
+  void SetIsGsfCtfScPixChargeConsistent(bool b);
+  inline bool IsGsfCtfScPixChargeConsistent() const { return j_isGsfCtfScPixChargeConsistent; }
+    
 private:
 
   double j_En_up;
@@ -138,6 +141,7 @@ private:
   double j_RelPFIso_Rho;
 
   double j_Rho;
+  int j_isGsfCtfScPixChargeConsistent;
 
   ClassDef(Electron,1)
 

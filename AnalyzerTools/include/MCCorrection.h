@@ -21,6 +21,7 @@
 #include "Gen.h"
 
 #include "TDirectoryHelper.h"
+#include "GenFinderForDY.h"
 
 class MCCorrection{
 
@@ -65,6 +66,9 @@ public:
 
   double GetTopPtReweight(const std::vector<Gen>& gens);
 
+  TH2D *hist_DYPtReweight_2D;
+  GenFinderForDY *genFinderDY;
+  double GetOfficialDYReweight(const vector<Gen>& gens);
 };
 
 #endif

@@ -12,12 +12,17 @@ SingleTop_tch_antitop_Incl	ST_t-channel_antitop_5f_TuneCP5_PSweights_13TeV-powhe
 SingleTop_tch_top_Incl	ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8	119.7	5903100	5869000
 TTLJ_powheg	TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8	365.34	43732445	43379133
 TTLL_powheg	TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8	88.29	69155808	68595608
+WGToLNuG_01J	WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8	489	25918966	15589532
+WGToLNuG_MG	WGToLNuG_TuneCP5_13TeV-madgraphMLM-pythia8	489	6283083	6282853
 WJets_MG	WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8	61530	77700506	77631180
 WWW	WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8	0.2086	240000	210490
 WWZ	WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8	0.1651	250000	221622
 WW_pythia	WW_TuneCP5_13TeV-pythia8	118.7	7791498	7791498
+WZTo3LNu	WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8	5.052	10987679	6887413
 WZZ	WZZ_TuneCP5_13TeV-amcatnlo-pythia8	0.05565	250000	219660
 WZ_pythia	WZ_TuneCP5_13TeV-pythia8	47.13	3928630	3928630
+ZGToLLG_01J	ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8	117.864	30490034	19282022
+ZZTo4L_powheg	ZZTo4L_13TeV_powheg_pythia8	1.256	6964071	6893887
 ZZZ	ZZZ_TuneCP5_13TeV-amcatnlo-pythia8	0.01398	250000	213514
 ZZ_pythia	ZZ_TuneCP5_13TeV-pythia8	16.523	1925931	1925931
 ttW	ttWJets_TuneCP5_13TeV_madgraphMLM_pythia8	0.4611	9425384	9384328	## From XSDB
