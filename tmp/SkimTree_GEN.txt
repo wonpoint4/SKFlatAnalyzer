@@ -1,0 +1,8 @@
+SKFlat.py -a SkimTree_GEN -i DYJets_MG -n 400 -y 2018
+SKFlat.py -a SkimTree_GEN -i DYJets -n 400 -y 2017
+SKFlat.py -a SkimTree_GEN -i DYJets -n 400 -y 2016
+SKFlat.py -a SkimTree_GEN -i DYJets_Pt-100To250 -n 100 -y 2016
+SKFlat.py -a SkimTree_GEN -i DYJets_Pt-250To400 -n 100 -y 2016
+SKFlat.py -a SkimTree_GEN -i DYJets_Pt-400To650 -n 100 -y 2016
+SKFlat.py -a SkimTree_GEN -i DYJets_Pt-50To100 -n 100 -y 2016
+SKFlat.py -a SkimTree_GEN -i DYJets_Pt-650ToInf -n 100 -y 2016

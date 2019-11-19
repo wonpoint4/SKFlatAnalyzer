@@ -24,6 +24,7 @@ parser.add_argument('--no_exec', action='store_true')
 parser.add_argument('--FastSim', action='store_true')
 parser.add_argument('--userflags', dest='Userflags', default="")
 parser.add_argument('--reduction', dest='Reduction', default=1, type=float)
+parser.add_argument('--nmax', dest='nmax', default=0, type=int)
 args = parser.parse_args()
 
 ## make userflags as a list
@@ -237,7 +238,7 @@ for InputSample in InputSamples:
 
   NTotalFiles = len(lines_files)
 
-  if NJobs>NTotalFiles:
+  if NJobs>NTotalFiles or NJobs==0:
     NJobs = NTotalFiles
 
   SubmitOutput = open(base_rundir+'/SubmitOutput.log','w')
@@ -389,9 +390,9 @@ queue {0}
 '''.format(str(NJobs), commandsfilename)
       submit_command.close()
     elif IsTAMSA:
-      requirements=''
-      if IsSkimTree:
-        requirements='Requirements = Machine=="{}"'.format(subprocess.check_output('condor_status -avail -constraint "TotalCpus<50" -af Machine -sort Cpus|tail -n1',shell=True).strip())
+      concurrency_limits=''
+      if args.nmax:
+        concurrency_limits='concurrency_limits = n'+str(args.nmax)+'.'+os.getenv("USER")
       print>>submit_command,'''executable = {1}.sh
 universe   = vanilla
 arguments  = $(Process)
@@ -405,7 +406,7 @@ accounting_group=group_cms
 transfer_output_remaps = "hists.root = output/hists_$(Process).root"
 {2}
 queue {0}
-'''.format(str(NJobs), commandsfilename,requirements)
+'''.format(str(NJobs), commandsfilename,concurrency_limits)
       submit_command.close()
 
   CheckTotalNFile=0
@@ -846,7 +847,7 @@ try:
                 os.system('hadd -j 4 -f '+outputname+'.root output/*.root >> JobStatus.log')
                 os.system('rm output/*.root')
               elif IsTAMSA1:
-                os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
+                os.system('condor_run -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root output/*.root 2>&1 >> JobStatus.log"')
                 os.system('rm output/*.root')
               else:
                 os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')

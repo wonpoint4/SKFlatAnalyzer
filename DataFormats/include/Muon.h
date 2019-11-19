@@ -102,9 +102,6 @@ public:
   void SetTrackerLayers(int n);
   inline int TrackerLayers() const { return j_trackerLayers; }
 
-  void SetTrackerLayers(int trackerLayers);
-  inline int TrackerLayers() const { return j_trackerLayers; }
-
 private:
 
   unsigned int j_TypeBit, j_IDBit;

@@ -1,0 +1,12 @@
+SKFlat.py -a GetEffLumi -i ZToEE_M_120_200 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_120_200_powheg_herwigpp -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_200_400 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_50_120 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_50_120_powheg_herwigpp -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToMuMu_M_120_200 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToMuMu_M_1400_2300 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToMuMu_M_200_400 -y 2016 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_120_200 -y 2017 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_200_400 -y 2017 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_400_800 -y 2017 -n 100
+SKFlat.py -a GetEffLumi -i ZToEE_M_50_120 -y 2017 -n 100

@@ -1,0 +1,47 @@
+SKFlat.py -a LJLAnalyzer -i EGamma -p A -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i EGamma -p B -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i EGamma -p C -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i EGamma -p D -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i DYJets_MG -n 40 -y 2018
+SKFlat.py -a LJLAnalyzer -i WW_pythia -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i WZ_pythia -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i ZZ_pythia -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i WJets_MG -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i TTLL_powheg -n 10 -y 2018
+SKFlat.py -a LJLAnalyzer -i SingleEG -p B -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleEG -p C -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleEG -p D -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleEG -p E -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleEG -p F -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleMuon -p B -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleMuon -p C -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleMuon -p D -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleMuon -p E -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i SingleMuon -p F -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i DYJets -n 40 -y 2017
+SKFlat.py -a LJLAnalyzer -i WW_pythia -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i WZ_pythia -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i ZZ_pythia -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i WJets_MG -n 10 -y 2017
+SKFlat.py -a LJLAnalyzer -i TTLL_powheg -n 10 -y 2017
+
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p B_ver2 -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p C -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p D -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p E -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p F -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p G -n 10 -y 2016
+#SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleEG -p H -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p B_ver2 -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p C -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p D -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p E -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p F -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p G -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i SingleMuon -p H -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i DYJets -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i WW_pythia -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i WZ_pythia -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i ZZ_pythia -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i WJets_MG -n 10 -y 2016
+SKFlat.py -a LJLAnalyzer --skim SkimTree_LJL -i TTLL_powheg -n 10 -y 2016

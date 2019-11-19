@@ -14,9 +14,11 @@ AnalyzerCore::AnalyzerCore(){
 AnalyzerCore::~AnalyzerCore(){
 
   //=== hist maps
-
+  int i=0;
   for(std::map< TString, TH1D* >::iterator mapit = maphist_TH1D.begin(); mapit!=maphist_TH1D.end(); mapit++){
-    delete mapit->second;
+    if(i%10000==0) cout<< "[AnalyzerCore::~AnalyzerCore] deleting 1D histogram "<<i<<"/"<<maphist_TH1D.size()<<" "<<printcurrunttime() << endl;
+    if(mapit->second) delete mapit->second;
+    i++;
   }
   maphist_TH1D.clear();
 
@@ -1978,7 +1980,9 @@ void AnalyzerCore::JSFillHist(TString suffix, TString histname,
 void AnalyzerCore::WriteHist(){
 
   outfile->cd();
+  int i=0;
   for(std::map< TString, TH1D* >::iterator mapit = maphist_TH1D.begin(); mapit!=maphist_TH1D.end(); mapit++){
+    if(i%10000==0) cout<< "[AnalyzerCore::WriteHist] writing 1D histogram "<<i<<"/"<<maphist_TH1D.size()<<" "<<printcurrunttime() << endl;
     TString this_fullname=mapit->second->GetName();
     TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());
     TString this_suffix=this_fullname(0,this_fullname.Last('/'));
@@ -1989,7 +1993,11 @@ void AnalyzerCore::WriteHist(){
     outfile->cd(this_suffix);
     mapit->second->Write(this_name);
     outfile->cd();
+    delete mapit->second;
+    i++;
   }
+  maphist_TH1D.clear();
+
   for(std::map< TString, TH2D* >::iterator mapit = maphist_TH2D.begin(); mapit!=maphist_TH2D.end(); mapit++){
     TString this_fullname=mapit->second->GetName();
     TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());

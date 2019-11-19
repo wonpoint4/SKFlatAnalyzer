@@ -107,6 +107,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 
     map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
     map_electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    map_electrons["TightID"]=SMPGetElectrons("passTightID",0.0,2.5);
 
     switch(DataYear){
     case 2016: 
@@ -250,21 +251,26 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 	TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
 	double dimass=dilepton.M();
 	double dipt=dilepton.Pt();
-	if(dimass>=60&&dimass<120){
+	if(dimass>=80&&dimass<100){
 	  FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,10.5,map_weight[""],20,0,20);
-	  FillHistsEfficiency(channelname+"/m60to120/"+prefix,idsuffix,leps,map_weight);
+	  FillHistsEfficiency(channelname+"/m80to100/"+prefix,idsuffix,leps,map_weight);
+	  /*
 	  if(dipt>50){
 	    FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,11.5,map_weight[""],20,0,20);
 	    FillHistsEfficiency(channelname+"/m60to120_pt50/"+prefix,idsuffix,leps,map_weight);
 	  }
-	}else if(dimass>=120&&dimass<400){
+	  */
+	}
+	/*
+	else if(dimass>=120&&dimass<400){
 	  FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,12.5,map_weight[""],20,0,20);
 	  FillHistsEfficiency(channelname+"/m120to400/"+prefix,idsuffix,leps,map_weight);
 	  if(dipt>50){
 	    FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,13.5,map_weight[""],20,0,20);
 	    FillHistsEfficiency(channelname+"/m120to400_pt50/"+prefix,idsuffix,leps,map_weight);
 	  }
-	}	
+	}
+	*/
       }
     }
   }
@@ -335,13 +341,13 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
     double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
     double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
     if(cost>0){
-      FillHist(pre+"forward"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_den"+suf,dimass,w*den_weight,massbinnum,(double*)massrange);
-      FillHist(pre+"forward_num"+suf,dimass,w*num_weight,massbinnum,(double*)massrange);    
+      FillHist(pre+"forward"+suf,dimass,w,mbinnum,(double*)mbin);
+      FillHist(pre+"forward_den"+suf,dimass,w*den_weight,mbinnum,(double*)mbin);
+      FillHist(pre+"forward_num"+suf,dimass,w*num_weight,mbinnum,(double*)mbin);    
     }else{
-      FillHist(pre+"backward"+suf,dimass,w,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_den"+suf,dimass,w*den_weight,massbinnum,(double*)massrange);
-      FillHist(pre+"backward_num"+suf,dimass,w*num_weight,massbinnum,(double*)massrange);   
+      FillHist(pre+"backward"+suf,dimass,w,mbinnum,(double*)mbin);
+      FillHist(pre+"backward_den"+suf,dimass,w*den_weight,mbinnum,(double*)mbin);
+      FillHist(pre+"backward_num"+suf,dimass,w*num_weight,mbinnum,(double*)mbin);   
     }
   }
 }
