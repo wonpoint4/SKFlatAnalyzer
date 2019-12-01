@@ -28,44 +28,35 @@ void EfficiencyValidation::executeEvent(){
 
   Event* ev=new Event;
   *ev=GetEvent();
-  TString channelname,muontrigger,electrontrigger;
   if(DataYear==2016){
-    vector<TString> muontrigger;
-    muontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
-    muontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
-    muontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
-    muontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-    electrontrigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
-    if(ev->PassTrigger(muontrigger)){
-      channelname="muon2016";
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(channelname,ev);
+    vector<TString> doublemuontrigger;
+    doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
+    doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
+    doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+    doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    if(ev->PassTrigger(doublemuontrigger)){
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2016",ev);
     }
-    if(ev->PassTrigger(electrontrigger)){
-      channelname="electron2016";
-      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(channelname,ev);
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")){
+      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2016",ev);
     }
   }else if(DataYear==2017){
-    muontrigger="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v";
-    electrontrigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v";
-    if(ev->PassTrigger(muontrigger)){
-      channelname="muon2017";
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(channelname,ev);
+    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")){
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2017",ev);
     }
-    if(ev->PassTrigger(electrontrigger)){
-      channelname="electron2017";
-      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(channelname,ev);
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")){
+      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2017",ev);
     }
   }else if(DataYear==2018){
-    muontrigger="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v";
-    electrontrigger="HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v";
-    if(ev->PassTrigger(muontrigger)){
-      channelname="muon2018";
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(channelname,ev);
-    }
-    if(ev->PassTrigger(electrontrigger)){
-      channelname="electron2018";
-      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter(channelname,ev);
-    }
+    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2018",ev);
+    
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("ee2018",ev);
+
+    if(ev->PassTrigger("HLT_Ele32_WPTight_Gsf_v"))
+      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("el2018",ev);
+    
   }    
 
   delete ev;
@@ -79,7 +70,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 
 
   double lep0ptcut,lep1ptcut;
-  if(channelname.Contains("muon")){
+  if(channelname.Contains(TRegexp("^mm"))){
     lep0ptcut=20.;
     lep1ptcut=10.;
 
@@ -101,7 +92,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
       break;
     default: cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
     }
- }else if(channelname.Contains("electron")){
+  }else if(channelname.Contains(TRegexp("^ee"))){
     lep0ptcut=25.;
     lep1ptcut=15.;
 
@@ -121,8 +112,29 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
       map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
       break;
     case 2018: 
-      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","",""); 
-      map_leps["_MediumID_selective"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"","","",""); 
+      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_TightID_pt10_Q","","Ele23_TightID_Q","Ele12_TightID_Q"); 
+      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passTightID","","Ele23_TightID_Q","Ele12_TightID_Q"); 
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele23_MediumID_Q","Ele12_MediumID_Q"); 
+      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele23_MediumID_Q","Ele12_MediumID_Q"); 
+      break;
+    default: 
+      cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
+      exit(EXIT_FAILURE);
+    }
+  }else if(channelname.Contains(TRegexp("^el"))){
+    lep0ptcut=35.;
+    lep1ptcut=15.;
+
+    map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
+    map_electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
+    map_electrons["TightID"]=SMPGetElectrons("passTightID",0.0,2.5);
+
+    switch(DataYear){
+    case 2018: 
+      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_TightID_pt10_Q","","Ele32_TightID_Q",""); 
+      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passTightID","","Ele32_TightID_Q",""); 
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele32_MediumID_Q",""); 
       break;
     default: 
       cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
@@ -139,17 +151,17 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     weight=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full");
   }
   totalweight*=weight;
-  FillHist(channelname+"/"+tauprefix+"cutflow",0.5,totalweight,20,0,20);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",totalweight);
 
   /////////////////PUreweight///////////////////
   double PUreweight=1.,PUreweight_up=1.,PUreweight_down=1.;
-  if(!IsDATA&&DataYear==2016){
+  if(!IsDATA){
     PUreweight=mcCorr->GetPileUpWeight(nPileUp,0);
     PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
     PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
   }
   totalweight*=PUreweight;
-  FillHist(channelname+"/"+tauprefix+"cutflow",1.5,totalweight,20,0,20);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","PU",totalweight);
   
   //////////////////////PrefileWeight////////////////////
   double prefireweight=1.;
@@ -161,10 +173,10 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     prefireweight_down=L1PrefireReweight_Down;
   }
   totalweight*=prefireweight;
-  FillHist(channelname+"/"+tauprefix+"cutflow",2.5,totalweight,20,0,20);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",totalweight);
 
   totalweight*=zptcor;
-  FillHist(channelname+"/"+tauprefix+"cutflow",3.5,totalweight,20,0,20);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","zptcor",totalweight);
 
   ///////////////////////lepton selection///////////////////////
   for(const auto& element_leps: map_leps){
@@ -174,9 +186,9 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     FillHist(channelname+"/"+tauprefix+"nlepton"+idsuffix,leps.size(),totalweight,10,0,10);
     if(leps.size()==2){
       TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
-      FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,4.5,totalweight,20,0,20);
+      FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"dilepton",totalweight);
       if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
-	FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,5.5,totalweight,20,0,20);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"OS",totalweight);
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
 	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
@@ -207,19 +219,26 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 	    ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
 	  }
 	}
-	FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,6.5,totalweight*RECOSF,20,0,20);
-	FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,7.5,totalweight*RECOSF*IDSF,20,0,20);
-	FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,8.5,totalweight*RECOSF*IDSF*ISOSF,20,0,20);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"RECOSF",totalweight*RECOSF);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"IDSF",totalweight*RECOSF*IDSF);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"ISOSF",totalweight*RECOSF*IDSF*ISOSF);
       
 	double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
 	if(!IsDATA){
-	  TString triggerSF_key0=get<3>(element_leps.second);
-	  TString triggerSF_key1=get<4>(element_leps.second);
-	  triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
-	  triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
-	  triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
+	  if(channelname.Contains(TRegexp("^ee"))||channelname.Contains(TRegexp("^mm"))){
+	    TString triggerSF_key0=get<3>(element_leps.second);
+	    TString triggerSF_key1=get<4>(element_leps.second);
+	    triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
+	    triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
+	    triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
+	  }else if(channelname.Contains(TRegexp("^el"))||channelname.Contains(TRegexp("^mu"))){
+	    TString triggerSF_key=get<3>(element_leps.second);
+	    triggerSF*=LeptonTrigger_SF(triggerSF_key,leps,0);
+	    triggerSF_up*=LeptonTrigger_SF(triggerSF_key,leps,1);
+	    triggerSF_down*=LeptonTrigger_SF(triggerSF_key,leps,-1);
+	  }	    
 	}
-	FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,9.5,totalweight*RECOSF*IDSF*ISOSF*triggerSF,20,0,20);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"triggerSF",totalweight*RECOSF*IDSF*ISOSF*triggerSF);
 
 	///////////////////////weight systematics//////////////////
 	map<TString,double> map_weight;
