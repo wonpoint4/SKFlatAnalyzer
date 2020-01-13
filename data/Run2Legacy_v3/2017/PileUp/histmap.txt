@@ -73,3 +73,6 @@ WZ_pythia	sig_up	Pileup_reweight_69p2_mb.root
 ZZ_pythia	central	Pileup_reweight_69p2_mb.root
 ZZ_pythia	sig_down	Pileup_reweight_69p2_mb.root
 ZZ_pythia	sig_up	Pileup_reweight_69p2_mb.root
+MC_2017		central		temp.root
+MC_2017		sig_up		temp.root
+MC_2017		sig_down	temp.root

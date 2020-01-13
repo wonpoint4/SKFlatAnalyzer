@@ -1,31 +1,44 @@
 #include "SMPAnalyzerCore.h"
 
 SMPAnalyzerCore::SMPAnalyzerCore(){
-  hzpt_muon=NULL;
-  hzpt_electron=NULL;
-  hzpt_norm_muon=NULL;
-  hzpt_norm_electron=NULL;
   roc=NULL;
   rocele=NULL;
   hz0=NULL;
 }
 
 SMPAnalyzerCore::~SMPAnalyzerCore(){
-  if(hzpt_muon) delete hzpt_muon;
-  if(hzpt_norm_muon) delete hzpt_norm_muon;
-  if(hzpt_electron) delete hzpt_electron;
-  if(hzpt_norm_electron) delete hzpt_norm_electron;
+  for(auto& [key,hist]:map_hist_zpt){
+    if(hist) delete hist;
+  }
   if(roc) delete roc;
   if(rocele) delete rocele;
   if(hz0) delete hz0;
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
-  SetupZPtWeight();
+  SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value,weight,n_bin,x_min,x_max);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value,weight,n_bin,xbins);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,weight,n_binx,x_min,x_max,n_biny,y_min,y_max);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,weight,n_binx,xbins,n_biny,ybins);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max, int n_binz, double z_min, double z_max){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,weight,n_binx,x_min,x_max,n_biny,y_min,y_max,n_binz,z_min,z_max);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
 }
 
 void SMPAnalyzerCore::FillDileptonHists(TString pre,TString suf,Particle *l0,Particle *l1,double w){
@@ -162,37 +175,32 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
     return (eff_data_BtoF*WeightBtoF+eff_data_GtoH*WeightGtoH)/(eff_mc_BtoF*WeightBtoF+eff_mc_GtoH*WeightGtoH);
   }
 }
-void SMPAnalyzerCore::SetupZPtWeight(){
-  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting zptcor"<<endl;
+void SMPAnalyzerCore::SetupZptWeight(){
+  cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fzpt(datapath+"/"+TString::Itoa(DataYear,10)+"/ZPt/ZPtWeight.root");
-  TString sflavour[2]={"muon","electron"};
-  TH2D **hzpt=NULL,**hzpt_norm=NULL;
-  for(int ifl=0;ifl<2;ifl++){
-    if(ifl==0){
-      hzpt=&hzpt_muon;
-      hzpt_norm=&hzpt_norm_muon;
-    }else if(ifl==1){
-      hzpt=&hzpt_electron;
-      hzpt_norm=&hzpt_norm_electron;
-    }
-    for(int i=0;i<20;i++){
-      TH2D* this_hzpt=(TH2D*)fzpt.Get(Form("%s%d_iter%d",sflavour[ifl].Data(),DataYear,i));
-      if(this_hzpt){
-	if(*hzpt){
-	  (*hzpt)->Multiply(this_hzpt);
-	  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting "<<sflavour[ifl]<<" zptcor iter"<<i<<endl;
-	}else{
-	  (*hzpt)=this_hzpt;
-	  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting first "<<sflavour[ifl]<<" zptcor"<<i<<endl;
-	}
-      }else break;
-    }
-    if(*hzpt) (*hzpt)->SetDirectory(0);
-    *hzpt_norm=(TH2D*)fzpt.Get(Form("%s%d_norm",sflavour[ifl].Data(),DataYear));
-    if(*hzpt_norm){
-      (*hzpt_norm)->SetDirectory(0);
-      cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting "<<sflavour[ifl]<<" zptcor norm"<<endl;
+  ifstream file_check(datapath+"/"+TString::Itoa(DataYear,10)+"/Zpt/ZptWeight.root");
+  bool isexist=file_check.is_open();
+  file_check.close();
+  if(!isexist){
+    cout<<"[SMPAnalyzerCore::SetupZptWeight] no ZptWeight.root"<<endl;
+    return;
+  }
+  TFile fzpt(datapath+"/"+TString::Itoa(DataYear,10)+"/Zpt/ZptWeight.root");
+  for(const auto&& key:*(fzpt.GetListOfKeys())){
+    TH2D* this_hist=(TH2D*)((TKey*)key)->ReadObj();
+    TString histname=this_hist->GetName();
+    TString striphistname=histname;
+    int extent=0,start=striphistname.Index(TRegexp("_iter[0-9]*$"),&extent);
+    if(start>=0) striphistname.Replace(start,extent,"");
+    cout<<"[SMPAnalyzerCore::SetupZptWeight] setting "<<histname<<endl;
+    if(histname.Contains(TRegexp("_iter0$"))){
+      map_hist_zpt[striphistname]=this_hist;
+      this_hist->SetDirectory(0);
+    }else if(histname.Contains(TRegexp("_iter[0-9]*$"))){
+      map_hist_zpt[striphistname]->Multiply(this_hist);
+    }else if(histname.Contains(TRegexp("_norm$"))){
+      map_hist_zpt[histname]=this_hist;
+      this_hist->SetDirectory(0);
     }
   }
 }
@@ -204,7 +212,7 @@ void SMPAnalyzerCore::SetupRoccoR(){
   if(DataYear!=2018) rocele=new RocelecoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RocelecoR"+TString::Itoa(DataYear,10)+"_new.txt").Data());
 }
 void SMPAnalyzerCore::SetupZ0Weight(){
-  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting Z0Weight"<<endl;
+  cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
   TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
   hz0=(TH1D*)fz0.Get("z0weight");
@@ -219,20 +227,23 @@ double SMPAnalyzerCore::GetZ0Weight(double valx){
   if(valx>xmax) valx=xmax-0.001;
   return hz0->GetBinContent(hz0->FindBin(valx));
 }
-double SMPAnalyzerCore::GetZPtWeight(double zpt,double zrap,Lepton::Flavour flavour){
+double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
   double valzptcor_norm=1.;
-  TH2D* hzpt=NULL;
-  TH2D* hzpt_norm=NULL;
-  if(flavour==Lepton::MUON){
-    hzpt=hzpt_muon;
-    hzpt_norm=hzpt_norm_muon;
-  }else if(flavour==Lepton::ELECTRON){
-    hzpt=hzpt_electron;
-    hzpt_norm=hzpt_norm_electron;
+  zrap=fabs(zrap);
+  TString sflavour=flavour==Lepton::MUON?"muon":"electron";
+  TString MCName=MCSample;
+  MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
+  TString hzptname=MCName+"_"+sflavour;
+  TString hnormname=hzptname+"_norm";
+  auto it=map_hist_zpt.find(hzptname);
+  if(it!=map_hist_zpt.end()){
+    valzptcor*=GetBinContentUser(map_hist_zpt[hzptname],zpt,zrap,0);
   }
-  if(hzpt) valzptcor*=GetBinContentUser(hzpt,zpt,zrap,0);
-  if(hzpt_norm) valzptcor_norm*=GetBinContentUser(hzpt_norm,zpt,zrap,0);
+  it=map_hist_zpt.find(hnormname);
+  if(it!=map_hist_zpt.end()){
+    valzptcor_norm*=GetBinContentUser(map_hist_zpt[hnormname],zpt,zrap,0);
+  }
   return valzptcor*valzptcor_norm;
 }
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
@@ -295,13 +306,23 @@ void SMPAnalyzerCore::GetGenIndex(const vector<Gen>& gens,int& parton0,int& part
 
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
-  if(id=="passMediumID_selective"){
+  if(id=="passMediumID_Selective"){
     std::vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron this_electron= electrons.at(i);
       if(!( this_electron.Pt()>ptmin ))	continue;
       if(!( fabs(this_electron.scEta())<fetamax )) continue;
       if(!( this_electron.PassID("passMediumID") ))	continue;
+      if(!electron_isGsfCtfScPixChargeConsistent->at(i)) continue;
+      out.push_back(this_electron);
+    }
+  }else if(id=="passTightID_Selective"){
+    std::vector<Electron> electrons = GetAllElectrons();
+    for(unsigned int i=0; i<electrons.size(); i++){
+      Electron this_electron= electrons.at(i);
+      if(!( this_electron.Pt()>ptmin ))	continue;
+      if(!( fabs(this_electron.scEta())<fetamax )) continue;
+      if(!( this_electron.PassID("passTightID") )) continue;
       if(!electron_isGsfCtfScPixChargeConsistent->at(i)) continue;
       out.push_back(this_electron);
     }
@@ -357,6 +378,7 @@ std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& mu
     muon.SetPtEtaPhiM(muon.MiniAODPt()*(rc+sys*rcerr),muon.Eta(),muon.Phi(),muon.M());
     out.push_back(muon);
   }
+  std::sort(out.begin(),out.end(),PtComparing);
   return out;
 }
 
@@ -377,6 +399,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
     electron.SetPtEtaPhiM(pt*rc,electron.Eta(),electron.Phi(),electron.M());
     out.push_back(electron);
   }
+  std::sort(out.begin(),out.end(),PtComparing);
   return out;
 }
   
@@ -405,3 +428,9 @@ void SMPAnalyzerCore::FillCutflow(TString histname,TString label,double weight){
   hist->Fill(ibin-0.5,weight);
 }
     
+TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
+  int extent;
+  int start=str.Index(reg,&extent);
+  if(start>=0) return str.Replace(start,extent,repl);
+  else return str;
+}

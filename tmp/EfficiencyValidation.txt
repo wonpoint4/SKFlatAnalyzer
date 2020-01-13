@@ -1,8 +1,8 @@
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i EGamma -p A -n 10 -y 2018
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i EGamma -p B -n 10 -y 2018
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i EGamma -p C -n 10 -y 2018
-SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i EGamma -p D -n 10 -y 2018
-SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i DYJets_MG -n 40 -y 2018
+SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i EGamma -p D -n 15 -y 2018
+SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i DYJets -n 60 -y 2018
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i WW_pythia -n 10 -y 2018
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i WZ_pythia -n 10 -y 2018
 SKFlat.py -a EfficiencyValidation --skim SkimTree_SMP -i ZZ_pythia -n 10 -y 2018

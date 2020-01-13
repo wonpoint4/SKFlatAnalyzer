@@ -843,12 +843,10 @@ try:
                 os.system('mv job_0/hists.root '+outputname+'.root')
 
             else:
-              if IsKISTI or IsTAMSA2:
+              if IsKISTI or IsTAMSA:
                 os.system('hadd -j 4 -f '+outputname+'.root output/*.root >> JobStatus.log')
                 os.system('rm output/*.root')
-              elif IsTAMSA1:
-                os.system('condor_run -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root output/*.root 2>&1 >> JobStatus.log"')
-                os.system('rm output/*.root')
+                #os.system('condor_run -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root output/*.root 2>&1 >> JobStatus.log"')
               else:
                 os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')
                 os.system('rm job_*/*.root')

@@ -158,6 +158,8 @@ void LJLAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       else if(isolep->Charge()<0&&nonisolep->Charge()<0) prefix="mm_"+tauprefix;
       else prefix=tauprefix;      
       FillCutflow(channelname+"/"+tauprefix+"cutflow"+suffix,"LJL",totalweight);
+      if((*isolep+*nonisolep).M()<60) return;
+      FillCutflow(channelname+"/"+tauprefix+"cutflow"+suffix,"mll>60",totalweight);      
       
       /////////////////efficiency scale factors///////////////////
       double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
@@ -266,7 +268,7 @@ void LJLAnalyzer::FillLJLHists(TString pre,TString suffix,const vector<Lepton*>&
       FillHist(pre+"leps"+suf,isoleps.size()+nonisoleps.size(),w,10,0,10);
       FillHist(pre+"isoleps"+suf,isoleps.size(),w,10,0,10);
       FillHist(pre+"nonisoleps"+suf,nonisoleps.size(),w,10,0,10);
-      FillHist(pre+"dimass"+suf,dilepton.M(),w,120,60,300);
+      FillHist(pre+"dimass"+suf,dilepton.M(),w,220,60,500);
       FillHist(pre+"dipt"+suf,dilepton.Pt(),w,150,0,300);
       FillHist(pre+"dirap"+suf,dilepton.Rapidity(),w,100,-5,5);
       FillHist(pre+"l0pt"+suf,isolep->Pt(),w,500,0,1000);

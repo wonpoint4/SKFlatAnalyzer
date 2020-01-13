@@ -17,8 +17,7 @@ void EfficiencyValidation::executeEvent(){
       Gen genhardl0=gens[hardl0],genhardl1=gens[hardl1],genl0=gens[l0],genl1=gens[l1],genphotons;
       for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
       TLorentzVector genZ=(genl0+genl1+genphotons);
-      //FIXME need to get Zptcor for 2018
-      if(DataYear!=2018) zptcor*=GetZPtWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+      zptcor*=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
     }else{
       tauprefix="tau_";
     }
@@ -51,7 +50,7 @@ void EfficiencyValidation::executeEvent(){
     if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2018",ev);
     
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("ee2018",ev);
 
     if(ev->PassTrigger("HLT_Ele32_WPTight_Gsf_v"))
@@ -97,8 +96,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     lep1ptcut=15.;
 
     map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
-    map_electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
-    map_electrons["TightID"]=SMPGetElectrons("passTightID",0.0,2.5);
+    map_electrons["MediumID_Selective"]=SMPGetElectrons("passMediumID_Selective",0.0,2.5);
 
     switch(DataYear){
     case 2016: 
@@ -108,12 +106,9 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     case 2017: 
       map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","LeadEle23_MediumID_Q","TailEle12_MediumID_Q"); 
-      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID"]),"ID_SF_TightID_pt10_Q","","LeadEle23_TightID_Q","TailEle12_TightID_Q"); 
       map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_Selective_MediumID_pt10_Q","","Selective_LeadEle23_MediumID_Q","Selective_TailEle12_MediumID_Q"); 
       break;
     case 2018: 
-      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_TightID_pt10_Q","","Ele23_TightID_Q","Ele12_TightID_Q"); 
-      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passTightID","","Ele23_TightID_Q","Ele12_TightID_Q"); 
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele23_MediumID_Q","Ele12_MediumID_Q"); 
       map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele23_MediumID_Q","Ele12_MediumID_Q"); 
       break;
@@ -126,13 +121,11 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     lep1ptcut=15.;
 
     map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
-    map_electrons["MediumID_selective"]=SMPGetElectrons("passMediumID_selective",0.0,2.5);
-    map_electrons["TightID"]=SMPGetElectrons("passTightID",0.0,2.5);
+    map_electrons["TightID_Selective"]=SMPGetElectrons("passTightID_Selective",0.0,2.5);
 
     switch(DataYear){
     case 2018: 
-      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_TightID_pt10_Q","","Ele32_TightID_Q",""); 
-      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passTightID","","Ele32_TightID_Q",""); 
+      map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID_Selective"]),"ID_SF_TightID_Selective_pt10_Q","","Ele32_TightID_Selective_Q",""); 
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele32_MediumID_Q",""); 
       map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele32_MediumID_Q",""); 
       break;
@@ -271,7 +264,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 	double dimass=dilepton.M();
 	double dipt=dilepton.Pt();
 	if(dimass>=80&&dimass<100){
-	  FillHist(channelname+"/"+tauprefix+"cutflow"+idsuffix,10.5,map_weight[""],20,0,20);
+	  FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"m80to100",map_weight[""]);
 	  FillHistsEfficiency(channelname+"/m80to100/"+prefix,idsuffix,leps,map_weight);
 	  /*
 	  if(dipt>50){
@@ -321,6 +314,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
 	double rtrkiso=((Muon*)leps.at(i))->TrkIso()/pt;
 	FillHist(Form("%slrtrkiso%s",pre.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
       }
+      /*
       vector<double> muon_ptbin={10,15,20,25,30,40,50,60,120,500};
       vector<double> muon_etabin={-2.4,-2.1,-1.85,-1.6,-1.4,-1.2,-0.9,-0.6,-0.3,-0.2,0,0.2,0.3,0.6,0.9,1.2,1.4,1.6,1.85,2.1,2.4};
       vector<double> electron_ptbin={10,15,20,25,30,35,40,45,70,100,500};
@@ -343,8 +337,9 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
 	  FillHist(Form("%slpt_eta%.2fto%.2f%s",pre.Data(),etabin[ib],etabin[ib+1],suf.Data()),pt,w,500,0,500);
 	}
       } 
+      */
     }
-    
+      
     TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
     double dimass=dilepton.M();
     double dipt=dilepton.Pt();
@@ -352,7 +347,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
     FillHist(pre+"dimass"+suf,dimass,w,400,0,400);
     FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
     FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
-    
+    /*
     double cost=GetCosThetaCS((Particle*)leps.at(0),(Particle*)leps.at(1));
     FillHist(pre+"costhetaCS"+suf,cost,w,40,-1,1);
     FillHist(pre+"abscosthetaCS"+suf,fabs(cost),w,20,0,1);
@@ -368,5 +363,6 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
       FillHist(pre+"backward_den"+suf,dimass,w*den_weight,mbinnum,(double*)mbin);
       FillHist(pre+"backward_num"+suf,dimass,w*num_weight,mbinnum,(double*)mbin);   
     }
+    */
   }
 }
