@@ -75,7 +75,7 @@ public:
   RoccoR* roc;
   RocelecoR* rocele;
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
-  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set,int member);
+  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

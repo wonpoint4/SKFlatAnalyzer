@@ -207,9 +207,8 @@ void SMPAnalyzerCore::SetupZptWeight(){
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TString textfile=datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RoccoR"+TString::Itoa(DataYear,10)+".txt";
-  roc=new RoccoR(textfile.Data());
-  if(DataYear!=2018) rocele=new RocelecoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RocelecoR"+TString::Itoa(DataYear,10)+"_new.txt").Data());
+  roc=new RoccoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RoccoR"+TString::Itoa(DataYear,10)+".txt").Data());
+  rocele=new RocelecoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RocelecoR"+TString::Itoa(DataYear,10)+"_new.txt").Data());
 }
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
@@ -384,19 +383,28 @@ std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& mu
 
 std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Electron>& electrons,int set,int member){
   std::vector<Electron> out;
+  vector<Gen> gens;
+  if(!IsData) gens=GetGens();
   for(auto electron:electrons){
     double rc=1.;
-    double pt=electron.Pt();
+    double rcerr=0.;
     if(set>=0){
       if(IsDATA){
-	pt=electron.Pt();
-	rc=rocele->kScaleDT(electron.Charge(),pt,electron.Eta(),electron.Phi(),set,member);
+	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.scEta(),electron.Phi(),set,member);
+	//rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),electron.scEta(),electron.Phi());
+	electron.SetPtEtaPhiM(electron.Pt()*rc,electron.Eta(),electron.Phi(),electron.M());
       }else{
-	pt=electron.UncorrPt();
-	rc=rocele->kScaleMC(electron.Charge(),pt,electron.Eta(),electron.Phi(),set,member);
+	Gen gen=GetGenMatchedLepton(electron,gens);
+	if(gen.IsEmpty()){
+	  rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);
+	  //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);	  
+	}else{
+	  rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
+	  //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
+	}
+	electron.SetPtEtaPhiM(electron.UncorrPt()*rc,electron.Eta(),electron.Phi(),electron.M());
       }      
     }
-    electron.SetPtEtaPhiM(pt*rc,electron.Eta(),electron.Phi(),electron.M());
     out.push_back(electron);
   }
   std::sort(out.begin(),out.end(),PtComparing);

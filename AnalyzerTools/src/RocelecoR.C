@@ -154,7 +154,7 @@ int RocelecoR::phiBin(double x) const{
 double RocelecoR::kScaleDT(int Q, double pt, double eta, double phi, int s, int m) const{
     int H = etaBin(eta);
     int F = phiBin(phi);
-    return 2.0/RC[s][m].CP[DT][H][F].M; // + Q*RC[s][m].CP[DT][H][F].A*pt);
+    return 2.0/RC[s][m].CP[DT][H][F].M+RC[s][m].CP[DT][H][F].A*pt; // + Q*RC[s][m].CP[DT][H][F].A*pt);
 }
 
 double RocelecoR::kScaleMC(int Q, double pt, double eta, double phi, int s, int m) const{
@@ -167,8 +167,9 @@ double RocelecoR::kSpreadMC(int Q, double pt, double eta, double phi, double gt,
     const auto& rc=RC[s][m];
     int H = etaBin(eta);
     int F = phiBin(phi);
-    double k=1.0/(rc.CP[MC][H][F].M + Q*rc.CP[MC][H][F].A*pt);
+    double k=2.0/RC[s][m].CP[MC][H][F].M;
     return k*rc.RR.kSpread(gt, k*pt, eta);
+//    return rc.RR.kSpread(gt, pt, eta);
 }
 
 double RocelecoR::kSmearMC(int Q, double pt, double eta, double phi, int n, double u, int s, int m) const{
@@ -177,6 +178,7 @@ double RocelecoR::kSmearMC(int Q, double pt, double eta, double phi, int n, doub
     int F = phiBin(phi);
     double k=1.0/(rc.CP[MC][H][F].M + Q*rc.CP[MC][H][F].A*pt);
     return k*rc.RR.kExtra(k*pt, eta, n, u);
+
 }
 
 

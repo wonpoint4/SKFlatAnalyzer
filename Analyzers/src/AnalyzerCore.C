@@ -1851,6 +1851,7 @@ void AnalyzerCore::FillHist(TString histname, double value, double weight, int n
   TH1D *this_hist = GetHist1D(histname);
   if( !this_hist ){
     this_hist = new TH1D(histname, "", n_bin, x_min, x_max);
+    this_hist->SetDirectory(NULL);
     maphist_TH1D[histname] = this_hist;
   }
 
@@ -1863,6 +1864,7 @@ void AnalyzerCore::FillHist(TString histname, double value, double weight, int n
   TH1D *this_hist = GetHist1D(histname);
   if( !this_hist ){
     this_hist = new TH1D(histname, "", n_bin, xbins);
+    this_hist->SetDirectory(NULL);
     maphist_TH1D[histname] = this_hist;
   }
 
@@ -1879,6 +1881,7 @@ void AnalyzerCore::FillHist(TString histname,
   TH2D *this_hist = GetHist2D(histname);
   if( !this_hist ){
     this_hist = new TH2D(histname, "", n_binx, x_min, x_max, n_biny, y_min, y_max);
+    this_hist->SetDirectory(NULL);
     maphist_TH2D[histname] = this_hist;
   }
 
@@ -1895,6 +1898,7 @@ void AnalyzerCore::FillHist(TString histname,
   TH2D *this_hist = GetHist2D(histname);
   if( !this_hist ){
     this_hist = new TH2D(histname, "", n_binx, xbins, n_biny, ybins);
+    this_hist->SetDirectory(NULL);
     maphist_TH2D[histname] = this_hist;
   }
 
@@ -1912,6 +1916,7 @@ void AnalyzerCore::FillHist(TString histname,
   TH3D *this_hist = GetHist3D(histname);
   if( !this_hist ){
     this_hist = new TH3D(histname, "", n_binx, x_min, x_max, n_biny, y_min, y_max, n_binz, z_min, z_max);
+    this_hist->SetDirectory(NULL);
     maphist_TH3D[histname] = this_hist;
   }
 
@@ -1929,6 +1934,7 @@ void AnalyzerCore::FillHist(TString histname,
   TH3D *this_hist = GetHist3D(histname);
   if( !this_hist ){
     this_hist = new TH3D(histname, "", n_binx, xbins, n_biny, ybins, n_binz, zbins);
+    this_hist->SetDirectory(NULL);
     maphist_TH3D[histname] = this_hist;
   }
 

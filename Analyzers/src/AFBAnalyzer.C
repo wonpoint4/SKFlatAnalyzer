@@ -7,11 +7,14 @@ void AFBAnalyzer::initializeAnalyzer(){
     vector<Jet::WP> vwps={Jet::Medium};
     SetupBTagger(vtaggers,vwps,true,true);
   }
+  SetupToy(100);
 }
 void AFBAnalyzer::executeEvent(){
+  GetToyWeight();
+
+  ////////////////////////check genlevel//////////////////
   tauprefix="";
   hardprefix="";
-  ////////////////////////check genlevel//////////////////
   zptcor=1.;
   if(IsDYSample){
     vector<Gen> gens=GetGens();
@@ -173,6 +176,9 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       map_electrons["_smear_down"]=SmearElectrons(map_electrons[""],-1);
       std::sort(map_electrons["_smear_down"].begin(),map_electrons["_smear_down"].end(),PtComparing);
       map_leps["_smear_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_down"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+
+      map_electrons["_roccor"]=ElectronEnergyCorrection(map_electrons[""],0,0);
+      map_leps["_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_roccor"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
     }
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
@@ -298,11 +304,11 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","RECO",totalweight*RECOSF);
 	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","ID",totalweight*RECOSF*IDSF);
 	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","ISO",totalweight*RECOSF*IDSF*ISOSF);
-	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","trigger",totalweight*RECOSF*IDSF*ISOSF);
+	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","trigger",totalweight*RECOSF*IDSF*ISOSF*triggerSF);
 
 	///////////////////////map_weight//////////////////
 	map<TString,double> map_weight;
-	if(!IsSYS||!IsNominal) map_weight[suffix]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	if(!IsSYS||!IsNominal) map_weight[""]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
 	if(IsNominal&&!IsDATA){
 	  if(HasFlag("SYS")){
 	    map_weight["_noefficiencySF"]=weight*PUreweight*prefireweight*zptcor*z0weight;
@@ -353,7 +359,8 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 	}
 
 	///////////////////////fill hists///////////////////////
-	FillHists(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
+	if(HasFlag("TOY")) FillHistsToy(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
+	else FillHists(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
       }
     }
   }
@@ -363,6 +370,7 @@ AFBAnalyzer::AFBAnalyzer(){
 }
 AFBAnalyzer::~AFBAnalyzer(){
   if(random) delete random;
+  DeleteToy();
 }
 double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1){
   const TLorentzVector *l0,*l1;
@@ -438,6 +446,10 @@ double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& j
   TVector3 b2=dilepton.BoostVector();
   p0.Boost(-b2);p1.Boost(-b2);particle.Boost(-b2);
   return direction*cos(particle.Angle(p0.Vect().Unit()-p1.Vect().Unit()));
+}
+void AFBAnalyzer::FillHistsToy(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight){
+  int n_toy=toy_random.size();
+  for(int i=0;i<n_toy;i++) FillHists(channelname,pre,suf+Form("_toy%d",i),l0,l1,Multiply(map_weight,toy_weight[i]));
 }
 void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight){
   TLorentzVector dilepton=(*l0)+(*l1);
@@ -554,3 +566,47 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
   }
 }
   
+void AFBAnalyzer::SetupToy(int n_toy){
+  DeleteToy();
+  for(int i=0;i<n_toy;i++){
+    toy_random.push_back(new TRandom3);
+    toy_weight.push_back(-9999.);
+  } 
+}
+void AFBAnalyzer::DeleteToy(){
+  int n_toy=toy_random.size();
+  for(int i=0;i<n_toy;i++) delete toy_random.at(i);
+  toy_random.clear();
+  toy_weight.clear();
+}
+void AFBAnalyzer::GetToyWeight(){
+  int n_toy=toy_random.size();
+  if(fChain->GetTree()->GetReadEntry()==0){
+    TString filename=fChain->GetFile()->GetName();
+    for(int i=0;i<n_toy;i++) toy_random[i]->SetSeed((filename+Form("%d",i)).MD5().Hash());
+  }
+  for(int i=0;i<n_toy;i++)
+    toy_weight[i]=toy_random[i]->PoissonD(1.);
+}
+
+void AFBAnalyzer::FillHistToy(TString histname, double value, double weight, int n_bin, double x_min, double x_max){
+  int n_toy=toy_random.size();
+  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value,weight*toy_weight[i],n_bin,x_min,x_max);
+}
+void AFBAnalyzer::FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max){
+  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value,weight,n_bin,x_min,x_max);
+}
+void AFBAnalyzer::FillHistToy(TString histname, double value, double weight, int n_bin, double *xbins){ 
+  int n_toy=toy_random.size();
+  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value,weight*toy_weight[i],n_bin,xbins);
+}
+void AFBAnalyzer::FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins){ 
+  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value,weight,n_bin,xbins);
+}
+void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, double value_z, double weight, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
+  int n_toy=toy_random.size();
+  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
+}
+void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
+  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
+}
