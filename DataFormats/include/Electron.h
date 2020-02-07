@@ -62,7 +62,12 @@ public:
     double e1x5OverE5x5,
     double trackIso,
     double dr03EcalRecHitSumEt,
-    double dr03HcalDepth1TowerSumEt
+    double dr03HcalDepth1TowerSumEt,
+    double dr03HcalTowerSumEt,
+    double dr03TkSumPt,
+    double ecalPFClusterIso,
+    double hcalPFClusterIso,
+    int ecalDriven
   );
   inline double Full5x5_sigmaIetaIeta() const { return j_Full5x5_sigmaIetaIeta; }
   inline double dEtaSeed() const { return j_dEtaSeed; }
@@ -74,9 +79,18 @@ public:
   inline double TrkIso() const {return j_trkiso; }
   inline double dr03EcalRecHitSumEt() const { return j_dr03EcalRecHitSumEt; }
   inline double dr03HcalDepth1TowerSumEt() const { return j_dr03HcalDepth1TowerSumEt; }
+  inline double dr03HcalTowerSumEt() const { return j_dr03HcalTowerSumEt; }
+  inline double dr03TkSumPt() const { return j_dr03TkSumPt; }
+  inline double ecalPFClusterIso() const { return j_ecalPFClusterIso; }
+  inline double hcalPFClusterIso() const { return j_hcalPFClusterIso; }
+  inline bool isEcalDriven() const { return j_isEcalDriven; }
 
   void SetIDBit(unsigned int idbit);
 
+  void SetIDCutBit(vector<int> idcutbit);
+  inline vector<int> IDCutBit() const { return j_IDCutBit; }
+
+  static const int N_SELECTOR = 12;
   enum Selector {
     POG_CB_VETO = 1<< 0,
     POG_CB_LOOSE = 1<< 1,
@@ -137,7 +151,10 @@ private:
   bool j_passConversionVeto;
   int j_NMissingHits;
   double j_Full5x5_sigmaIetaIeta, j_dEtaSeed, j_dPhiIn, j_HoverE, j_InvEminusInvP, j_e2x5OverE5x5, j_e1x5OverE5x5, j_trkiso, j_dr03EcalRecHitSumEt, j_dr03HcalDepth1TowerSumEt;
+  double j_dr03HcalTowerSumEt, j_dr03TkSumPt, j_ecalPFClusterIso, j_hcalPFClusterIso;
+  bool j_isEcalDriven;
   unsigned int j_IDBit;
+  vector<int> j_IDCutBit;
   double j_RelPFIso_Rho;
 
   double j_Rho;

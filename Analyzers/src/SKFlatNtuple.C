@@ -99,7 +99,7 @@ void SKFlatNtuple::Init()
     weight_norm_1invpb = xsec/sumW;
   }
 
-  // Set object pointer
+   // Set object pointer
    HLT_TriggerName = 0;
    jet_pt = 0;
    jet_eta = 0;
@@ -249,6 +249,7 @@ void SKFlatNtuple::Init()
    electron_RelPFIso_dBeta = 0;
    electron_RelPFIso_Rho = 0;
    electron_IDBit = 0;
+   electron_IDCutBit = 0;
    electron_EnergyUnCorr = 0;
    electron_chMiniIso = 0;
    electron_nhMiniIso = 0;
@@ -257,6 +258,10 @@ void SKFlatNtuple::Init()
    electron_trackIso = 0;
    electron_dr03EcalRecHitSumEt = 0;
    electron_dr03HcalDepth1TowerSumEt = 0;
+   electron_dr03HcalTowerSumEt = 0;
+   electron_dr03TkSumPt = 0;
+   electron_ecalPFClusterIso = 0;
+   electron_hcalPFClusterIso = 0;
    muon_PfChargedHadronIsoR04 = 0;
    muon_PfNeutralHadronIsoR04 = 0;
    muon_PfGammaIsoR04 = 0;
@@ -337,6 +342,24 @@ void SKFlatNtuple::Init()
    muon_PfNeutralHadronMiniIso = 0;
    muon_PfGammaMiniIso = 0;
    muon_PFSumPUMiniIso = 0;
+   muon_MVA = 0;
+   muon_lowptMVA = 0;
+   muon_softMVA = 0;
+   muon_jetPtRatio = 0;
+   muon_jetPtRel = 0;
+   muon_simType = 0;
+   muon_simExtType = 0;
+   muon_simFlavour = 0;
+   muon_simHeaviestMotherFlavour = 0;
+   muon_simPdgId = 0;
+   muon_simMotherPdgId = 0;
+   muon_simMatchQuality = 0;
+   LHE_Px = 0;
+   LHE_Py = 0;
+   LHE_Pz = 0;
+   LHE_E = 0;
+   LHE_Status = 0;
+   LHE_ID = 0;
    PDFWeights_Scale = 0;
    PDFWeights_Error = 0;
    PDFWeights_AlphaS = 0;
@@ -570,6 +593,7 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("electron_RelPFIso_dBeta", &electron_RelPFIso_dBeta, &b_electron_RelPFIso_dBeta);
    fChain->SetBranchAddress("electron_RelPFIso_Rho", &electron_RelPFIso_Rho, &b_electron_RelPFIso_Rho);
    fChain->SetBranchAddress("electron_IDBit", &electron_IDBit, &b_electron_IDBit);
+   fChain->SetBranchAddress("electron_IDCutBit", &electron_IDCutBit, &b_electron_IDCutBit);
    fChain->SetBranchAddress("electron_EnergyUnCorr", &electron_EnergyUnCorr, &b_electron_EnergyUnCorr);
    fChain->SetBranchAddress("electron_chMiniIso", &electron_chMiniIso, &b_electron_chMiniIso);
    fChain->SetBranchAddress("electron_nhMiniIso", &electron_nhMiniIso, &b_electron_nhMiniIso);
@@ -578,6 +602,10 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("electron_trackIso", &electron_trackIso, &b_electron_trackIso);
    fChain->SetBranchAddress("electron_dr03EcalRecHitSumEt", &electron_dr03EcalRecHitSumEt, &b_electron_dr03EcalRecHitSumEt);
    fChain->SetBranchAddress("electron_dr03HcalDepth1TowerSumEt", &electron_dr03HcalDepth1TowerSumEt, &b_electron_dr03HcalDepth1TowerSumEt);
+   fChain->SetBranchAddress("electron_dr03HcalTowerSumEt", &electron_dr03HcalTowerSumEt, &b_electron_dr03HcalTowerSumEt);
+   fChain->SetBranchAddress("electron_dr03TkSumPt", &electron_dr03TkSumPt, &b_electron_dr03TkSumPt);
+   fChain->SetBranchAddress("electron_ecalPFClusterIso", &electron_ecalPFClusterIso, &b_electron_ecalPFClusterIso);
+   fChain->SetBranchAddress("electron_hcalPFClusterIso", &electron_hcalPFClusterIso, &b_electron_hcalPFClusterIso);
    fChain->SetBranchAddress("muon_PfChargedHadronIsoR04", &muon_PfChargedHadronIsoR04, &b_muon_PfChargedHadronIsoR04);
    fChain->SetBranchAddress("muon_PfNeutralHadronIsoR04", &muon_PfNeutralHadronIsoR04, &b_muon_PfNeutralHadronIsoR04);
    fChain->SetBranchAddress("muon_PfGammaIsoR04", &muon_PfGammaIsoR04, &b_muon_PfGammaIsoR04);
@@ -658,8 +686,25 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("muon_PfNeutralHadronMiniIso", &muon_PfNeutralHadronMiniIso, &b_muon_PfNeutralHadronMiniIso);
    fChain->SetBranchAddress("muon_PfGammaMiniIso", &muon_PfGammaMiniIso, &b_muon_PfGammaMiniIso);
    fChain->SetBranchAddress("muon_PFSumPUMiniIso", &muon_PFSumPUMiniIso, &b_muon_PFSumPUMiniIso);
-
+   fChain->SetBranchAddress("muon_MVA", &muon_MVA, &b_muon_MVA);
+   fChain->SetBranchAddress("muon_lowptMVA", &muon_lowptMVA, &b_muon_lowptMVA);
+   fChain->SetBranchAddress("muon_softMVA", &muon_softMVA, &b_muon_softMVA);
+   fChain->SetBranchAddress("muon_jetPtRatio", &muon_jetPtRatio, &b_muon_jetPtRatio);
+   fChain->SetBranchAddress("muon_jetPtRel", &muon_jetPtRel, &b_muon_jetPtRel);
+   fChain->SetBranchAddress("muon_simType", &muon_simType, &b_muon_simType);
+   fChain->SetBranchAddress("muon_simExtType", &muon_simExtType, &b_muon_simExtType);
+   fChain->SetBranchAddress("muon_simFlavour", &muon_simFlavour, &b_muon_simFlavour);
+   fChain->SetBranchAddress("muon_simHeaviestMotherFlavour", &muon_simHeaviestMotherFlavour, &b_muon_simHeaviestMotherFlavour);
+   fChain->SetBranchAddress("muon_simPdgId", &muon_simPdgId, &b_muon_simPdgId);
+   fChain->SetBranchAddress("muon_simMotherPdgId", &muon_simMotherPdgId, &b_muon_simMotherPdgId);
+   fChain->SetBranchAddress("muon_simMatchQuality", &muon_simMatchQuality, &b_muon_simMatchQuality);
    if(!IsDATA){
+   fChain->SetBranchAddress("LHE_Px", &LHE_Px, &b_LHE_Px);
+   fChain->SetBranchAddress("LHE_Py", &LHE_Py, &b_LHE_Py);
+   fChain->SetBranchAddress("LHE_Pz", &LHE_Pz, &b_LHE_Pz);
+   fChain->SetBranchAddress("LHE_E", &LHE_E, &b_LHE_E);
+   fChain->SetBranchAddress("LHE_Status", &LHE_Status, &b_LHE_Status);
+   fChain->SetBranchAddress("LHE_ID", &LHE_ID, &b_LHE_ID);
    fChain->SetBranchAddress("PDFWeights_Scale", &PDFWeights_Scale, &b_PDFWeights_Scale);
    fChain->SetBranchAddress("PDFWeights_Error", &PDFWeights_Error, &b_PDFWeights_Error);
    fChain->SetBranchAddress("PDFWeights_AlphaS", &PDFWeights_AlphaS, &b_PDFWeights_AlphaS);
@@ -694,7 +739,6 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("genWeight_alphaQCD", &genWeight_alphaQCD, &b_genWeight_alphaQCD);
    fChain->SetBranchAddress("genWeight_alphaQED", &genWeight_alphaQED, &b_genWeight_alphaQED);
    }
-
    fChain->SetBranchAddress("photon_Energy", &photon_Energy, &b_photon_Energy);
    fChain->SetBranchAddress("photon_EnergyUnCorr", &photon_EnergyUnCorr, &b_photon_EnergyUnCorr);
    fChain->SetBranchAddress("photon_eta", &photon_eta, &b_photon_eta);

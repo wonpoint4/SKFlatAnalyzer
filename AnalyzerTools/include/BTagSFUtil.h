@@ -30,9 +30,12 @@ class BTagSFUtil{
 
   // Functions used in IsTagged to determine tag rate with syst                                                                                                                                                                                                      
   float GetJetSF(int JetFlavor, float JetPt, float JetEta);
-  float GetJetSFPeriodDependant(int JetFlavor, float JetPt, float JetEta, TString iperiod);
+  float GetJetSFPeriodDependant(int JetFlavor, float JetPt, float JetEta, TString iperiod, bool isperiodDep, TString tagger);
   float JetTagEfficiency(int JetFlavor, float JetPt, float JetEta);
 
+
+  // Function to warn user of incorrect setup
+  void ErrorLoadingCSV(TString tag_key, bool isperiodDep, TString TaggerName);
 
   // New functions for SKAnalzyer
   void SetMCSample(TString s);

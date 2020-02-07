@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumw
+ZZTo2L2Nu_powheg	ZZTo2L2Nu_13TeV_powheg_pythia8_ext1	1.	47678932	47678932

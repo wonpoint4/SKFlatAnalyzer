@@ -25,6 +25,7 @@ void AnalyzerParameter::Clear(){
 
   Muon_Loose_ID = "";
   Muon_Veto_ID = "";
+  Muon_RECO_SF_Key = "";
   Muon_ID_SF_Key = "";
   Muon_ISO_SF_Key = "";
   Muon_Trigger_SF_Key = "";
@@ -61,6 +62,7 @@ AnalyzerParameter::AnalyzerParameter(){
   Muon_Tight_ID = "POGTightWithTightIso";
   Muon_Loose_ID = "POGLoose";
   Muon_Veto_ID = "POGLoose";
+  Muon_RECO_SF_Key = "";
   Muon_ID_SF_Key = "NUM_TightID_DEN_genTracks";
   Muon_ISO_SF_Key = "NUM_TightRelIso_DEN_TightIDandIPCut";
   Muon_Trigger_SF_Key = "POGTight";

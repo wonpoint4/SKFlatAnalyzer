@@ -5,7 +5,7 @@
 https://jskim.web.cern.ch/jskim/SKFlat/Manual/Manual_SKFlat.pdf
 
 ## Where to put the analyzer
-TAMSA 1/2 : /data4/Users/$USER/
+TAMSA 1/2 : /data6/Users/$USER/
 
 KISTI : ~/ # home directory
 
@@ -13,11 +13,22 @@ KNU :  ~/scartch/
 
 ## First time setup
 ```
-source setup.sh # This should be done for every new shell
-#### Setup user info
-#### Need to be done only once
+#### When first time gie clone, use the option "--recursive" to initiate the submodules
+git clone --recursive git@github.com:CMSSNU/SKFlatAnalyzer.git
+#### add your remote repo
+git remote add <nickname> git@github.com:<gitaccount>/SKFlatAnalyzer.git
+git checkout <your working branch>
+
+#### First time setup script
+source bin/FirstTimeSetup.sh 
+
+#### You have to edit user info
+#### First, copy the temply using the command below
 cp $SKFlat_WD/python/UserInfo_template.py $SKFlat_WD/python/UserInfo_${USER}.py 
-# edit $SKFlat_WD/python/UserInfo_${USER}.py
+#### Then, edit $SKFlat_WD/python/UserInfo_${USER}.py
+
+#### Now, run setup script.
+#### This should be done for every new shell
 source setup.sh
 ```
 Compile
@@ -55,18 +66,9 @@ in Analyzers/include/Analyzers_LinkDef.h
 
 Look Analyzers/src/ExampleRun.C
 
-# How To update your forked repo to follow the original repository
+# Tips
 
-To get your forked repo from this one
-```
-push "Fork" button on the right-top side of this web page
-```
+## Making PR
 
-Go to you forked repo webpage and copy the address of it, then clone
+Start from the CMSSNU's master branch of CMSSNU when making pull request to prevent anoying conflicts.
 
-How to update your forked repo to follow the original repository
-```
-git remote add upstream https://github.com/CMSSNU/SKFlatAnalyzer
-git fetch upstream
-git pull upstream master
-```

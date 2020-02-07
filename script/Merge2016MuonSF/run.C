@@ -1,12 +1,12 @@
 void run(){
 
-  double lumi_periodB = 5.929001722;
-  double lumi_periodC = 2.645968083;
-  double lumi_periodD = 4.35344881;
-  double lumi_periodE = 4.049732039;
-  double lumi_periodF = 3.157020934;
-  double lumi_periodG = 7.549615806;
-  double lumi_periodH = 8.545039549 + 0.216782873;
+  double lumi_periodB = 5750.490644035;
+  double lumi_periodC = 2572.903488748;
+  double lumi_periodD = 4242.291556970;
+  double lumi_periodE = 4025.228136967;
+  double lumi_periodF = 3104.509131800;
+  double lumi_periodG = 7575.824256098;
+  double lumi_periodH = 8650.628380028;
   double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
 
   double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;

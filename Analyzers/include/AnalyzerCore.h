@@ -11,6 +11,7 @@
 #include "Event.h"
 #include "Particle.h"
 #include "Gen.h"
+#include "LHE.h"
 #include "Lepton.h"
 #include "Muon.h"
 #include "Electron.h"
@@ -25,6 +26,7 @@
 #include "CFBackgroundEstimator.h"
 #include "BTagSFUtil.h"
 #include "GeneralizedEndpoint.h"
+#include "GEScaleSyst.h"
 #include "PDFReweight.h"
 
 #define M_Z 91.1876
@@ -82,6 +84,7 @@ public:
   std::vector<FatJet> GetFatJets(TString id, double ptmin, double fetamax);
 
   std::vector<Gen> GetGens();
+  std::vector<LHE> GetLHEs();
 
   //===================================================
   //==== Get objects METHOD 2
@@ -140,6 +143,7 @@ public:
 
   //==== Muon GeneralizedEngpoint momentum scaling
   GeneralizedEndpoint *muonGE;
+  GEScaleSyst *muonGEScaleSyst;
 
   //==== Btag setup
   void SetupBTagger(std::vector<Jet::Tagger> taggers, std::vector<Jet::WP> wps, bool setup_systematics, bool period_dependant);
@@ -215,17 +219,17 @@ public:
                 int n_binx, double *xbins,
                 int n_biny, double *ybins);
   void FillHist(TString histname,
-                double value_x, double value_y, double value_z,
-                double weight,
-                int n_binx, double x_min, double x_max,
-                int n_biny, double y_min, double y_max,
-                int n_binz, double z_min, double z_max);
+		double value_x, double value_y, double value_z,
+		double weight,
+		int n_binx, double x_min, double x_max,
+		int n_biny, double y_min, double y_max,
+		int n_binz, double z_min, double z_max);
   void FillHist(TString histname,
-                double value_x, double value_y, double value_z,
-                double weight,
-                int n_binx, double *xbins,
-                int n_biny, double *ybins,
-                int n_binz, double *zbins);
+		double value_x, double value_y, double value_z,
+		double weight,
+		int n_binx, double *xbins,
+		int n_biny, double *ybins,
+		int n_binz, double *zbins);
 
   //==== JSFillHist : 1D
   std::map< TString, std::map<TString, TH1D*> > JSmaphist_TH1D;

@@ -28,7 +28,7 @@ void MCCorrection::ReadHistograms(){
     if(tstring_elline.Contains("#")) continue;
 
     TString a,b,c,d,e,f;
-    is >> a; // ID,RERCO
+    is >> a; // ID,RECO
     is >> b; // Eff,SF
     is >> c; // <WPnames>
     is >> d; // <rootfilename>
@@ -174,6 +174,54 @@ void MCCorrection::SetMCSample(TString s){
 void MCCorrection::SetDataYear(int i){
   DataYear = i;
 }
+void MCCorrection::SetIsFastSim(bool b){
+  IsFastSim = b;
+}
+
+double MCCorrection::MuonReco_SF(TString key, double eta, double p, int sys){
+
+  //cout << "[MCCorrection::MuonReco_SF] key = " << key << endl;
+  //cout << "[MCCorrection::MuonReco_SF] eta = " << eta << ", p = " << p << endl;
+
+  if(key=="Default") return 1.;
+
+  double value = 1.;
+  double error = 0.;
+
+  eta = fabs(eta);
+
+  if(key=="HighPtMuonRecoSF"){
+
+    //==== XXX this histogram uses P not Pt    
+
+    //==== boundaries
+    if(p<50.) p = 50.;
+    if(p>=3500.) p = 3499.;
+    if(eta>=2.4) eta = 2.39;
+
+  }
+
+  //cout << "[MCCorrection::MuonReco_SF] corrected eta = " << eta << ", p = " << p << endl;
+  //cout << "[MCCorrection::MuonReco_SF] histname = " << "RECO_SF_"+key << endl;
+
+  TH2F *this_hist = map_hist_Muon["RECO_SF_"+key];
+  if(!this_hist){
+    if(IgnoreNoHist) return 1.;
+    else{
+      cerr << "[MCCorrection::MuonReco_SF] No "<<"RECO_SF_"+key<<endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  int this_bin = this_hist->FindBin(p, eta);
+  value = this_hist->GetBinContent(this_bin);
+  error = this_hist->GetBinError(this_bin);
+
+  //cout << "[MCCorrection::MuonReco_SF] --> value = " << value << "\t" << ", error = " << error << endl;
+
+  return value+double(sys)*error;
+
+}
 
 double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
 
@@ -201,7 +249,7 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
   if(!this_hist){
     if(IgnoreNoHist) return 1.;
     else{
-      cout << "[MCCorrection::MuonID_SF] No "<<"ID_SF_"+ID<<endl;
+      cerr << "[MCCorrection::MuonID_SF] No "<<"ID_SF_"+ID<<endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -249,7 +297,7 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
   if(!this_hist){
     if(IgnoreNoHist) return 1.;
     else{
-      cout << "[MCCorrection::MuonISO_SF] No "<<"ISO_SF_"+ID<<endl;
+      cerr << "[MCCorrection::MuonISO_SF] No "<<"ISO_SF_"+ID<<endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -274,9 +322,12 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 
 double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys){
 
+  //cout << "[MCCorrection::MuonTrigger_Eff] Called" << endl;
+
   if(ID=="Default") return 1.;
   if(trig=="Default") return 1.;
 
+  //cout << "[MCCorrection::MuonTrigger_Eff] DataYear = " << DataYear << endl;
   //cout << "[MCCorrection::MuonTrigger_Eff] ID = " << ID << "\t" << "trig = " << trig << endl;
   //cout << "[MCCorrection::MuonTrigger_Eff] DataOrMC = " << DataOrMC << endl;
   //cout << "[MCCorrection::MuonTrigger_Eff] eta = " << eta << ", pt = " << pt << endl;
@@ -298,7 +349,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<52.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>800.) pt = 799.;
+      if(pt>1000.) pt = 999.;
     }
     else{
 
@@ -319,7 +370,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<52.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>1000.) pt = 999.;
     }
     else{
 
@@ -336,14 +387,14 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<52.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>1000.) pt = 999.;
     }
     else{
 
     }
   }
   else{
-    cout << "[MCCorrection::MuonTrigger_Eff] Wrong year : " << DataYear << endl;
+    cerr << "[MCCorrection::MuonTrigger_Eff] Wrong year : " << DataYear << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -354,7 +405,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
   if(!this_hist){
     if(IgnoreNoHist) return 1.;
     else{
-      cout << "[MCCorrection::MuonTrigger_Eff] No "<<histkey<<endl;
+      cerr << "[MCCorrection::MuonTrigger_Eff] No "<<histkey<<endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -477,7 +528,7 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
       this_SF_err = sqrt(this_SF_staterr*this_SF_staterr+this_SF_systerr*this_SF_systerr);
     }
     else{
-      cout << "[MCCorrection::ElectronID_SF] (Hist) Wrong year "<< DataYear << endl;
+      cerr << "[MCCorrection::ElectronID_SF] (Hist) Wrong year "<< DataYear << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -490,7 +541,7 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
     if(!this_hist){
       if(IgnoreNoHist) return 1.;
       else{
-        cout << "[MCCorrection::ElectronID_SF] (Hist) No "<<"ID_SF_"+ID<<endl;
+        cerr << "[MCCorrection::ElectronID_SF] (Hist) No "<<"ID_SF_"+ID<<endl;
         exit(EXIT_FAILURE);
       }
     }
@@ -522,7 +573,7 @@ double MCCorrection::ElectronReco_SF(double sceta, double pt, int sys){
   if(!this_hist){
     if(IgnoreNoHist) return 1.;
     else{
-      cout << "[MCCorrection::ElectronReco_SF] No "<<"RECO_SF_"+ptrange<<endl;
+      cerr << "[MCCorrection::ElectronReco_SF] No "<<"RECO_SF_"+ptrange<<endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -549,34 +600,39 @@ double MCCorrection::ElectronTrigger_Eff(TString ID, TString trig, int DataOrMC,
   double value = 1.;
   double error = 0.;
 
-  //==== XXX If you have min pt, apply it here
-  if(pt<50.) pt = 50.;
-  if(pt>=500.) pt = 499.;
+  if(trig=="WREGammaTrigger"){
 
-  if(sceta<-2.5) sceta = -2.5;
-  if(sceta>=2.5) sceta = 2.49;
+    if(pt<50.) pt = 50.;
+    if(pt>=500.) pt = 499.;
 
-  TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID;
-  if(DataOrMC==1) histkey = "Trigger_Eff_MC_"+trig+"_"+ID;
-  //cout << "[MCCorrection::ElectronTrigger_Eff] histkey = " << histkey << endl;
-  TH2F *this_hist = map_hist_Electron[histkey];
-  if(!this_hist){
-    if(IgnoreNoHist) return 1.;
-    else{
-      cout << "[MCCorrection::ElectronTrigger_Eff] No "<<histkey<<endl;
-      exit(EXIT_FAILURE);
+    if(sceta<-2.5) sceta = -2.5;
+    if(sceta>=2.5) sceta = 2.49;
+
+    TString etaregion = "Barrel";
+    if(fabs(sceta) > 1.566) etaregion = "EndCap";
+
+    TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID+"_"+etaregion;
+    if(DataOrMC==1) histkey = "Trigger_Eff_MC_"+trig+"_"+ID+"_"+etaregion;
+    //cout << "[MCCorrection::ElectronTrigger_Eff] histkey = " << histkey << endl;
+    TH2F *this_hist = map_hist_Electron[histkey];
+    if(!this_hist){
+      if(IgnoreNoHist) return 1.;
+      else{
+        cerr << "[MCCorrection::ElectronTrigger_Eff] No "<<histkey<<endl;
+        exit(EXIT_FAILURE);
+      }
     }
+
+    int this_bin = this_hist->FindBin(sceta, pt);
+
+    value = this_hist->GetBinContent(this_bin);
+    error = this_hist->GetBinError(this_bin);
+
   }
-
-  int this_bin = this_hist->FindBin(sceta, pt);
-
-  value = this_hist->GetBinContent(this_bin);
-  error = this_hist->GetBinError(this_bin);
 
   //cout << "[MCCorrection::ElectronTrigger_Eff] value = " << value << endl;
 
   return value+double(sys)*error;
-
 
 }
 
@@ -587,7 +643,7 @@ double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, const std::vec
 
   double value = 1.;
 
-  if(trig=="Ele27_WPTight_Gsf" || trig=="Ele35_WPTight_Gsf" || trig=="Ele32_WPTight_Gsf"){
+  if(trig=="WREGammaTrigger"){
 
     double eff_DATA = 1.;
     double eff_MC = 1.;
@@ -601,6 +657,8 @@ double MCCorrection::ElectronTrigger_SF(TString ID, TString trig, const std::vec
     eff_MC = 1.-eff_MC;
 
     value = eff_DATA/eff_MC;
+    if(IsFastSim) value = eff_DATA;
+
 
 /*
     if(eff_DATA==0||eff_MC==0){
@@ -687,13 +745,13 @@ double MCCorrection::GetPileUpWeightBySampleName(int N_pileup, int syst){
     this_histname += "_sig_up_pileup";
   }
   else{
-    cout << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
+    cerr << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
     exit(EXIT_FAILURE);
   }
 
   TH1D *this_hist = map_hist_pileup[this_histname];
   if(!this_hist){
-    cout << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
+    cerr << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -717,13 +775,13 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
     this_histname += "_sig_up_pileup";
   }
   else{
-    cout << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
+    cerr << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
     exit(EXIT_FAILURE);
   }
 
   TH1D *this_hist = map_hist_pileup[this_histname];
   if(!this_hist){
-    cout << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
+    cerr << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -768,7 +826,7 @@ double MCCorrection::GetTopPtReweight(const std::vector<Gen>& gens){
   return pt_reweight;
 }
 
-double MCCorrection::GetOfficialDYReweight(const vector<Gen>& gens){
+double MCCorrection::GetOfficialDYReweight(const vector<Gen>& gens, int sys){
 
   genFinderDY->Find(gens);
   Particle genZ = genFinderDY->GenZ;
@@ -780,6 +838,8 @@ double MCCorrection::GetOfficialDYReweight(const vector<Gen>& gens){
   int bin_pt   = hist_DYPtReweight_2D->GetYaxis()->FindBin(ptZ);
 
   double value = hist_DYPtReweight_2D->GetBinContent( bin_mass, bin_pt );
-  return value;
+  double error = hist_DYPtReweight_2D->GetBinError( bin_mass, bin_pt );
+
+  return value+double(sys)*error;
 
 }

@@ -12,6 +12,7 @@ void SKFlatValidation::initializeAnalyzer(){
 
   if(DataYear==2016){
 
+    //==== Normal POG ID
     Triggers_POG_Electron = {
       "HLT_Ele27_WPTight_Gsf_v",
     };
@@ -24,14 +25,17 @@ void SKFlatValidation::initializeAnalyzer(){
     TriggerSafePt_POG_Electron = 30.;
     TriggerSafePt_POG_Muon = 26.;
 
+    //==== POG High pt ID
     Triggers_POGHighPt_Electron = {
       "HLT_Ele27_WPTight_Gsf_v",
+      "HLT_Photon175_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
     };
     Triggers_POGHighPt_Muon = {
       "HLT_Mu50",
       "HLT_TkMu50_v",
     };
-    TriggerNameForSF_POGHighPt_Electron = "Ele27_WPTight_Gsf";
+    TriggerNameForSF_POGHighPt_Electron = "WREGammaTrigger";
     TriggerNameForSF_POGHighPt_Muon = "Mu50";
     TriggerSafePt_POGHighPt_Electron = 30.;
     TriggerSafePt_POGHighPt_Muon = 52.;
@@ -39,6 +43,7 @@ void SKFlatValidation::initializeAnalyzer(){
   }
   else if(DataYear==2017){
 
+    //==== Normal POG ID
     Triggers_POG_Electron = {
       "HLT_Ele35_WPTight_Gsf_v",
     };
@@ -50,13 +55,18 @@ void SKFlatValidation::initializeAnalyzer(){
     TriggerSafePt_POG_Electron = 38.;
     TriggerSafePt_POG_Muon = 29.;
 
+    //==== POG High pt ID
     Triggers_POGHighPt_Electron = {
       "HLT_Ele35_WPTight_Gsf_v",
+      "HLT_Photon200_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
     };
     Triggers_POGHighPt_Muon = {
       "HLT_Mu50_v",
+      "HLT_OldMu100_v",
+      "HLT_TkMu100_v",
     };
-    TriggerNameForSF_POGHighPt_Electron = "Ele35_WPTight_Gsf";
+    TriggerNameForSF_POGHighPt_Electron = "WREGammaTrigger";
     TriggerNameForSF_POGHighPt_Muon = "Mu50";
     TriggerSafePt_POGHighPt_Electron = 38.;
     TriggerSafePt_POGHighPt_Muon = 52.;
@@ -64,6 +74,7 @@ void SKFlatValidation::initializeAnalyzer(){
   }
   else if(DataYear==2018){
 
+    //==== Normal POG ID
     Triggers_POG_Electron = {
       "HLT_Ele32_WPTight_Gsf_v",
     };
@@ -75,18 +86,19 @@ void SKFlatValidation::initializeAnalyzer(){
     TriggerSafePt_POG_Electron = 35.;
     TriggerSafePt_POG_Muon = 26.;
 
+    //==== POG High pt ID
     Triggers_POGHighPt_Electron = {
       "HLT_Ele32_WPTight_Gsf_v",
+      "HLT_Photon200_v",
+      "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
     };
     Triggers_POGHighPt_Muon = {
       "HLT_Mu50_v",
       "HLT_OldMu100_v",
       "HLT_TkMu100_v",
     };
-    TriggerNameForSF_POGHighPt_Electron = "Ele35_WPTight_Gsf";
+    TriggerNameForSF_POGHighPt_Electron = "WREGammaTrigger";
     TriggerNameForSF_POGHighPt_Muon = "Mu50";
-    TriggerNameForSF_POG_Electron = "Default";
-    TriggerNameForSF_POG_Muon = "Default";
     TriggerSafePt_POGHighPt_Electron = 35.;
     TriggerSafePt_POGHighPt_Muon = 52.;
     DoublePhotonSafePtCut = 75.;
@@ -105,7 +117,7 @@ void SKFlatValidation::initializeAnalyzer(){
   v_wps.push_back(Jet::Medium);
 
   //=== list of taggers, WP, setup systematics, use period SFs
-  SetupBTagger(vtaggers,v_wps, true, true);
+  SetupBTagger(vtaggers,v_wps, true, false);
 
 }
 
@@ -125,6 +137,7 @@ void SKFlatValidation::executeEvent(){
 
   param.Electron_Tight_ID = "passMediumID";
   param.Electron_ID_SF_Key = "passMediumID";
+  param.Electron_Trigger_SF_Key = "Default";
 
   param.Muon_Tight_ID = "POGTightWithTightIso";
   param.Muon_ID_SF_Key = "NUM_TightID_DEN_genTracks";
@@ -143,6 +156,7 @@ void SKFlatValidation::executeEvent(){
 
   param.Electron_Tight_ID = "passHEEPID";
   param.Electron_ID_SF_Key = "HEEP";
+  param.Electron_Trigger_SF_Key = "HEEP";
 
   param.Muon_Tight_ID = "POGHighPtWithLooseTrkIso";
   param.Muon_ID_SF_Key = "NUM_HighPtID_DEN_genTracks";
@@ -287,13 +301,22 @@ void SKFlatValidation::executeEventFromParameter(AnalyzerParameter param){
 
           weight *= this_idsf*this_isosf*this_trigsf;
 
+          if(param.Name=="POGHighPt"){
+            double MiniAODP = sqrt( muons.at(i).MiniAODPt() * muons.at(i).MiniAODPt() + muons.at(i).Pz() * muons.at(i).Pz() );
+            double this_recosf = mcCorr->MuonReco_SF("HighPtMuonRecoSF", this_eta, MiniAODP);
+            weight *= this_recosf;
+          }
+
         }
       }
       if( Suffix.Contains("DiElectron") || Suffix.Contains("SingleElectron") || Suffix.Contains("DiPhoton") ){
         for(unsigned int i=0; i<electrons.size(); i++){
           double this_recosf = mcCorr->ElectronReco_SF(electrons.at(i).scEta(),electrons.at(i).Pt());
           double this_idsf = mcCorr->ElectronID_SF(param.Electron_ID_SF_Key, electrons.at(i).scEta(), electrons.at(i).Pt());
-          weight *= this_recosf*this_idsf;
+          double this_trigsf = mcCorr->ElectronTrigger_SF(param.Electron_Trigger_SF_Key, TriggerNameForSF_Electron, electrons);
+
+          weight *= this_recosf*this_idsf*this_trigsf;
+
         }
       }
 

@@ -8,17 +8,16 @@ AnalyzerCore::AnalyzerCore(){
   cfEst = new CFBackgroundEstimator();
   pdfReweight = new PDFReweight();
   muonGE = new GeneralizedEndpoint();
+  muonGEScaleSyst = new GEScaleSyst();
 
 }
 
 AnalyzerCore::~AnalyzerCore(){
 
   //=== hist maps
-  int i=0;
+
   for(std::map< TString, TH1D* >::iterator mapit = maphist_TH1D.begin(); mapit!=maphist_TH1D.end(); mapit++){
-    if(i%10000==0) cout<< "[AnalyzerCore::~AnalyzerCore] deleting 1D histogram "<<i<<"/"<<maphist_TH1D.size()<<" "<<printcurrunttime() << endl;
-    if(mapit->second) delete mapit->second;
-    i++;
+    delete mapit->second;
   }
   maphist_TH1D.clear();
 
@@ -31,7 +30,7 @@ AnalyzerCore::~AnalyzerCore(){
     delete mapit->second;
   }
   maphist_TH3D.clear();
-
+  
   //=== delete btag map
   for(std::map<TString,BTagSFUtil*>::iterator it = MapBTagSF.begin(); it!= MapBTagSF.end(); it++){
     delete it->second;
@@ -49,6 +48,8 @@ AnalyzerCore::~AnalyzerCore(){
   delete fakeEst;
   delete cfEst;
   delete pdfReweight;
+  delete muonGE;
+  delete muonGEScaleSyst;
 
 }
 
@@ -111,6 +112,8 @@ std::vector<Muon> AnalyzerCore::GetAllMuons(){
     //==== TuneP
     //==== Apply scailing later with AnalyzerCore::UseTunePMuon()
     mu.SetTuneP4(muon_TuneP_pt->at(i), muon_TuneP_ptError->at(i), muon_TuneP_eta->at(i), muon_TuneP_phi->at(i), muon_TuneP_charge->at(i));
+
+    mu.SetMVA(muon_MVA->at(i));
 
     mu.SetdXY(muon_dxyVTX->at(i), muon_dxyerrVTX->at(i));
     mu.SetdZ(muon_dzVTX->at(i), muon_dzerrVTX->at(i));
@@ -199,10 +202,20 @@ std::vector<Electron> AnalyzerCore::GetAllElectrons(){
       electron_e1x5OverE5x5->at(i),
       electron_trackIso->at(i),
       electron_dr03EcalRecHitSumEt->at(i),
-      electron_dr03HcalDepth1TowerSumEt->at(i)
+      electron_dr03HcalDepth1TowerSumEt->at(i),
+      electron_dr03HcalTowerSumEt->at(i),
+      electron_dr03TkSumPt->at(i),
+      electron_ecalPFClusterIso->at(i),
+      electron_hcalPFClusterIso->at(i),
+      electron_ecalDriven->at(i)
     );
 
     el.SetIDBit(electron_IDBit->at(i));
+    vector<int> temp_idcutbit;
+    for(unsigned int j=0; j<Electron::N_SELECTOR; j++){
+      temp_idcutbit.push_back( electron_IDCutBit->at( i*Electron::N_SELECTOR + j ) );
+    }
+    el.SetIDCutBit(temp_idcutbit);
     el.SetRelPFIso_Rho(electron_RelPFIso_Rho->at(i));
 
     //==== Should be ran after SCeta is set
@@ -525,6 +538,26 @@ std::vector<Gen> AnalyzerCore::GetGens(){
 
 }
 
+std::vector<LHE> AnalyzerCore::GetLHEs(){
+
+  std::vector<LHE> out;
+  if(IsDATA) return out;
+
+  for(unsigned int i=0; i<LHE_Px->size(); i++){
+
+    LHE lhe;
+
+    lhe.SetPxPyPzE(LHE_Px->at(i), LHE_Py->at(i), LHE_Pz->at(i), LHE_E->at(i));
+    lhe.SetIndexIDStatus(i, LHE_ID->at(i), LHE_Status->at(i));
+
+    out.push_back(lhe);
+
+  }
+
+  return out;
+
+}
+
 std::vector<Muon> AnalyzerCore::UseTunePMuon(const std::vector<Muon>& muons){
 
   std::vector<Muon> out;
@@ -538,7 +571,7 @@ std::vector<Muon> AnalyzerCore::UseTunePMuon(const std::vector<Muon>& muons){
     //==== 1) if tuneP Pt < 200 -> Rochester
     //==== 2) if tuneP pt >= 200 -> Generalized Endpoint
 
-    double new_pt, new_pt_up, new_pt_down;
+    double new_pt( this_tunep4.Pt() ), new_pt_up( this_tunep4.Pt() ), new_pt_down( this_tunep4.Pt() );
     if(this_tunep4.Pt()<200){
 
       //==== 19/03/24 (jskim) : For 99% of the muons, MiniAODPt and TunePPt are same
@@ -560,21 +593,33 @@ std::vector<Muon> AnalyzerCore::UseTunePMuon(const std::vector<Muon>& muons){
     }
     else{
 
-      //==== ScaledPts defined in GeneralizedEndpointPt.h ..
-      ScaledPts ptvalues = muonGE->GeneralizedEndpointPt(this_tunep4.Pt(), this_tunep4.Charge(), this_tunep4.Eta(), this_tunep4.Phi()*180./M_PI, event);
-      new_pt = ptvalues.ScaledPt;
-      //==== Mode == 1 : Kappa up
-      //==== Mode == 2 : Kappa down
-      new_pt_up = ptvalues.ScaeldPt_Up;
-      new_pt_down = ptvalues.ScaeldPt_Down;
+      //==== Unlike rochester, GE method should be only applied to MC
+
+      if(!IsDATA){
+
+        //==== ScaledPts defined in GeneralizedEndpointPt.h ..
+
+        ScaledPts ptvalues;
+        //==== TODO FIXME
+        //==== 19/09/02 : There is no GEScaleSyst map for 2016
+        if(DataYear==2016) ptvalues = muonGE->GeneralizedEndpointPt(this_tunep4.Pt(), this_tunep4.Charge(), this_tunep4.Eta(), this_tunep4.Phi()*180./M_PI, event);
+        else ptvalues = muonGEScaleSyst->GEPt(DataYear, this_tunep4.Pt(), this_tunep4.Eta(), this_tunep4.Phi(), this_tunep4.Charge());
+
+        new_pt = ptvalues.ScaledPt;
+        //==== Mode == 1 : Kappa up
+        //==== Mode == 2 : Kappa down
+        new_pt_up = ptvalues.ScaeldPt_Up;
+        new_pt_down = ptvalues.ScaeldPt_Down;
 
 /*
-      cout << "## GeneralizedEndpointPt ##" << endl;
-      cout << "old_pt = " << this_tunep4.Pt() << endl;
-      cout << "new_pt = " << new_pt << endl;
-      cout << "new_pt_up = " << new_pt_up << endl;
-      cout << "new_pt_down = " << new_pt_down << endl;
+        cout << "## GeneralizedEndpointPt ##" << endl;
+        cout << "old_pt = " << this_tunep4.Pt() << endl;
+        cout << "new_pt = " << new_pt << endl;
+        cout << "new_pt_up = " << new_pt_up << endl;
+        cout << "new_pt_down = " << new_pt_down << endl;
 */
+
+      }
 
     }
 
@@ -859,13 +904,12 @@ bool AnalyzerCore::PassMETFilter(){
 }
 
 void AnalyzerCore::initializeAnalyzerTools(){
-  cout<<"init start"<<endl;
+
   //==== MCCorrection
   if(!IsDATA){
     mcCorr->SetMCSample(MCSample);
-    cout<<"init datayear"<<endl;
     mcCorr->SetDataYear(DataYear);
-    cout<<"init histograms"<<endl;
+    mcCorr->SetIsFastSim(IsFastSim);
     mcCorr->ReadHistograms();
   }
 
@@ -1837,14 +1881,15 @@ TH2D* AnalyzerCore::GetHist2D(TString histname){
 }
 
 TH3D* AnalyzerCore::GetHist3D(TString histname){
-
+  
   TH3D *h = NULL;
   std::map<TString, TH3D*>::iterator mapit = maphist_TH3D.find(histname);
   if(mapit != maphist_TH3D.end()) return mapit->second;
-
+  
   return h;
-
+  
 }
+
 
 void AnalyzerCore::FillHist(TString histname, double value, double weight, int n_bin, double x_min, double x_max){
 
@@ -1907,39 +1952,39 @@ void AnalyzerCore::FillHist(TString histname,
 }
 
 void AnalyzerCore::FillHist(TString histname,
-		double value_x, double value_y, double value_z,
-                double weight,
-                int n_binx, double x_min, double x_max,
-		int n_biny, double y_min, double y_max,
-		int n_binz, double z_min, double z_max){
-
+			    double value_x, double value_y, double value_z,
+			    double weight,
+			    int n_binx, double x_min, double x_max,
+			    int n_biny, double y_min, double y_max,
+			    int n_binz, double z_min, double z_max){
+  
   TH3D *this_hist = GetHist3D(histname);
   if( !this_hist ){
     this_hist = new TH3D(histname, "", n_binx, x_min, x_max, n_biny, y_min, y_max, n_binz, z_min, z_max);
     this_hist->SetDirectory(NULL);
     maphist_TH3D[histname] = this_hist;
   }
-
+  
   this_hist->Fill(value_x, value_y, value_z, weight);
-
+  
 }
 
 void AnalyzerCore::FillHist(TString histname,
-		double value_x, double value_y, double value_z,
-                double weight,
-                int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins){
-
+			    double value_x, double value_y, double value_z,
+			    double weight,
+			    int n_binx, double *xbins,
+			    int n_biny, double *ybins,
+			    int n_binz, double *zbins){
+  
   TH3D *this_hist = GetHist3D(histname);
   if( !this_hist ){
     this_hist = new TH3D(histname, "", n_binx, xbins, n_biny, ybins, n_binz, zbins);
     this_hist->SetDirectory(NULL);
     maphist_TH3D[histname] = this_hist;
   }
-
+  
   this_hist->Fill(value_x, value_y, value_z, weight);
-
+  
 }
 
 TH1D* AnalyzerCore::JSGetHist1D(TString suffix, TString histname){
@@ -2047,7 +2092,6 @@ void AnalyzerCore::WriteHist(){
     mapit->second->Write(this_name);
     outfile->cd();
   }
-
   for(std::map< TString, TH2D* >::iterator mapit = maphist_TH2D.begin(); mapit!=maphist_TH2D.end(); mapit++){
     TString this_fullname=mapit->second->GetName();
     TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());
@@ -2060,7 +2104,6 @@ void AnalyzerCore::WriteHist(){
     mapit->second->Write(this_name);
     outfile->cd();
   }
-
   for(std::map< TString, TH3D* >::iterator mapit = maphist_TH3D.begin(); mapit!=maphist_TH3D.end(); mapit++){
     TString this_fullname=mapit->second->GetName();
     TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());

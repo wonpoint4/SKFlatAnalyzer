@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumw
+WWTo2L2Nu_powheg	WWTo2L2Nu_13TeV-powheg	1.	1999000	1999000

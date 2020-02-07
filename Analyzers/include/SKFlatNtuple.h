@@ -246,6 +246,7 @@ public :
    vector<double>  *electron_RelPFIso_dBeta;
    vector<double>  *electron_RelPFIso_Rho;
    vector<unsigned int> *electron_IDBit;
+   vector<int>     *electron_IDCutBit;
    vector<double>  *electron_EnergyUnCorr;
    vector<double>  *electron_chMiniIso;
    vector<double>  *electron_nhMiniIso;
@@ -254,6 +255,10 @@ public :
    vector<double>  *electron_trackIso;
    vector<double>  *electron_dr03EcalRecHitSumEt;
    vector<double>  *electron_dr03HcalDepth1TowerSumEt;
+   vector<double>  *electron_dr03HcalTowerSumEt;
+   vector<double>  *electron_dr03TkSumPt;
+   vector<double>  *electron_ecalPFClusterIso;
+   vector<double>  *electron_hcalPFClusterIso;
    vector<double>  *muon_PfChargedHadronIsoR04;
    vector<double>  *muon_PfNeutralHadronIsoR04;
    vector<double>  *muon_PfGammaIsoR04;
@@ -264,7 +269,7 @@ public :
    vector<double>  *muon_PFSumPUIsoR03;
    vector<unsigned int> *muon_TypeBit;
    vector<unsigned int> *muon_IDBit;
-   vector<bool> *muon_ishighpt;
+   vector<bool>    *muon_ishighpt;
    vector<double>  *muon_dB;
    vector<double>  *muon_phi;
    vector<double>  *muon_eta;
@@ -334,6 +339,24 @@ public :
    vector<double>  *muon_PfNeutralHadronMiniIso;
    vector<double>  *muon_PfGammaMiniIso;
    vector<double>  *muon_PFSumPUMiniIso;
+   vector<double>  *muon_MVA;
+   vector<double>  *muon_lowptMVA;
+   vector<double>  *muon_softMVA;
+   vector<double>  *muon_jetPtRatio;
+   vector<double>  *muon_jetPtRel;
+   vector<int>     *muon_simType;
+   vector<int>     *muon_simExtType;
+   vector<int>     *muon_simFlavour;
+   vector<int>     *muon_simHeaviestMotherFlavour;
+   vector<int>     *muon_simPdgId;
+   vector<int>     *muon_simMotherPdgId;
+   vector<double>  *muon_simMatchQuality;
+   vector<double>  *LHE_Px;
+   vector<double>  *LHE_Py;
+   vector<double>  *LHE_Pz;
+   vector<double>  *LHE_E;
+   vector<int>     *LHE_Status;
+   vector<int>     *LHE_ID;
    vector<double>  *PDFWeights_Scale;
    vector<double>  *PDFWeights_Error;
    vector<double>  *PDFWeights_AlphaS;
@@ -584,6 +607,7 @@ public :
    TBranch        *b_electron_RelPFIso_dBeta;   //!
    TBranch        *b_electron_RelPFIso_Rho;   //!
    TBranch        *b_electron_IDBit;   //!
+   TBranch        *b_electron_IDCutBit;   //!
    TBranch        *b_electron_EnergyUnCorr;   //!
    TBranch        *b_electron_chMiniIso;   //!
    TBranch        *b_electron_nhMiniIso;   //!
@@ -592,6 +616,10 @@ public :
    TBranch        *b_electron_trackIso;   //!
    TBranch        *b_electron_dr03EcalRecHitSumEt;   //!
    TBranch        *b_electron_dr03HcalDepth1TowerSumEt;   //!
+   TBranch        *b_electron_dr03HcalTowerSumEt;   //!
+   TBranch        *b_electron_dr03TkSumPt;   //!
+   TBranch        *b_electron_ecalPFClusterIso;   //!
+   TBranch        *b_electron_hcalPFClusterIso;   //!
    TBranch        *b_muon_PfChargedHadronIsoR04;   //!
    TBranch        *b_muon_PfNeutralHadronIsoR04;   //!
    TBranch        *b_muon_PfGammaIsoR04;   //!
@@ -602,7 +630,7 @@ public :
    TBranch        *b_muon_PFSumPUIsoR03;   //!
    TBranch        *b_muon_TypeBit;   //!
    TBranch        *b_muon_IDBit;   //!
-   TBranch        *b_muon_ishighpt;
+   TBranch        *b_muon_ishighpt;   //!
    TBranch        *b_muon_dB;   //!
    TBranch        *b_muon_phi;   //!
    TBranch        *b_muon_eta;   //!
@@ -672,6 +700,24 @@ public :
    TBranch        *b_muon_PfNeutralHadronMiniIso;   //!
    TBranch        *b_muon_PfGammaMiniIso;   //!
    TBranch        *b_muon_PFSumPUMiniIso;   //!
+   TBranch        *b_muon_MVA;   //!
+   TBranch        *b_muon_lowptMVA;   //!
+   TBranch        *b_muon_softMVA;   //!
+   TBranch        *b_muon_jetPtRatio;   //!
+   TBranch        *b_muon_jetPtRel;   //!
+   TBranch        *b_muon_simType;   //!
+   TBranch        *b_muon_simExtType;   //!
+   TBranch        *b_muon_simFlavour;   //!
+   TBranch        *b_muon_simHeaviestMotherFlavour;   //!
+   TBranch        *b_muon_simPdgId;   //!
+   TBranch        *b_muon_simMotherPdgId;   //!
+   TBranch        *b_muon_simMatchQuality;   //!
+   TBranch        *b_LHE_Px;   //!
+   TBranch        *b_LHE_Py;   //!
+   TBranch        *b_LHE_Pz;   //!
+   TBranch        *b_LHE_E;   //!
+   TBranch        *b_LHE_Status;   //!
+   TBranch        *b_LHE_ID;   //!
    TBranch        *b_PDFWeights_Scale;   //!
    TBranch        *b_PDFWeights_Error;   //!
    TBranch        *b_PDFWeights_AlphaS;   //!
@@ -744,7 +790,6 @@ public :
    TBranch        *b_pfMET_Type1_PhiCor_pt_shifts;   //!
    TBranch        *b_pfMET_Type1_PhiCor_phi_shifts;   //!
    TBranch        *b_pfMET_Type1_PhiCor_SumEt_shifts;   //!
-
 
 };
 
