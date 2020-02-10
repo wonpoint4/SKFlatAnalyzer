@@ -97,6 +97,7 @@ bool Muon::PassID(TString ID) const {
   if(ID=="POGHighPtWithLooseTrkIso") return Pass_POGHighPtWithLooseTrkIso();
   //==== Customized
   if(ID=="TEST") return Pass_TESTID();
+  if(ID=="POGMediumWithLooseTrkIso") return Pass_POGMediumWithLooseTrkIso();
 
   cout << "[Electron::PassID] No id : " << ID << endl;
   exit(EXIT_FAILURE);
@@ -123,4 +124,10 @@ bool Muon::Pass_TESTID() const {
 
 void Muon::SetTrackerLayers(int n){
   j_trackerLayers = n;
+}
+
+bool Muon::Pass_POGMediumWithLooseTrkIso() const {
+  if(!( isPOGMedium() )) return false;
+  if(!( TrkIso()/TuneP4().Pt()<0.1 ))  return false;
+  return true;
 }

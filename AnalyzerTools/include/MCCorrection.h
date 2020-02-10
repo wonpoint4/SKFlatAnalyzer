@@ -43,6 +43,7 @@ public:
 
   double MuonID_SF(TString ID, double eta, double pt, int sys=0);
   double MuonISO_SF(TString ID, double eta, double pt, int sys=0);
+  double MuonTrigger_SF(TString ID, double eta, double pt, int sys=0);
   double MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys=0);
   double MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon>& muons, int sys=0);
   double MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon *>& muons, int sys=0);

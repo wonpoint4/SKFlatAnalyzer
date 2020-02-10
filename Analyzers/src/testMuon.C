@@ -1,0 +1,74 @@
+#include "testMuon.h"
+
+void testMuon::initializeAnalyzer(){
+
+}
+
+void testMuon::executeEvent(){
+
+  AnalyzerParameter param;
+  executeEventFromParameter(param);
+
+}
+
+void testMuon::executeEventFromParameter(AnalyzerParameter param){
+
+  vector<Muon> AllMuons = GetAllMuons();
+  Event ev = GetEvent();
+  if(! (ev.PassTrigger("HLT_IsoMu27_v") )) return;
+
+  vector<Muon> muons = AllMuons;
+  vector<Muon> looses = SelectMuons(muons, "POGLoose", 0., 2.4);
+  vector<Muon> mediums = SelectMuons(muons, "POGMedium", 0., 2.4);
+  vector<Muon> tights = SelectMuons(muons, "POGTight", 0., 2.4);
+
+  std::sort(muons.begin(), muons.end(), PtComparing);
+  std::sort(looses.begin(), looses.end(), PtComparing);
+  std::sort(mediums.begin(), mediums.end(), PtComparing);
+  std::sort(tights.begin(), tights.end(), PtComparing);
+
+  //if(muons.size() == 0  || looses.size() == 0) return;
+
+  FillHist("AllMuonNumber", muons.size(),1, 20, 0, 20);
+  for(unsigned int i=0; i<muons.size(); i++){
+    FillHist(TString::Itoa(i,10)+"_AllMuon_pT", muons.at(i).Pt(), 1, 120, 0, 120);
+    FillHist(TString::Itoa(i,10)+"_AllMuon_eta", muons.at(i).Eta(), 1, 48, -2.4, 2.4);
+    FillHist(TString::Itoa(i,10)+"_AllMuon_type", muons.at(i).GetType(), 1, 200, 0, 200);
+    FillHist("AllMuonType", muons.at(i).GetType(), 1, 200, 0, 200);
+  }
+
+  FillHist("LooseMuonNumber", looses.size(),1, 20, 0, 20);
+  for(unsigned int i=0;i<looses.size();i++){
+    FillHist(TString::Itoa(i,10)+"_LooseMuon_pT", looses.at(i).Pt(), 1, 120, 0, 120);
+    FillHist(TString::Itoa(i,10)+"_LooseMuon_eta", looses.at(i).Eta(), 1, 48, -2.4, 2.4);
+    FillHist(TString::Itoa(i,10)+"_LooseMuon_type", looses.at(i).GetType(), 1, 200, 0, 200);
+    FillHist("LooseMuonType", looses.at(i).GetType(), 1, 200, 0, 200);
+  }
+
+  FillHist("MediumMuonNumber", mediums.size(),1, 20, 0, 20);
+  for(unsigned int i=0;i<mediums.size();i++){
+    FillHist(TString::Itoa(i,10)+"_MediumMuon_pT", mediums.at(i).Pt(), 1, 120, 0, 120);
+    FillHist(TString::Itoa(i,10)+"_MediumMuon_eta", mediums.at(i).Eta(), 1, 48, -2.4, 2.4);
+    FillHist(TString::Itoa(i,10)+"_MediumMuon_type", mediums.at(i).GetType(), 1, 200, 0, 200);
+    FillHist("MediumMuonType", mediums.at(i).GetType(), 1, 200, 0, 200);
+  }
+
+  FillHist("TightMuonNumber", tights.size(),1, 20, 0, 20);
+  for(unsigned int i=0;i<tights.size();i++){
+    FillHist(TString::Itoa(i,10)+"_TightMuon_pT", tights.at(i).Pt(), 1, 120, 0, 120);
+    FillHist(TString::Itoa(i,10)+"_TightMuon_eta", tights.at(i).Eta(), 1, 48, -2.4, 2.4);
+    FillHist(TString::Itoa(i,10)+"_TightMuon_type", tights.at(i).GetType(), 1, 200, 0, 200);
+    FillHist("TightMuonType", tights.at(i).GetType(), 1, 200, 0, 200);
+  }
+
+}
+
+testMuon::testMuon(){
+
+}
+
+testMuon::~testMuon(){
+
+}
+
+

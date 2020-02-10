@@ -1,0 +1,22 @@
+#ifndef testGen_h
+#define testGen_h
+
+#include "AnalyzerCore.h"
+
+class testGen : public AnalyzerCore {
+
+public:
+
+  void initializeAnalyzer();
+  void executeEventFromParameter(AnalyzerParameter param);
+  void executeEvent();
+
+  testGen();
+  ~testGen();
+
+};
+
+
+
+#endif
+

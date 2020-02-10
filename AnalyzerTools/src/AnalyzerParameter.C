@@ -39,7 +39,6 @@ void AnalyzerParameter::Clear(){
   Muon_UsePtCone = false;
   Muon_UseTuneP = false;
   Muon_MinPt = 10.;
-
   Jet_ID = "";
   FatJet_ID = "";
 

@@ -177,25 +177,34 @@ void MCCorrection::SetDataYear(int i){
 
 double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
 
-  if(ID=="Default") return 1.;
+  if(ID.Contains("Default")) return 1.;
 
   //cout << "[MCCorrection::MuonID_SF] ID = " << ID << endl;
   //cout << "[MCCorrection::MuonID_SF] eta = " << eta << ", pt = " << pt << endl;
 
   double value = 1.;
   double error = 0.;
-
-  if(DataYear!=2016){
-    eta = fabs(eta);
-  }
-
+  double abseta = fabs(eta);
+  
   if(ID=="NUM_TightID_DEN_genTracks" || ID=="NUM_HighPtID_DEN_genTracks"){
     //==== boundaries
     if(pt<20.) pt = 20.;
     if(pt>=120.) pt = 119.;
-    if(eta>=2.4) eta = 2.39;
-    if(eta<-2.4) eta = -2.4;
+    if(abseta>=2.4) abseta = 2.39;
   }
+  else if(ID=="NUM_LooseID_DEN_genTracks" || ID=="NUM_LooseID_DEN_genTracks_2016BF" || ID=="NUM_LooseID_DEN_genTracks_2016GH"){
+    //==== boundaries
+    if(pt<20.) cout<<"In "+ID+", pt low coverage error suspected....."<<endl;//pt = 20.;
+    if(pt>=120.) pt = 119.;
+    if(abseta>2.4) cout<<"In "+ID+", eta coverage error suspected....."<<endl;//abseta = 2.39;
+  }
+  else if(ID=="NUM_LooseID_DEN_genTracks_JPsi" || ID=="NUM_LooseID_DEN_genTracks_JPsi_2016BF" || ID=="NUM_LooseID_DEN_genTracks_JPsi_2016GH"){
+    //==== boundaries
+    if(pt<10.) cout<<"In "+ID+", pt low coverage error suspected....."<<endl;//pt = 10.;
+    if(pt>=20.) cout<<"In "+ID+", pt high coverage error suspected....."<<endl;//pt = 29.;
+    if(abseta>2.4) cout<<"In "+ID+", eta coverage error suspected....."<<endl;//abseta = 2.39;
+  }
+  else cout << "[MCCorrection::MuonID_SF] No boundary setted at "+ID<<endl;
 
   TH2F *this_hist = map_hist_Muon["ID_SF_"+ID];
   if(!this_hist){
@@ -208,11 +217,11 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
 
   int this_bin(-999);
 
-  if(DataYear==2016){
-    this_bin = this_hist->FindBin(eta,pt);
+  if(DataYear != 2016 || ID=="NUM_LooseID_DEN_genTracks_JPsi_2016BF" || ID=="NUM_LooseID_DEN_genTracks_JPsi_2016GH" || ID=="NUM_TightID_DEN_genTracks"){
+    this_bin = this_hist->FindBin(pt, abseta);
   }
   else{
-    this_bin = this_hist->FindBin(pt,eta);
+    this_bin = this_hist->FindBin(eta, pt);
   }
 
   value = this_hist->GetBinContent(this_bin);
@@ -226,24 +235,35 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
 
 double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 
-  if(ID=="Default") return 1.;
+  if(ID.Contains("Default")) return 1.;
 
   //cout << "[MCCorrection::MuonISO_SF] eta = " << eta << ", pt = " << pt << endl;
 
   double value = 1.;
   double error = 0.;
-
-  if(DataYear!=2016){
-    eta = fabs(eta);
-  }
+  double abseta = fabs(eta);
 
   if(ID=="NUM_TightRelIso_DEN_TightIDandIPCut" || ID=="NUM_LooseRelTkIso_DEN_HighPtIDandIPCut"){
     //==== boundaries
-    if(pt<20.) pt = 20.;
+    if(pt<20.) pt = 20.1;
     if(pt>=120.) pt = 119.;
-    if(eta>=2.4) eta = 2.39;
-    if(eta<-2.4) eta = -2.4;
+    if(abseta>=2.4) abseta = 2.39;
   }
+  else if(ID.Contains("NUM_MediumID_RelTrkIso010_DEN_genTracks")){
+    //==== boundaries
+    if(pt<20.) pt = 20.1;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }
+  else if(ID.Contains("NUM_MediumID_RelTrkIso010_DEN_LooseID") || ID.Contains("NUM_MediumID_RelTrkIso010_DEN_TrackerMu")){
+    //==== boundaries
+    if(pt<10.) pt = 10.1;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }
+  else cout << "[MCCorrection::MuonISO_SF] No boundary setted at "+ID<<endl;
 
   TH2F *this_hist = map_hist_Muon["ISO_SF_"+ID];
   if(!this_hist){
@@ -256,13 +276,17 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 
   int this_bin(-999);
 
+  /*
   if(DataYear==2016){
     this_bin = this_hist->FindBin(eta,pt);
   }
   else{
     this_bin = this_hist->FindBin(pt,eta);
   }
-
+  */
+  if(ID=="NUM_TightRelIso_DEN_TightIDandIPCut" || ID=="NUM_LooseRelTkIso_DEN_HighPtIDandIPCut") this_bin = this_hist->FindBin(pt,abseta);
+  else this_bin = this_hist->FindBin(eta,pt);
+  
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
 
@@ -272,10 +296,72 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 
 }
 
-double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys){
+/*
+double MCCorrection::MuonTrigger_SF(TString ID, double eta, double pt, int sys){ //For DoubleMuon Trigger SF, it can be useful when you use Hyonsans TnP tools.
 
-  if(ID=="Default") return 1.;
-  if(trig=="Default") return 1.;
+  if(ID.Contains("Default")) return 1.;
+
+  //cout << "[MCCorrection::MuonTrigger_SF] eta = " << eta << ", pt = " << pt << endl;
+
+  double value = 1.;
+  double error = 0.;
+  double abseta = fabs(eta);
+
+  if(ID.Contains("Mu17_MediumID_RelTrkIso010")){
+    //==== boundaries
+    if(pt<20.) pt = 20.;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }
+  else if(ID.Contains("Mu8_MediumID_RelTrkIso010")){
+    //==== boundaries
+    if(pt<10.) pt = 10.;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }
+  else if(ID=="Mu17_TightID_RelPFIso015"){
+    //==== boundaries
+    if(pt<20.) pt = 20.;
+    if(pt>=120.) pt = 119.;
+    if(abseta>2.4) abseta = 2.39;
+  }
+  else if(ID=="Mu8_TightID_RelPFIso015"){
+    //==== boundaries
+    if(pt<10.) pt = 10.;
+    if(pt>=120.) pt = 119.;
+    if(abseta>2.4) abseta = 2.39;
+  }
+  else cout << "[MCCorrection::MuonTrigger_SF] No boundary setted at "+ID<<endl;
+
+  TH2F *this_hist = map_hist_Muon["Trigger_SF_"+ID];
+  if(!this_hist){
+    if(IgnoreNoHist) return 1.;
+    else{
+      cout << "[MCCorrection::MuonTrigger_SF] No "<<"Trigger_SF_"+ID<<endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  int this_bin(-999);
+
+  if(ID.Contains("TightID_RelPFIso015")) this_bin = this_hist->FindBin(abseta,pt);
+  else this_bin = this_hist->FindBin(eta,pt);
+
+  value = this_hist->GetBinContent(this_bin);
+  error = this_hist->GetBinError(this_bin);
+
+  //cout << "[MCCorrection::MuonTrigger_SF] value = " << value << endl;
+
+  return value+double(sys)*error;
+
+}
+*/
+
+double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, double eta, double pt, int sys){ //For SingleMuon Trigger (at now, only Isolated trig)
+
+  if(ID.Contains("Default") || trig.Contains("Default")) return 1.;
 
   //cout << "[MCCorrection::MuonTrigger_Eff] ID = " << ID << "\t" << "trig = " << trig << endl;
   //cout << "[MCCorrection::MuonTrigger_Eff] DataOrMC = " << DataOrMC << endl;
@@ -284,68 +370,50 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
   double value = 1.;
   double error = 0.;
 
-  eta = fabs(eta);
+  //eta = fabs(eta);
 
   //==== 2016
-  if(DataYear==2016){
-    if(trig=="IsoMu24"){
-      if(pt<26.) return 1.; //FIXME
-      if(eta>=2.4) eta = 2.39;
-
-      if(pt>500.) pt = 499.;
-    }
-    else if(trig=="Mu50"){
-      if(pt<52.) return 1.; //FIXME
-      if(eta>=2.4) eta = 2.39;
-
+  if(trig == "Mu17"){
+    //==== boundaries
+    if(pt<17.) return 0.; //New added.
+    if(pt<20.) pt = 20.1;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }
+  else if(trig == "Mu8"){
+    //==== boundaries
+    if(pt<10.) pt = 10.1;
+    if(pt>=120.) pt = 119.;
+    if(eta>2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = 2.39;
+    if(eta<-2.4) cout<<"In "+ID+"eta coverage error suspected....."<<endl;//eta = -2.4;
+  }  
+  else if(trig == "IsoMu24"){
+    if(pt<24.) return 0.; //New added.
+    if(pt<26.) pt = 26.1; //return 1.; //FIXME
+    if(pt>120.) pt = 119.;
+    if(eta>=2.4) eta = 2.39;
+    if(eta<=-2.4) eta = -2.4;
+  }
+  else if(trig == "IsoMu27"){
+    //==== FIXME MiniAODPt Pt                                                                                                                                                                                                             
+    //==== FIXME 28.9918  29.0363                                                                                                                                                                                                         
+    //==== FIXME This event pass pt>29GeV cut, but MiniAOD pt < 29 GeV                                                                                                                                                                    
+    //==== FIXME So when I return 0., SF goes nan.. let's return 1 for now..                                                                                                                                                              
+    if(pt<27.) return 0.; //New added.
+    if(pt<29.) pt = 29.1; //return 1.; //FIXME
+    if(pt>120.) pt = 119.;
+    if(eta>=2.4) eta = 2.39;
+    if(eta<=-2.4) eta = -2.4;
+  }
+  else if(trig=="Mu50"){
+      if(pt<52.) pt = 52.; //return 1.; //FIXME
       if(pt>800.) pt = 799.;
-    }
-    else{
-
-    }
-  }
-  else if(DataYear==2017){
-    if(trig=="IsoMu27"){
-      //==== FIXME MiniAODPt Pt
-      //==== FIXME 28.9918  29.0363
-      //==== FIXME This event pass pt>29GeV cut, but MiniAOD pt < 29 GeV
-      //==== FIXME So when I return 0., SF goes nan.. let's return 1 for now..
-      if(pt<29.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
-
-      if(pt>1200.) pt = 1199.;
-    }
-    else if(trig=="Mu50"){
-      if(pt<52.) return 1.; //FIXME
-      if(eta>=2.4) eta = 2.39;
-
-      if(pt>1200.) pt = 1199.;
-    }
-    else{
-
-    }
   }
-  else if(DataYear==2018){
-    if(trig=="IsoMu24"){
-      if(pt<26.) return 1.; //FIXME
-      if(eta>=2.4) eta = 2.39;
-
-      if(pt>1200.) pt = 1199.;
-    }
-    else if(trig=="Mu50"){
-      if(pt<52.) return 1.; //FIXME
-      if(eta>=2.4) eta = 2.39;
-
-      if(pt>1200.) pt = 1199.;
-    }
-    else{
-
-    }
-  }
-  else{
-    cout << "[MCCorrection::MuonTrigger_Eff] Wrong year : " << DataYear << endl;
-    exit(EXIT_FAILURE);
-  }
+  else cout << "[MCCorrection::MuonTrigger_SF] No boundary setted at "+ID<<endl;
+  
+  if(trig == "IsoMu24" || trig == "IsoMu27") trig = "SingleMuon";
 
   TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID;
   if(DataOrMC==1) histkey = "Trigger_Eff_MC_"+trig+"_"+ID;
@@ -359,7 +427,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
     }
   }
 
-  int this_bin = this_hist->FindBin(pt,eta);
+  int this_bin = this_hist->FindBin(eta,pt);
 
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
@@ -367,8 +435,6 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
   //cout << "[MCCorrection::MuonTrigger_Eff] value = " << value << endl;
 
   return value+double(sys)*error;
-
-
 }
 
 double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon>& muons, int sys){
@@ -377,35 +443,42 @@ double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<
   if(trig=="Default") return 1.;
 
   double value = 1.;
+  double eff_DATA = 1.;
+  double eff_MC = 1.;
+  TString charge = ""; TString subcharge = "";
 
-  if(trig=="IsoMu24" || trig=="IsoMu27" || trig=="Mu50"){
-
-    double eff_DATA = 1.;
-    double eff_MC = 1.;
-
+  if(trig=="IsoMu24" || trig=="IsoMu27" || trig=="Mu50"){ //Only for SingleMuon trigger
     for(unsigned int i=0; i<muons.size(); i++){
-      eff_DATA *= ( 1.-MuonTrigger_Eff(ID, trig, 0, muons.at(i).Eta(), muons.at(i).MiniAODPt(), sys) );
-      eff_MC   *= ( 1.-MuonTrigger_Eff(ID, trig, 1, muons.at(i).Eta(), muons.at(i).MiniAODPt(), -sys) );
-    }
+      if(muons.at(i).Charge() > 0) charge = "_plus";
+      else charge = "_minus";
 
+      eff_DATA *= ( 1.-MuonTrigger_Eff(ID+charge, trig, 0, muons.at(i).Eta(), muons.at(i).MiniAODPt(), sys) );
+      eff_MC   *= ( 1.-MuonTrigger_Eff(ID+charge, trig, 1, muons.at(i).Eta(), muons.at(i).MiniAODPt(), -sys) );
+    }
     eff_DATA = 1.-eff_DATA;
     eff_MC = 1.-eff_MC;
-
-    value = eff_DATA/eff_MC;
-
-/*
-    if(eff_DATA==0||eff_MC==0){
-      cout << "==== Zero Trigger Eff ====" << endl;
-      for(unsigned int i=0;i<muons.size();i++){
-        cout << muons.at(i).MiniAODPt() << "\t" << muons.at(i).Pt() << endl;
-      }
+  }
+  else if(trig == "Mu17" || trig == "Mu8"){ //Only for DoubleMuon trigger
+    if(muons.at(0).Charge() > 0){
+      charge = "_plus"; subcharge = "_minus";
     }
-*/
-
+    else {
+      charge = "_minus"; subcharge = "_plus";
+    }
+    eff_DATA = MuonTrigger_Eff(ID+charge, "Mu17", 0, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) * MuonTrigger_Eff(ID+subcharge, "Mu8", 0, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
+    eff_DATA += MuonTrigger_Eff(ID+charge, "Mu8", 0, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) * MuonTrigger_Eff(ID+subcharge, "Mu17", 0, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
+    eff_DATA -= MuonTrigger_Eff(ID+charge, "Mu17", 0, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) * MuonTrigger_Eff(ID+subcharge, "Mu17", 0, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
+    eff_MC = MuonTrigger_Eff(ID+charge, "Mu17", 1, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) *MuonTrigger_Eff(ID+subcharge, "Mu8", 1, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
+    eff_MC +=MuonTrigger_Eff(ID+charge, "Mu8", 1, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) * MuonTrigger_Eff(ID+subcharge, "Mu17", 1, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
+    eff_MC -= MuonTrigger_Eff(ID+charge, "Mu17", 1, muons.at(0).Eta(), muons.at(0).MiniAODPt(), sys) * MuonTrigger_Eff(ID+subcharge, "Mu17", 1, muons.at(1).Eta(), muons.at(1).MiniAODPt(), sys);
   }
 
+  if(eff_DATA == 0 ||eff_MC == 0){
+    eff_MC +=0.001; //Zero efficiency of Data or MC (both of two muons have pT lower than threshold) -> If code doesn't have any errors, then it'll be Okay
+    cout<<"Zero Trigger efficiency appeared! Something is wrong"<<endl;
+  }
+  value = eff_DATA/eff_MC;
   return value;
-
 }
 
 double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon *>& muons, int sys){

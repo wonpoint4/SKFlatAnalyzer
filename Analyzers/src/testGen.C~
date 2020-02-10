@@ -1,0 +1,230 @@
+#include "testGen.h"
+
+void testGen::initializeAnalyzer(){
+
+  if(DataYear==2016){
+    IsoMuTriggerName = "HLT_IsoMu24_v";
+    TriggerSafePtCut = 26.;
+  }
+  else if(DataYear==2017){
+    IsoMuTriggerName = "HLT_IsoMu27_v";
+    TriggerSafePtCut = 29.;
+  }
+
+}
+
+void testGen::executeEvent(){
+
+  AllMuons = GetAllMuons();
+  AllGens = GetGens();
+  AnalyzerParameter param;
+
+  executeEventFromParameter(param);
+
+}
+
+void testGen::executeEventFromParameter(AnalyzerParameter param){
+
+  Event ev = GetEvent();
+  if(! ( ev.PassTrigger(IsoMuTriggerName) )) return;
+
+  vector<Muon> muons = AllMuons;
+  vector<Gen> gens = AllGens;
+  vector<Muon> muons_ID = SelectMuons(muons, "POGMediumWithLooseTrkIso", 0, 2.4);
+
+  if(muons.size() == 0) return;
+  std::sort(muons.begin(), muons.end(), PtComparing);
+  if(muons.at(0).Pt() <= TriggerSafePtCut ) return;
+  if(fabs(muons.at(0).Eta()) > 2.4) return; 
+
+  FillHist("1_genNumber",gens.size(),1, 200, 0, 200);
+  FillHist("0_muonNumber",muons.size(),1, 20, 0, 20);
+  if(muons_ID.size() !=1) return;
+
+  FillHist("1_muonNumber",muons.size(),1, 10, 0, 10);
+
+  if(muons != MuonPromptOnly(muons, gens)) return;
+  FillHist("1_truemuonNumber",muons.size(),1, 10, 0, 10);
+  FillHist("1_muons_pT",muons.at(0).Pt(),1, 200, 0, 200);
+  FillHist("1_muons_eta",muons.at(0).Eta(),1, 50, -2.5, 2.5);
+  FillHist("1_muons_charge",muons.at(0).Charge(),1, 4, -2, 2);
+  //PrintGen(gens);
+
+  vector<Gen> genMuons_plus; genMuons_plus.clear();
+  vector<Gen> genMuons_minus; genMuons_minus.clear();
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    if(muons.at(0).Charge() > 0){
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 ) genMuons_minus.push_back(gens.at(i));
+    }
+    else{
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 ) genMuons_plus.push_back(gens.at(i));
+    }
+  }
+
+  FillHist("1_gen_plusNumber",genMuons_plus.size(),1, 10, 0, 10);
+  FillHist("1_gen_minusNumber",genMuons_minus.size(),1, 10, 0, 10);
+
+  for(unsigned int i=0; i<genMuons_plus.size(); i++){
+    //FillHist("gen_"+TString::Itoa(i,10)+"_PID",gens.at(i).PID(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_1_NoCut_pT", genMuons_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_1_NoCut_eta", genMuons_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_1_NoCut_mass",(muons.at(0) + genMuons_plus.at(i)).M(),1, 150, 0, 150);
+  }
+  for(unsigned int i=0; i<genMuons_minus.size(); i++){
+    //FillHist("gen_"+TString::Itoa(i,10)+"_PID",gens.at(i).PID(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_1_NoCut_pT", genMuons_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_1_NoCut_eta", genMuons_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_1_NoCut_mass", (muons.at(0) + genMuons_minus.at(i)).M(),1, 150, 0, 150);
+  }
+
+  vector<Gen> genMuons2_plus; genMuons2_plus.clear();
+  vector<Gen> genMuons2_minus; genMuons2_minus.clear();
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    if(muons.at(0).Charge() > 0){
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1) genMuons2_minus.push_back(gens.at(i));
+    }
+    else{
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1) genMuons2_plus.push_back(gens.at(i));
+    }
+  }
+
+  for(unsigned int i=0; i<genMuons2_plus.size(); i++){
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_2_StatusCut_pT", genMuons2_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_2_StatusCut_eta", genMuons2_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_2_StatusCut_mass",(muons.at(0) + genMuons2_plus.at(i)).M(),1, 150, 0, 150);
+  }
+  for(unsigned int i=0; i<genMuons2_minus.size(); i++){
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_2_StatusCut_pT", genMuons2_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_2_StatusCut_eta", genMuons2_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_2_StatusCut_mass", (muons.at(0) + genMuons2_minus.at(i)).M(),1, 150, 0, 150);
+  }
+
+
+  vector<Gen> genMuons4_plus; genMuons4_plus.clear();
+  vector<Gen> genMuons4_minus; genMuons4_minus.clear();
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    if(muons.at(0).Charge() > 0){
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).isPrompt()) genMuons4_minus.push_back(gens.at(i));
+    }
+    else{
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).isPrompt()) genMuons4_plus.push_back(gens.at(i));
+    }
+  }
+
+  for(unsigned int i=0; i<genMuons4_plus.size(); i++){
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_4_IsPrompt_pT", genMuons4_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_4_IsPrompt_eta", genMuons4_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_4_IsPrompt_mass",(muons.at(0) + genMuons4_plus.at(i)).M(),1, 150, 0, 150);
+  }
+  for(unsigned int i=0; i<genMuons4_minus.size(); i++){
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_4_IsPrompt_pT", genMuons4_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_4_IsPrompt_eta", genMuons4_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_4_IsPrompt_mass", (muons.at(0) + genMuons4_minus.at(i)).M(),1, 150, 0, 150);
+  }
+
+  vector<Gen> genMuons5_plus; genMuons5_plus.clear();
+  vector<Gen> genMuons5_minus; genMuons5_minus.clear();
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    if(muons.at(0).Charge() > 0){
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).isPromptFinalState()) genMuons5_minus.push_back(gens.at(i));
+    }
+    else{
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 5 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).isPromptFinalState()) genMuons5_plus.push_back(gens.at(i));
+    }
+  }
+
+  for(unsigned int i=0; i<genMuons5_plus.size(); i++){
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_pT", genMuons5_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_eta", genMuons5_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_plus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_mass",(muons.at(0) + genMuons5_plus.at(i)).M(),1, 150, 0, 150);
+  }
+  for(unsigned int i=0; i<genMuons5_minus.size(); i++){
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_pT", genMuons5_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_eta", genMuons5_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("testGen/genMuons_minus_"+TString::Itoa(i,10)+"_5_IsPromptFinalState_mass", (muons.at(0) + genMuons5_minus.at(i)).M(),1, 150, 0, 150);
+  }
+
+  // Genuine reco-failed muon
+  vector<Gen> GenMuons_plus; GenMuons_plus.clear();
+  vector<Gen> GenMuons_minus; GenMuons_minus.clear();
+  float mass_ll = 0;
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    mass_ll = (muons.at(0) + gens.at(i)).M();
+    if(muons.at(0).Charge() > 0){               //TriggerSafePtCut//
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 10 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1 && 80 < mass_ll && mass_ll < 100) GenMuons_minus.push_back(gens.at(i));
+    }
+    else{                                       //TriggerSafePtCut//
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 10 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1 && 80 < mass_ll && mass_ll < 100) GenMuons_plus.push_back(gens.at(i));
+    }
+  }
+
+  for(unsigned int i=0; i<GenMuons_plus.size(); i++){
+    mass_ll = (muons.at(0) + GenMuons_plus.at(i)).M();
+    FillHist("1_GenMuons_plus_"+TString::Itoa(i,10)+"_pT", GenMuons_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("1_GenMuons_plus_"+TString::Itoa(i,10)+"_eta", GenMuons_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("1_GenMuons_plus_"+TString::Itoa(i,10)+"_mass", mass_ll,1, 30, 75, 105);
+    FillHist("1_GenMuons_plus_"+TString::Itoa(i,10)+"_etapT",GenMuons_plus.at(i).Eta(), GenMuons_plus.at(i).Pt(),1, 14,10,80, 20,-2.4,2.4);
+  }
+  for(unsigned int i=0; i<GenMuons_minus.size(); i++){
+    mass_ll = (muons.at(0) + GenMuons_minus.at(i)).M();
+    FillHist("1_GenMuons_minus_"+TString::Itoa(i,10)+"_pT", GenMuons_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("1_GenMuons_minus_"+TString::Itoa(i,10)+"_eta", GenMuons_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("1_GenMuons_minus_"+TString::Itoa(i,10)+"_mass", mass_ll,1, 30, 75, 105);
+    FillHist("1_GenMuons_minus_"+TString::Itoa(i,10)+"_etapT",GenMuons_minus.at(i).Eta(), GenMuons_minus.at(i).Pt(),1, 14,10,80, 20,-2.4,2.4);
+  }
+
+  // Apply IDISO cut to reco-ed muon
+
+  if(muons_ID.size() !=1) return;
+  if(muons_ID.at(0).Pt() <= TriggerSafePtCut ) return;
+  if(muons_ID != MuonPromptOnly(muons_ID, gens)) return;
+
+  GenMuons_plus.clear();
+  GenMuons_minus.clear();
+  mass_ll = 0;
+
+  FillHist("2_muons_pT",muons_ID.at(0).Pt(),1, 200, 0, 200);
+  FillHist("2_muons_eta",muons_ID.at(0).Eta(),1, 50, -2.5, 2.5);
+  FillHist("2_muons_charge",muons_ID.at(0).Charge(),1, 4, -2, 2);
+
+  for(unsigned int i=0; i<gens.size(); i++){
+    mass_ll = (muons_ID.at(0) + gens.at(i)).M();
+    if(muons_ID.at(0).Charge() > 0){            //TriggerSafePtCut//
+      if(gens.at(i).PID() == 13 && gens.at(i).Pt() > 10 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1 && 80 < mass_ll && mass_ll < 100) GenMuons_minus.push_back(gens.at(i));
+    }
+    else{                                            //TriggerSafePtCut//
+      if(gens.at(i).PID() == -13 && gens.at(i).Pt() > 10 && fabs(gens.at(i).Eta()) < 2.4 && gens.at(i).Status() == 1 && 80 < mass_ll && mass_ll < 100) GenMuons_plus.push_back(gens.at(i));
+    }
+  }
+
+  for(unsigned int i=0; i<GenMuons_plus.size(); i++){
+    mass_ll = (muons_ID.at(0) + GenMuons_plus.at(i)).M();
+    FillHist("2_GenMuons_plus_"+TString::Itoa(i,10)+"_pT", GenMuons_plus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("2_GenMuons_plus_"+TString::Itoa(i,10)+"_eta", GenMuons_plus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("2_GenMuons_plus_"+TString::Itoa(i,10)+"_mass", mass_ll,1, 30, 75, 105);
+    FillHist("2_GenMuons_plus_"+TString::Itoa(i,10)+"_etapT",GenMuons_plus.at(i).Eta(), GenMuons_plus.at(i).Pt(),1, 14,10,80, 20,-2.4,2.4);
+  }
+  for(unsigned int i=0; i<GenMuons_minus.size(); i++){
+    mass_ll = (muons_ID.at(0) + GenMuons_minus.at(i)).M();
+    FillHist("2_GenMuons_minus_"+TString::Itoa(i,10)+"_pT", GenMuons_minus.at(i).Pt(),1, 200, 0, 200);
+    FillHist("2_GenMuons_minus_"+TString::Itoa(i,10)+"_eta", GenMuons_minus.at(i).Eta(),1, 50, -2.5, 2.5);
+    FillHist("2_GenMuons_minus_"+TString::Itoa(i,10)+"_mass", mass_ll,1, 30, 75, 105);
+    FillHist("2_GenMuons_minus_"+TString::Itoa(i,10)+"_etapT",GenMuons_minus.at(i).Eta(), GenMuons_minus.at(i).Pt(),1, 14,10,80, 20,-2.4,2.4);
+  }
+
+}
+
+testGen::testGen(){
+
+}
+
+testGen::~testGen(){
+
+}
+
+

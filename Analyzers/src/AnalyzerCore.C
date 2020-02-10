@@ -9,6 +9,10 @@ AnalyzerCore::AnalyzerCore(){
   pdfReweight = new PDFReweight();
   muonGE = new GeneralizedEndpoint();
 
+  hzpt_muon=NULL;
+  hzpt_electron=NULL;
+  hzpt_norm_muon=NULL;
+  hzpt_norm_electron=NULL;
 }
 
 AnalyzerCore::~AnalyzerCore(){
@@ -43,6 +47,10 @@ AnalyzerCore::~AnalyzerCore(){
   delete cfEst;
   delete pdfReweight;
 
+  if(hzpt_muon) delete hzpt_muon;
+  if(hzpt_norm_muon) delete hzpt_norm_muon;
+  if(hzpt_electron) delete hzpt_electron;
+  if(hzpt_norm_electron) delete hzpt_norm_electron;
 }
 
 //==== Attach the historams to ai different direcotry, not outfile
@@ -680,6 +688,78 @@ std::vector<FatJet> AnalyzerCore::SelectFatJets(const std::vector<FatJet>& jets,
   }
   return out;
 
+}
+
+//HyonSan's ZpT correction
+void AnalyzerCore::SetupZPtWeight(){
+  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting zptcor"<<endl;
+  TString datapath=getenv("DATA_DIR");
+  TFile fzpt(datapath+"/"+TString::Itoa(DataYear,10)+"/ZPt/ZPtWeight.root");
+  TString sflavour[2]={"muon","electron"};
+  TH2D **hzpt=NULL,**hzpt_norm=NULL;
+  for(int ifl=0;ifl<2;ifl++){
+    if(ifl==0){
+      hzpt=&hzpt_muon;
+      hzpt_norm=&hzpt_norm_muon;
+    }else if(ifl==1){
+      hzpt=&hzpt_electron;
+      hzpt_norm=&hzpt_norm_electron;
+    }
+    for(int i=0;i<20;i++){
+      TH2D* this_hzpt=(TH2D*)fzpt.Get(Form("%s%d_iter%d",sflavour[ifl].Data(),DataYear,i));
+      if(this_hzpt){
+	if(*hzpt){
+	  (*hzpt)->Multiply(this_hzpt);
+	  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting "<<sflavour[ifl]<<" zptcor iter"<<i<<endl;
+	}else{
+	  (*hzpt)=this_hzpt;
+	  cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting first "<<sflavour[ifl]<<" zptcor"<<i<<endl;
+	}
+      }else break;
+    }
+    if(*hzpt) (*hzpt)->SetDirectory(0);
+    *hzpt_norm=(TH2D*)fzpt.Get(Form("%s%d_norm",sflavour[ifl].Data(),DataYear));
+    if(*hzpt_norm){
+      (*hzpt_norm)->SetDirectory(0);
+      cout<<"[SMPAnalyzerCore::SetupZPtWeight] setting "<<sflavour[ifl]<<" zptcor norm"<<endl;
+    }
+  }
+}
+double AnalyzerCore::GetZPtWeight(double zpt,double zrap,Lepton::Flavour flavour){
+  double valzptcor=1.;
+  double valzptcor_norm=1.;
+  TH2D* hzpt=NULL;
+  TH2D* hzpt_norm=NULL;
+  if(flavour==Lepton::MUON){
+    hzpt=hzpt_muon;
+    hzpt_norm=hzpt_norm_muon;
+  }else if(flavour==Lepton::ELECTRON){
+    hzpt=hzpt_electron;
+    hzpt_norm=hzpt_norm_electron;
+  }
+  if(hzpt) valzptcor*=GetBinContentUser(hzpt,zpt,zrap,0);
+  if(hzpt_norm) valzptcor_norm*=GetBinContentUser(hzpt_norm,zpt,zrap,0);
+  return valzptcor*valzptcor_norm;
+}
+double AnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int sys){
+  double xmin=hist->GetXaxis()->GetXmin();
+  double xmax=hist->GetXaxis()->GetXmax();
+  double ymin=hist->GetYaxis()->GetXmin();
+  double ymax=hist->GetYaxis()->GetXmax();
+  if(xmin>=0) valx=fabs(valx);
+  if(valx<xmin) valx=xmin+0.001;
+  if(valx>xmax) valx=xmax-0.001;
+  if(ymin>=0) valy=fabs(valy);
+  if(valy<ymin) valy=ymin+0.001;
+  if(valy>ymax) valy=ymax-0.001;
+  return hist->GetBinContent(hist->FindBin(valx,valy))+sys*hist->GetBinError(hist->FindBin(valx,valy));
+}
+
+void AnalyzerCore::PrintGens(const vector<Gen>& gens){
+  cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
+  for(int i=0;i<(int)gens.size();i++){
+    cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
+  }
 }
 
 std::vector<Electron> AnalyzerCore::ScaleElectrons(const std::vector<Electron>& electrons, int sys){
@@ -1429,6 +1509,43 @@ Gen AnalyzerCore::GetGenMatchedPhoton(const Lepton& lep, const std::vector<Gen>&
 
   return gen_closest;
 
+}
+//HyonSan's function
+void AnalyzerCore::GetGenIndex(const vector<Gen>& gens,int& parton0,int& parton1,int& hardl0,int& hardl1,int& l0,int& l1,vector<int>& photons){
+  parton0=0;parton1=0;hardl0=0;hardl1=0;l0=0;l1=0;photons.clear();
+  //if(!IsDYSample){
+  //  cout <<"[SMPAnalyzerCore::GetGenIndex] this is for DY event"<<endl;
+  //  return;
+  //}
+  for(int i=0;i<(int)gens.size();i++){
+    if(!gens.at(i).isPrompt()) continue;
+    int genpid=gens.at(i).PID();
+    if(gens.at(i).isHardProcess()){
+      if(abs(genpid)<7||genpid==21){
+	if(!parton0) parton0=i;
+	else if(!parton1) parton1=i;
+      }else if(abs(genpid)==11||abs(genpid)==13||abs(genpid)==15){
+	if(!hardl0) hardl0=i;
+	else if(!hardl1&&genpid==-gens[hardl0].PID()) hardl1=i;
+      }
+    }
+    if(gens.at(i).Status()==1){
+      if(abs(genpid)==11||abs(genpid)==13){
+	if(!l0) l0=i;
+	else if(!l1&&genpid==-gens[l0].PID()) l1=i;
+      }else if(gens.at(i).PID()==22){
+	photons.push_back(i);
+      }
+    }
+  }
+  if(abs(gens[hardl0].PID())!=15){
+    if(!hardl0||!hardl1||!l0||!l1){
+      PrintGens(gens);
+      cout <<"[SMPAnalyzerCore::GetGenIndex] something is wrong"<<endl;
+      exit(EXIT_FAILURE);
+    }
+  }   
+  return;
 }
 
 vector<int> AnalyzerCore::TrackGenSelfHistory(const Gen& me, const std::vector<Gen>& gens){

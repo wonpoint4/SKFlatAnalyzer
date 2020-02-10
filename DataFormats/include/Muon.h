@@ -57,7 +57,7 @@ public:
 
   inline bool PassSelector( unsigned int s ) const { return (j_IDBit & s)==s; }
   inline bool IsType( unsigned int t ) const { return (j_TypeBit & t); }
-
+  unsigned int GetType() { return j_TypeBit; }
 
   inline bool isPOGTight() const {return PassSelector(CutBasedIdTight);}
   inline bool isPOGMedium() const {return PassSelector(CutBasedIdMedium);}
@@ -98,6 +98,7 @@ public:
   bool Pass_POGTightWithTightIso() const;
   bool Pass_POGHighPtWithLooseTrkIso() const;
   bool Pass_TESTID() const;
+  bool Pass_POGMediumWithLooseTrkIso() const;
   
   void SetTrackerLayers(int n);
   inline int TrackerLayers() const { return j_trackerLayers; }

@@ -7,6 +7,11 @@ export SKFlatV="Run2Legacy_v3"
 mkdir -p $SKFlat_WD/data/$SKFlatV
 export DATA_DIR=$SKFlat_WD/data/$SKFlatV
 
+#### USER INFO ####                                                                                                                                                                  
+export SKFlatLogEmail='abcdevvqq@naver.com'
+export SKFlatLogWeb='' # leave if blank if you don't have webpage
+export SKFlatLogWebDir='' # leave if blank if you don't have webpage 
+
 #### use cvmfs for root ####
 export CMS_PATH=/cvmfs/cms.cern.ch
 source $CMS_PATH/cmsset_default.sh
@@ -29,14 +34,14 @@ if [[ $HOSTNAME == *"ui"*".sdfarm.kr"* ]]; then
 elif [[ $HOSTNAME == *"tamsa1"* ]]; then
 
   echo "@@@@ Working on tamsa1"
-  export SKFlatRunlogDir="/data4/Users/$USER/SKFlatRunlog/"
-  export SKFlatOutputDir="/data4/Users/$USER/SKFlatOutput/"
+  export SKFlatRunlogDir="/data6/Users/$USER/SKFlatRunlog/"
+  export SKFlatOutputDir="/data6/Users/$USER/SKFlatOutput/"
 
 elif [[ $HOSTNAME == *"tamsa2"* ]]; then
 
   echo "@@@@ Working on tamsa2"
-  export SKFlatRunlogDir="/data4/Users/$USER/SKFlatRunlog/"
-  export SKFlatOutputDir="/data4/Users/$USER/SKFlatOutput/"
+  export SKFlatRunlogDir="/data6/Users/$USER/SKFlatRunlog/"
+  export SKFlatOutputDir="/data6/Users/$USER/SKFlatOutput/"
 
 elif [[ $HOSTNAME == *"knu"* ]]; then
 
