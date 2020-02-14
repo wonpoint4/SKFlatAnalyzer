@@ -13,7 +13,7 @@
 #pragma link C++ class SkimTree_LRSMHighPt+;
 #pragma link C++ class JetTagging+;
 #pragma link C++ class SMPAnalyzerCore+;
-#pragma link C++ class SkimTree_SMP+;
+#pragma link C++ class SkimTree_Dilepton+;
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
 #pragma link C++ class EfficiencyValidation+;

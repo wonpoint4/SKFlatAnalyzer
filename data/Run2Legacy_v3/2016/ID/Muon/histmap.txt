@@ -10,6 +10,7 @@ Trigger	Eff_DATA	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2016.root	Eff_
 Trigger	Eff_MC	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2016.root	Eff_MC
 Trigger	Eff_DATA	Mu50_POGHighPtLooseTrkIso	RunAveraged_Eff_Trigger.root	Mu50_OR_TkMu50_PtEtaBins/efficienciesDATA/pt_abseta_DATA
 Trigger	Eff_MC	Mu50_POGHighPtLooseTrkIso	RunAveraged_Eff_Trigger.root	Mu50_OR_TkMu50_PtEtaBins/efficienciesMC/pt_abseta_MC
+### AFB
 Trigger	Eff_DATA LeadMu17_POGTight_BCDEF	MuonTriggerEfficiency_ISR_DoubleIsoMu17Mu8_IsoMu17leg_RunBCDEF.root	TriggerEff_ISR_BCDEF_Data
 Trigger	Eff_MC LeadMu17_POGTight_BCDEF	MuonTriggerEfficiency_ISR_DoubleIsoMu17Mu8_IsoMu17leg_RunBCDEF.root	TriggerEff_ISR_BCDEF_MC
 Trigger	Eff_DATA LeadMu17_POGTight_GH	MuonTriggerEfficiency_ISR_DoubleIsoMu17Mu8_IsoMu17leg_RunGH.root	TriggerEff_ISR_GH_Data
@@ -18,7 +19,6 @@ Trigger	Eff_DATA TailMu8_POGTight_BCDEF	MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_R
 Trigger	Eff_MC TailMu8_POGTight_BCDEF	MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_RunBCDEF.root	TriggerEff_ISR_BCDEF_MC
 Trigger	Eff_DATA TailMu8_POGTight_GH	MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_RunGH.root	TriggerEff_ISR_GH_Data
 Trigger	Eff_MC TailMu8_POGTight_GH	MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_RunGH.root	TriggerEff_ISR_GH_MC
-### AFB
 IDISO	SF      TightID_trkIso_pt20_QPlus_BCDEF      Mu_IdIso_runBCDEF_TightID_trkIso_QPlus_helee_v1.root    SF_eta_pt
 IDISO	SF      TightID_trkIso_pt20_QMinus_BCDEF     Mu_IdIso_runBCDEF_TightID_trkIso_QMinus_helee_v1.root   SF_eta_pt
 IDISO  	SF      TightID_trkIso_pt20_QPlus_GH 	     Mu_IdIso_runGH_TightID_trkIso_QPlus_helee_v1.root       SF_eta_pt

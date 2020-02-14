@@ -134,26 +134,26 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     lep1ptcut=10.;
     
     map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGTightWithTightIso",0.0,2.4),0);
-    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
     
     if(HasFlag("SYS")){
       map_muons["_scale_up"]=MuonMomentumCorrection(map_muons[""],+1);
-      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_up"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_up"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
       
       map_muons["_scale_down"]=MuonMomentumCorrection(map_muons[""],-1);
-      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_down"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_down"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
 
       map_muons["_noroccor"]=MuonMomentumCorrection(map_muons[""],0,-1);
-      map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_muons["_noroccor"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"LeadMu17_POGTight",DataYear==2018?"":"TailMu8_POGTight");
+      map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_muons["_noroccor"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
     }
   }else if(channelname.Contains("ee")){
     lep0ptcut=25.;
     lep1ptcut=15.;
     TString LeptonIDSF_key,triggerSF_key0,triggerSF_key1;
     switch(DataYear){
-    case 2016: LeptonIDSF_key="ID_SF_MediumID_pt10";triggerSF_key0="LeadEle23_MediumID";triggerSF_key1="TailEle12_MediumID"; break;
-    case 2017: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="LeadEle23_MediumID_Q";triggerSF_key1="TailEle12_MediumID_Q"; break;
-    case 2018: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="Ele23_MediumID_Q";triggerSF_key1="Ele12_MediumID_Q"; break;
+    case 2016: LeptonIDSF_key="ID_SF_MediumID_pt10";triggerSF_key0="Ele23Leg1_MediumID";triggerSF_key1="Ele12Leg2_MediumID"; break;
+    case 2017: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="Ele23Leg1_MediumID_Q";triggerSF_key1="Ele12Leg2_MediumID_Q"; break;
+    case 2018: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="Ele23Leg1_MediumID_Q";triggerSF_key1="Ele12Leg2_MediumID_Q"; break;
     default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
     }
     

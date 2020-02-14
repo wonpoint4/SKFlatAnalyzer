@@ -10,3 +10,15 @@ Trigger	Eff_DATA	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2017.root	Eff_
 Trigger	Eff_MC	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2017.root	Eff_MC
 Trigger Eff_DATA	Mu50_POGHighPt		MuonTriggerEfficiency_ZprimeToNN_Mu50_Run2017BCDEF_Central.root	TriggerEff_HNDilepton_BCDEF_Data
 Trigger Eff_MC		Mu50_POGHighPt		MuonTriggerEfficiency_ZprimeToNN_Mu50_Run2017BCDEF_Central.root	TriggerEff_HNDilepton_BCDEF_MC
+### AFB Tight PFIso 
+Trigger Eff_DATA        Mu17Leg1_POGTight       Mu_TrigEff_IsoMu17Mu8_Iso17_Run2017BCDEF_v1.root        TriggerEff_AFB_2017BCDEF_Data   TH2D
+Trigger Eff_MC          Mu17Leg1_POGTight       Mu_TrigEff_IsoMu17Mu8_Iso17_Run2017BCDEF_v1.root        TriggerEff_AFB_2017BCDEF_MC     TH2D
+Trigger Eff_DATA        Mu8Leg2_POGTight        Mu_TrigEff_IsoMu17Mu8_Mu8_OR_TkMu8_Run2017BCDEF_v1.root TriggerEff_AFB_2017BCDEF_Data   TH2D
+Trigger Eff_MC          Mu8Leg2_POGTight        Mu_TrigEff_IsoMu17Mu8_Mu8_OR_TkMu8_Run2017BCDEF_v1.root TriggerEff_AFB_2017BCDEF_MC     TH2D
+### AFB Tight trkIso
+IDISO   SF      TightID_trkIso_pt20_QPlus       Mu_IdIso_runBCDEF_TightID_trkIso_QPlus_wonjun_v1.root   SF_abseta_pt    TH2D
+IDISO   SF      TightID_trkIso_pt20_QMinus      Mu_IdIso_runBCDEF_TightID_trkIso_QMinus_wonjun_v1.root  SF_abseta_pt    TH2D
+Trigger SF      Mu17Leg1_TightID_trkIso_QPlus   Mu_TrigEff_runBCDEF_LeadMu17_QPlus_wonjun_v1.root       SF_abseta_pt    TH2D
+Trigger SF      Mu17Leg1_TightID_trkIso_QMinus  Mu_TrigEff_runBCDEF_LeadMu17_QMinus_wonjun_v1.root      SF_abseta_pt    TH2D
+Trigger SF      Mu8Leg2_TightID_trkIso_QPlus    Mu_TrigEff_runBCDEF_TailMu8_QPlus_wonjun_v1.root        SF_abseta_pt    TH2D
+Trigger SF      Mu8Leg2_TightID_trkIso_QMinus   Mu_TrigEff_runBCDEF_TailMu8_QMinus_wonjun_v1.root       SF_abseta_pt    TH2D
