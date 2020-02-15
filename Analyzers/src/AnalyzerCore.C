@@ -2,6 +2,7 @@
 
 AnalyzerCore::AnalyzerCore(){
 
+  outfile = NULL;
   mcCorr = new MCCorrection();
   puppiCorr = new PuppiSoftdropMassCorr();
   fakeEst = new FakeBackgroundEstimator();
@@ -39,7 +40,7 @@ AnalyzerCore::~AnalyzerCore(){
 
   //==== output rootfile
 
-  outfile->Close();
+  if(outfile) outfile->Close();
 
   //==== Tools
 

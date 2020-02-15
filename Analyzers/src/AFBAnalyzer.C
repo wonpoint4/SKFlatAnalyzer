@@ -470,6 +470,8 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
     FillHist(channelname+"/"+pre+"backward_den"+suf,dimass,dirap,dipt,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
     FillHist(channelname+"/"+pre+"backward_num"+suf,dimass,dirap,dipt,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
   }
+  const double costbin[21]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
+  FillHist(channelname+"/"+pre+"costhetaCS_4D"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,(double*)costbin);
 
   for(int im=0;im<grid_mbinnum;im++){
     if(dimass>=grid_mbin[im]&&dimass<grid_mbin[im+1]){

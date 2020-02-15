@@ -13,6 +13,10 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(roc) delete roc;
   if(rocele) delete rocele;
   if(hz0) delete hz0;
+  for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
+    delete mapit->second;
+  }
+  maphist_TH4D.clear();
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
@@ -22,6 +26,71 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
 }
+
+TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
+
+  TH4D *h = NULL;
+  std::map<TString, TH4D*>::iterator mapit = maphist_TH4D.find(histname);
+  if(mapit != maphist_TH4D.end()) return mapit->second;                                                                                                                                                     
+
+  return h;
+
+}
+
+void SMPAnalyzerCore::FillHist(TString histname,
+                            double value_x, double value_y, double value_z, double value_u,
+                            double weight,
+                            int n_binx, double x_min, double x_max,
+                            int n_biny, double y_min, double y_max,
+                            int n_binz, double z_min, double z_max,
+                            int n_binu, double u_min, double u_max){
+
+  TH4D *this_hist = GetHist4D(histname);
+  if( !this_hist ){
+    this_hist = new TH4D(histname, "", n_binx, x_min, x_max, n_biny, y_min, y_max, n_binz, z_min, z_max, n_binu, u_min, u_max);
+    this_hist->SetDirectory(NULL);
+    maphist_TH4D[histname] = this_hist;
+  }
+
+  this_hist->Fill(value_x, value_y, value_z, value_u, weight);
+
+}
+
+void SMPAnalyzerCore::FillHist(TString histname,
+                            double value_x, double value_y, double value_z, double value_u,
+                            double weight,
+                            int n_binx, double *xbins,
+                            int n_biny, double *ybins,
+                            int n_binz, double *zbins,
+                            int n_binu, double *ubins){
+
+  TH4D *this_hist = GetHist4D(histname);
+  if( !this_hist ){
+    this_hist = new TH4D(histname, "", n_binx, xbins, n_biny, ybins, n_binz, zbins, n_binu, ubins);
+    this_hist->SetDirectory(NULL);
+    maphist_TH4D[histname] = this_hist;
+  }
+
+  this_hist->Fill(value_x, value_y, value_z, value_u, weight);
+
+}
+void SMPAnalyzerCore::WriteHist(){
+  AnalyzerCore::WriteHist();
+  outfile->cd();
+  for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
+    TString this_fullname=mapit->second->GetName();
+    TString this_name=this_fullname(this_fullname.Last('/')+1,this_fullname.Length());
+    TString this_suffix=this_fullname(0,this_fullname.Last('/'));
+    TDirectory *dir = outfile->GetDirectory(this_suffix);
+    if(!dir){
+      outfile->mkdir(this_suffix);
+    }
+    outfile->cd(this_suffix);
+    mapit->second->Write(this_name);
+    outfile->cd();
+  }
+}
+
 void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value,weight,n_bin,x_min,x_max);
 }
@@ -39,6 +108,12 @@ void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y,
 }
 void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max, int n_binz, double z_min, double z_max, int n_binu, double u_min, double u_max){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,x_min,x_max,n_biny,y_min,y_max,n_binz,z_min,z_max,n_binu,u_min,u_max);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins, int n_binu, double *ubins){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins,n_binu,ubins);
 }
 
 void SMPAnalyzerCore::FillDileptonHists(TString pre,TString suf,Particle *l0,Particle *l1,double w){

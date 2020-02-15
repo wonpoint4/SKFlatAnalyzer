@@ -42,7 +42,7 @@ OLIST = $(patsubst %.C,%.o,$(notdir $(CPPLIST)))
 # Rule to create the dictionary
 $(DICTFILE): $(HLIST) $(DICTLDEF)
 	@echo "Generating dictionary $@"
-	@$(shell root-config --exec-prefix)/bin/rootcint -f $(DICTFILE) $(INCLUDES) $^
+	@$(shell root-config --exec-prefix)/bin/rootcint -f $(DICTFILE) -rmf lib$(LIBRARY).rootmap -rml lib$(LIBRARY).so $(ADDITIONAL_ROOTMAPLIBRARY) $(INCLUDES) $^
 
 # Rule to comile the dictionary
 $(DICTOBJ): $(DICTFILE)
