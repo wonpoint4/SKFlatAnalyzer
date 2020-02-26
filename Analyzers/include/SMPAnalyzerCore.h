@@ -16,19 +16,26 @@ public:
   std::map< TString, TH4D* > maphist_TH4D;
   TH4D* GetHist4D(TString histname);
   void FillHist(TString histname,
-                double value_x, double value_y, double value_z, double value_u,
-                double weight,
-                int n_binx, double x_min, double x_max,
-                int n_biny, double y_min, double y_max,
-                int n_binz, double z_min, double z_max,
-                int n_binu, double u_min, double u_max);
+                Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                Double_t weight,
+                Int_t n_binx, Double_t x_min, Double_t x_max,
+                Int_t n_biny, Double_t y_min, Double_t y_max,
+                Int_t n_binz, Double_t z_min, Double_t z_max,
+                Int_t n_binu, Double_t u_min, Double_t u_max);
   void FillHist(TString histname,
-                double value_x, double value_y, double value_z, double value_u,
-                double weight,
-                int n_binx, double *xbins,
-                int n_biny, double *ybins,
-                int n_binz, double *zbins,
-                int n_binu, double *ubins);
+                Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                Double_t weight,
+                Int_t n_binx, Double_t *xbins,
+                Int_t n_biny, Double_t *ybins,
+                Int_t n_binz, Double_t *zbins,
+                Int_t n_binu, Double_t *ubins);
+  void FillHist(TString histname,
+                Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                Double_t weight,
+                Int_t n_binx, Double_t *xbins,
+                Int_t n_biny, Double_t *ybins,
+                Int_t n_binz, Double_t *zbins,
+                Int_t n_binu, Double_t u_min, Double_t u_max);
   virtual void WriteHist();
 
   using AnalyzerCore::FillHist;
@@ -70,6 +77,13 @@ public:
 		int n_biny, double *ybins,
 		int n_binz, double *zbins,
                 int n_binu, double *ubins);
+  void FillHist(TString histname,
+		double value_x, double value_y, double value_z, double value_u,
+		map<TString,double> weights,
+		int n_binx, double *xbins,
+		int n_biny, double *ybins,
+		int n_binz, double *zbins,
+                int n_binu, double u_min, double u_max);
 
   void FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w);
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);

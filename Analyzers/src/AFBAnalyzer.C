@@ -8,6 +8,7 @@ void AFBAnalyzer::initializeAnalyzer(){
     SetupBTagger(vtaggers,vwps,true,true);
   }
   SetupToy(100);
+  IsSYS=HasFlag("SYS")||HasFlag("DYSYS");
 }
 void AFBAnalyzer::executeEvent(){
   GetToyWeight();
@@ -17,6 +18,26 @@ void AFBAnalyzer::executeEvent(){
   hardprefix="";
   zptcor=1.;
   if(IsDYSample){
+    vector<LHE> lhes=GetLHEs();
+    LHE lhe_l0,lhe_l1;
+    GetLHEParticles(lhes,lhe_l0,lhe_l1);
+    if(abs(lhe_l0.ID())==11){
+      map<TString,double> map_weight;
+      map_weight[""]=weight_norm_1invpb*(gen_weight>0?1:-1);
+      if(!IsSYS) FillHists(Form("ee%d",DataYear),"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
+    }else if(abs(lhe_l0.ID())==13){
+      map<TString,double> map_weight;
+      map_weight[""]=weight_norm_1invpb*(gen_weight>0?1:-1);
+      if(!IsSYS) FillHists(Form("mm%d",DataYear),"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
+    }else if(abs(lhe_l0.ID())==15){
+      tauprefix="tau_";
+    }else{
+      cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
+      for(auto& lhe:lhes) lhe.Print();
+      exit(EXIT_FAILURE);
+    } 
+    
+    /*
     vector<Gen> gens=GetGens();
     int parton0,parton1,hardl0,hardl1,l0,l1;
     vector<int> photons;
@@ -77,6 +98,7 @@ void AFBAnalyzer::executeEvent(){
     }else{
       tauprefix="tau_";
     }
+    */
   }
 
   //if(HasFlag("GEN")||HasFlag("GENHARD")) return;
@@ -125,8 +147,6 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   std::vector<Jet> jets=GetJets("tightLepVeto",30,2.7);
   std::sort(jets.begin(),jets.end(),PtComparing);
-
-  bool IsSYS=HasFlag("SYS")||HasFlag("DYSYS");
   
   double lep0ptcut,lep1ptcut;
   if(channelname.Contains("mm")){
@@ -179,6 +199,14 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
       map_electrons["_roccor"]=ElectronEnergyCorrection(map_electrons[""],0,0);
       map_leps["_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_roccor"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+
+      map_leps["_default"]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+
+      for(int i=1;i<18;i++){
+	TString title=Form("_roccor_try%d",i);
+	map_electrons[title]=ElectronEnergyCorrection(map_electrons[""],-i,0);
+	map_leps[title]=make_tuple(MakeLeptonPointerVector(map_electrons[title]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      }
     }
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
@@ -380,6 +408,22 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1){
   }else if(p0->Charge()>0&&p1->Charge()<0){
     l0=p1;
     l1=p0;
+  }else if(strcmp(p0->ClassName(),"LHE")==0){ 
+    if(((LHE*)p0)->ID()>0&&((LHE*)p1)->ID()<0){
+      l0=p0;
+      l1=p1;
+    }else if(((LHE*)p0)->ID()<0&&((LHE*)p1)->ID()>0){
+      l0=p1;
+      l1=p0;
+    }else{
+      if(random->Rndm()<0.5){
+	l0=p0;
+	l1=p1;
+      }else{
+	l0=p1;
+	l1=p0;
+      }      
+    } 
   }else{
     if(random->Rndm()<0.5){
       l0=p0;
@@ -461,53 +505,24 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
   double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*cost*cost);
   double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
   double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
-  if(cost>0){
-    FillHist(channelname+"/"+pre+"forward"+suf,dimass,dirap,dipt,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
-    FillHist(channelname+"/"+pre+"forward_den"+suf,dimass,dirap,dipt,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
-    FillHist(channelname+"/"+pre+"forward_num"+suf,dimass,dirap,dipt,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
-  }else{
-    FillHist(channelname+"/"+pre+"backward"+suf,dimass,dirap,dipt,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
-    FillHist(channelname+"/"+pre+"backward_den"+suf,dimass,dirap,dipt,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
-    FillHist(channelname+"/"+pre+"backward_num"+suf,dimass,dirap,dipt,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin);
+  FillHist(channelname+"/"+pre+"costhetaCS"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+  FillHist(channelname+"/"+pre+"costhetaCS_den"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+  FillHist(channelname+"/"+pre+"costhetaCS_num"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+
+  FillHist(channelname+"/"+pre+"l0pt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+  FillHist(channelname+"/"+pre+"l1pt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+  FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+  FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+
+  FillHist(channelname+"/"+pre+"l0eta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+  FillHist(channelname+"/"+pre+"l1eta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+  FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+  FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+
+  if(!pre.Contains("gen")&&!pre.Contains("lhe")){
+    FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
+    FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
   }
-  const double costbin[21]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
-  FillHist(channelname+"/"+pre+"costhetaCS_4D"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,(double*)costbin);
-
-  for(int im=0;im<grid_mbinnum;im++){
-    if(dimass>=grid_mbin[im]&&dimass<grid_mbin[im+1]){
-      for(int ir=0;ir<grid_ybinnum;ir++){
-	if(fabs(dirap)>=grid_ybin[ir]&&fabs(dirap)<grid_ybin[ir+1]){
-	  for(int ip=0;ip<grid_ptbinnum;ip++){
-	    if(dipt>=grid_ptbin[ip]&&dipt<grid_ptbin[ip+1]){
-	      TString this_pre=channelname+Form("/m[%.0f,%.0f]/y[%.1f,%.1f]/pt[%.0f,%.0f]/",grid_mbin[im],grid_mbin[im+1],grid_ybin[ir],grid_ybin[ir+1],grid_ptbin[ip],grid_ptbin[ip+1])+pre;
-
-	      FillHist(this_pre+"l0pt"+suf,l0->Pt(),map_weight,lptbinnum,(double*)lptbin);
-	      FillHist(this_pre+"l1pt"+suf,l1->Pt(),map_weight,lptbinnum,(double*)lptbin);
-	      FillHist(this_pre+"lpt"+suf,l0->Pt(),map_weight,lptbinnum,(double*)lptbin);
-	      FillHist(this_pre+"lpt"+suf,l1->Pt(),map_weight,lptbinnum,(double*)lptbin);
-	      FillHist(this_pre+"l0eta"+suf,l0->Eta(),map_weight,60,-3,3);
-	      FillHist(this_pre+"l1eta"+suf,l1->Eta(),map_weight,60,-3,3);
-	      FillHist(this_pre+"leta"+suf,l0->Eta(),map_weight,60,-3,3);
-	      FillHist(this_pre+"leta"+suf,l1->Eta(),map_weight,60,-3,3);
-	      
-	      FillHist(this_pre+"z0"+suf,vertex_Z,map_weight,120,-15,15);
-	      FillHist(this_pre+"met"+suf,pfMET_Type1_pt,map_weight,100,0,200);
-	      
-	      FillHist(this_pre+"dimass"+suf,dimass,map_weight,fine_mbinnum,(double*)fine_mbin);
-	      FillHist(this_pre+"dirap"+suf,dirap,map_weight,60,-3,3);
-	      FillHist(this_pre+"dipt"+suf,dipt,map_weight,fine_ptbinnum,(double*)fine_ptbin);
-	      FillHist(this_pre+"costhetaCS"+suf,cost,map_weight,40,-1,1);
-	      //FillHist(channelname+"/"+pre+"abscosthetaCS"+suf,fabs(cost),w,20,0,1);
-	      
-	      break;
-	    }
-	  }
-	  break;
-	}
-      }
-      break;
-    }
-  }  
 }
 void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w){
   Gen genhardl=genhardl0.PID()>0?genhardl0:genhardl1;
@@ -565,6 +580,20 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
     FillHist(pre+"jeta"+suf,genhardj0.Eta(),w,100,-5,5);
     FillHist(pre+"jeta_asym"+suf,genhardj0.Eta(),w/2,100,-5,5);
     FillHist(pre+"jeta_asym"+suf,-1.*genhardj0.Eta(),-w/2,100,-5,5);
+  }
+}
+void AFBAnalyzer::GetLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1){
+  if(!IsDYSample){
+    cout <<"[AFBAnalyzer::GetLHEParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  for(int i=0;i<(int)lhes.size();i++){
+    if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
+    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
+  }
+  if(l0.ID()==0||l1.ID()==0){
+    cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
+    exit(EXIT_FAILURE);
   }
 }
   

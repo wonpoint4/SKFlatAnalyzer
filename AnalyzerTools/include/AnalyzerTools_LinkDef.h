@@ -15,6 +15,7 @@
 #pragma link C++ class GeneralizedEndpoint+;
 #pragma link C++ class BTagSFUtil+;
 #pragma link C++ class RoccoR+;
+#pragma link C++ class RocelecoR+;
 #pragma link C++ class GenFinderForDY+;
 
 #endif

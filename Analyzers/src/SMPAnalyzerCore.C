@@ -38,12 +38,12 @@ TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
-                            double value_x, double value_y, double value_z, double value_u,
-                            double weight,
-                            int n_binx, double x_min, double x_max,
-                            int n_biny, double y_min, double y_max,
-                            int n_binz, double z_min, double z_max,
-                            int n_binu, double u_min, double u_max){
+                            Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                            Double_t weight,
+                            Int_t n_binx, Double_t x_min, Double_t x_max,
+                            Int_t n_biny, Double_t y_min, Double_t y_max,
+                            Int_t n_binz, Double_t z_min, Double_t z_max,
+                            Int_t n_binu, Double_t u_min, Double_t u_max){
 
   TH4D *this_hist = GetHist4D(histname);
   if( !this_hist ){
@@ -57,12 +57,12 @@ void SMPAnalyzerCore::FillHist(TString histname,
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
-                            double value_x, double value_y, double value_z, double value_u,
-                            double weight,
-                            int n_binx, double *xbins,
-                            int n_biny, double *ybins,
-                            int n_binz, double *zbins,
-                            int n_binu, double *ubins){
+                            Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                            Double_t weight,
+                            Int_t n_binx, Double_t *xbins,
+                            Int_t n_biny, Double_t *ybins,
+                            Int_t n_binz, Double_t *zbins,
+                            Int_t n_binu, Double_t *ubins){
 
   TH4D *this_hist = GetHist4D(histname);
   if( !this_hist ){
@@ -74,6 +74,29 @@ void SMPAnalyzerCore::FillHist(TString histname,
   this_hist->Fill(value_x, value_y, value_z, value_u, weight);
 
 }
+
+void SMPAnalyzerCore::FillHist(TString histname,
+                            Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
+                            Double_t weight,
+                            Int_t n_binx, Double_t *xbins,
+                            Int_t n_biny, Double_t *ybins,
+                            Int_t n_binz, Double_t *zbins,
+			    Int_t n_binu, Double_t u_min, Double_t u_max){
+
+  TH4D *this_hist = GetHist4D(histname);
+  if( !this_hist ){
+    TAxis uaxis(n_binu,u_min,u_max);
+    vector<double> ubins={};
+    for(int i=1;i<n_binu+2;i++) ubins.push_back(uaxis.GetBinLowEdge(i));
+    this_hist = new TH4D(histname, "", n_binx, xbins, n_biny, ybins, n_binz, zbins, n_binu, &ubins[0]);
+    this_hist->SetDirectory(NULL);
+    maphist_TH4D[histname] = this_hist;
+  }
+
+  this_hist->Fill(value_x, value_y, value_z, value_u, weight);
+
+}
+
 void SMPAnalyzerCore::WriteHist(){
   AnalyzerCore::WriteHist();
   outfile->cd();
@@ -114,6 +137,9 @@ void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y,
 }
 void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins, int n_binu, double *ubins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins,n_binu,ubins);
+}
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins, int n_binu, double u_min, double u_max){
+  for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins,n_binu,u_min,u_max);
 }
 
 void SMPAnalyzerCore::FillDileptonHists(TString pre,TString suf,Particle *l0,Particle *l1,double w){
@@ -465,19 +491,56 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
     double rcerr=0.;
     if(set>=0){
       if(IsDATA){
-	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.scEta(),electron.Phi(),set,member);
+	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.Eta(),electron.Phi(),set,member);
 	//rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),electron.scEta(),electron.Phi());
+	//cout<<"---------------------"<<endl;
+	//cout<<"before:";electron.Print();
 	electron.SetPtEtaPhiM(electron.Pt()*rc,electron.Eta(),electron.Phi(),electron.M());
+	//cout<<"after:";electron.Print();
       }else{
 	Gen gen=GetGenMatchedLepton(electron,gens);
 	if(gen.IsEmpty()){
-	  rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);
+	  //cout<<"cannot find matched lepton"<<endl;
+	  rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),set,member);
 	  //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);	  
 	}else{
-	  rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
+	  rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),gen.Pt(),set,member);
 	  //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
 	}
+	//cout<<"---------------------"<<endl;
+	//cout<<"before:";electron.Print();
 	electron.SetPtEtaPhiM(electron.UncorrPt()*rc,electron.Eta(),electron.Phi(),electron.M());
+	//cout<<"after:";electron.Print();
+      }      
+    }else if(set==-1){ //no energe cor
+      electron.SetPtEtaPhiM(electron.UncorrPt(),electron.Eta(),electron.Phi(),electron.M());
+    }else if(set<-1){ //0:uncorE 1:E 2:uncorPt 3:Pt
+      int mcmode=(abs(set)-2)%4;
+      int datamode=(abs(set)-2)/4;
+      if(IsDATA){
+	double datainput=0;
+	double datapt=0;
+	double POGcor=electron.E()/electron.UncorrE();
+	if(datamode==0){datainput=electron.UncorrE(); datapt=electron.UncorrPt();}
+	else if(datamode==1){datainput=electron.E(); datapt=electron.Pt();}
+	else if(datamode==2){datainput=electron.UncorrPt(); datapt=electron.UncorrPt();}
+	else if(datamode==3){datainput=electron.Pt(); datapt=electron.Pt();}
+	rc=rocele->kScaleDT(electron.Charge(),datainput,electron.Eta(),electron.Phi(),0,member);
+	electron.SetPtEtaPhiM(datapt*rc,electron.Eta(),electron.Phi(),electron.M());
+      }else{
+	double mcinput=0;
+	double mcpt=0;
+	if(mcmode==0){mcinput=electron.UncorrE(); mcpt=electron.UncorrPt();}
+	else if(mcmode==1){mcinput=electron.E(); mcpt=electron.Pt();}
+	else if(mcmode==2){mcinput=electron.UncorrPt(); mcpt=electron.UncorrPt();}
+	else if(mcmode==3){mcinput=electron.Pt(); mcpt=electron.Pt();}
+	Gen gen=GetGenMatchedLepton(electron,gens);
+	if(gen.IsEmpty()) rc=rocele->kScaleMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),0,member);
+	else {
+	  if(mcmode<2) rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.E(),0,member);
+	  else rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.Pt(),0,member);
+	} 
+	electron.SetPtEtaPhiM(mcpt*rc,electron.Eta(),electron.Phi(),electron.M());
       }      
     }
     out.push_back(electron);

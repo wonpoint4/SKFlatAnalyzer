@@ -15,6 +15,5 @@
 #pragma link C++ class Photon+;
 #pragma link C++ class Jet+;
 #pragma link C++ class FatJet+;
-#pragma link C++ class TH4D+;
 
 #endif
