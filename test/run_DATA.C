@@ -52,8 +52,8 @@ void run_DATA(){
   m.SetOutfilePath("hists.root");
 
   m.Init();
-  m.initializeAnalyzerTools();
   m.initializeAnalyzer();
+  m.initializeAnalyzerTools();
   m.SwitchToTempDir();
   m.Loop();
 

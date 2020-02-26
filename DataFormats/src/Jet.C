@@ -103,21 +103,23 @@ bool Jet::PassID(TString ID) const {
 
 }
 
-double Jet::GetTaggerResult(Tagger tg){
-  if(tg==CSVv2) return j_CSVv2;
-  else if(tg==DeepCSV) return j_DeepCSV;
-  else if(tg==DeepFlavour_b) return j_DeepFlavour_b;
-  else if(tg==DeepFlavour_bb) return j_DeepFlavour_bb;
-  else if(tg==DeepFlavour_lepb) return j_DeepFlavour_lepb;
-  else if(tg==DeepFlavour_c) return j_DeepFlavour_c;
-  else if(tg==DeepFlavour_uds) return j_DeepFlavour_uds;
-  else if(tg==DeepFlavour_g) return j_DeepFlavour_g;
-  else if(tg==CvsL) return j_CvsL;
-  else if(tg==CvsB) return j_CvsB;
-  else if(tg==DeepCvsL) return j_DeepCvsL;
-  else if(tg==DeepCvsB) return j_DeepCvsB;
+double Jet::GetTaggerResult(JetTagging::Tagger tg) const {
+
+  if(tg==JetTagging::CSVv2) return j_CSVv2;
+  else if(tg==JetTagging::DeepCSV) return j_DeepCSV;
+  else if(tg==JetTagging::DeepJet) return j_DeepFlavour_b+j_DeepFlavour_bb+j_DeepFlavour_lepb;
+  else if(tg==JetTagging::DeepFlavour_b) return j_DeepFlavour_b;
+  else if(tg==JetTagging::DeepFlavour_bb) return j_DeepFlavour_bb;
+  else if(tg==JetTagging::DeepFlavour_lepb) return j_DeepFlavour_lepb;
+  else if(tg==JetTagging::DeepFlavour_c) return j_DeepFlavour_c;
+  else if(tg==JetTagging::DeepFlavour_uds) return j_DeepFlavour_uds;
+  else if(tg==JetTagging::DeepFlavour_g) return j_DeepFlavour_g;
+  else if(tg==JetTagging::CvsL) return j_CvsL;
+  else if(tg==JetTagging::CvsB) return j_CvsB;
+  else if(tg==JetTagging::DeepCvsL) return j_DeepCvsL;
+  else if(tg==JetTagging::DeepCvsB) return j_DeepCvsB;
   else{
-    cout << "[Jet::GetTaggerResult] ERROR; Wrong tagger" << endl;
+    cout << "[Jet::GetTaggerResult] ERROR; Wrong tagger : " << tg << endl;
     return -999;
   }
 }

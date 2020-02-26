@@ -2,6 +2,7 @@
 #define FatJet_h
 
 #include "Particle.h"
+#include "JetTaggingParameters.h"
 
 class FatJet: public Particle {
 public:
@@ -38,16 +39,7 @@ public:
 
   bool PassID(TString ID) const;
 
-  enum Tagger{
-    CSVv2,
-    DeepCSV, DeepCvsL, DeepCvsB,
-    CvsL, CvsB,
-    DeepFlavour_b, DeepFlavour_bb, DeepFlavour_lepb, DeepFlavour_c, DeepFlavour_uds, DeepFlavour_g,
-  };
-  enum WP{
-    Loose, Medium, Tight
-  };
-  double GetTaggerResult(Tagger tg);
+  double GetTaggerResult(JetTagging::Tagger tg) const;
 
   void SetPuppiTaus(double t1, double t2, double t3, double t4);
   double PuppiTau1() const { return j_puppi_tau1; }

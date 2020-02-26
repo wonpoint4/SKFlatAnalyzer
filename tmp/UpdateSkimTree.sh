@@ -40,8 +40,9 @@ do
     then 
 	[ ${#array[@]} -eq 6 ] || continue
 	TAG=${array[5]}
-	SAMPLE=$(grep $SAMPLE $SKFlat_WD/data/$VERSION/$YEAR/Sample/SampleSummary_MC.txt|awk '{print $1}')
+	SAMPLE=$(grep $SAMPLE $SKFlat_WD/data/$VERSION/$YEAR/Sample/SampleSummary_MC.txt|awk '{print $1}'|head -n1)
 	TARGET=$SKFlat_WD/data/$VERSION/$YEAR/Sample/ForSNU/${SKIM}_${SAMPLE}.txt
+	[ "$SAMPLE" = "" ] && { echo "Cannot find alias for ${array[4]}"; continue; }
     fi	    
 #    echo VERSION=$VERSION
 #    echo YEAR=$YEAR
@@ -50,6 +51,6 @@ do
 #    echo SAMPLE=$SAMPLE
 #    echo PERIOD=$PERIOD
 #    echo TAG=$TAG
-    echo "find $line -type f > $TARGET"
-    [ "$DRY" != true ] && find $line -type f > $TARGET
-done< <(find $SKIMDIR -type d)
+    echo "find $line -type f |sort -V > $TARGET"
+    [ "$DRY" != true ] && find $line -type f |sort -V > $TARGET
+done< <(find $SKIMDIR -type d | sort -n )

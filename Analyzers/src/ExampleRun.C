@@ -45,17 +45,13 @@ void ExampleRun::initializeAnalyzer(){
   cout << "[ExampleRun::initializeAnalyzer] IsoMuTriggerName = " << IsoMuTriggerName << endl;
   cout << "[ExampleRun::initializeAnalyzer TriggerSafePtCut = " << TriggerSafePtCut << endl;
 
-  //==== Test btagging code
+  //==== B-Tagging
   //==== add taggers and WP that you want to use in analysis
-  std::vector<Jet::Tagger> vtaggers;
-  vtaggers.push_back(Jet::DeepCSV);
-
-  std::vector<Jet::WP> v_wps;
-  v_wps.push_back(Jet::Medium);
-
-  //=== list of taggers, WP, setup systematics, use period SFs
-  // 4th argument is period dependancy, only set true IF you need this
-  SetupBTagger(vtaggers,v_wps, true, false);
+  std::vector<JetTagging::Parameters> jtps;
+  //==== If you want to use 1a or 2a method,
+  jtps.push_back( JetTagging::Parameters(JetTagging::DeepCSV, JetTagging::Medium, JetTagging::incl, JetTagging::comb) );
+  //==== set
+  mcCorr->SetJetTaggingParameters(jtps);
 
   //================================
   //==== Example 2
@@ -329,15 +325,28 @@ void ExampleRun::executeEventFromParameter(AnalyzerParameter param){
   //==== 2) jets : similar, but also when applying new JEC, ordering is changes. This is important if you use leading jets
   std::sort(jets.begin(), jets.end(), PtComparing);
 
-  int n_bjet_deepcsv_m=0;
-  int n_bjet_deepcsv_m_noSF=0;
+  int NBJets_NoSF(0), NBJets_WithSF_2a(0);
+  JetTagging::Parameters jtp_DeepCSV_Medium = JetTagging::Parameters(JetTagging::DeepCSV,
+                                                                     JetTagging::Medium,
+                                                                     JetTagging::incl, JetTagging::comb);
 
+  //==== b tagging
+
+  //==== method 1a)
+  //==== multiply "btagWeight" to the event weight
+  double btagWeight = mcCorr->GetBTaggingReweight_1a(jets, jtp_DeepCSV_Medium);
+
+  //==== method 2a)
   for(unsigned int ij = 0 ; ij < jets.size(); ij++){
-    if(IsBTagged(jets.at(ij), Jet::DeepCSV, Jet::Medium,true,0)) n_bjet_deepcsv_m++; // method for getting btag with SF applied to MC
-    if(IsBTagged(jets.at(ij), Jet::DeepCSV, Jet::Medium,false,0)) n_bjet_deepcsv_m_noSF++; // method for getting btag with no SF applied to MC
+
+    double this_discr = jets.at(ij).GetTaggerResult(JetTagging::DeepCSV);
+    //==== No SF
+    if( this_discr > mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium) ) NBJets_NoSF++;
+    //==== 2a
+    if( mcCorr->IsBTagged_2a(jtp_DeepCSV_Medium, jets.at(ij)) ) NBJets_WithSF_2a++;
+
   }
 
-  cout << "n_bjet_deepcsv_m = " << n_bjet_deepcsv_m << " n_bjet_deepcsv_m_noSF = " << n_bjet_deepcsv_m_noSF << endl;
   
   //=========================
   //==== Event selections..

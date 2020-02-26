@@ -1,9 +1,3 @@
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_10.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_11.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_12.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_13.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_14.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_15.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_1.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_2.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_3.root
@@ -13,6 +7,111 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_7.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_8.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_9.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_10.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_11.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_12.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_13.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_14.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_122833/0000/SKFlatNtuple_2018_MC_15.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_1.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_2.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_3.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_4.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_5.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_6.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_7.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_8.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_9.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_10.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_11.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_12.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_13.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_14.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_15.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_16.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_17.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_18.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_19.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_20.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_21.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_22.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_23.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_24.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_25.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_26.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_27.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_28.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_29.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_30.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_31.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_32.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_33.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_34.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_35.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_36.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_37.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_38.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_39.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_40.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_41.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_42.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_43.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_44.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_45.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_46.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_47.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_48.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_49.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_50.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_51.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_52.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_53.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_54.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_55.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_56.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_57.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_58.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_59.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_60.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_61.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_62.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_63.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_64.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_65.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_66.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_67.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_68.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_69.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_70.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_71.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_72.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_73.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_74.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_75.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_76.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_77.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_78.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_79.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_80.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_81.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_82.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_83.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_84.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_85.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_86.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_87.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_88.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_89.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_90.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_91.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_92.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_93.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_94.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_95.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_96.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_97.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_98.root
+/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_99.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_100.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_101.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_102.root
@@ -23,7 +122,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_107.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_108.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_109.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_10.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_110.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_111.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_112.root
@@ -34,7 +132,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_117.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_118.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_119.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_11.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_120.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_121.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_122.root
@@ -45,7 +142,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_127.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_128.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_129.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_12.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_130.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_131.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_132.root
@@ -56,7 +152,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_137.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_138.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_139.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_13.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_140.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_141.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_142.root
@@ -67,7 +162,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_147.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_148.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_149.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_14.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_150.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_151.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_152.root
@@ -78,7 +172,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_157.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_158.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_159.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_15.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_160.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_161.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_162.root
@@ -89,7 +182,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_167.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_168.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_169.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_16.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_170.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_171.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_172.root
@@ -100,7 +192,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_177.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_178.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_179.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_17.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_180.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_181.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_182.root
@@ -111,7 +202,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_187.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_188.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_189.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_18.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_190.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_191.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_192.root
@@ -122,8 +212,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_197.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_198.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_199.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_19.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_1.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_200.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_201.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_202.root
@@ -134,7 +222,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_207.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_208.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_209.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_20.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_210.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_211.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_212.root
@@ -145,7 +232,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_217.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_218.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_219.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_21.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_220.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_221.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_222.root
@@ -156,7 +242,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_227.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_228.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_229.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_22.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_230.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_231.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_232.root
@@ -167,7 +252,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_237.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_238.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_239.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_23.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_240.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_241.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_242.root
@@ -178,7 +262,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_247.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_248.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_249.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_24.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_250.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_251.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_252.root
@@ -189,7 +272,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_257.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_258.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_259.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_25.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_260.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_261.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_262.root
@@ -200,7 +282,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_267.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_268.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_269.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_26.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_270.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_271.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_272.root
@@ -211,7 +292,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_277.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_278.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_279.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_27.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_280.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_281.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_282.root
@@ -222,7 +302,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_287.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_288.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_289.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_28.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_290.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_291.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_292.root
@@ -233,8 +312,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_297.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_298.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_299.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_29.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_2.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_300.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_301.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_302.root
@@ -245,7 +322,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_307.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_308.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_309.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_30.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_310.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_311.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_312.root
@@ -256,7 +332,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_317.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_318.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_319.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_31.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_320.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_321.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_322.root
@@ -267,7 +342,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_327.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_328.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_329.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_32.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_330.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_331.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_332.root
@@ -278,7 +352,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_337.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_338.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_339.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_33.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_340.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_341.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_342.root
@@ -289,7 +362,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_347.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_348.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_349.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_34.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_350.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_351.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_352.root
@@ -300,7 +372,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_357.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_358.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_359.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_35.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_360.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_361.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_362.root
@@ -311,7 +382,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_367.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_368.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_369.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_36.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_370.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_371.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_372.root
@@ -322,7 +392,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_377.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_378.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_379.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_37.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_380.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_381.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_382.root
@@ -333,7 +402,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_387.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_388.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_389.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_38.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_390.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_391.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_392.root
@@ -344,8 +412,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_397.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_398.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_399.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_39.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_3.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_400.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_401.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_402.root
@@ -356,7 +422,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_407.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_408.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_409.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_40.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_410.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_411.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_412.root
@@ -367,7 +432,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_417.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_418.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_419.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_41.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_420.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_421.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_422.root
@@ -378,7 +442,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_427.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_428.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_429.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_42.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_430.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_431.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_432.root
@@ -389,7 +452,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_437.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_438.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_439.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_43.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_440.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_441.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_442.root
@@ -400,7 +462,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_447.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_448.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_449.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_44.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_450.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_451.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_452.root
@@ -411,7 +472,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_457.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_458.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_459.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_45.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_460.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_461.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_462.root
@@ -422,7 +482,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_467.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_468.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_469.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_46.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_470.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_471.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_472.root
@@ -433,7 +492,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_477.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_478.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_479.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_47.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_480.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_481.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_482.root
@@ -444,7 +502,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_487.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_488.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_489.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_48.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_490.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_491.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_492.root
@@ -455,8 +512,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_497.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_498.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_499.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_49.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_4.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_500.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_501.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_502.root
@@ -467,7 +522,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_507.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_508.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_509.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_50.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_510.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_511.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_512.root
@@ -478,7 +532,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_517.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_518.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_519.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_51.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_520.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_521.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_522.root
@@ -489,7 +542,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_527.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_528.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_529.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_52.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_530.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_531.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_532.root
@@ -500,7 +552,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_537.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_538.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_539.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_53.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_540.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_541.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_542.root
@@ -511,7 +562,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_547.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_548.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_549.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_54.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_550.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_551.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_552.root
@@ -522,7 +572,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_557.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_558.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_559.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_55.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_560.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_561.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_562.root
@@ -533,7 +582,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_567.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_568.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_569.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_56.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_570.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_571.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_572.root
@@ -544,7 +592,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_577.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_578.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_579.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_57.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_580.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_581.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_582.root
@@ -555,7 +602,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_587.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_588.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_589.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_58.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_590.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_591.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_592.root
@@ -566,8 +612,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_597.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_598.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_599.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_59.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_5.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_600.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_601.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_602.root
@@ -578,7 +622,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_607.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_608.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_609.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_60.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_610.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_611.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_612.root
@@ -589,7 +632,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_617.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_618.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_619.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_61.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_620.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_621.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_622.root
@@ -600,7 +642,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_627.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_628.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_629.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_62.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_630.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_631.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_632.root
@@ -611,7 +652,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_637.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_638.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_639.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_63.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_640.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_641.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_642.root
@@ -622,7 +662,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_647.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_648.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_649.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_64.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_650.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_651.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_652.root
@@ -633,7 +672,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_657.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_658.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_659.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_65.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_660.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_661.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_662.root
@@ -644,7 +682,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_667.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_668.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_669.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_66.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_670.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_671.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_672.root
@@ -655,7 +692,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_677.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_678.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_679.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_67.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_680.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_681.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_682.root
@@ -666,7 +702,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_687.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_688.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_689.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_68.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_690.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_691.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_692.root
@@ -677,8 +712,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_697.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_698.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_699.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_69.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_6.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_700.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_701.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_702.root
@@ -689,7 +722,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_707.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_708.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_709.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_70.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_710.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_711.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_712.root
@@ -700,7 +732,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_717.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_718.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_719.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_71.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_720.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_721.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_722.root
@@ -711,7 +742,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_727.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_728.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_729.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_72.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_730.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_731.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_732.root
@@ -722,7 +752,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_737.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_738.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_739.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_73.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_740.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_741.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_742.root
@@ -733,7 +762,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_747.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_748.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_749.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_74.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_750.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_751.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_752.root
@@ -744,7 +772,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_757.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_758.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_759.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_75.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_760.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_761.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_762.root
@@ -755,7 +782,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_767.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_768.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_769.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_76.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_770.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_771.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_772.root
@@ -766,7 +792,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_777.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_778.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_779.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_77.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_780.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_781.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_782.root
@@ -777,7 +802,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_787.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_788.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_789.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_78.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_790.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_791.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_792.root
@@ -788,8 +812,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_797.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_798.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_799.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_79.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_7.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_800.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_801.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_802.root
@@ -800,7 +822,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_807.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_808.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_809.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_80.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_810.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_811.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_812.root
@@ -811,7 +832,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_817.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_818.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_819.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_81.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_820.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_821.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_822.root
@@ -822,7 +842,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_827.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_828.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_829.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_82.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_830.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_831.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_832.root
@@ -833,7 +852,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_837.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_838.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_839.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_83.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_840.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_841.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_842.root
@@ -844,7 +862,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_847.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_848.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_849.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_84.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_850.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_851.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_852.root
@@ -855,7 +872,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_857.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_858.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_859.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_85.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_860.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_861.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_862.root
@@ -866,7 +882,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_867.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_868.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_869.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_86.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_870.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_871.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_872.root
@@ -877,7 +892,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_877.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_878.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_879.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_87.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_880.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_881.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_882.root
@@ -888,7 +902,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_887.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_888.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_889.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_88.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_890.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_891.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_892.root
@@ -899,8 +912,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_897.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_898.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_899.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_89.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_8.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_900.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_901.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_902.root
@@ -911,7 +922,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_907.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_908.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_909.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_90.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_910.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_911.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_912.root
@@ -922,7 +932,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_917.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_918.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_919.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_91.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_920.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_921.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_922.root
@@ -933,7 +942,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_927.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_928.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_929.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_92.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_930.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_931.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_932.root
@@ -944,7 +952,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_937.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_938.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_939.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_93.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_940.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_941.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_942.root
@@ -955,7 +962,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_947.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_948.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_949.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_94.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_950.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_951.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_952.root
@@ -966,7 +972,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_957.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_958.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_959.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_95.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_960.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_961.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_962.root
@@ -977,7 +982,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_967.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_968.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_969.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_96.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_970.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_971.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_972.root
@@ -988,7 +992,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_977.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_978.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_979.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_97.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_980.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_981.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_982.root
@@ -999,7 +1002,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_987.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_988.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_989.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_98.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_990.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_991.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_992.root
@@ -1010,8 +1012,6 @@
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_997.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_998.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_999.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_99.root
-/gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0000/SKFlatNtuple_2018_MC_9.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0001/SKFlatNtuple_2018_MC_1000.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0001/SKFlatNtuple_2018_MC_1001.root
 /gv0/DATA/SKFlat/Run2Legacy_v4/2018/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/200130_123437/0001/SKFlatNtuple_2018_MC_1002.root
