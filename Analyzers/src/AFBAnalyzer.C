@@ -3,9 +3,9 @@
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
   if(HasFlag("bjet")){
-    vector<Jet::Tagger> vtaggers={Jet::DeepCSV};
-    vector<Jet::WP> vwps={Jet::Medium};
-    SetupBTagger(vtaggers,vwps,true,true);
+    //vector<Jet::Tagger> vtaggers={Jet::DeepCSV};
+    //vector<Jet::WP> vwps={Jet::Medium};
+    //SetupBTagger(vtaggers,vwps,true,true);
   }
   SetupToy(100);
   IsSYS=HasFlag("SYS")||HasFlag("DYSYS");
@@ -13,35 +13,45 @@ void AFBAnalyzer::initializeAnalyzer(){
 void AFBAnalyzer::executeEvent(){
   GetToyWeight();
 
-  ////////////////////////check genlevel//////////////////
+  Event* ev=new Event;
+  *ev=GetEvent();
+
   tauprefix="";
   hardprefix="";
   zptcor=1.;
   if(IsDYSample){
+    //////////////////////// Check LHE /////////////////////////
     vector<LHE> lhes=GetLHEs();
     LHE lhe_l0,lhe_l1;
-    GetLHEParticles(lhes,lhe_l0,lhe_l1);
-    if(abs(lhe_l0.ID())==11){
-      map<TString,double> map_weight;
-      map_weight[""]=weight_norm_1invpb*(gen_weight>0?1:-1);
-      if(!IsSYS) FillHists(Form("ee%d",DataYear),"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
-    }else if(abs(lhe_l0.ID())==13){
-      map<TString,double> map_weight;
-      map_weight[""]=weight_norm_1invpb*(gen_weight>0?1:-1);
-      if(!IsSYS) FillHists(Form("mm%d",DataYear),"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
-    }else if(abs(lhe_l0.ID())==15){
+    GetDYLHEParticles(lhes,lhe_l0,lhe_l1);
+    TString channelname="";
+    if(abs(lhe_l0.ID())==15){
       tauprefix="tau_";
     }else{
-      cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
-      for(auto& lhe:lhes) lhe.Print();
-      exit(EXIT_FAILURE);
-    } 
-    
-    /*
-    vector<Gen> gens=GetGens();
-    int parton0,parton1,hardl0,hardl1,l0,l1;
-    vector<int> photons;
-    GetGenIndex(gens,parton0,parton1,hardl0,hardl1,l0,l1,photons);
+      double l0ptcut,l1ptcut,letacut;
+      if(abs(lhe_l0.ID())==11){
+	channelname=Form("ee%d",DataYear);
+	l0ptcut=20.;
+	l1ptcut=10.;
+	letacut=2.4;
+      }else if(abs(lhe_l0.ID())==13){
+	channelname=Form("mm%d",DataYear);
+	l0ptcut=25.;
+	l1ptcut=15.;
+	letacut=2.5;
+      }else{
+	cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
+	for(auto& lhe:lhes) lhe.Print();
+	exit(EXIT_FAILURE);
+      }
+      
+      //////////////////////// GEN /////////////////////////
+      vector<Gen> gens=GetGens();
+      Gen gen_parton0,gen_parton1,gen_l0,gen_l1;
+      GetDYGenParticles(gens,gen_parton0,gen_parton1,gen_l0,gen_l1,true);
+      TLorentzVector genZ=(gen_l0+gen_l1);
+      zptcor*=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(gen_l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+      /*
     int hardj0=0,hardj1=0,hardj2=0;
     Gen genhardj0,genhardj1,genhardj2;
     for(unsigned int i=parton1+1;i<gens.size();i++){
@@ -61,16 +71,11 @@ void AFBAnalyzer::executeEvent(){
 	}
       }
     }
-    if(abs(gens[hardl0].PID())!=15){
-      Gen genparton0=gens[parton0],genparton1=gens[parton1],genhardl0=gens[hardl0],genhardl1=gens[hardl1],genl0=gens[l0],genl1=gens[l1],genphotons;
-      genparton0.SetPxPyPzE(0,0,genWeight_X1*6500.,genWeight_X1*6500.);
-      genparton1.SetPxPyPzE(0,0,-genWeight_X2*6500.,genWeight_X2*6500.);
-      for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
-      TLorentzVector genZ=(genl0+genl1+genphotons);
-      TLorentzVector gendilepton=genl0+genl1;
-      TLorentzVector genharddilepton=genhardl0+genhardl1;
-      zptcor*=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(genhardl0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
-      TString slepton=abs(genhardl0.PID())==13?"muon":"electron";
+    */
+      //genparton0.SetPxPyPzE(0,0,genWeight_X1*6500.,genWeight_X1*6500.);
+      //genparton1.SetPxPyPzE(0,0,-genWeight_X2*6500.,genWeight_X2*6500.);
+      //for(unsigned int i=0;i<photons.size();i++) genphotons+=gens[photons[i]];
+      /*
       if(genparton0.PID()==21){
 	if(genparton1.PID()==21) hardprefix="gg_";
 	else if(genparton1.PID()>0) hardprefix="gq_";
@@ -85,20 +90,25 @@ void AFBAnalyzer::executeEvent(){
 	else if(genparton1.PID()<0) hardprefix="qbarqbar_";
       }
       int nhardjet=(hardj0?1:0)+(hardj1?1:0)+(hardj2?1:0);
-
-      ///////////////////////FillGenHist////////////////
+      */
+     
       map<TString,double> map_weight;
-      map_weight[""]=weight_norm_1invpb*gen_weight*zptcor;
-      map_weight["_nozptcor"]=weight_norm_1invpb*gen_weight;
+      map_weight[""]=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full")*zptcor;
+      map_weight["_nozptcor"]=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full");
+
+      //////////////// Fill LHE,Gen hists //////////////////////
+      if(!IsSYS){
+	FillHists(channelname,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
+	FillHists(channelname,"gen_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
+	if(gen_l0.Pt()>l0ptcut&&gen_l1.Pt()>l1ptcut&&fabs(gen_l0.Eta())<letacut&&fabs(gen_l1.Eta())<letacut){
+	  FillHists(channelname,"genfid_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
+	}
+      }
       
-      TString channelname=Form("%s%d",slepton.Data(),DataYear);
       //if(HasFlag("HIST_gen")) FillHistGrid(channelname,"gen_","",&genl0,&genl1,map_weight);
       //if(HasFlag("HIST_genhard")) FillHistGrid(channelname,"genhard_","",&genhardl0,&genhardl1,map_weight);
       
-    }else{
-      tauprefix="tau_";
     }
-    */
   }
 
   //if(HasFlag("GEN")||HasFlag("GENHARD")) return;
@@ -109,8 +119,6 @@ void AFBAnalyzer::executeEvent(){
   if(HasFlag("bjet")) prefix="bjet/";
   else if(HasFlag("highmet")) prefix="highmet/";
 			
-  Event* ev=new Event;
-  *ev=GetEvent();
   if(DataYear==2016){
     vector<TString> muontrigger={
       "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v",
@@ -262,7 +270,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   int n_bjet=0;
   if(HasFlag("bjet")){
     for(const auto& jet:jets){
-      if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
+      //if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
     }
     if(!n_bjet) return;
     if(!IsSYS) FillCutflow(channelname+"/"+tauprefix+"cutflow","BJetCut",totalweight);    
@@ -388,7 +396,16 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
 	///////////////////////fill hists///////////////////////
 	if(HasFlag("TOY")) FillHistsToy(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
-	else FillHists(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
+	else{
+	  FillHists(channelname,prefix,suffix,(Particle*)leps[0],(Particle*)leps[1],map_weight);
+	  if(IsDYSample&&prefix==""){
+	    vector<Gen> gens=GetGens();
+	    Gen truth_l0=GetGenMatchedLepton(*leps[0],gens);
+	    Gen truth_l1=GetGenMatchedLepton(*leps[1],gens);
+	    if(!truth_l0.IsEmpty()&&!truth_l1.IsEmpty()) FillHists(channelname,"truth_",suffix,(Particle*)&truth_l0,(Particle*)&truth_l1,map_weight);
+	    //else cout<<"no matching"<<endl;
+	  }
+	}
       }
     }
   }
@@ -470,7 +487,7 @@ double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& j
   TLorentzVector system=dilepton+j0;
   double direction=dilepton.Pz()/fabs(dilepton.Pz());
   double systemmass=system.M();
-  double systempt=system.Pt();
+  //double systempt=system.Pt();
   double systempz=system.Pz();
   TLorentzVector p0(0,0,(sqrt(systemmass*systemmass+systempz*systempz)+systempz)/2.,(sqrt(systemmass*systemmass+systempz*systempz)+systempz)/2.);
   TLorentzVector p1(0,0,-(sqrt(systemmass*systemmass+systempz*systempz)-systempz)/2.,(sqrt(systemmass*systemmass+systempz*systempz)-systempz)/2.);
@@ -519,7 +536,7 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
   FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
   FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
 
-  if(!pre.Contains("gen")&&!pre.Contains("lhe")){
+  if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
     FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
     FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
   }
@@ -582,21 +599,6 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
     FillHist(pre+"jeta_asym"+suf,-1.*genhardj0.Eta(),-w/2,100,-5,5);
   }
 }
-void AFBAnalyzer::GetLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1){
-  if(!IsDYSample){
-    cout <<"[AFBAnalyzer::GetLHEParticles] this is for DY event"<<endl;
-    exit(EXIT_FAILURE);
-  }
-  for(int i=0;i<(int)lhes.size();i++){
-    if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
-    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
-  }
-  if(l0.ID()==0||l1.ID()==0){
-    cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
-    exit(EXIT_FAILURE);
-  }
-}
-  
 void AFBAnalyzer::SetupToy(int n_toy){
   DeleteToy();
   for(int i=0;i<n_toy;i++){

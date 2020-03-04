@@ -6,7 +6,6 @@ MAKEFLAGS = --no-print-directory -r -s
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -Iinclude -I./
 INCLUDES += -I/cvmfs/cms.cern.ch/slc6_amd64_gcc630/external/lhapdf/6.2.1-fmblme/include/
-INCLUDES += -I/cvmfs/cms.cern.ch/slc6_amd64_gcc700/external/boost/1.67.0/include/
 
 CXXFLAGS += -Wall -Wextra -Wno-overloaded-virtual -Wno-ignored-qualifiers -Wno-unused-parameter
 #-Wno-ignored-qualifiers -Wno-unused-parameter

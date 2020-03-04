@@ -8,11 +8,10 @@ void LJLAnalyzer::executeEvent(){
   tauprefix="";
 
   if(IsDYSample){
-    vector<Gen> gens=GetGens();
-    int parton0,parton1,hardl0,hardl1,l0,l1;
-    vector<int> photons;
-    GetGenIndex(gens,parton0,parton1,hardl0,hardl1,l0,l1,photons);
-    if(abs(gens[hardl0].PID())==15) tauprefix="tau_";
+    vector<LHE> lhes=GetLHEs();
+    LHE l0,l1;
+    GetDYLHEParticles(lhes,l0,l1);
+    if(abs(l0.ID())==15) tauprefix="tau_";
   }
   
   if(!PassMETFilter()) return;

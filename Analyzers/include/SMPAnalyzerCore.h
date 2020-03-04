@@ -97,7 +97,8 @@ public:
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
   void PrintGens(const vector<Gen>& gens);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
-  void GetGenIndex(const vector<Gen>& gens,int& parton0,int& parton1,int& hardl0,int& hardl1,int& l0,int& l1,vector<int>& photons);
+  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
+  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);

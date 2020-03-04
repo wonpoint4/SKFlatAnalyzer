@@ -204,7 +204,7 @@ double SMPAnalyzerCore::LeptonTrigger_SF(TString triggerSF_key,const vector<Lept
   if(triggerSF_key=="") return 1;
   if(triggerSF_key=="Default") return 1;
 
-  double triggerSF=1.,data_eff=1.,mc_eff=1.;
+  double data_eff=1.,mc_eff=1.;
   for(const auto& lep:leps){
     data_eff*=1-Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key,lep,sys);
     mc_eff*=1-Lepton_SF("Trigger_Eff_MC_"+triggerSF_key,lep,-sys);
@@ -349,6 +349,7 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
   for(int i=0;i<(int)gens.size();i++){
+    gens[i].Print();
     cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
   }
 }
@@ -367,41 +368,72 @@ double SMPAnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int 
   return hist->GetBinContent(hist->FindBin(valx,valy))+sys*hist->GetBinError(hist->FindBin(valx,valy));
 }
 
-void SMPAnalyzerCore::GetGenIndex(const vector<Gen>& gens,int& parton0,int& parton1,int& hardl0,int& hardl1,int& l0,int& l1,vector<int>& photons){
-  parton0=0;parton1=0;hardl0=0;hardl1=0;l0=0;l1=0;photons.clear();
+void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1){
   if(!IsDYSample){
-    cout <<"[SMPAnalyzerCore::GetGenIndex] this is for DY event"<<endl;
-    return;
+    cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
   }
-  for(int i=0;i<(int)gens.size();i++){
+  for(int i=0;i<(int)lhes.size();i++){
+    if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
+    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
+  }
+  if(l0.ID()==0||l1.ID()==0){
+    cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(l0.Pt()<l1.Pt()){
+    LHE temp=l0;
+    l0=l1;
+    l1=temp;
+  }
+}
+
+
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed){
+  if(!IsDYSample){
+    cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  vector<const Gen*> leptons;
+  vector<const Gen*> photons;
+  int ngen=gens.size();
+  for(int i=0;i<ngen;i++){
     if(!gens.at(i).isPrompt()) continue;
     int genpid=gens.at(i).PID();
     if(gens.at(i).isHardProcess()){
       if(abs(genpid)<7||genpid==21){
-	if(!parton0) parton0=i;
-	else if(!parton1) parton1=i;
-      }else if(abs(genpid)==11||abs(genpid)==13||abs(genpid)==15){
-	if(!hardl0) hardl0=i;
-	else if(!hardl1&&genpid==-gens[hardl0].PID()) hardl1=i;
+	if(parton0.IsEmpty()) parton0=gens[i];
+	else if(parton1.IsEmpty()) parton1=gens[i];
       }
     }
     if(gens.at(i).Status()==1){
-      if(abs(genpid)==11||abs(genpid)==13){
-	if(!l0) l0=i;
-	else if(!l1&&genpid==-gens[l0].PID()) l1=i;
-      }else if(gens.at(i).PID()==22){
-	photons.push_back(i);
+      if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
+      else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
+    }
+  }
+  int nlepton=leptons.size();
+  for(int i=0;i<nlepton;i++){
+    for(int j=i+1;j<nlepton;j++){
+      if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){
+	if(leptons[i]->Pt()>leptons[j]->Pt()){
+	  l0=*leptons[i];
+	  l1=*leptons[j];
+	}else{
+	  l0=*leptons[j];
+	  l1=*leptons[i];
+	}
       }
     }
   }
-  if(abs(gens[hardl0].PID())!=15){
-    if(!hardl0||!hardl1||!l0||!l1){
-      PrintGens(gens);
-      cout <<"[SMPAnalyzerCore::GetGenIndex] something is wrong"<<endl;
-      exit(EXIT_FAILURE);
+  if(dressed){
+    int nphoton=photons.size();
+    for(int i=0;i<nphoton;i++){
+      if(l0.DeltaR(*photons[i])>0.4&&l1.DeltaR(*photons[i])>0.4) continue;
+      if(l0.DeltaR(*photons[i])<l1.DeltaR(*photons[i])) l0+=*photons[i];
+      else l1+=*photons[i];
     }
-  }   
-  return;
+  }
 }
 
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
@@ -488,7 +520,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
   if(!IsData) gens=GetGens();
   for(auto electron:electrons){
     double rc=1.;
-    double rcerr=0.;
+    //double rcerr=0.;
     if(set>=0){
       if(IsDATA){
 	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.Eta(),electron.Phi(),set,member);
@@ -520,7 +552,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
       if(IsDATA){
 	double datainput=0;
 	double datapt=0;
-	double POGcor=electron.E()/electron.UncorrE();
+	//double POGcor=electron.E()/electron.UncorrE();
 	if(datamode==0){datainput=electron.UncorrE(); datapt=electron.UncorrPt();}
 	else if(datamode==1){datainput=electron.E(); datapt=electron.Pt();}
 	else if(datamode==2){datainput=electron.UncorrPt(); datapt=electron.UncorrPt();}

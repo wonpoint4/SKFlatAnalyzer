@@ -21,7 +21,6 @@ public:
   void FillHistsToy(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
   void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
-  void GetLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
   void SetupToy(int n_toy);
   void DeleteToy();
   void GetToyWeight();
