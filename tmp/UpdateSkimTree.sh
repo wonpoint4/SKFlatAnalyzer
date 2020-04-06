@@ -53,4 +53,4 @@ do
 #    echo TAG=$TAG
     echo "find $line -type f |sort -V > $TARGET"
     [ "$DRY" != true ] && find $line -type f |sort -V > $TARGET
-done< <(find $SKIMDIR -type d | sort -n )
+done< <(find $SKIMDIR -type d | sort -V )

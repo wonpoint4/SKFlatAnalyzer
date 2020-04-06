@@ -188,6 +188,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     map_electrons[""]=SMPGetElectrons("passMediumID",0.0,2.5);
     map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
+
     if(HasFlag("SYS")){
       map_electrons["_scale_up"]=ScaleElectrons(map_electrons[""],1);
       std::sort(map_electrons["_scale_up"].begin(),map_electrons["_scale_up"].end(),PtComparing);
@@ -210,11 +211,22 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
       map_leps["_default"]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
+      map_electrons["_noEcor"]=ElectronEnergyCorrection(map_electrons[""],-1,0);
+      map_leps["_noEcor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_noEcor"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      
+      /*
       for(int i=1;i<18;i++){
 	TString title=Form("_roccor_try%d",i);
 	map_electrons[title]=ElectronEnergyCorrection(map_electrons[""],-i,0);
 	map_leps[title]=make_tuple(MakeLeptonPointerVector(map_electrons[title]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
       }
+      */
+
+      map_electrons["_tight"]=SMPGetElectrons("passTightID",0.0,2.5);
+      map_leps["_tight"]=make_tuple(MakeLeptonPointerVector(map_electrons["_tight"]),"ID_SF_TightID_pt10_Q","Default",triggerSF_key0,triggerSF_key1);
+
+      map_electrons["_tight_roccor"]=ElectronEnergyCorrection(map_electrons["_tight"],0,0);
+      map_leps["_tight_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_tight_roccor"]),"ID_SF_TightID_pt10_Q","Default",triggerSF_key0,triggerSF_key1);
     }
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
@@ -526,19 +538,23 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
   FillHist(channelname+"/"+pre+"costhetaCS_den"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
   FillHist(channelname+"/"+pre+"costhetaCS_num"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 
-  FillHist(channelname+"/"+pre+"l0pt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
-  FillHist(channelname+"/"+pre+"l1pt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
-  FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
-  FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+  if(!HasFlag("DYSYS")){
+    FillHist(channelname+"/"+pre+"l0pt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+    FillHist(channelname+"/"+pre+"l1pt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+    FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+    FillHist(channelname+"/"+pre+"lpt"+suf,dimass,dirap,dipt,l1->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
+    
+    FillHist(channelname+"/"+pre+"l0eta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+    FillHist(channelname+"/"+pre+"l1eta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+    FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
+    FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
 
-  FillHist(channelname+"/"+pre+"l0eta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
-  FillHist(channelname+"/"+pre+"l1eta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
-  FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
-  FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
-
-  if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
-    FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-    FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
+    if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
+      FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
+      FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
+      FillHist(channelname+"/"+pre+"nPV"+suf,dimass,dirap,dipt,nPV,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
+      FillHist(channelname+"/"+pre+"nPileUp"+suf,dimass,dirap,dipt,nPileUp,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
+    }
   }
 }
 void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w){
