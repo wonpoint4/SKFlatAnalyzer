@@ -2,3 +2,6 @@
 	path = external/GEScaleSyst
 	url = git@github.com:jedori0228/GEScaleSyst.git
 	branch = ForSKFlatAnalyzer
+[submodule "external/TH4D"]
+	path = external/TH4D
+	url = https://github.com/sansan9401/TH4D
