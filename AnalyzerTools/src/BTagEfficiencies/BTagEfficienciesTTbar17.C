@@ -1,706 +1,703 @@
-/* These Efficiencies have been derived for TTLJ_powheg events and should 
+/* These Efficiencies have been derived for 2017 JetTagging_TTLL_powheg.root events and should 
 be used only for the same MC samples or for events with similar topology */  
 
 
 float BTagSFUtil::TagEfficiencyB_2017(float JetPt, float JetEta) {
 
 
-if (TaggerOP=="CSVv2_Loose") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.86183 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.86738;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.83541;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.81806;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.87383 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.87660;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.85353;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.84212;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88351 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.88668;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.86381;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.85072;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88677 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.88965;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.86689;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.85098;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88425 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.88463;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.85895;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.84030;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.87608 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.87440;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.84867;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.82376;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.68326 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.66623;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.63343;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.59709;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.71239 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.69737;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.66263;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63348;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72528 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71529;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.67098;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.64119;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72695 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71828;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.67259;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63525;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72129 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71476;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.66100;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.62264;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.69700 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.68720;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.62061;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.57762;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.45999 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.41640;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.40955;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37676;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.51009 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.47578;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.44107;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.41670;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.50865 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.48503;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43879;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.41821;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.50871 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.48657;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43412;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.40226;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.51139 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.49915;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.42178;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.38847;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.47269 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.45939;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.36784;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.33376;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Loose") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.86914 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.87686;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.85382;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.83420;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.89085 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.89627;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.87535;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.85429;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90224 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.90740;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.88629;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.86678;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90727 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.91225;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89327;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87449;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90979 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.91401;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89613;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87858;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90605 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.90812;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89105;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87057;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.70924 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71813;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.67234;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63319;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.75066 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.75571;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.71197;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.67192;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.77254 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.77679;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.73074;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.68698;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.78135 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.78415;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.73533;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.68346;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.78415 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.78379;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.73099;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.67508;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.76593 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.75739;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.69782;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63049;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.53696 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.53676;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.46895;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.42905;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.59332 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.59049;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.52333;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.48077;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.61888 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61658;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.54717;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.49991;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.62471 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.62059;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.54901;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.49538;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.62257 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61596;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.54117;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.48271;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.58590 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.57047;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.49185;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.42590;  
-  } 
- } 
- return 1.;
- 
- } 
+	 if (TaggerOP=="CSVv2_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.83171 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.83576;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.79668;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.77934;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.87148 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.87422;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.84933;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.83858;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88388 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.88619;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.86424;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.85102;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88775 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.89052;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.86815;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.85160;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88612 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.88669;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.86097;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.84144;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.87895 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.87670;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.85112;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.82657;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.63876 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61792;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.57643;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.53836;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.70910 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.69380;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.65622;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.62465;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72449 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71302;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.66783;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63435;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72711 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71749;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.67048;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63058;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.72216 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.71479;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.66111;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.61767;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.69840 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.68925;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.62157;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.57769;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41772 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.37257;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.35870;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.32352;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.50616 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.47165;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43395;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.40770;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.50623 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.48115;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43438;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.41065;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.50732 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.48478;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43061;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.39712;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.51038 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.49692;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.42013;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.38191;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.47171 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.45932;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.36676;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.33157;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.84366 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.85016;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.82409;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.80497;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.88838 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.89379;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.87035;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.84781;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90268 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.90705;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.88511;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.86281;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.90869 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.91339;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89391;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87237;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.91242 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.91639;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89796;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87712;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.91174 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.91336;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.89593;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.87537;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.66809 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.67499;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.62431;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.58066;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.74640 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.75139;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.70453;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.66210;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.77173 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.77504;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.72724;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.67878;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.78250 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.78440;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.73397;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.67849;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.78670 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.78599;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.73197;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.67100;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.77353 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.76540;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.70406;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.63515;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.48662 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.48405;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.41418;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37179;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.58765 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.58440;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.51423;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.46951;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.61631 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61186;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.54137;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.49049;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.62352 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61821;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.54560;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.48791;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.62296 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.61460;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.53862;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.47629;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.59132 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.57624;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.49524;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.42693;  
+			 } 
+		 } 
+	 return 1.; 
+} 
 float BTagSFUtil::TagEfficiencyC_2017(float JetPt, float JetEta) {
 
 
-if (TaggerOP=="CSVv2_Loose") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.43268 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.45897;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.44058;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43400;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41051 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.43372;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43222;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43938;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41277 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.43438;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43097;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43950;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41227 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.43598;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.43533;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.44202;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.40727 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.42990;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.42441;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43106;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.39958 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.42756;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.42579;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43935;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.13979 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.13061;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.14294;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13069;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.12666 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12040;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13687;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13352;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.12458 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12186;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13126;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13044;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.12158 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12173;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13223;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13027;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.12389 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12774;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13539;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13290;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.11731 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12460;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12799;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13311;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02310 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01822;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02735;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02570;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02381 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02049;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02545;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02649;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02050 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01927;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02293;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02418;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02055 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01996;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02195;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02137;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02392 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02475;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02336;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02309;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02321 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02489;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02052;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02332;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Loose") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41463 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.44872;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.45259;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43635;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.40910 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.44513;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.45274;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.43506;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41237 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.44783;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.45775;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.44171;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.41326 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.45127;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.46696;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.45368;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.42313 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.45963;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.47635;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.46303;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.43083 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.46293;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.47988;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.46804;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10297 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12258;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13184;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12306;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.09935 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.11917;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13017;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12504;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10361 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12345;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13365;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12799;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10949 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12861;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13880;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13239;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.11702 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.13562;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.14252;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.13483;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.12402 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.13674;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.14120;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12993;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01783 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02229;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02352;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02263;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01811 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02257;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02488;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02419;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02030 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02481;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02674;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02630;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02159 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02629;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02837;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02658;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02382 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02802;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02944;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02842;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02530 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02807;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02810;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02679;  
-  } 
- } 
- return 1.;
- 
- } 
+	 if (TaggerOP=="CSVv2_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.31723 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.34742;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.33357;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.33893;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.27863 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.31327;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.34142;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37417;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.26731 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.30164;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.33196;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.36891;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.27100 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.30781;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.34316;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37883;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.27830 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.31204;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.34175;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37916;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.32315 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.35996;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.37733;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.41261;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10732 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.10329;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10083;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.09397;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08898 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09152;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10576;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.11064;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08309 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.08794;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.09660;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.10557;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08384 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09219;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.09887;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.10872;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08672 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09422;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10256;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.11389;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10032 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.11205;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.11257;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12662;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02926 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02360;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02578;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02272;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02051 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01918;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02238;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02469;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01653 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01714;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01882;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02149;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01731 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01848;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01924;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02178;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01930 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02165;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02031;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02254;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02366 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02617;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02036;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02523;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.33049 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.36373;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.37278;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37025;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.30328 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.34303;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.37117;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37411;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.29777 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.33721;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.36751;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.37307;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.30628 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.34651;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.37795;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.38262;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.32504 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.36096;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.39025;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.39794;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.36829 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.39636;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.41975;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.41965;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.09688 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.10977;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10773;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.09776;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08358 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09934;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.11077;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.10526;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.08527 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.10079;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10931;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.10427;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.09155 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.10784;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.11414;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.10876;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10124 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.11465;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12003;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.11338;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.11469 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12296;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12393;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.11422;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02579 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02785;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02502;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02156;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01802 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02210;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02340;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02247;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01919 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02248;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02382;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02253;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02046 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02399;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02546;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02398;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02272 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02553;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02567;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02512;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02362 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.02619;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02506;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02308;  
+			 } 
+		 } 
+	 return 1.; 
+} 
 float BTagSFUtil::TagEfficiencyLight_2017(float JetPt, float JetEta) {
 
 
-  if (TaggerOP=="CSVv2_Loose") { 
-    if (JetPt > 20.00000 && JetPt <= 40.00000){  
-      if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.06246 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.08930;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12301;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15619;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.03838 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.05578;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.08927;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12962;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.03229 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.04729;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.08047;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12114;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.03177 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.04638;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.08232;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12559;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.02989 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.04364;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.07680;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12485;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.03822 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.05551;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.09945;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15429;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00624 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00760;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01342;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01798;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00416 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00525;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00875;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01454;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00348 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00437;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00707;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01222;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00345 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00437;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00706;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01223;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00319 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00419;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00689;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01251;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00433 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00595;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00906;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01730;  
-  } 
- } 
-if (TaggerOP=="CSVv2_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00075 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00075;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00122;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00206;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00044 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00050;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00071;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00160;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00044 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00047;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00058;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00108;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00050 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00057;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00062;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00111;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00059 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00073;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00062;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00116;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00085 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00107;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00094;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00183;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Loose") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.05482 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.08186;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12651;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15130;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04590 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.07012;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10830;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12851;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04018 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.06237;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.09850;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.11956;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04018 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.06146;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.09851;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12229;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04275 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.06500;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10209;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.12742;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.05520 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.07708;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12036;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15160;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Medium") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00463 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00733;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01220;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01438;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00405 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00647;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01076;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01318;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00359 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00561;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00942;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01216;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00378 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00568;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00926;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01187;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00406 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00599;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00953;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01217;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00541 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00683;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01111;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01425;  
-  } 
- } 
-if (TaggerOP=="DeepCSV_Tight") { 
-   if (JetPt > 20.00000 && JetPt <= 40.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00065 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00090;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00136;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00156;  
-  } 
-   else if (JetPt > 40.00000 && JetPt <= 60.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00044 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00065;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00106;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00119;  
-  } 
-   else if (JetPt > 60.00000 && JetPt <= 80.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00045 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00061;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00093;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00115;  
-  } 
-   else if (JetPt > 80.00000 && JetPt <= 100.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00050 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00068;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00097;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00113;  
-  } 
-   else if (JetPt > 100.00000 && JetPt <= 120.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00056 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00073;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00098;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00111;  
-  } 
-   else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
-     if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00079 ;  
-     else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00088;  
-     else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00113;  
-     else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00127;  
-  } 
- } 
- return 1.;
- 
- } 
+	 if (TaggerOP=="CSVv2_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.10332 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.12538;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13746;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15632;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.07312 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.08918;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.11685;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15874;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.05999 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.07360;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.11864;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15895;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.05317 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.06711;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12539;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.16556;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04608 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.05805;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.10537;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15632;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.04810 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.06451;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12250;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.17714;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01066 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01151;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01541;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01678;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00843 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00921;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01490;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01979;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00746 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00806;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01242;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01637;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00690 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00747;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01157;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01519;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00618 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00663;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01099;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01471;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00617 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00750;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01132;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01840;  
+			 } 
+		 } 
+	 if (TaggerOP=="CSVv2_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00131 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00123;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00151;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00230;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00089 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00086;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00123;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00245;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00078 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00083;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00105;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00150;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00080 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00090;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00101;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00128;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00090 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00100;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00103;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00131;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00106 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00123;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00116;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00195;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Loose") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.11391 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.13949;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.16831;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.18273;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.09194 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.11569;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.15109;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.16804;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.07613 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09860;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13497;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.15401;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.06932 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09236;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12948;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.14946;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.06911 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09073;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.12805;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.14927;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.07438 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.09421;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.13860;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.16752;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Medium") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01447 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01891;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.02060;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01850;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.01039 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01424;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01932;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.02024;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00848 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01169;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01616;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01703;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00800 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01112;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01509;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01591;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00811 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01071;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01461;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01586;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00834 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.01022;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.01441;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.01652;  
+			 } 
+		 } 
+	 if (TaggerOP=="DeepCSV_Tight") { 
+		 if (JetPt > 20.00000 && JetPt <= 40.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00158 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00193;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00200;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00173;  
+			 } 
+		 else if (JetPt > 40.00000 && JetPt <= 60.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00121 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00160;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00200;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00188;  
+			 } 
+		 else if (JetPt > 60.00000 && JetPt <= 80.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00107 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00140;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00174;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00161;  
+			 } 
+		 else if (JetPt > 80.00000 && JetPt <= 100.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00101 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00130;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00156;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00147;  
+			 } 
+		 else if (JetPt > 100.00000 && JetPt <= 120.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00098 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00122;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00144;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00145;  
+			 } 
+		 else if (JetPt > 120.00000 && JetPt <= 3000.00000){  
+			 if      (fabs(JetEta) > 0.00000   && fabs(JetEta) <= 0.60000) return 0.00104 ;  
+			 else if (fabs(JetEta) > 0.60000 && fabs(JetEta) <= 1.20000) return 0.00118;  
+			 else if (fabs(JetEta) > 1.20000 && fabs(JetEta) <= 1.80000) return 0.00136;  
+			 else if (fabs(JetEta) > 1.80000 && fabs(JetEta) <= 2.40000) return 0.00139;  
+			 } 
+		 } 
+	 return 1.; 
+} 

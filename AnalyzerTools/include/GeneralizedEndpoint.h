@@ -1,3 +1,13 @@
+#ifndef ScaledPts_h
+#define ScaledPts_h
+
+struct ScaledPts {
+  double ScaledPt, ScaeldPt_Up, ScaeldPt_Down;
+};
+
+#endif
+
+
 #ifndef GeneralizedEndpoint_h
 #define GeneralizedEndpoint_h
 
@@ -8,10 +18,6 @@
 //==== https://github.com/cms-analysis/SUSYBSMAnalysis-Zprime2muAnalysis/blob/mini-AOD/src/GeneralizedEndpoint.cc
 
 using namespace std;
-
-struct ScaledPts {
-  double ScaledPt, ScaeldPt_Up, ScaeldPt_Down;
-};
 
 class GeneralizedEndpoint{
 

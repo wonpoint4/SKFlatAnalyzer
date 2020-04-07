@@ -39,8 +39,12 @@ public:
   int DataYear;
   void SetDataYear(int i);
 
+  bool IsFastSim;
+  void SetIsFastSim(bool b);
+
   bool IgnoreNoHist;
 
+  double MuonReco_SF(TString key, double eta, double p, int sys=0);
   double MuonID_SF(TString ID, double eta, double pt, int sys=0);
   double MuonISO_SF(TString ID, double eta, double pt, int sys=0);
   double MuonTrigger_SF(TString ID, double eta, double pt, int sys=0);
@@ -69,7 +73,7 @@ public:
 
   TH2D *hist_DYPtReweight_2D;
   GenFinderForDY *genFinderDY;
-  double GetOfficialDYReweight(const vector<Gen>& gens);
+  double GetOfficialDYReweight(const vector<Gen>& gens, int sys=0);
 };
 
 #endif

@@ -15,5 +15,6 @@
 #pragma link C++ class testGen+;
 #pragma link C++ class testMuon+;
 #pragma link C++ class ControlplotISR+;
+#pragma link C++ class JetTagging+;
 
 #endif

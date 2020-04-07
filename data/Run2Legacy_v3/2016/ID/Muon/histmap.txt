@@ -26,16 +26,16 @@ Trigger         Eff_MC          Mu17_MediumID_RelTrkIso010_2016GH_plus          
 Trigger         Eff_MC          Mu17_MediumID_RelTrkIso010_2016GH_minus                 2016GH_Mu17_minus.root            muonEffi_mc_eta_pt
 Trigger         Eff_MC          Mu8_MediumID_RelTrkIso010_2016GH_plus                   2016GH_Mu8_plus.root              muonEffi_mc_eta_pt
 Trigger         Eff_MC          Mu8_MediumID_RelTrkIso010_2016GH_minus                  2016GH_Mu8_minus.root             muonEffi_mc_eta_pt
-#
-#ID	SF	NUM_TightID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_TightID_DEN_genTracks_eta_pt
-#ISO	SF	NUM_TightRelIso_DEN_TightIDandIPCut	RunAveraged_SF_ISO.root	NUM_TightRelIso_DEN_TightIDandIPCut_eta_pt
-#ID	SF	NUM_HighPtID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_HighPtID_DEN_genTracks_eta_pair_newTuneP_probe_pt
-#ISO	SF	NUM_LooseRelTkIso_DEN_HighPtIDandIPCut	RunAveraged_SF_ISO.root	NUM_LooseRelTkIso_DEN_HighPtIDandIPCut_eta_pair_newTuneP_probe_pt
-#ID	SF	NUM_MediumID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_MediumID_DEN_genTracks_eta_pt
-#Trigger	Eff_DATA	IsoMu24_POGTight	RunAveraged_Eff_Trigger.root	IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA
-#Trigger	Eff_MC	IsoMu24_POGTight	RunAveraged_Eff_Trigger.root	IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesMC/pt_abseta_MC
-#Trigger	Eff_DATA	Mu50_POGHighPtLooseTrkIso	RunAveraged_Eff_Trigger.root	Mu50_OR_TkMu50_PtEtaBins/efficienciesDATA/pt_abseta_DATA
-#Trigger	Eff_MC	Mu50_POGHighPtLooseTrkIso	RunAveraged_Eff_Trigger.root	Mu50_OR_TkMu50_PtEtaBins/efficienciesMC/pt_abseta_MC
+RECO	SF	HighPtMuonRecoSF	HighPtMuonRecoSF_Run2016.root	HighPtMuonRecoSF
+ID	SF	NUM_TightID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_TightID_DEN_genTracks_eta_pt
+ISO	SF	NUM_TightRelIso_DEN_TightIDandIPCut	RunAveraged_SF_ISO.root	NUM_TightRelIso_DEN_TightIDandIPCut_eta_pt
+ID	SF	NUM_HighPtID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_HighPtID_DEN_genTracks_eta_pair_newTuneP_probe_pt
+ISO	SF	NUM_LooseRelTkIso_DEN_HighPtIDandIPCut	RunAveraged_SF_ISO.root	NUM_LooseRelTkIso_DEN_HighPtIDandIPCut_eta_pair_newTuneP_probe_pt
+ID	SF	NUM_MediumID_DEN_genTracks	RunAveraged_SF_ID.root	NUM_MediumID_DEN_genTracks_eta_pt
+Trigger Eff_DATA  IsoMu24_POGTight  RunAveraged_Eff_Trigger.root  IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesDATA/pt_abseta_DATA
+Trigger Eff_MC  IsoMu24_POGTight  RunAveraged_Eff_Trigger.root  IsoMu24_OR_IsoTkMu24_PtEtaBins/efficienciesMC/pt_abseta_MC
+Trigger	Eff_DATA	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2016.root	Eff_Data
+Trigger	Eff_MC	Mu50_POGHighPtLooseTrkIso	HighPtMuonTriggerSF_Run2016.root	Eff_MC
 #
 #ID              SF              NUM_LooseID_DEN_genTracks_2016BF_JPsi                   RunBCDEF_SF_ID_JPsi.root          NUM_LooseID_DEN_genTracks_pt_abseta
 #ID              SF              NUM_LooseID_DEN_genTracks_2016BF                        RunBCDEF_SF_ID_syst.root          NUM_LooseID_DEN_genTracks_eta_pt

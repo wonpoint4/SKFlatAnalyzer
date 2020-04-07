@@ -23,7 +23,7 @@ public:
   double Electron_MinPt;
 
   TString Muon_Tight_ID, Muon_Loose_ID, Muon_Veto_ID;
-  TString Muon_ID_SF_Key, Muon_ISO_SF_Key, Muon_Trigger_SF_Key;
+  TString Muon_RECO_SF_Key, Muon_ID_SF_Key, Muon_ISO_SF_Key, Muon_Trigger_SF_Key;
   TString Muon_FR_ID, Muon_FR_Key;
   TString Muon_CF_ID, Muon_CF_Key;
   double Muon_Tight_RelIso, Muon_Loose_RelIso, Muon_Veto_RelIso;

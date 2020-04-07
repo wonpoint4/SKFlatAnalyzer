@@ -54,7 +54,8 @@ void ExampleRun::initializeAnalyzer(){
   v_wps.push_back(Jet::Medium);
 
   //=== list of taggers, WP, setup systematics, use period SFs
-  SetupBTagger(vtaggers,v_wps, true, true);
+  // 4th argument is period dependancy, only set true IF you need this
+  SetupBTagger(vtaggers,v_wps, true, false);
 
   //================================
   //==== Example 2
@@ -335,6 +336,8 @@ void ExampleRun::executeEventFromParameter(AnalyzerParameter param){
     if(IsBTagged(jets.at(ij), Jet::DeepCSV, Jet::Medium,true,0)) n_bjet_deepcsv_m++; // method for getting btag with SF applied to MC
     if(IsBTagged(jets.at(ij), Jet::DeepCSV, Jet::Medium,false,0)) n_bjet_deepcsv_m_noSF++; // method for getting btag with no SF applied to MC
   }
+
+  cout << "n_bjet_deepcsv_m = " << n_bjet_deepcsv_m << " n_bjet_deepcsv_m_noSF = " << n_bjet_deepcsv_m_noSF << endl;
   
   //=========================
   //==== Event selections..

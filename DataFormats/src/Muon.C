@@ -14,6 +14,9 @@ Muon::Muon() : Lepton() {
   j_MomentumScaleUp = -999.;
   j_MomentumScaleDown = -999.;
   j_TunePPtError = -999.;
+  j_MVA = -999.;
+  j_lowptMVA = -999.;
+  j_softMVA = -999.;
   j_trackerLayers = 0;
 }
 
@@ -87,6 +90,12 @@ void Muon::SetTuneP4(double pt, double pt_err, double eta, double phi, double q)
   j_TunePPtError = pt_err;
 }
 
+void Muon::SetMVA(double MVA){
+  j_MVA = MVA;
+  //j_lowptMVA = lowptMVA;
+  //j_softMVA = softMVA;
+}
+
 bool Muon::PassID(TString ID) const {
   //==== POG
   if(ID=="POGTight") return isPOGTight();
@@ -98,6 +107,9 @@ bool Muon::PassID(TString ID) const {
   //==== Customized
   if(ID=="TEST") return Pass_TESTID();
   if(ID=="POGMediumWithLooseTrkIso") return Pass_POGMediumWithLooseTrkIso();
+
+  //==== No cut
+  if(ID=="NOCUT") return true;
 
   cout << "[Electron::PassID] No id : " << ID << endl;
   exit(EXIT_FAILURE);
