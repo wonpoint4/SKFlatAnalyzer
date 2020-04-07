@@ -9,12 +9,30 @@ void AFBAnalyzer::initializeAnalyzer(){
   }
   SetupToy(100);
   IsSYS=HasFlag("SYS")||HasFlag("DYSYS");
+  if(fChain->GetListOfFiles()->GetEntries()){
+    TString filename=fChain->GetListOfFiles()->At(0)->GetTitle();
+    if(filename.Contains("SkimTree_")) IsSkimmed=true;
+    else IsSkimmed=false;
+  }else{
+    cout<<"[AFBAnalyzer::initializeAnalyzer] no input file"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(!IsSkimmed){
+    fChain->SetBranchStatus("pfMET_*",false);
+    fChain->SetBranchStatus("HLT_TriggerName",false);
+    fChain->SetBranchStatus("jet_*",false);
+    fChain->SetBranchStatus("fatjet_*",false);
+    fChain->SetBranchStatus("electron_*",false);
+    fChain->SetBranchStatus("muon_*",false);
+    fChain->SetBranchStatus("photon_*",false);
+  }
 }
 void AFBAnalyzer::executeEvent(){
   GetToyWeight();
 
   Event* ev=new Event;
-  *ev=GetEvent();
+  if(!IsData) ev->SetMCweight(gen_weight);
+  ev->SetDataYear(DataYear);
 
   tauprefix="";
   hardprefix="";
@@ -97,22 +115,20 @@ void AFBAnalyzer::executeEvent(){
       map_weight["_nozptcor"]=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full");
 
       //////////////// Fill LHE,Gen hists //////////////////////
-      if(!IsSYS){
+      if(!IsSYS&&!IsSkimmed){
 	FillHists(channelname,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
 	FillHists(channelname,"gen_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	if(gen_l0.Pt()>l0ptcut&&gen_l1.Pt()>l1ptcut&&fabs(gen_l0.Eta())<letacut&&fabs(gen_l1.Eta())<letacut){
 	  FillHists(channelname,"genfid_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	}
       }
-      
-      //if(HasFlag("HIST_gen")) FillHistGrid(channelname,"gen_","",&genl0,&genl1,map_weight);
-      //if(HasFlag("HIST_genhard")) FillHistGrid(channelname,"genhard_","",&genhardl0,&genhardl1,map_weight);
-      
     }
   }
 
-  //if(HasFlag("GEN")||HasFlag("GENHARD")) return;
+  if(!IsSkimmed) return;
 
+
+  *ev=GetEvent();
   if(!PassMETFilter()) return;
 
   TString prefix="";

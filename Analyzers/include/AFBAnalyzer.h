@@ -36,6 +36,7 @@ public:
   vector<TRandom3*> toy_random;
   vector<double> toy_weight;
   bool IsSYS=false;
+  bool IsSkimmed=false;
   
   static const int afb_mbinnum=40;
   const double afb_mbin[afb_mbinnum+1]={60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
