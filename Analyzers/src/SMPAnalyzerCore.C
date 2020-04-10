@@ -177,7 +177,7 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
     this_eta=lep->Eta();
     this_hist=mcCorr->map_hist_Muon[histkey];
   }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
-    this_pt=lep->Pt();
+    this_pt=((Electron*)lep)->UncorrPt();
     this_eta=((Electron*)lep)->scEta();
     this_hist=mcCorr->map_hist_Electron[histkey];
   }else{
@@ -436,6 +436,23 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
 }
 
+Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
+  //0: default
+  //1: dressed 0.1
+  Gen gen_lepton=GetGenMatchedLepton(lep,gens);
+  if(gen_lepton.IsEmpty()) return gen_lepton;
+  if(mode==1){ // dressed 0.1 cone
+    for(const auto& gen: gens){
+      if(gen.Status()!=1) continue;
+      if(gen.PID()!=22) continue;
+      if(gen.DeltaR(gen_lepton)>0.1) continue;
+      gen_lepton+=gen;
+    }
+  }
+    
+  return gen_lepton;
+}
+
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
   if(id=="passMediumID_Selective"){
@@ -519,61 +536,36 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
   vector<Gen> gens;
   if(!IsData) gens=GetGens();
   for(auto electron:electrons){
-    double rc=1.;
-    //double rcerr=0.;
     if(set>=0){
-      if(IsDATA){
-	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.Eta(),electron.Phi(),set,member);
-	//rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),electron.scEta(),electron.Phi());
-	//cout<<"---------------------"<<endl;
-	//cout<<"before:";electron.Print();
-	electron.SetPtEtaPhiM(electron.Pt()*rc,electron.Eta(),electron.Phi(),electron.M());
-	//cout<<"after:";electron.Print();
-      }else{
-	Gen gen=GetGenMatchedLepton(electron,gens);
-	if(gen.IsEmpty()){
-	  //cout<<"cannot find matched lepton"<<endl;
-	  rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),set,member);
-	  //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);	  
-	}else{
-	  rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),gen.Pt(),set,member);
-	  //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
-	}
-	//cout<<"---------------------"<<endl;
-	//cout<<"before:";electron.Print();
-	electron.SetPtEtaPhiM(electron.UncorrPt()*rc,electron.Eta(),electron.Phi(),electron.M());
-	//cout<<"after:";electron.Print();
-      }      
+      double rc=1.;
+      //double rcerr=0.;
+      double el_eta=electron.scEta();
+      double el_phi=electron.Phi();
+      // FIXME: rocelecor don't have the corrections for 2.4<|eta|<2.5
+      if(el_eta>=2.4) el_eta=2.39;
+      if(el_eta<=-2.4) el_eta=-2.39;
+      if(fabs(el_eta)<2.4){
+	if(IsDATA){
+	  rc=rocele->kScaleDT(electron.Charge(),electron.E(),el_eta,el_phi,set,member);
+	  //rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),el_eta,el_phi);
+	  electron*=rc;
+	}else{	
+	  Gen gen=SMPGetGenMatchedLepton(electron,gens,1);
+	  if(gen.IsEmpty()){
+	    rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,set,member);
+	    //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,set,member);	  
+	  }else{
+	    rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,gen.Pt(),set,member);
+	    //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,gen.Pt(),set,member);
+	  }
+	  electron*=rc*electron.UncorrE()/electron.E();
+	}      
+      }
     }else if(set==-1){ //no energe cor
-      electron.SetPtEtaPhiM(electron.UncorrPt(),electron.Eta(),electron.Phi(),electron.M());
-    }else if(set<-1){ //0:uncorE 1:E 2:uncorPt 3:Pt
-      int mcmode=(abs(set)-2)%4;
-      int datamode=(abs(set)-2)/4;
-      if(IsDATA){
-	double datainput=0;
-	double datapt=0;
-	//double POGcor=electron.E()/electron.UncorrE();
-	if(datamode==0){datainput=electron.UncorrE(); datapt=electron.UncorrPt();}
-	else if(datamode==1){datainput=electron.E(); datapt=electron.Pt();}
-	else if(datamode==2){datainput=electron.UncorrPt(); datapt=electron.UncorrPt();}
-	else if(datamode==3){datainput=electron.Pt(); datapt=electron.Pt();}
-	rc=rocele->kScaleDT(electron.Charge(),datainput,electron.Eta(),electron.Phi(),0,member);
-	electron.SetPtEtaPhiM(datapt*rc,electron.Eta(),electron.Phi(),electron.M());
-      }else{
-	double mcinput=0;
-	double mcpt=0;
-	if(mcmode==0){mcinput=electron.UncorrE(); mcpt=electron.UncorrPt();}
-	else if(mcmode==1){mcinput=electron.E(); mcpt=electron.Pt();}
-	else if(mcmode==2){mcinput=electron.UncorrPt(); mcpt=electron.UncorrPt();}
-	else if(mcmode==3){mcinput=electron.Pt(); mcpt=electron.Pt();}
-	Gen gen=GetGenMatchedLepton(electron,gens);
-	if(gen.IsEmpty()) rc=rocele->kScaleMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),0,member);
-	else {
-	  if(mcmode<2) rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.E(),0,member);
-	  else rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.Pt(),0,member);
-	} 
-	electron.SetPtEtaPhiM(mcpt*rc,electron.Eta(),electron.Phi(),electron.M());
-      }      
+      electron*=electron.UncorrE()/electron.E();
+    }else{
+      cout<<"[SMPAnalyzerCore::ElectronEnergyCorrection] wrong set "<<set<<endl;
+      exit(EXIT_FAILURE);
     }
     out.push_back(electron);
   }
