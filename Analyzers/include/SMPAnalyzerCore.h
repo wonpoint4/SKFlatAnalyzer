@@ -99,6 +99,7 @@ public:
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
   void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed);
+  Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);
