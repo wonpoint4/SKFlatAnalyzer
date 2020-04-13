@@ -30,3 +30,18 @@ Trigger Eff_DATA     Mu8Leg2_POGTight_trkIso_QPlus    Mu_TrigEff_runBCDEF_TailMu
 Trigger Eff_MC     Mu8Leg2_POGTight_trkIso_QPlus    Mu_TrigEff_runBCDEF_TailMu8_QPlus_wonjun_v1.root        muonEffi_mc_eta_pt    TH2D
 Trigger Eff_DATA     Mu8Leg2_POGTight_trkIso_QMinus   Mu_TrigEff_runBCDEF_TailMu8_QMinus_wonjun_v1.root       muonEffi_data_eta_pt    TH2D
 Trigger Eff_MC     Mu8Leg2_POGTight_trkIso_QMinus   Mu_TrigEff_runBCDEF_TailMu8_QMinus_wonjun_v1.root       muonEffi_mc_eta_pt    TH2D
+### AFB MediumID trkIsoLoose (won-20200413)
+IDISO   SF        MediumID_trkIsoLoose_QPlus              2017_IDISO_plus.root       SF_eta_pt
+IDISO   SF        MediumID_trkIsoLoose_QMinus             2017_IDISO_minus.root      SF_eta_pt
+Trigger Eff_MC    Mu17Leg1_MediumID_trkIsoLoose_QPlus     2017_Mu17_plus.root        muonEffi_mc_eta_pt
+Trigger Eff_MC    Mu17Leg1_MediumID_trkIsoLoose_QMinus    2017_Mu17_minus.root       muonEffi_mc_eta_pt
+Trigger Eff_MC    Mu8Leg2_MediumID_trkIsoLoose_QPlus      2017_Mu8_plus.root         muonEffi_mc_eta_pt
+Trigger Eff_MC    Mu8Leg2_MediumID_trkIsoLoose_QMinus     2017_Mu8_minus.root        muonEffi_mc_eta_pt
+Trigger Eff_MC    IsoMu24_MediumID_trkIsoLoose_QPlus      2017_IsoMu24_plus.root     muonEffi_mc_eta_pt
+Trigger Eff_MC    IsoMu24_MediumID_trkIsoLoose_QMinus     2017_IsoMu24_minus.root    muonEffi_mc_eta_pt
+Trigger Eff_DATA  Mu17Leg1_MediumID_trkIsoLoose_QPlus     2017_Mu17_plus.root        muonEffi_data_eta_pt
+Trigger Eff_DATA  Mu17Leg1_MediumID_trkIsoLoose_QMinus    2017_Mu17_minus.root       muonEffi_data_eta_pt
+Trigger Eff_DATA  Mu8Leg2_MediumID_trkIsoLoose_QPlus      2017_Mu8_plus.root         muonEffi_data_eta_pt
+Trigger Eff_DATA  Mu8Leg2_MediumID_trkIsoLoose_QMinus     2017_Mu8_minus.root        muonEffi_data_eta_pt
+Trigger Eff_DATA  IsoMu24_MediumID_trkIsoLoose_QPlus      2017_IsoMu24_plus.root     muonEffi_data_eta_pt
+Trigger Eff_DATA  IsoMu24_MediumID_trkIsoLoose_QMinus     2017_IsoMu24_minus.root    muonEffi_data_eta_pt
