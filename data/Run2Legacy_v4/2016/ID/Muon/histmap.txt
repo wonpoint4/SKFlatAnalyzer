@@ -40,9 +40,17 @@ Trigger Eff_DATA Mu8Leg2_POGTight_GH    MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_R
 Trigger Eff_MC Mu8Leg2_POGTight_GH      MuonTriggerEfficiency_ISR_Mu8_OR_TkMu8_RunGH.root       TriggerEff_ISR_GH_MC
 ### AFB MediumID trkIsoLoose (won-20200413)
 IDISO   SF 	  MediumID_trkIsoLoose_QPlus_BCDEF		2016BF_IDISO_plus.root	     SF_eta_pt
+IDISO	Eff_MC	  MediumID_trkIsoLoose_QPlus_BCDEF		2016BF_IDISO_plus.root	     muonEffi_mc_eta_pt
+IDISO	Eff_DATA  MediumID_trkIsoLoose_QPlus_BCDEF     		2016BF_IDISO_plus.root       muonEffi_data_eta_pt
 IDISO   SF        MediumID_trkIsoLoose_QMinus_BCDEF		2016BF_IDISO_minus.root      SF_eta_pt
+IDISO	Eff_MC	  MediumID_trkIsoLoose_QMinus_BCDEF		2016BF_IDISO_minus.root	     muonEffi_mc_eta_pt
+IDISO	Eff_DATA  MediumID_trkIsoLoose_QMinus_BCDEF     	2016BF_IDISO_minus.root	     muonEffi_data_eta_pt
 IDISO   SF        MediumID_trkIsoLoose_QPlus_GH       		2016GH_IDISO_plus.root       SF_eta_pt
+IDISO	Eff_MC	  MediumID_trkIsoLoose_QPlus_GH			2016GH_IDISO_plus.root	     muonEffi_mc_eta_pt
+IDISO	Eff_DATA  MediumID_trkIsoLoose_QPlus_GH     		2016GH_IDISO_plus.root       muonEffi_data_eta_pt
 IDISO   SF        MediumID_trkIsoLoose_QMinus_GH   		2016GH_IDISO_minus.root      SF_eta_pt
+IDISO	Eff_MC	  MediumID_trkIsoLoose_QMinus_GH		2016GH_IDISO_minus.root	     muonEffi_mc_eta_pt
+IDISO	Eff_DATA  MediumID_trkIsoLoose_QMinus_GH     		2016GH_IDISO_minus.root      muonEffi_data_eta_pt
 Trigger Eff_MC	  Mu17Leg1_MediumID_trkIsoLoose_QPlus_BCDEF     2016BF_Mu17_plus.root        muonEffi_mc_eta_pt
 Trigger Eff_MC    Mu17Leg1_MediumID_trkIsoLoose_QMinus_BCDEF    2016BF_Mu17_minus.root       muonEffi_mc_eta_pt
 Trigger Eff_MC    Mu17Leg1_MediumID_trkIsoLoose_QPlus_GH        2016GH_Mu17_plus.root        muonEffi_mc_eta_pt

@@ -176,6 +176,29 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
     this_pt=((Muon*)lep)->MiniAODPt();
     this_eta=lep->Eta();
     this_hist=mcCorr->map_hist_Muon[histkey];
+    if(!this_hist && DataYear==2016 && !histkey.Contains("_BCDEF$") && !histkey.Contains("_GH$")){
+      double lumi_periodB = 5750.490644035;
+      double lumi_periodC = 2572.903488748;
+      double lumi_periodD = 4242.291556970;
+      double lumi_periodE = 4025.228136967;
+      double lumi_periodF = 3104.509131800;
+      double lumi_periodG = 7575.824256098;
+      double lumi_periodH = 8650.628380028;
+      double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
+      
+      double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
+      double WeightGtoH = (lumi_periodG+lumi_periodH)/total_lumi;
+
+      if(histkey.Contains("_SF_")){
+	TString histkey_data=histkey;
+	histkey_data.ReplaceAll("_SF_","_Eff_DATA_");
+	TString histkey_mc=histkey;
+	histkey_mc.ReplaceAll("_SF_","_Eff_MC_");
+	return (WeightBtoF*Lepton_SF(histkey_data+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey_data+"_GH",lep,sys))/(WeightBtoF*Lepton_SF(histkey_mc+"_BCDEF",lep,-sys)+WeightGtoH*Lepton_SF(histkey_mc+"_GH",lep,-sys));
+      }else if(histkey.Contains("_Eff_")){
+	return WeightBtoF*Lepton_SF(histkey+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey+"_GH",lep,sys);
+      }
+    }
   }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
     this_pt=((Electron*)lep)->UncorrPt();
     this_eta=((Electron*)lep)->scEta();
@@ -221,32 +244,25 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
     return 1;
   }
   TString histkeys[2]={triggerSF_key0,triggerSF_key1};
-  if(!(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON)){
-    double eff[2][2][2]={}; //[data/mc][l0/l1][leg1/leg2]
-    TString sdata[2]={"DATA","MC"};
-    for(int id=0;id<2;id++){
-      for(int ilep=0;ilep<2;ilep++){
-	for(int ileg=0;ileg<2;ileg++){
-	  TString scharge="";
-	  if(histkeys[ileg].Contains(TRegexp("_Q$"))){
-	    if(leps.at(ilep)->Charge()>0) scharge="Plus";
-	    else scharge="Minus";
-	  }
-	  eff[id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg]+scharge,leps.at(ilep),(id?-1.:1.)*sys);
-	}
-      }
-    }
-    double eff_data=eff[0][0][1]*eff[0][1][1]-(eff[0][0][1]-eff[0][0][0])*(eff[0][1][1]-eff[0][1][0]);
-    double eff_mc=eff[1][0][1]*eff[1][1][1]-(eff[1][0][1]-eff[1][0][0])*(eff[1][1][1]-eff[1][1][0]);
-    return eff_data/eff_mc;
-  }else{
-    double lumi_periodB = 5.929001722;
-    double lumi_periodC = 2.645968083;
-    double lumi_periodD = 4.35344881;
-    double lumi_periodE = 4.049732039;
-    double lumi_periodF = 3.157020934;
-    double lumi_periodG = 7.549615806;
-    double lumi_periodH = 8.545039549 + 0.216782873;
+  //  if(!(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON)){
+  double eff[2][2][2]={}; //[data/mc][l0/l1][leg1/leg2]
+  TString sdata[2]={"DATA","MC"};
+  for(int id=0;id<2;id++)
+    for(int ilep=0;ilep<2;ilep++)
+      for(int ileg=0;ileg<2;ileg++)
+	eff[id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg],leps.at(ilep),(id?-1.:1.)*sys);
+  double eff_data=eff[0][0][1]*eff[0][1][1]-(eff[0][0][1]-eff[0][0][0])*(eff[0][1][1]-eff[0][1][0]);
+  double eff_mc=eff[1][0][1]*eff[1][1][1]-(eff[1][0][1]-eff[1][0][0])*(eff[1][1][1]-eff[1][1][0]);
+  return eff_data/eff_mc;
+  //}else{
+  if(0){
+    double lumi_periodB = 5750.490644035;
+    double lumi_periodC = 2572.903488748;
+    double lumi_periodD = 4242.291556970;
+    double lumi_periodE = 4025.228136967;
+    double lumi_periodF = 3104.509131800;
+    double lumi_periodG = 7575.824256098;
+    double lumi_periodH = 8650.628380028;
     double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
     
     double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
@@ -483,6 +499,11 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
   vector<Muon> out;
   if(id=="POGTightWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
     }

@@ -9,12 +9,12 @@ Trigger	Eff_DATA	WREGammaTrigger_HEEP_EndCap	WREGammaTriggerEff.root	DataEff_TH2
 Trigger	Eff_MC	WREGammaTrigger_HEEP_Barrel	WREGammaTriggerEff.root	MCEff_TH2F_Barrel	TH2F
 Trigger	Eff_MC	WREGammaTrigger_HEEP_EndCap	WREGammaTriggerEff.root	MCEff_TH2F_EndCap	TH2F
 ### AFB TightID (hsseo)
-ID      SF              TightID_pt10_QPlus      egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_SF2D             TH2F
-ID      Eff_DATA        TightID_pt10_QPlus      egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_EffData2D        TH2F
-ID      Eff_MC          TightID_pt10_QPlus      egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_EffMC2D          TH2F
-ID      SF              TightID_pt10_QMinus     egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_SF2D             TH2F
-ID      Eff_DATA        TightID_pt10_QMinus     egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_EffData2D        TH2F
-ID      Eff_MC          TightID_pt10_QMinus     egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_EffMC2D          TH2F
+ID      SF              TightID_QPlus		egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_SF2D             TH2F
+ID      Eff_DATA        TightID_QPlus      	egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_EffData2D        TH2F
+ID      Eff_MC          TightID_QPlus      	egammaEffi.txt_EGM2D_Tight94XV2_QPlus_hsseo_v1.root     EGamma_EffMC2D          TH2F
+ID      SF              TightID_QMinus     	egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_SF2D             TH2F
+ID      Eff_DATA        TightID_QMinus     	egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_EffData2D        TH2F
+ID      Eff_MC          TightID_QMinus     	egammaEffi.txt_EGM2D_Tight94XV2_QMinus_hsseo_v1.root    EGamma_EffMC2D          TH2F
 Trigger SF              Ele32_TightID_QPlus     egammaEffi.txt_EGM2D_Ele32_Tight94XV2_QPlus_hsseo_v1.root       EGamma_SF2D             TH2F
 Trigger Eff_DATA        Ele32_TightID_QPlus     egammaEffi.txt_EGM2D_Ele32_Tight94XV2_QPlus_hsseo_v1.root       EGamma_EffData2D        TH2F
 Trigger Eff_MC          Ele32_TightID_QPlus     egammaEffi.txt_EGM2D_Ele32_Tight94XV2_QPlus_hsseo_v1.root       EGamma_EffMC2D          TH2F
@@ -22,12 +22,12 @@ Trigger SF              Ele32_TightID_QMinus    egammaEffi.txt_EGM2D_Ele32_Tight
 Trigger Eff_DATA        Ele32_TightID_QMinus    egammaEffi.txt_EGM2D_Ele32_Tight94XV2_QMinus_hsseo_v1.root      EGamma_EffData2D        TH2F
 Trigger Eff_MC          Ele32_TightID_QMinus    egammaEffi.txt_EGM2D_Ele32_Tight94XV2_QMinus_hsseo_v1.root      EGamma_EffMC2D          TH2F
 ### AFB TightID SelectiveCharge (hsseo)
-ID      SF              TightID_Selective_pt10_QPlus    egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_SF2D             TH2F
-ID      Eff_DATA        TightID_Selective_pt10_QPlus    egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_EffData2D        TH2F
-ID      Eff_MC          TightID_Selective_pt10_QPlus    egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_EffMC2D          TH2F
-ID      SF              TightID_Selective_pt10_QMinus   egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_SF2D             TH2F
-ID      Eff_DATA        TightID_Selective_pt10_QMinus   egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_EffData2D        TH2F
-ID      Eff_MC          TightID_Selective_pt10_QMinus   egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_EffMC2D          TH2F
+ID      SF              TightID_Selective_QPlus		egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_SF2D             TH2F
+ID      Eff_DATA        TightID_Selective_QPlus    	egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_EffData2D        TH2F
+ID      Eff_MC          TightID_Selective_QPlus    	egammaEffi.txt_EGM2D_Tight94XV2_Selective_QPlus_hsseo_v1.root   EGamma_EffMC2D          TH2F
+ID      SF              TightID_Selective_QMinus   	egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_SF2D             TH2F
+ID      Eff_DATA        TightID_Selective_QMinus   	egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_EffData2D        TH2F
+ID      Eff_MC          TightID_Selective_QMinus   	egammaEffi.txt_EGM2D_Tight94XV2_Selective_QMinus_hsseo_v1.root  EGamma_EffMC2D          TH2F
 Trigger SF              Ele32_TightID_Selective_QPlus   egammaEffi.txt_EGM2D_Ele32_Tight94XV2_Selective_QPlus_hsseo_v1.root     EGamma_SF2D             TH2F
 Trigger Eff_DATA        Ele32_TightID_Selective_QPlus   egammaEffi.txt_EGM2D_Ele32_Tight94XV2_Selective_QPlus_hsseo_v1.root     EGamma_EffData2D        TH2F
 Trigger Eff_MC          Ele32_TightID_Selective_QPlus   egammaEffi.txt_EGM2D_Ele32_Tight94XV2_Selective_QPlus_hsseo_v1.root     EGamma_EffMC2D          TH2F
@@ -35,12 +35,12 @@ Trigger SF              Ele32_TightID_Selective_QMinus  egammaEffi.txt_EGM2D_Ele
 Trigger Eff_DATA        Ele32_TightID_Selective_QMinus  egammaEffi.txt_EGM2D_Ele32_Tight94XV2_Selective_QMinus_hsseo_v1.root    EGamma_EffData2D        TH2F
 Trigger Eff_MC          Ele32_TightID_Selective_QMinus  egammaEffi.txt_EGM2D_Ele32_Tight94XV2_Selective_QMinus_hsseo_v1.root    EGamma_EffMC2D          TH2F
 ### AFB MediumID (hsseo)
-ID      SF              MediumID_pt10_QPlus     egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_SF2D             TH2F
-ID      Eff_DATA        MediumID_pt10_QPlus     egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_EffData2D        TH2F
-ID      Eff_MC          MediumID_pt10_QPlus     egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_EffMC2D          TH2F
-ID      SF              MediumID_pt10_QMinus    egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_SF2D             TH2F
-ID      Eff_DATA        MediumID_pt10_QMinus    egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_EffData2D        TH2F
-ID      Eff_MC          MediumID_pt10_QMinus    egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_EffMC2D          TH2F
+ID      SF              MediumID_QPlus		egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_SF2D             TH2F
+ID      Eff_DATA        MediumID_QPlus     	egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_EffData2D        TH2F
+ID      Eff_MC          MediumID_QPlus     	egammaEffi.txt_EGM2D_Medium94XV2_QPlus_hsseo_v1.root    EGamma_EffMC2D          TH2F
+ID      SF              MediumID_QMinus    	egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_SF2D             TH2F
+ID      Eff_DATA        MediumID_QMinus    	egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_EffData2D        TH2F
+ID      Eff_MC          MediumID_QMinus    	egammaEffi.txt_EGM2D_Medium94XV2_QMinus_hsseo_v1.root   EGamma_EffMC2D          TH2F
 Trigger SF              Ele32_MediumID_QPlus    egammaEffi.txt_EGM2D_Ele32_Medium94XV2_QPlus_hsseo_v1.root      EGamma_SF2D             TH2F
 Trigger Eff_DATA        Ele32_MediumID_QPlus    egammaEffi.txt_EGM2D_Ele32_Medium94XV2_QPlus_hsseo_v1.root      EGamma_EffData2D        TH2F
 Trigger Eff_MC          Ele32_MediumID_QPlus    egammaEffi.txt_EGM2D_Ele32_Medium94XV2_QPlus_hsseo_v1.root      EGamma_EffMC2D          TH2F
