@@ -244,7 +244,6 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
     return 1;
   }
   TString histkeys[2]={triggerSF_key0,triggerSF_key1};
-  //  if(!(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON)){
   double eff[2][2][2]={}; //[data/mc][l0/l1][leg1/leg2]
   TString sdata[2]={"DATA","MC"};
   for(int id=0;id<2;id++)
@@ -254,43 +253,6 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
   double eff_data=eff[0][0][1]*eff[0][1][1]-(eff[0][0][1]-eff[0][0][0])*(eff[0][1][1]-eff[0][1][0]);
   double eff_mc=eff[1][0][1]*eff[1][1][1]-(eff[1][0][1]-eff[1][0][0])*(eff[1][1][1]-eff[1][1][0]);
   return eff_data/eff_mc;
-  //}else{
-  if(0){
-    double lumi_periodB = 5750.490644035;
-    double lumi_periodC = 2572.903488748;
-    double lumi_periodD = 4242.291556970;
-    double lumi_periodE = 4025.228136967;
-    double lumi_periodF = 3104.509131800;
-    double lumi_periodG = 7575.824256098;
-    double lumi_periodH = 8650.628380028;
-    double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
-    
-    double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
-    double WeightGtoH = (lumi_periodG+lumi_periodH)/total_lumi;
-    
-    double eff[2][2][2][2]={}; //[period][data/mc][l0/l1][leg1/leg2]
-    TString speriod[2]={"BCDEF","GH"};
-    TString sdata[2]={"DATA","MC"};
-    for(int ip=0;ip<2;ip++){
-      for(int id=0;id<2;id++){
-	for(int ilep=0;ilep<2;ilep++){
-	  for(int ileg=0;ileg<2;ileg++){
-	    TString scharge="";
-	    if(histkeys[ileg].Contains(TRegexp("_Q$"))){
-	      if(leps.at(ilep)->Charge()>0) scharge="Plus";
-	      else scharge="Minus";
-	    }
-	    eff[ip][id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg]+scharge+"_"+speriod[ip],leps.at(ilep),(id?-1.:1.)*sys);
-	  }
-	}
-      }
-    }
-    double eff_data_BtoF=eff[0][0][0][1]*eff[0][0][1][1]-(eff[0][0][0][1]-eff[0][0][0][0])*(eff[0][0][1][1]-eff[0][0][1][0]);
-    double eff_data_GtoH=eff[1][0][0][1]*eff[1][0][1][1]-(eff[1][0][0][1]-eff[1][0][0][0])*(eff[1][0][1][1]-eff[1][0][1][0]);
-    double eff_mc_BtoF=eff[0][1][0][1]*eff[0][1][1][1]-(eff[0][1][0][1]-eff[0][1][0][0])*(eff[0][1][1][1]-eff[0][1][1][0]);
-    double eff_mc_GtoH=eff[1][1][0][1]*eff[1][1][1][1]-(eff[1][1][0][1]-eff[1][1][0][0])*(eff[1][1][1][1]-eff[1][1][1][0]);
-    return (eff_data_BtoF*WeightBtoF+eff_data_GtoH*WeightGtoH)/(eff_mc_BtoF*WeightBtoF+eff_mc_GtoH*WeightGtoH);
-  }
 }
 void SMPAnalyzerCore::SetupZptWeight(){
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
