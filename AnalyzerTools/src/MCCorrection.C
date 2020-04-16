@@ -793,8 +793,11 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
     cerr << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
     exit(EXIT_FAILURE);
   }
-
-  return this_hist->GetBinContent(this_bin);
+  
+  //FIXME 
+  double pu_weight=this_hist->GetBinContent(this_bin);
+  if(pu_weight>5) pu_weight=5;
+  return pu_weight;
 
 }
 

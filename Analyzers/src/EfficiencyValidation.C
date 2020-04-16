@@ -4,6 +4,13 @@ EfficiencyValidation::EfficiencyValidation(){
 }
 EfficiencyValidation::~EfficiencyValidation(){
 }
+void EfficiencyValidation::initializeAnalyzer(){
+  SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0
+  fChain->SetBranchStatus("pfMET_*",false);
+  fChain->SetBranchStatus("jet_*",false);
+  fChain->SetBranchStatus("fatjet_*",false);
+  fChain->SetBranchStatus("photon_*",false);
+}
 void EfficiencyValidation::executeEvent(){
   tauprefix="";
   ////////////////////////check genlevel//////////////////
@@ -30,29 +37,32 @@ void EfficiencyValidation::executeEvent(){
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-    if(ev->PassTrigger(doublemuontrigger)){
+    if(ev->PassTrigger(doublemuontrigger))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2016",ev);
-    }
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")){
+    if(ev->PassTrigger("HLT_IsoMu24_v")||ev->PassTrigger("HLT_IsoTkMu24_v"))
+      if(!IsDATA||DataStream.Contains("SingleMuon")) executeEventFromParameter("mu2016",ev);
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2016",ev);
-    }
+    if(ev->PassTrigger("HLT_Ele27_WPTight_Gsf_v"))
+      if(!IsDATA||DataStream.Contains("SingleElectron")) executeEventFromParameter("el2016",ev);
   }else if(DataYear==2017){
-    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")){
+    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2017",ev);
-    }
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")){
+    if(ev->PassTrigger("HLT_IsoMu27_v"))
+      if(!IsDATA||DataStream.Contains("SingleMuon")) executeEventFromParameter("mu2017",ev);    
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2017",ev);
-    }
+    if(ev->PassTrigger("HLT_Ele32_WPTight_Gsf_L1DoubleEG_v"))
+      if(!IsDATA||DataStream.Contains("SingleElectron")) executeEventFromParameter("el2017",ev);
   }else if(DataYear==2018){
     if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2018",ev);
-    
+    if(ev->PassTrigger("HLT_IsoMu24_v"))
+      if(!IsDATA||DataStream.Contains("SingleMuon")) executeEventFromParameter("mu2018",ev);    
     if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("ee2018",ev);
-
     if(ev->PassTrigger("HLT_Ele32_WPTight_Gsf_v"))
-      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("el2018",ev);
-    
+      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("el2018",ev);    
   }    
 
   delete ev;
@@ -64,75 +74,86 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
   //suffix, lepton vector, SF1, SF2, TriggerSF1, TriggerSF2
   map< TString, tuple<vector<Lepton*>,TString,TString,TString,TString> > map_leps;
 
-
   double lep0ptcut,lep1ptcut;
   if(channelname.Contains(TRegexp("^mm"))){
     lep0ptcut=20.;
     lep1ptcut=10.;
-
-    map_muons["POGTight_PFIsoTight"]=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
-    map_muons["POGTight_TrkIsoLoose"]=SMPGetMuons("POGTightWithLooseTrkIso",0.0,2.4);
-
+    map_muons["_MediumID_trkIsoLoose"]=SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4);
+    map_muons["_TightID_PFIsoTight"]=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
+    map_leps["_MediumID_trkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["_MediumID_trkIsoLoose"]),"IDISO_SF_MediumID_trkIsoLoose_Q","","Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q");
+    if(DataYear==2016) map_leps["_TightID_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["_TightID_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","Mu17Leg1_POGTight","Mu8Leg2_POGTight");
+  }else if(channelname.Contains(TRegexp("^mu"))){
+    map_muons["_MediumID_trkIsoLoose"]=SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4);
     switch(DataYear){
-    case 2016: 
-      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","Mu17Leg1_POGTight","Mu8Leg2_POGTight");
-      //map_leps["_POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","LeadMu17_TightID_trkIso_Q","TailMu8_TightID_trkIso_Q"); 
+    case 2016:
+      lep0ptcut=27.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_trkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["_MediumID_trkIsoLoose"]),"IDISO_SF_MediumID_trkIsoLoose_Q","","IsoMu24_MediumID_trkIsoLoose_Q","");
       break;
-    case 2017: 
-      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","Mu17Leg1_POGTight","Mu8Leg2_POGTight");
-      map_leps["_POGTight_TrkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"IDISO_SF_TightID_trkIso_pt20_Q","Default","Mu17Leg1_POGTight_trkIso_Q","Mu8Leg2_POGTight_trkIso_Q");
+    case 2017:
+      lep0ptcut=30.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_trkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["_MediumID_trkIsoLoose"]),"IDISO_SF_MediumID_trkIsoLoose_Q","","IsoMu27_MediumID_trkIsoLoose_Q","");    
       break;
-    case 2018: 
-      map_leps["_POGTight_PFIsoTight"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_PFIsoTight"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","","");
-      map_leps["_POGTight_TrkIsoLoose"]=make_tuple(MakeLeptonPointerVector(map_muons["POGTight_TrkIsoLoose"]),"ID_SF_NUM_TightID_DEN_genTracks","Default","","");
+    case 2018:
+      lep0ptcut=27.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_trkIsoLoose_Q"]=make_tuple(MakeLeptonPointerVector(map_muons["_MediumID_trkIsoLoose"]),"IDISO_SF_MediumID_trkIsoLoose_Q","","IsoMu24_MediumID_trkIsoLoose_Q","");    
       break;
-    default: cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
+    default: 
+      cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
+      exit(EXIT_FAILURE);
     }
   }else if(channelname.Contains(TRegexp("^ee"))){
     lep0ptcut=25.;
     lep1ptcut=15.;
-
-    map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
-    map_electrons["MediumID_Selective"]=SMPGetElectrons("passMediumID_Selective",0.0,2.5);
-    map_electrons["MediumID_roccor"]=ElectronEnergyCorrection(map_electrons["MediumID"],0,0);
+    map_electrons["_MediumID_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
+    map_electrons["_MediumID"]=ElectronEnergyCorrection(map_electrons["_MediumID_noroccor"],0,0);
+    map_electrons["_MediumID_noEcor"]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),-1,0);
+    map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
+    map_leps["_MediumID_noEcor_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID_noEcor"]),"ID_SF_MediumID_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
 
     switch(DataYear){
     case 2016: 
-      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","Ele23Leg1_MediumID","Ele12Leg2_MediumID"); 
-      map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_MediumID_Selective_pt10_Q","","Ele23Leg1_MediumID_Selective_Q","Ele12Leg2_MediumID_Selective_Q"); 
+      map_leps["_MediumID_old"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_pt10","","Ele23Leg1_MediumID","Ele12Leg2_MediumID");
       break;
     case 2017: 
-      map_leps["_MediumID"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10","","Ele23Leg1_MediumID","Ele12Leg2_MediumID"); 
-      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
-      map_leps["_MediumID_selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_selective"]),"ID_SF_MediumID_Selective_pt10_Q","","Ele23Leg1_MediumID_Selective_Q","Ele12Leg2_MediumID_Selective_Q"); 
+      map_leps["_MediumID_old_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele23Leg1_MediumID_old_Q","Ele12Leg2_MediumID_old_Q"); 
       break;
     case 2018: 
-      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q");
-      map_leps["_MediumID_Q_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID_roccor"]),"ID_SF_MediumID_pt10_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q");
-      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
       break;
     default: 
       cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
       exit(EXIT_FAILURE);
     }
   }else if(channelname.Contains(TRegexp("^el"))){
-    lep0ptcut=35.;
-    lep1ptcut=15.;
-
-    map_electrons["MediumID"]=SMPGetElectrons("passMediumID",0.0,2.5);
-    map_electrons["TightID"]=SMPGetElectrons("passTightID",0.0,2.5);
-    map_electrons["TightID_Selective"]=SMPGetElectrons("passTightID_Selective",0.0,2.5);
-    map_electrons["TightID_roccor"]=ElectronEnergyCorrection(map_electrons["TightID"],0,0);
-    map_electrons["TightID_Selective_roccor"]=ElectronEnergyCorrection(map_electrons["TightID_Selective"],0,0);
+    map_electrons["_MediumID_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
+    map_electrons["_MediumID"]=ElectronEnergyCorrection(map_electrons["_MediumID_noroccor"],0,0);
+    map_electrons["_MediumID_noEcor"]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),-1,0);
+    map_electrons["_TightID_Selective_noroccor"]=SMPGetElectrons("passMediumID_Selective",0.0,2.4);
+    map_electrons["_TightID_Selective"]=ElectronEnergyCorrection(map_electrons["_TightID_Selective_noroccor"],0,0);
 
     switch(DataYear){
+    case 2016:
+      lep0ptcut=30.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele27_MediumID_Q",""); 
+      map_leps["_MediumID_noEcor_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID_noEcor"]),"ID_SF_MediumID_Q","","Ele27_MediumID_Q",""); 
+      map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele27_TightID_Selective_Q",""); 
+      break;
+    case 2017:
+      lep0ptcut=35.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_MediumID_noEcor_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID_noEcor"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele32_TightID_Selective_Q",""); 
+      break;
     case 2018: 
-      map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID_Selective"]),"ID_SF_TightID_Selective_pt10_Q","","Ele32_TightID_Selective_Q",""); 
-      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_MediumID_pt10_Q","","Ele32_MediumID_Q",""); 
-      map_leps["_TightID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID"]),"ID_SF_TightID_pt10_Q","","Ele32_TightID_Q","");
-      map_leps["_MediumID_POGSF"]=make_tuple(MakeLeptonPointerVector(map_electrons["MediumID"]),"ID_SF_passMediumID","","Ele32_MediumID_Q",""); 
-      map_leps["_TightID_Q_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID_roccor"]),"ID_SF_TightID_pt10_Q","","Ele32_TightID_Q","");
-      map_leps["_TightID_Selective_Q_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["TightID_Selective_roccor"]),"ID_SF_TightID_Selective_pt10_Q","","Ele32_TightID_Selective_Q","");
+      lep0ptcut=35.;
+      lep1ptcut=10.;
+      map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_MediumID_noEcor_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID_noEcor"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele32_TightID_Selective_Q",""); 
       break;
     default: 
       cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
@@ -173,8 +194,17 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
   totalweight*=prefireweight;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",totalweight);
 
+  /////////////////// zpt correction //////////////////////
   totalweight*=zptcor;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","zptcor",totalweight);
+  
+  //////////////////////Z0 weight///////////////////////
+  double z0weight=1.;
+  if(!IsDATA){
+    z0weight=GetZ0Weight(vertex_Z);
+  }
+  totalweight*=z0weight;
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","z0",totalweight);
 
   ///////////////////////lepton selection///////////////////////
   for(const auto& element_leps: map_leps){
@@ -183,10 +213,13 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 
     FillHist(channelname+"/"+tauprefix+"nlepton"+idsuffix,leps.size(),totalweight,10,0,10);
     if(leps.size()==2){
-      TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
+      TString prefix=tauprefix;
+      if(leps.at(0)->Charge()*leps.at(1)->Charge()>0)
+	//prefix="ss_"+prefix;
+	return;
       FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"dilepton",totalweight);
       if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"OS",totalweight);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"LepPtCut",totalweight);
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
 	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
@@ -240,28 +273,32 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 
 	///////////////////////weight systematics//////////////////
 	map<TString,double> map_weight;
-	map_weight[""]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight[""]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
 	if(!IsDATA){
+	  map_weight["_noweight"]=weight;
+	  map_weight["_noPUreweight"]=weight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_noprefireweight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*zptcor*z0weight;
 	  
-	  map_weight["noefficiencySF"]=weight*PUreweight*prefireweight*zptcor;
+	  map_weight["_noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
 	
-	  map_weight["noRECOSF"]=weight*PUreweight*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	  map_weight["RECOSF_up"]=weight*PUreweight*RECOSF_up*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	  map_weight["RECOSF_down"]=weight*PUreweight*RECOSF_down*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
-	
-	  map_weight["noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor;
-	  map_weight["IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor;
-	  map_weight["IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight["_noIDSF"]=weight*PUreweight*RECOSF*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_IDSF_up"]=weight*PUreweight*RECOSF*IDSF_up*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_IDSF_down"]=weight*PUreweight*RECOSF*IDSF_down*ISOSF*triggerSF*prefireweight*zptcor*z0weight;
 	  
-	  map_weight["noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor;
-	  map_weight["ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor;
-	  map_weight["ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor;
+	  map_weight["_noISOSF"]=weight*PUreweight*RECOSF*IDSF*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_ISOSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF_up*triggerSF*prefireweight*zptcor*z0weight;
+	  map_weight["_ISOSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF_down*triggerSF*prefireweight*zptcor*z0weight;
 	
-	  map_weight["notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor;
-	  map_weight["triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor;
-	  map_weight["triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor;
+	  map_weight["_notriggerSF"]=weight*PUreweight*RECOSF*IDSF*ISOSF*prefireweight*zptcor*z0weight;
+	  map_weight["_triggerSF_up"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_up*prefireweight*zptcor*z0weight;
+	  map_weight["_triggerSF_down"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF_down*prefireweight*zptcor*z0weight;
 	  
-	  map_weight["nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
+	  map_weight["_noefficiencySF"]=weight*PUreweight*prefireweight*zptcor*z0weight;
+	  map_weight["_noefficiencySF_nozptcor"]=weight*PUreweight*prefireweight*z0weight;
+	  map_weight["_noz0weight"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	  map_weight["_nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*z0weight;
 	}
 	
 	///////////////////////fill hists///////////////////////
@@ -274,6 +311,10 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 	  if(dimass>=80&&dimass<100){
 	    FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"m80to100",map_weight[""]);
 	    FillHistsEfficiency(channelname+"/m80to100/"+prefix,idsuffix,leps,map_weight);
+	    if(leps.at(1)->Pt()<25){
+	      FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"l1pt<25",map_weight[""]);
+	      FillHistsEfficiency(channelname+"/m80to100_l1pt/"+prefix,idsuffix,leps,map_weight);
+	    } 
 	  }
 	}
       }
@@ -282,8 +323,7 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
 }
 void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const vector<Lepton*>& leps,const map<TString,double>& weights){
   for(const auto& element:weights){
-    TString suf=suffix;
-    if(element.first!="") suf+="_"+element.first;
+    TString suf=suffix+element.first;
     double w=element.second;
     
     //for leptons
