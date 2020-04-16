@@ -7,8 +7,8 @@ SMPAnalyzerCore::SMPAnalyzerCore(){
 }
 
 SMPAnalyzerCore::~SMPAnalyzerCore(){
-  for(auto& [key,hist]:map_hist_zpt){
-    if(hist) delete hist;
+  for(auto& iter:map_hist_zpt){
+    if(iter.second) delete iter.second;
   }
   if(roc) delete roc;
   if(rocele) delete rocele;
@@ -171,7 +171,10 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   if(histkey.Contains(TRegexp("_Q$"))){
     if(lep->Charge()>0) histkey+="Plus";
     else histkey+="Minus";
-  }
+  }else if(histkey.Contains("_Q_")){
+    if(lep->Charge()>0) histkey.ReplaceAll("_Q_","_QPlus_");
+    else histkey.ReplaceAll("_Q_","_QMinus_");;
+  }    
   if(lep->LeptonFlavour()==Lepton::MUON){
     this_pt=((Muon*)lep)->MiniAODPt();
     this_eta=lep->Eta();
@@ -213,9 +216,11 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   }    
   double this_x,this_y;
   if(this_hist->GetXaxis()->GetXmax()>this_hist->GetYaxis()->GetXmax()){
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetXaxis()->GetXmin()) return 0;
     this_x=this_pt;
     this_y=this_eta;
   }else{
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetYaxis()->GetXmin()) return 0;
     this_x=this_eta;
     this_y=this_pt;
   }
@@ -238,21 +243,39 @@ double SMPAnalyzerCore::LeptonTrigger_SF(TString triggerSF_key,const vector<Lept
 }
 double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int sys){
   if(IsDATA) return 1;
-  if(triggerSF_key0==""&&triggerSF_key1=="") return 1;
-  if(leps.size()!=2){
-    cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
-    return 1;
+  if((triggerSF_key0==""||triggerSF_key0=="Default")&&(triggerSF_key1==""||triggerSF_key1=="Default")) return 1;
+  int nlep=leps.size();
+  if(nlep<2){
+    cout<<"[SMPAnalyzerCore::DileptonTrigger_SF] nlep < 2. return 1."<<endl;
+    return 1.;
   }
-  TString histkeys[2]={triggerSF_key0,triggerSF_key1};
-  double eff[2][2][2]={}; //[data/mc][l0/l1][leg1/leg2]
-  TString sdata[2]={"DATA","MC"};
-  for(int id=0;id<2;id++)
-    for(int ilep=0;ilep<2;ilep++)
-      for(int ileg=0;ileg<2;ileg++)
-	eff[id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg],leps.at(ilep),(id?-1.:1.)*sys);
-  double eff_data=eff[0][0][1]*eff[0][1][1]-(eff[0][0][1]-eff[0][0][0])*(eff[0][1][1]-eff[0][1][0]);
-  double eff_mc=eff[1][0][1]*eff[1][1][1]-(eff[1][0][1]-eff[1][0][0])*(eff[1][1][1]-eff[1][1][0]);
-  return eff_data/eff_mc;
+  double data_noleg1=1.,mc_noleg1=1.;
+  vector<double> data_oneleg1_noleg2(nlep,1.);
+  vector<double> mc_oneleg1_noleg2(nlep,1.);
+  for(int i=0;i<nlep;i++){
+    double data_eff_leg1=Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key0,leps.at(i),sys);
+    double data_eff_leg2=Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key1,leps.at(i),sys);
+    double mc_eff_leg1=Lepton_SF("Trigger_Eff_MC_"+triggerSF_key0,leps.at(i),-sys);
+    double mc_eff_leg2=Lepton_SF("Trigger_Eff_MC_"+triggerSF_key1,leps.at(i),-sys);
+    data_noleg1*=(1-data_eff_leg1);    
+    mc_noleg1*=(1-mc_eff_leg1);
+    for(int j=0;j<nlep;j++){
+      if(i==j){
+	data_oneleg1_noleg2[j]*=data_eff_leg1;
+	mc_oneleg1_noleg2[j]*=mc_eff_leg1;
+      }else{
+	data_oneleg1_noleg2[j]*=(1-data_eff_leg2);
+	mc_oneleg1_noleg2[j]*=(1-mc_eff_leg2);
+      }
+    }
+  }
+  double data_eff=1.-data_noleg1;
+  double mc_eff=1.-mc_noleg1;
+  for(int i=0;i<nlep;i++){
+    data_eff-=data_oneleg1_noleg2[i];
+    mc_eff-=mc_oneleg1_noleg2[i];
+  }
+  return data_eff/mc_eff;
 }
 void SMPAnalyzerCore::SetupZptWeight(){
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
@@ -462,12 +485,14 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
   if(id=="POGTightWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
     for(auto const& muon: muons){
-      if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
-      if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);

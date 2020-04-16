@@ -1,6 +1,6 @@
 TString analyzer="ZptWeight";
-TString recoskim="SkimTree_SMP";
-TString genskim="SkimTree_GEN";
+TString recoskim="SkimTree_Dilepton";
+TString genskim="";
 
 TString dyname="DYJets";
 vector<TString> backgrounds={"TTLL_powheg","WJets_MG","WW_pythia","WZ_pythia","ZZ_pythia"};
@@ -53,8 +53,8 @@ TH1* GetZptWeight(TString mode){
       hdata=GetHist(file,prefix+"/m80to100/diptdirap");
     }
   }
-  hdata->Add(GetHist(mcfileprefix+dyname+".root",prefix+"/m80to100/tau_diptdirap"),-1);
   cout<<"hdata-= tau from "<<mcfileprefix+dyname+".root"<<endl;
+  hdata->Add(GetHist(mcfileprefix+dyname+".root",prefix+"/m80to100/tau_diptdirap"),-1);
   for(const auto& bkname:backgrounds){
     TString file=mcfileprefix+bkname+".root";
     cout<<"hdata-="<<file<<endl;

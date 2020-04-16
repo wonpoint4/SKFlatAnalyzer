@@ -12,7 +12,7 @@ void ZptWeight::executeEvent(){
     vector<Gen> gens=GetGens();
     Gen parton0,parton1,l0,l1;
     GetDYGenParticles(gens,parton0,parton1,l0,l1,true);
-    if(abs(l0.PID())!=15){
+    if(abs(l0.PID())==11||abs(l0.PID())==13){
       TLorentzVector genZ=(l0+l1);
       zptcor*=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
       FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap"),genZ.Pt(),fabs(genZ.Rapidity()),weight_norm_1invpb*gen_weight*zptcor,ptbinnum,ptbin,rapbinnum,rapbin);
@@ -66,43 +66,15 @@ void ZptWeight::executeEventFromParameter(TString channelname,Event* ev){
 
   double lep0ptcut,lep1ptcut;
   if(channelname.Contains(TRegexp("^mm"))){
+    lep0ptcut=20.;
+    lep1ptcut=10.;
+    map_muons[""]=SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4);
+    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"IDISO_SF_MediumID_trkIsoLoose_Q","","Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q");
+  }else if(channelname.Contains(TRegexp("^ee"))){
     lep0ptcut=25.;
     lep1ptcut=15.;
-
-    map_muons[""]=SMPGetMuons("POGTightWithTightIso",0.0,2.4);
-
-    switch(DataYear){
-    case 2016: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
-      break;
-    case 2017: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","LeadMu17_POGTight","TailMu8_POGTight");
-      break;
-    case 2018: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","","");
-      break;
-    default: cout<<"[ZptWeight::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
-    }
-  }else if(channelname.Contains(TRegexp("^ee"))){
-    lep0ptcut=30.;
-    lep1ptcut=20.;
-
-    map_electrons[""]=SMPGetElectrons("passMediumID",0.0,2.5);
-
-    switch(DataYear){
-    case 2016: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
-      break;
-    case 2017: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),"ID_SF_MediumID_pt10","","LeadEle23_MediumID","TailEle12_MediumID"); 
-      break;
-    case 2018: 
-      map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),"ID_SF_MediumID_pt10_Q","","Ele23_MediumID_Q","Ele12_MediumID_Q"); 
-      break;
-    default: 
-      cout<<"[ZptWeight::executeEventFromParameter] wrong year"<<endl;
-      exit(EXIT_FAILURE);
-    }
+    map_electrons[""]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),0,0);
+    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),"ID_SF_MediumID_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
   }else{
     cout<<"[ZptWeight::executeEventFromParameter] wrong channelname"<<endl;
     exit(EXIT_FAILURE);
@@ -117,29 +89,38 @@ void ZptWeight::executeEventFromParameter(TString channelname,Event* ev){
   FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",totalweight);
 
   /////////////////PUreweight///////////////////
-  double PUreweight=1.,PUreweight_up=1.,PUreweight_down=1.;
+  double PUreweight=1.;//,PUreweight_up=1.,PUreweight_down=1.;
   if(!IsDATA){
     PUreweight=mcCorr->GetPileUpWeight(nPileUp,0);
-    PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
-    PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
+    //PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
+    //PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
   }
   totalweight*=PUreweight;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","PU",totalweight);
   
   //////////////////////PrefileWeight////////////////////
   double prefireweight=1.;
-  double prefireweight_up=1.;
-  double prefireweight_down=1.;
+  //double prefireweight_up=1.;
+  //double prefireweight_down=1.;
   if(!IsDATA&&DataYear<2018){
     prefireweight=L1PrefireReweight_Central;
-    prefireweight_up=L1PrefireReweight_Up;
-    prefireweight_down=L1PrefireReweight_Down;
+    //prefireweight_up=L1PrefireReweight_Up;
+    //prefireweight_down=L1PrefireReweight_Down;
   }
   totalweight*=prefireweight;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",totalweight);
 
+  /////////////////// zpt correction //////////////////////
   totalweight*=zptcor;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","zptcor",totalweight);
+
+  //////////////////////Z0 weight///////////////////////
+  double z0weight=1.;
+  if(!IsDATA){
+    z0weight=GetZ0Weight(vertex_Z);
+  }
+  totalweight*=z0weight;
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","z0",totalweight);
 
   ///////////////////////lepton selection///////////////////////
   for(const auto& element_leps: map_leps){
@@ -147,11 +128,12 @@ void ZptWeight::executeEventFromParameter(TString channelname,Event* ev){
     auto const& leps=get<0>(element_leps.second);
 
     FillHist(channelname+"/"+tauprefix+"nlepton"+idsuffix,leps.size(),totalweight,10,0,10);
-    if(leps.size()==2){
-      TString prefix=(leps.at(0)->Charge()*leps.at(1)->Charge()>0?"ss_":"")+tauprefix;
+    if(leps.size()>=2){
+      TString prefix=tauprefix;
+      if(leps.at(0)->Charge()*leps.at(1)->Charge()>0) return;
       FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"dilepton",totalweight);
       if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"OS",totalweight);
+	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"LepPtCut",totalweight);
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
 	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
@@ -162,7 +144,7 @@ void ZptWeight::executeEventFromParameter(TString channelname,Event* ev){
 	  for(unsigned int i=0;i<leps.size();i++){	  
             if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
 	      double this_pt,this_eta;
-              this_pt=leps.at(i)->Pt();
+              this_pt=((Electron*)leps.at(i))->UncorrPt();
               this_eta=((Electron*)leps.at(i))->scEta();
 
 	      double this_RECOSF=mcCorr->ElectronReco_SF(this_eta,this_pt,0);
