@@ -283,9 +283,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   int n_bjet=0;
   if(HasFlag("bjet")){
-    for(const auto& jet:jets){
-      //if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
-    }
+    //for(const auto& jet:jets) if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
     if(!n_bjet) return;
     if(!IsSYS) FillCutflow(channelname+"/"+tauprefix+"cutflow","BJetCut",totalweight);    
   }
@@ -299,7 +297,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     auto const& leps=get<0>(element_leps.second);
 
     if(!IsSYS||!IsNominal) FillHist(channelname+"/"+tauprefix+"nlepton"+suffix,leps.size(),totalweight,10,0,10);
-    if(leps.size()==2){
+    if(leps.size()>=2){
       TString prefix=tauprefix;
       if(HasFlag("REGION_cf")){
 	if(leps.at(0)->Charge()>0&&leps.at(1)->Charge()>0) prefix="pp_"+prefix;

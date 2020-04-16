@@ -105,7 +105,7 @@ public:
   void FillCutflow(TString histname,TString label,double weight);
   TString Replace(TString str,TRegexp reg,TString repl);
   inline map<TString,double> Multiply(map<TString,double> a,double b){
-    for(auto& [name,value]:a) value*=b;
+    for(auto& iter:a) iter.second*=b;
     return a;
   }
   

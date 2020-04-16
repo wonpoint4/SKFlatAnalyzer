@@ -123,23 +123,23 @@ void LJLAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",totalweight);
 
   /////////////////PUreweight///////////////////
-  double PUreweight=1.,PUreweight_up=1.,PUreweight_down=1.;
+  double PUreweight=1.;//,PUreweight_up=1.,PUreweight_down=1.;
   if(!IsDATA){
     PUreweight=mcCorr->GetPileUpWeight(nPileUp,0);
-    PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
-    PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
+    //PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
+    //PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
   }
   totalweight*=PUreweight;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","PU",totalweight);
   
   //////////////////////PrefileWeight////////////////////
   double prefireweight=1.;
-  double prefireweight_up=1.;
-  double prefireweight_down=1.;
+  //double prefireweight_up=1.;
+  //double prefireweight_down=1.;
   if(!IsDATA&&DataYear<2018){
     prefireweight=L1PrefireReweight_Central;
-    prefireweight_up=L1PrefireReweight_Up;
-    prefireweight_down=L1PrefireReweight_Down;
+    //prefireweight_up=L1PrefireReweight_Up;
+    //prefireweight_down=L1PrefireReweight_Down;
   }
   totalweight*=prefireweight;
   FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",totalweight);

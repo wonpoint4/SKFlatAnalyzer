@@ -1,7 +1,7 @@
 #ifndef ZptWeight_h
 #define ZptWeight_h
 
-#include "AFBAnalyzer.h"
+#include "SMPAnalyzerCore.h"
 
 class ZptWeight : public SMPAnalyzerCore {
 
