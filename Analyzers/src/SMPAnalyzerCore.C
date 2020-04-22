@@ -197,7 +197,10 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
 	histkey_data.ReplaceAll("_SF_","_Eff_DATA_");
 	TString histkey_mc=histkey;
 	histkey_mc.ReplaceAll("_SF_","_Eff_MC_");
-	return (WeightBtoF*Lepton_SF(histkey_data+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey_data+"_GH",lep,sys))/(WeightBtoF*Lepton_SF(histkey_mc+"_BCDEF",lep,-sys)+WeightGtoH*Lepton_SF(histkey_mc+"_GH",lep,-sys));
+	double data_eff=WeightBtoF*Lepton_SF(histkey_data+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey_data+"_GH",lep,sys);
+	double mc_eff=WeightBtoF*Lepton_SF(histkey_mc+"_BCDEF",lep,-sys)+WeightGtoH*Lepton_SF(histkey_mc+"_GH",lep,-sys);
+	if(mc_eff==0) return 1;
+	else return data_eff/mc_eff;
       }else if(histkey.Contains("_Eff_")){
 	return WeightBtoF*Lepton_SF(histkey+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey+"_GH",lep,sys);
       }
@@ -239,7 +242,8 @@ double SMPAnalyzerCore::LeptonTrigger_SF(TString triggerSF_key,const vector<Lept
   }
   data_eff=1-data_eff;
   mc_eff=1-mc_eff;
-  return data_eff/mc_eff;
+  if(mc_eff==0) return 1.;
+  else return data_eff/mc_eff;
 }
 double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int sys){
   if(IsDATA) return 1;
@@ -275,7 +279,8 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
     data_eff-=data_oneleg1_noleg2[i];
     mc_eff-=mc_oneleg1_noleg2[i];
   }
-  return data_eff/mc_eff;
+  if(mc_eff==0) return 1.;
+  else return data_eff/mc_eff;
 }
 void SMPAnalyzerCore::SetupZptWeight(){
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
