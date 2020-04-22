@@ -109,14 +109,12 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
     lep1ptcut=15.;
     map_electrons["_MediumID_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
     map_electrons["_MediumID"]=ElectronEnergyCorrection(map_electrons["_MediumID_noroccor"],0,0);
-    map_electrons["_MediumID_noEcor"]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),-1,0);
     map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
     if(DataYear!=2016) map_leps["_MediumID_Q_v1"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1","","Ele23Leg1_MediumID_Q_v1","Ele12Leg2_MediumID_Q_v1"); 
-    if(DataYear!=2016) map_leps["_MediumID_Q_mix"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
+    map_leps["_MediumID_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1_3","","Ele23Leg1_MediumID_Q_v1_3","Ele12Leg2_MediumID_Q_v1_3"); 
   }else if(channelname.Contains(TRegexp("^el"))){
     map_electrons["_MediumID_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
     map_electrons["_MediumID"]=ElectronEnergyCorrection(map_electrons["_MediumID_noroccor"],0,0);
-    map_electrons["_MediumID_noEcor"]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),-1,0);
     map_electrons["_TightID_Selective_noroccor"]=SMPGetElectrons("passMediumID_Selective",0.0,2.4);
     map_electrons["_TightID_Selective"]=ElectronEnergyCorrection(map_electrons["_TightID_Selective_noroccor"],0,0);
     switch(DataYear){
@@ -124,19 +122,29 @@ void EfficiencyValidation::executeEventFromParameter(TString channelname,Event* 
       lep0ptcut=30.;
       lep1ptcut=10.;
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele27_MediumID_Q",""); 
+      map_leps["_MediumID_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1_3","","Ele27_MediumID_Q_v1_3",""); 
       map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele27_TightID_Selective_Q",""); 
+      map_leps["_TightID_Selective_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q_v1_3","","Ele27_TightID_Selective_Q_v1_3",""); 
       break;
     case 2017:
       lep0ptcut=35.;
       lep1ptcut=10.;
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_MediumID_Q_v1"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1","","Ele32_MediumID_Q_v1",""); 
+      map_leps["_MediumID_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1_3","","Ele32_MediumID_Q_v1_3",""); 
       map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele32_TightID_Selective_Q",""); 
+      map_leps["_TightID_Selective_Q_v1"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q_v1","","Ele32_TightID_Selective_Q_v1",""); 
+      map_leps["_TightID_Selective_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q_v1_3","","Ele32_TightID_Selective_Q_v1_3",""); 
       break;
     case 2018: 
       lep0ptcut=35.;
       lep1ptcut=10.;
       map_leps["_MediumID_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q","","Ele32_MediumID_Q",""); 
+      map_leps["_MediumID_Q_v1"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1_3","","Ele32_MediumID_Q_v1",""); 
+      map_leps["_MediumID_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_MediumID"]),"ID_SF_MediumID_Q_v1_3","","Ele32_MediumID_Q_v1_3",""); 
       map_leps["_TightID_Selective_Q"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q","","Ele32_TightID_Selective_Q",""); 
+      map_leps["_TightID_Selective_Q_v1"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q_v1","","Ele32_TightID_Selective_Q_v1",""); 
+      map_leps["_TightID_Selective_Q_v1_3"]=make_tuple(MakeLeptonPointerVector(map_electrons["_TightID_Selective"]),"ID_SF_TightID_Selective_Q_v1_3","","Ele32_TightID_Selective_Q_v1_3",""); 
       break;
     default: 
       cout<<"[EfficiencyValidation::executeEventFromParameter] wrong year"<<endl;
@@ -324,7 +332,12 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
       if(leps.at(i)->LeptonFlavour()==Lepton::Flavour::MUON){
 	double rtrkiso=((Muon*)leps.at(i))->TrkIso()/pt;
 	FillHist(Form("%slrtrkiso%s",pre.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
+      }else if(leps.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
+	Electron* el=(Electron*)leps.at(i);
+	FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
+	FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
       }
+
       /*
       vector<double> muon_ptbin={10,15,20,25,30,40,50,60,120,500};
       vector<double> muon_etabin={-2.4,-2.1,-1.85,-1.6,-1.4,-1.2,-0.9,-0.6,-0.3,-0.2,0,0.2,0.3,0.6,0.9,1.2,1.4,1.6,1.85,2.1,2.4};
