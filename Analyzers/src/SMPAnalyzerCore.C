@@ -176,10 +176,12 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
     this_pt=((Muon*)lep)->MiniAODPt();
     this_eta=lep->Eta();
     this_hist=mcCorr->map_hist_Muon[histkey];
+    if(!this_hist) this_hist=mcCorr->map_hist_Electron[histkey];
   }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
     this_pt=lep->Pt();
     this_eta=((Electron*)lep)->scEta();
     this_hist=mcCorr->map_hist_Electron[histkey];
+    if(!this_hist) this_hist=mcCorr->map_hist_Muon[histkey];
   }else{
     cout <<"[SMPAnalyzerCore::Lepton_SF] It is not lepton"<<endl;
     exit(EXIT_FAILURE);

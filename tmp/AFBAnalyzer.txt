@@ -1,4 +1,4 @@
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -y 2016
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -y 2016
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -p B_ver2 -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -p C -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -p D -n 10 -y 2016
@@ -19,7 +19,7 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -y 2016
 
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -y 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -y 2017
 SKFlat.py -a AFBAnalyzer -i DYJets_M-100to200 -n 20 -y 2017
 SKFlat.py -a AFBAnalyzer -i DYJets_M-200to400 -n 10 -y 2017
 SKFlat.py -a AFBAnalyzer -i DYJets_M-400to500 -n 5 -y 2017
@@ -51,7 +51,7 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -y 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -y 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -y 2017
 
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -y 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -y 2018
 SKFlat.py -a AFBAnalyzer -i DYJets_M-100to200 -n 20 -y 2018
 SKFlat.py -a AFBAnalyzer -i DYJets_M-200to400 -n 10 -y 2018
 SKFlat.py -a AFBAnalyzer -i DYJets_M-400to500 -n 5 -y 2018
