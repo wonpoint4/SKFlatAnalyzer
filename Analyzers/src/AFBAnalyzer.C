@@ -17,7 +17,7 @@ void AFBAnalyzer::initializeAnalyzer(){
     cout<<"[AFBAnalyzer::initializeAnalyzer] no input file"<<endl;
     exit(EXIT_FAILURE);
   }
-  if(!IsSkimmed){
+  if(!IsSkimmed&&!HasFlag("ALL")){
     fChain->SetBranchStatus("pfMET_*",false);
     fChain->SetBranchStatus("HLT_TriggerName",false);
     fChain->SetBranchStatus("jet_*",false);
@@ -52,7 +52,7 @@ void AFBAnalyzer::executeEvent(){
 	channelname=Form("ee%d",DataYear);
 	l0ptcut=25.;
 	l1ptcut=15.;
-	letacut=2.5;
+	letacut=2.4;
       }else if(abs(lhe_l0.ID())==13){
 	channelname=Form("mm%d",DataYear);
 	l0ptcut=20.;
@@ -68,7 +68,7 @@ void AFBAnalyzer::executeEvent(){
 	channelname=Form("ee%d",DataYear);
 	l0ptcut=25.;
 	l1ptcut=15.;
-	letacut=2.5;
+	letacut=2.4;
       }else if(abs(lhe_l0.ID())==13 && abs(lhe_l0.ID())==13){
 	channelname=Form("mm%d",DataYear);
 	l0ptcut=20.;
@@ -78,12 +78,12 @@ void AFBAnalyzer::executeEvent(){
 	channelname=Form("em%d",DataYear);
 	l0ptcut=25.;
 	l1ptcut=10.;
-	letacut=2.5; 
+	letacut=2.4; 
       }else if(abs(lhe_l0.ID())==13 && abs(lhe_l0.ID())==11){
 	channelname=Form("em%d",DataYear);
 	l0ptcut=25.;
 	l1ptcut=15.;
-	letacut=2.5;
+	letacut=2.4;
       }else{
 	cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
 	for(auto& lhe:lhes) lhe.Print();
@@ -141,7 +141,7 @@ void AFBAnalyzer::executeEvent(){
       map_weight["_nozptcor"]=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full");
 
       //////////////// Fill LHE,Gen hists //////////////////////
-      if(!IsSYS&&!IsSkimmed){
+      if(!IsSYS&&!IsSkimmed&&!HasFlag("ALL")){
 	FillHists(channelname,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
 	FillHists(channelname,"gen_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	if(gen_l0.Pt()>l0ptcut&&gen_l1.Pt()>l1ptcut&&fabs(gen_l0.Eta())<letacut&&fabs(gen_l1.Eta())<letacut){
@@ -151,7 +151,7 @@ void AFBAnalyzer::executeEvent(){
     }
   }
 
-  if(!IsSkimmed) return;
+  if(!IsSkimmed&&!HasFlag("ALL")) return;
 
 
   *ev=GetEvent();
@@ -220,75 +220,61 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   
   double lep0ptcut,lep1ptcut;
   if(channelname.Contains("mm")){
+    TString IDISOSF_key="IDISO_SF_MediumID_trkIsoLoose_Q";
+    TString triggerSF_key0="Mu17Leg1_MediumID_trkIsoLoose_Q";
+    TString triggerSF_key1="Mu8Leg2_MediumID_trkIsoLoose_Q";
     lep0ptcut=20.;
     lep1ptcut=10.;
     
-    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGTightWithTightIso",0.0,2.4),0);
-    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
+    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
+    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),IDISOSF_key,"",triggerSF_key0,triggerSF_key1);
     
     if(HasFlag("SYS")){
       map_muons["_scale_up"]=MuonMomentumCorrection(map_muons[""],+1);
-      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_up"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
+      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_up"]),IDISOSF_key,"",triggerSF_key0,triggerSF_key1);
       
       map_muons["_scale_down"]=MuonMomentumCorrection(map_muons[""],-1);
-      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_down"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
+      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_muons["_scale_down"]),IDISOSF_key,"",triggerSF_key0,triggerSF_key1);
 
       map_muons["_noroccor"]=MuonMomentumCorrection(map_muons[""],0,-1);
-      map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_muons["_noroccor"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut",DataYear==2018?"":"Mu17Leg1_POGTight",DataYear==2018?"":"Mu8Leg2_POGTight");
+      map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_muons["_noroccor"]),IDISOSF_key,"",triggerSF_key0,triggerSF_key1);
     }
   }else if(channelname.Contains("ee")){
+    TString IDSF_key="ID_SF_MediumID_Q";
+    TString triggerSF_key0="Ele23Leg1_MediumID_Q";
+    TString triggerSF_key1="Ele12Leg2_MediumID_Q";
     lep0ptcut=25.;
     lep1ptcut=15.;
-    TString LeptonIDSF_key,triggerSF_key0,triggerSF_key1;
-    switch(DataYear){
-    case 2016: LeptonIDSF_key="ID_SF_MediumID_pt10";triggerSF_key0="Ele23Leg1_MediumID";triggerSF_key1="Ele12Leg2_MediumID"; break;
-    case 2017: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="Ele23Leg1_MediumID_Q";triggerSF_key1="Ele12Leg2_MediumID_Q"; break;
-    case 2018: LeptonIDSF_key="ID_SF_MediumID_pt10_Q";triggerSF_key0="Ele23Leg1_MediumID_Q";triggerSF_key1="Ele12Leg2_MediumID_Q"; break;
-    default: cout<<"[AFBAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
-    }
     
-    map_electrons[""]=SMPGetElectrons("passMediumID",0.0,2.5);
-    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
-
+    map_electrons["_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
+    map_electrons[""]=ElectronEnergyCorrection(map_electrons["_noroccor"],0,0);
+    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
     if(HasFlag("SYS")){
       map_electrons["_scale_up"]=ScaleElectrons(map_electrons[""],1);
       std::sort(map_electrons["_scale_up"].begin(),map_electrons["_scale_up"].end(),PtComparing);
-      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_scale_up"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_leps["_scale_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_scale_up"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
       
       map_electrons["_scale_down"]=ScaleElectrons(map_electrons[""],-1);
       std::sort(map_electrons["_scale_down"].begin(),map_electrons["_scale_down"].end(),PtComparing);
-      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_scale_down"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_leps["_scale_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_scale_down"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
       
       map_electrons["_smear_up"]=SmearElectrons(map_electrons[""],1);
       std::sort(map_electrons["_smear_up"].begin(),map_electrons["_smear_up"].end(),PtComparing);
-      map_leps["_smear_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_up"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_leps["_smear_up"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_up"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
       
       map_electrons["_smear_down"]=SmearElectrons(map_electrons[""],-1);
       std::sort(map_electrons["_smear_down"].begin(),map_electrons["_smear_down"].end(),PtComparing);
-      map_leps["_smear_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_down"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_leps["_smear_down"]=make_tuple(MakeLeptonPointerVector(map_electrons["_smear_down"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
-      map_electrons["_roccor"]=ElectronEnergyCorrection(map_electrons[""],0,0);
-      map_leps["_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_roccor"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_electrons["_eta2p5"]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0);
+      map_leps["_eta2p5"]=make_tuple(MakeLeptonPointerVector(map_electrons["_eta2p5"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
-      map_leps["_default"]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
-
-      map_electrons["_noEcor"]=ElectronEnergyCorrection(map_electrons[""],-1,0);
-      map_leps["_noEcor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_noEcor"]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
+      map_leps["_noroccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_noroccor"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
       
-      /*
-      for(int i=1;i<18;i++){
-	TString title=Form("_roccor_try%d",i);
-	map_electrons[title]=ElectronEnergyCorrection(map_electrons[""],-i,0);
-	map_leps[title]=make_tuple(MakeLeptonPointerVector(map_electrons[title]),LeptonIDSF_key,"Default",triggerSF_key0,triggerSF_key1);
-      }
-      */
+      map_electrons["_noEcor"]=ElectronEnergyCorrection(map_electrons[""],-1,0);
+      map_leps["_noEcor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_noEcor"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
-      map_electrons["_tight"]=SMPGetElectrons("passTightID",0.0,2.5);
-      map_leps["_tight"]=make_tuple(MakeLeptonPointerVector(map_electrons["_tight"]),"ID_SF_TightID_pt10_Q","Default",triggerSF_key0,triggerSF_key1);
-
-      map_electrons["_tight_roccor"]=ElectronEnergyCorrection(map_electrons["_tight"],0,0);
-      map_leps["_tight_roccor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_tight_roccor"]),"ID_SF_TightID_pt10_Q","Default",triggerSF_key0,triggerSF_key1);
     }
   }else if(channelname.Contains("em")){
     lep0ptcut=25.;
@@ -370,9 +356,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
 
   int n_bjet=0;
   if(HasFlag("bjet")){
-    for(const auto& jet:jets){
-      //if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
-    }
+    //for(const auto& jet:jets) if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
     if(!n_bjet) return;
     if(!IsSYS) FillCutflow(channelname+"/"+tauprefix+"cutflow","BJetCut",totalweight);    
   }
@@ -386,7 +370,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     auto const& leps=get<0>(element_leps.second);
 
     if(!IsSYS||!IsNominal) FillHist(channelname+"/"+tauprefix+"nlepton"+suffix,leps.size(),totalweight,10,0,10);
-    if(leps.size()==2){
+    if(leps.size()>=2){
       TString prefix=tauprefix;
       if(HasFlag("REGION_cf")){
 	if(leps.at(0)->Charge()>0&&leps.at(1)->Charge()>0) prefix="pp_"+prefix;
@@ -408,7 +392,7 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
           for(unsigned int i=0;i<leps.size();i++){
             if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
               double this_pt,this_eta;
-              this_pt=leps.at(i)->Pt();
+              this_pt=((Electron*)leps.at(i))->UncorrPt();
               this_eta=((Electron*)leps.at(i))->scEta();
 
               double this_RECOSF=mcCorr->ElectronReco_SF(this_eta,this_pt,0);

@@ -7,8 +7,8 @@ SMPAnalyzerCore::SMPAnalyzerCore(){
 }
 
 SMPAnalyzerCore::~SMPAnalyzerCore(){
-  for(auto& [key,hist]:map_hist_zpt){
-    if(hist) delete hist;
+  for(auto& iter:map_hist_zpt){
+    if(iter.second) delete iter.second;
   }
   if(roc) delete roc;
   if(rocele) delete rocele;
@@ -171,14 +171,43 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   if(histkey.Contains(TRegexp("_Q$"))){
     if(lep->Charge()>0) histkey+="Plus";
     else histkey+="Minus";
-  }
+  }else if(histkey.Contains("_Q_")){
+    if(lep->Charge()>0) histkey.ReplaceAll("_Q_","_QPlus_");
+    else histkey.ReplaceAll("_Q_","_QMinus_");;
+  }    
   if(lep->LeptonFlavour()==Lepton::MUON){
     this_pt=((Muon*)lep)->MiniAODPt();
     this_eta=lep->Eta();
     this_hist=mcCorr->map_hist_Muon[histkey];
+    if(!this_hist && DataYear==2016 && !histkey.Contains("_BCDEF$") && !histkey.Contains("_GH$")){
+      double lumi_periodB = 5750.490644035;
+      double lumi_periodC = 2572.903488748;
+      double lumi_periodD = 4242.291556970;
+      double lumi_periodE = 4025.228136967;
+      double lumi_periodF = 3104.509131800;
+      double lumi_periodG = 7575.824256098;
+      double lumi_periodH = 8650.628380028;
+      double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
+      
+      double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
+      double WeightGtoH = (lumi_periodG+lumi_periodH)/total_lumi;
+
+      if(histkey.Contains("_SF_")){
+	TString histkey_data=histkey;
+	histkey_data.ReplaceAll("_SF_","_Eff_DATA_");
+	TString histkey_mc=histkey;
+	histkey_mc.ReplaceAll("_SF_","_Eff_MC_");
+	double data_eff=WeightBtoF*Lepton_SF(histkey_data+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey_data+"_GH",lep,sys);
+	double mc_eff=WeightBtoF*Lepton_SF(histkey_mc+"_BCDEF",lep,-sys)+WeightGtoH*Lepton_SF(histkey_mc+"_GH",lep,-sys);
+	if(mc_eff==0) return 1;
+	else return data_eff/mc_eff;
+      }else if(histkey.Contains("_Eff_")){
+	return WeightBtoF*Lepton_SF(histkey+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey+"_GH",lep,sys);
+      }
     if(!this_hist) this_hist=mcCorr->map_hist_Electron[histkey];
+    }
   }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
-    this_pt=lep->Pt();
+    this_pt=((Electron*)lep)->UncorrPt();
     this_eta=((Electron*)lep)->scEta();
     this_hist=mcCorr->map_hist_Electron[histkey];
     if(!this_hist) this_hist=mcCorr->map_hist_Muon[histkey];
@@ -192,9 +221,11 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   }    
   double this_x,this_y;
   if(this_hist->GetXaxis()->GetXmax()>this_hist->GetYaxis()->GetXmax()){
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetXaxis()->GetXmin()) return 0;
     this_x=this_pt;
     this_y=this_eta;
   }else{
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetYaxis()->GetXmin()) return 0;
     this_x=this_eta;
     this_y=this_pt;
   }
@@ -213,70 +244,45 @@ double SMPAnalyzerCore::LeptonTrigger_SF(TString triggerSF_key,const vector<Lept
   }
   data_eff=1-data_eff;
   mc_eff=1-mc_eff;
-  return data_eff/mc_eff;
+  if(mc_eff==0) return 1.;
+  else return data_eff/mc_eff;
 }
 double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int sys){
   if(IsDATA) return 1;
-  if(triggerSF_key0==""&&triggerSF_key1=="") return 1;
-  if(leps.size()!=2){
-    cout<<"[SMPAnalyzerCore::Trigger_SF] only dilepton algorithm"<<endl;
-    return 1;
+  if((triggerSF_key0==""||triggerSF_key0=="Default")&&(triggerSF_key1==""||triggerSF_key1=="Default")) return 1;
+  int nlep=leps.size();
+  if(nlep<2){
+    cout<<"[SMPAnalyzerCore::DileptonTrigger_SF] nlep < 2. return 1."<<endl;
+    return 1.;
   }
-  TString histkeys[2]={triggerSF_key0,triggerSF_key1};
-  if(!(DataYear==2016&&leps[0]->LeptonFlavour()==Lepton::MUON)){
-    double eff[2][2][2]={}; //[data/mc][l0/l1][leg1/leg2]
-    TString sdata[2]={"DATA","MC"};
-    for(int id=0;id<2;id++){
-      for(int ilep=0;ilep<2;ilep++){
-	for(int ileg=0;ileg<2;ileg++){
-	  TString scharge="";
-	  if(histkeys[ileg].Contains(TRegexp("_Q$"))){
-	    if(leps.at(ilep)->Charge()>0) scharge="Plus";
-	    else scharge="Minus";
-	  }
-	  eff[id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg]+scharge,leps.at(ilep),(id?-1.:1.)*sys);
-	}
+  double data_noleg1=1.,mc_noleg1=1.;
+  vector<double> data_oneleg1_noleg2(nlep,1.);
+  vector<double> mc_oneleg1_noleg2(nlep,1.);
+  for(int i=0;i<nlep;i++){
+    double data_eff_leg1=Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key0,leps.at(i),sys);
+    double data_eff_leg2=Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key1,leps.at(i),sys);
+    double mc_eff_leg1=Lepton_SF("Trigger_Eff_MC_"+triggerSF_key0,leps.at(i),-sys);
+    double mc_eff_leg2=Lepton_SF("Trigger_Eff_MC_"+triggerSF_key1,leps.at(i),-sys);
+    data_noleg1*=(1-data_eff_leg1);    
+    mc_noleg1*=(1-mc_eff_leg1);
+    for(int j=0;j<nlep;j++){
+      if(i==j){
+	data_oneleg1_noleg2[j]*=data_eff_leg1;
+	mc_oneleg1_noleg2[j]*=mc_eff_leg1;
+      }else{
+	data_oneleg1_noleg2[j]*=(1-data_eff_leg2);
+	mc_oneleg1_noleg2[j]*=(1-mc_eff_leg2);
       }
     }
-    double eff_data=eff[0][0][1]*eff[0][1][1]-(eff[0][0][1]-eff[0][0][0])*(eff[0][1][1]-eff[0][1][0]);
-    double eff_mc=eff[1][0][1]*eff[1][1][1]-(eff[1][0][1]-eff[1][0][0])*(eff[1][1][1]-eff[1][1][0]);
-    return eff_data/eff_mc;
-  }else{
-    double lumi_periodB = 5.929001722;
-    double lumi_periodC = 2.645968083;
-    double lumi_periodD = 4.35344881;
-    double lumi_periodE = 4.049732039;
-    double lumi_periodF = 3.157020934;
-    double lumi_periodG = 7.549615806;
-    double lumi_periodH = 8.545039549 + 0.216782873;
-    double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
-    
-    double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
-    double WeightGtoH = (lumi_periodG+lumi_periodH)/total_lumi;
-    
-    double eff[2][2][2][2]={}; //[period][data/mc][l0/l1][leg1/leg2]
-    TString speriod[2]={"BCDEF","GH"};
-    TString sdata[2]={"DATA","MC"};
-    for(int ip=0;ip<2;ip++){
-      for(int id=0;id<2;id++){
-	for(int ilep=0;ilep<2;ilep++){
-	  for(int ileg=0;ileg<2;ileg++){
-	    TString scharge="";
-	    if(histkeys[ileg].Contains(TRegexp("_Q$"))){
-	      if(leps.at(ilep)->Charge()>0) scharge="Plus";
-	      else scharge="Minus";
-	    }
-	    eff[ip][id][ilep][ileg]=Lepton_SF("Trigger_Eff_"+sdata[id]+"_"+histkeys[ileg]+scharge+"_"+speriod[ip],leps.at(ilep),(id?-1.:1.)*sys);
-	  }
-	}
-      }
-    }
-    double eff_data_BtoF=eff[0][0][0][1]*eff[0][0][1][1]-(eff[0][0][0][1]-eff[0][0][0][0])*(eff[0][0][1][1]-eff[0][0][1][0]);
-    double eff_data_GtoH=eff[1][0][0][1]*eff[1][0][1][1]-(eff[1][0][0][1]-eff[1][0][0][0])*(eff[1][0][1][1]-eff[1][0][1][0]);
-    double eff_mc_BtoF=eff[0][1][0][1]*eff[0][1][1][1]-(eff[0][1][0][1]-eff[0][1][0][0])*(eff[0][1][1][1]-eff[0][1][1][0]);
-    double eff_mc_GtoH=eff[1][1][0][1]*eff[1][1][1][1]-(eff[1][1][0][1]-eff[1][1][0][0])*(eff[1][1][1][1]-eff[1][1][1][0]);
-    return (eff_data_BtoF*WeightBtoF+eff_data_GtoH*WeightGtoH)/(eff_mc_BtoF*WeightBtoF+eff_mc_GtoH*WeightGtoH);
   }
+  double data_eff=1.-data_noleg1;
+  double mc_eff=1.-mc_noleg1;
+  for(int i=0;i<nlep;i++){
+    data_eff-=data_oneleg1_noleg2[i];
+    mc_eff-=mc_oneleg1_noleg2[i];
+  }
+  if(mc_eff==0) return 1.;
+  else return data_eff/mc_eff;
 }
 void SMPAnalyzerCore::SetupZptWeight(){
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
@@ -438,6 +444,23 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
 }
 
+Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
+  //0: default
+  //1: dressed 0.1
+  Gen gen_lepton=GetGenMatchedLepton(lep,gens);
+  if(gen_lepton.IsEmpty()) return gen_lepton;
+  if(mode==1){ // dressed 0.1 cone
+    for(const auto& gen: gens){
+      if(gen.Status()!=1) continue;
+      if(gen.PID()!=22) continue;
+      if(gen.DeltaR(gen_lepton)>0.1) continue;
+      gen_lepton+=gen;
+    }
+  }
+    
+  return gen_lepton;
+}
+
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
   if(id=="passMediumID_Selective"){
@@ -469,7 +492,14 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
   if(id=="POGTightWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
     for(auto const& muon: muons){
-      if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
+      if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
@@ -521,61 +551,36 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
   vector<Gen> gens;
   if(!IsData) gens=GetGens();
   for(auto electron:electrons){
-    double rc=1.;
-    //double rcerr=0.;
     if(set>=0){
-      if(IsDATA){
-	rc=rocele->kScaleDT(electron.Charge(),electron.E(),electron.Eta(),electron.Phi(),set,member);
-	//rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),electron.scEta(),electron.Phi());
-	//cout<<"---------------------"<<endl;
-	//cout<<"before:";electron.Print();
-	electron.SetPtEtaPhiM(electron.Pt()*rc,electron.Eta(),electron.Phi(),electron.M());
-	//cout<<"after:";electron.Print();
-      }else{
-	Gen gen=GetGenMatchedLepton(electron,gens);
-	if(gen.IsEmpty()){
-	  //cout<<"cannot find matched lepton"<<endl;
-	  rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),set,member);
-	  //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),set,member);	  
-	}else{
-	  rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),electron.Eta(),electron.Phi(),gen.Pt(),set,member);
-	  //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),electron.scEta(),electron.Phi(),gen.Pt(),set,member);
-	}
-	//cout<<"---------------------"<<endl;
-	//cout<<"before:";electron.Print();
-	electron.SetPtEtaPhiM(electron.UncorrPt()*rc,electron.Eta(),electron.Phi(),electron.M());
-	//cout<<"after:";electron.Print();
-      }      
+      double rc=1.;
+      //double rcerr=0.;
+      double el_eta=electron.scEta();
+      double el_phi=electron.Phi();
+      // FIXME: rocelecor don't have the corrections for 2.4<|eta|<2.5
+      if(el_eta>=2.4) el_eta=2.39;
+      if(el_eta<=-2.4) el_eta=-2.39;
+      if(fabs(el_eta)<2.4){
+	if(IsDATA){
+	  rc=rocele->kScaleDT(electron.Charge(),electron.E(),el_eta,el_phi,set,member);
+	  //rcerr=rocele->kScaleDTerror(electron.Charge(),electron.E(),el_eta,el_phi);
+	  electron*=rc;
+	}else{	
+	  Gen gen=SMPGetGenMatchedLepton(electron,gens,1);
+	  if(gen.IsEmpty()){
+	    rc=rocele->kScaleMC(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,set,member);
+	    //rcerr=rocele->kScaleMCerror(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,set,member);	  
+	  }else{
+	    rc=rocele->kSpreadMC(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,gen.Pt(),set,member);
+	    //rcerr=rocele->kSpreadMCerror(electron.Charge(),electron.UncorrPt(),el_eta,el_phi,gen.Pt(),set,member);
+	  }
+	  electron*=rc*electron.UncorrE()/electron.E();
+	}      
+      }
     }else if(set==-1){ //no energe cor
-      electron.SetPtEtaPhiM(electron.UncorrPt(),electron.Eta(),electron.Phi(),electron.M());
-    }else if(set<-1){ //0:uncorE 1:E 2:uncorPt 3:Pt
-      int mcmode=(abs(set)-2)%4;
-      int datamode=(abs(set)-2)/4;
-      if(IsDATA){
-	double datainput=0;
-	double datapt=0;
-	//double POGcor=electron.E()/electron.UncorrE();
-	if(datamode==0){datainput=electron.UncorrE(); datapt=electron.UncorrPt();}
-	else if(datamode==1){datainput=electron.E(); datapt=electron.Pt();}
-	else if(datamode==2){datainput=electron.UncorrPt(); datapt=electron.UncorrPt();}
-	else if(datamode==3){datainput=electron.Pt(); datapt=electron.Pt();}
-	rc=rocele->kScaleDT(electron.Charge(),datainput,electron.Eta(),electron.Phi(),0,member);
-	electron.SetPtEtaPhiM(datapt*rc,electron.Eta(),electron.Phi(),electron.M());
-      }else{
-	double mcinput=0;
-	double mcpt=0;
-	if(mcmode==0){mcinput=electron.UncorrE(); mcpt=electron.UncorrPt();}
-	else if(mcmode==1){mcinput=electron.E(); mcpt=electron.Pt();}
-	else if(mcmode==2){mcinput=electron.UncorrPt(); mcpt=electron.UncorrPt();}
-	else if(mcmode==3){mcinput=electron.Pt(); mcpt=electron.Pt();}
-	Gen gen=GetGenMatchedLepton(electron,gens);
-	if(gen.IsEmpty()) rc=rocele->kScaleMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),0,member);
-	else {
-	  if(mcmode<2) rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.E(),0,member);
-	  else rc=rocele->kSpreadMC(electron.Charge(),mcinput,electron.Eta(),electron.Phi(),gen.Pt(),0,member);
-	} 
-	electron.SetPtEtaPhiM(mcpt*rc,electron.Eta(),electron.Phi(),electron.M());
-      }      
+      electron*=electron.UncorrE()/electron.E();
+    }else{
+      cout<<"[SMPAnalyzerCore::ElectronEnergyCorrection] wrong set "<<set<<endl;
+      exit(EXIT_FAILURE);
     }
     out.push_back(electron);
   }
