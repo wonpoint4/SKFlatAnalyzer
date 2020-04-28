@@ -2,10 +2,9 @@
 
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
-  if(HasFlag("bjet")){
-    //vector<Jet::Tagger> vtaggers={Jet::DeepCSV};
-    //vector<Jet::WP> vwps={Jet::Medium};
-    //SetupBTagger(vtaggers,vwps,true,true);
+  if(HasFlag("bjet")||HasFlag("nobjet")){
+    vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::mujets,JetTagging::mujets)};
+    mcCorr->SetJetTaggingParameters(jtps);
   }
   SetupToy(100);
   IsSYS=HasFlag("SYS")||HasFlag("DYSYS");
@@ -133,6 +132,7 @@ void AFBAnalyzer::executeEvent(){
 
   TString prefix="";
   if(HasFlag("bjet")) prefix="bjet/";
+  else if(HasFlag("nobjet")) prefix="nobjet/";
   else if(HasFlag("highmet")) prefix="highmet/";
 			
   if(DataYear==2016){
@@ -282,9 +282,14 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
   }
 
   int n_bjet=0;
-  if(HasFlag("bjet")){
-    //for(const auto& jet:jets) if(IsBTagged(jet,Jet::DeepCSV,Jet::Medium,true,0)) n_bjet++;
-    if(!n_bjet) return;
+  if(HasFlag("bjet")||HasFlag("nobjet")){
+    JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::mujets,JetTagging::mujets);
+    for(const auto& jet:jets)
+      if(mcCorr->IsBTagged_2a(jtp,jet))
+	n_bjet++;
+    
+    if(HasFlag("bjet")&&!n_bjet) return;
+    if(HasFlag("nobjet")&&n_bjet) return;
     if(!IsSYS) FillCutflow(channelname+"/"+tauprefix+"cutflow","BJetCut",totalweight);    
   }
 
