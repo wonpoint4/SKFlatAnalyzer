@@ -46,6 +46,7 @@ void AFBAnalyzer::executeEvent(){
       tauprefix="tau_";
     }else{
       double l0ptcut,l1ptcut,letacut;
+      /*
       if(abs(lhe_l0.ID())==11){
 	channelname=Form("ee%d",DataYear);
 	l0ptcut=25.;
@@ -61,7 +62,32 @@ void AFBAnalyzer::executeEvent(){
 	for(auto& lhe:lhes) lhe.Print();
 	exit(EXIT_FAILURE);
       }
-      
+      */
+      if(abs(lhe_l0.ID())==11 && abs(lhe_l0.ID())==11){
+	channelname=Form("ee%d",DataYear);
+	l0ptcut=25.;
+	l1ptcut=15.;
+	letacut=2.4;
+      }else if(abs(lhe_l0.ID())==13 && abs(lhe_l0.ID())==13){
+	channelname=Form("mm%d",DataYear);
+	l0ptcut=20.;
+	l1ptcut=10.;
+	letacut=2.4;
+      }else if(abs(lhe_l0.ID())==11 && abs(lhe_l0.ID())==13){
+	channelname=Form("em%d",DataYear);
+	l0ptcut=25.;
+	l1ptcut=10.;
+	letacut=2.4; 
+      }else if(abs(lhe_l0.ID())==13 && abs(lhe_l0.ID())==11){
+	channelname=Form("em%d",DataYear);
+	l0ptcut=25.;
+	l1ptcut=15.;
+	letacut=2.4;
+      }else{
+	cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
+	for(auto& lhe:lhes) lhe.Print();
+	exit(EXIT_FAILURE);
+      }
       //////////////////////// GEN /////////////////////////
       vector<Gen> gens=GetGens();
       Gen gen_parton0,gen_parton1,gen_l0,gen_l1;
@@ -150,33 +176,34 @@ void AFBAnalyzer::executeEvent(){
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && ev->PassTrigger(muontrigger))
+
+    if(ev->PassTrigger(muontrigger))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2016",ev);
-    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(prefix+"ee2016",ev);
-    if(HasFlag("emu") && ev->PassTrigger(emutrigger))
+    if(ev->PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2016",ev);
   }else if(DataYear==2017){
     vector<TString> emutrigger={
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
+    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2017",ev);
-    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(prefix+"ee2017",ev);
-    if(HasFlag("emu") && ev->PassTrigger(emutrigger))
+    if(ev->PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2017",ev);
   }else if(DataYear==2018){
     vector<TString> emutrigger={
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
+    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2018",ev);
-    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter(prefix+"ee2018",ev);
-    if(HasFlag("emu")  && ev->PassTrigger(emutrigger))
+    if(ev->PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2018",ev);
   }    
   
@@ -269,7 +296,6 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     }
     std::sort(emu.begin(),emu.end(),PtComparingPtr);
     map_leps[""]=make_tuple(emu,El_IDSF_key,Mu_IDISOSF_key,triggerSF_key0,triggerSF_key1);
-
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
     return;
@@ -603,7 +629,14 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
 
     if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
       FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-      FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
+      FillHist(channelname+"/"+pre+"met_raw"+suf,dimass,dirap,dipt,pfMET_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_PhiCor_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1-raw"+suf,dimass,dirap,dipt,pfMET_Type1_pt-pfMET_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-50,50);
+      FillHist(channelname+"/"+pre+"met_T1-T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_pt-pfMET_Type1_PhiCor_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-50,50);
+      FillHist(channelname+"/"+pre+"metphi_raw"+suf,dimass,dirap,dipt,pfMET_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);
+      FillHist(channelname+"/"+pre+"metphi_T1"+suf,dimass,dirap,dipt,pfMET_Type1_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);
+      FillHist(channelname+"/"+pre+"metphi_T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_PhiCor_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);
       FillHist(channelname+"/"+pre+"nPV"+suf,dimass,dirap,dipt,nPV,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
       FillHist(channelname+"/"+pre+"nPileUp"+suf,dimass,dirap,dipt,nPileUp,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
     }
