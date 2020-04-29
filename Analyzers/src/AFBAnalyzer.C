@@ -144,20 +144,40 @@ void AFBAnalyzer::executeEvent(){
       "HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v",
       "HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",
     };
-    if(ev->PassTrigger(muontrigger))
+    vector<TString> emutrigger={
+      "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v",
+      "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v",
+      "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
+      "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
+    };
+    if(!HasFlag("emu") && ev->PassTrigger(muontrigger))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2016",ev);
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(prefix+"ee2016",ev);
+    if(HasFlag("emu") && ev->PassTrigger(emutrigger))
+      if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2016",ev);
   }else if(DataYear==2017){
-    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
+    vector<TString> emutrigger={
+      "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
+      "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
+    };
+    if(!HasFlag("emu") && ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2017",ev);
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter(prefix+"ee2017",ev);
+    if(HasFlag("emu") && ev->PassTrigger(emutrigger))
+      if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2017",ev);
   }else if(DataYear==2018){
-    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
+    vector<TString> emutrigger={
+      "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
+      "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
+    };
+    if(!HasFlag("emu") && ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter(prefix+"mm2018",ev);
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(!HasFlag("emu") && ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter(prefix+"ee2018",ev);
+    if(HasFlag("emu")  && ev->PassTrigger(emutrigger))
+      if(!IsDATA||DataStream.Contains("MuonEG")) executeEventFromParameter(prefix+"em2018",ev);
   }    
   
   delete ev;
@@ -230,6 +250,26 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       map_leps["_noEcor"]=make_tuple(MakeLeptonPointerVector(map_electrons["_noEcor"]),IDSF_key,"Default",triggerSF_key0,triggerSF_key1);
 
     }
+  }else if(channelname.Contains("em")){
+    TString El_IDSF_key="ID_SF_MediumID_Q";
+    TString Mu_IDISOSF_key="IDISO_SF_MediumID_trkIsoLoose_Q";
+    TString triggerSF_key0="";
+    TString triggerSF_key1="";
+    lep0ptcut=25.;
+    lep1ptcut=15.;
+
+    map_electrons["_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
+    map_electrons[""]=ElectronEnergyCorrection(map_electrons["_noroccor"],0,0);
+    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
+
+    std::vector<Lepton *> emu = MakeLeptonPointerVector(map_electrons[""]);
+    std::vector<Lepton *> mu = MakeLeptonPointerVector(map_muons[""]);
+    for(unsigned int i=0; i<mu.size(); i++){
+      emu.push_back(mu.at(i));
+    }
+    std::sort(emu.begin(),emu.end(),PtComparingPtr);
+    map_leps[""]=make_tuple(emu,El_IDSF_key,Mu_IDISOSF_key,triggerSF_key0,triggerSF_key1);
+
   }else{
     cout<<"[AFBAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
     return;
@@ -311,6 +351,9 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       }else{
 	if(leps.at(0)->Charge()*leps.at(1)->Charge()>0) prefix="ss_"+prefix;
       }
+      if(channelname.Contains("em")){
+	if(leps.at(0)->LeptonFlavour() == leps.at(1)->LeptonFlavour()) return;
+      }
       if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","dilepton",totalweight);
       if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
 	if(!IsSYS&&IsNominal) FillCutflow(channelname+"/"+tauprefix+"cutflow","ptcut",totalweight);
@@ -333,6 +376,10 @@ void AFBAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
               RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
             }
 
+            if(channelname.Contains("em")){
+	      LeptonIDSF_key=leps[i]->LeptonFlavour()==Lepton::ELECTRON?get<1>(element_leps.second):get<2>(element_leps.second);
+              LeptonISOSF_key="";
+            }
             double this_IDSF=Lepton_SF(LeptonIDSF_key,leps.at(i),0);
             double this_IDSF_up=Lepton_SF(LeptonIDSF_key,leps.at(i),1);
             double this_IDSF_down=Lepton_SF(LeptonIDSF_key,leps.at(i),-1);
