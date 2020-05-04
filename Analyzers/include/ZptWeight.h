@@ -7,7 +7,7 @@ class ZptWeight : public SMPAnalyzerCore {
 
 public:
 
-  void executeEventFromParameter(TString channelname,Event* ev);
+  void executeEventWithChannelName(TString channelname);
   void executeEvent();
   void FillHistsZptWeight(TString pre,TString suf,const vector<Lepton*>& leps,const map<TString,double>& weights);
 

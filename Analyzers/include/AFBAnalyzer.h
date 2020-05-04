@@ -9,7 +9,7 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
-  void executeEventFromParameter(TString channelname,Event* ev);
+  void executeEventWithChannelName(TString channelname);
 
   AFBAnalyzer();
   ~AFBAnalyzer();
@@ -35,7 +35,7 @@ public:
   TString hardprefix;
   vector<TRandom3*> toy_random;
   vector<double> toy_weight;
-  bool IsSYS=false;
+  bool IsNominalRun=true;
   bool IsSkimmed=false;
   
   static const int afb_mbinnum=40;

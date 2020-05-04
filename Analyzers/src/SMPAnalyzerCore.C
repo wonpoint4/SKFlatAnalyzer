@@ -28,13 +28,10 @@ void SMPAnalyzerCore::initializeAnalyzer(){
 }
 
 TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
-
   TH4D *h = NULL;
   std::map<TString, TH4D*>::iterator mapit = maphist_TH4D.find(histname);
-  if(mapit != maphist_TH4D.end()) return mapit->second;                                                                                                                                                     
-
+  if(mapit != maphist_TH4D.end()) return mapit->second;
   return h;
-
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
@@ -352,6 +349,41 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
   }
   return valzptcor*valzptcor_norm;
 }
+void SMPAnalyzerCore::GetEventWeights(){
+  lumiweight=1;
+  PUweight=1;
+  PUweight_up=1;
+  PUweight_down=1;
+  prefireweight=1;
+  prefireweight_up=1;
+  prefireweight_down=1;
+  zptweight=1;
+  tauprefix="";
+  z0weight=1;
+  if(!IsDATA){
+    lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full");
+    PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
+    PUweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
+    PUweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
+    if(DataYear<2018){
+      prefireweight=L1PrefireReweight_Central;
+      prefireweight_up=L1PrefireReweight_Up;
+      prefireweight_down=L1PrefireReweight_Down;
+    }
+    if(IsDYSample){
+      vector<Gen> gens=GetGens();
+      Gen parton0,parton1,l0,l1;
+      GetDYGenParticles(gens,parton0,parton1,l0,l1,true);
+      if(abs(l0.PID())==11||abs(l0.PID())==13){
+	TLorentzVector genZ=(l0+l1);
+	zptweight=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+      }else tauprefix="tau_";
+    }
+    z0weight=GetZ0Weight(vertex_Z);
+  }
+}
+    
+  
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
   for(int i=0;i<(int)gens.size();i++){

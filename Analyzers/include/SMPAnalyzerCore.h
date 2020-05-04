@@ -117,8 +117,13 @@ public:
   map<TString,TH2D*> map_hist_zpt;
   TH1D *hz0;
   TString tauprefix;
-  double zptcor;
   bool IsDYSample=false;
+  Event event;
+  double lumiweight=1;
+  double PUweight=1,PUweight_up=1,PUweight_down=1;
+  double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
+  double zptweight=1;
+  double z0weight=1;
 
   RoccoR* roc;
   RocelecoR* rocele;
@@ -128,6 +133,47 @@ public:
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();
 
+  void GetEventWeights();
+
+  enum{
+    NominalWeight=1<<0,
+    SystematicWeight=1<<1,
+    PDFWeight=1<<2,
+  };
+
+  class Parameter{
+  public:
+    TString electronIDSF,muonIDSF,muonISOSF;
+    vector<TString> triggerSF;
+    double lep0ptcut=0,lep1ptcut=0;
+    int weightbit=NominalWeight;
+    vector<Lepton*> leps;
+    inline Parameter Clone(vector<Lepton*> leps_,int weightbit_=0){
+      Parameter out=*this;
+      out.leps=leps_;
+      if(weightbit_) out.weightbit=weightbit_;
+      return out;
+    }
+    Parameter(){
+      electronIDSF="ID_SF_MediumID_Q";
+      muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
+    }
+    Parameter(TString elID,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
+      electronIDSF=elID;
+      triggerSF=Trig;
+      if(l0ptcut>0) lep0ptcut=l0ptcut;
+      if(l1ptcut>0) lep1ptcut=l1ptcut;
+      if(leps_.size()) leps=leps_;
+    }
+    Parameter(TString muID,TString muISO,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
+      muonIDSF=muID;
+      muonISOSF=muISO;
+      triggerSF=Trig;
+      if(l0ptcut>0) lep0ptcut=l0ptcut;
+      if(l1ptcut>0) lep1ptcut=l1ptcut;
+      if(leps_.size()) leps=leps_;
+    }
+  };
 };
 #endif
 
