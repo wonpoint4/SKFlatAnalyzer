@@ -1,11 +1,5 @@
 #include "SMPAnalyzerCore.h"
 
-SMPAnalyzerCore::SMPAnalyzerCore(){
-  roc=NULL;
-  rocele=NULL;
-  hz0=NULL;
-}
-
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   for(auto& iter:map_hist_zpt){
     if(iter.second) delete iter.second;

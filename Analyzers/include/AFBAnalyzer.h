@@ -30,8 +30,9 @@ public:
   void FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
   void FillHistToy(TString histname, double value_x, double value_y, double value_z, double weight, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
   void FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
+  void SetupCosThetaWeight();
+  void DeleteCosThetaWeight();
   
-  TRandom3* random;
   TString hardprefix;
   vector<TRandom3*> toy_random;
   vector<double> toy_weight;

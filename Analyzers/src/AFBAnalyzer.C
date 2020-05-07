@@ -2,6 +2,8 @@
 
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
+  SetupCosThetaWeight();
+  
   if(HasFlag("bjet")||HasFlag("nobjet")){
     vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::mujets,JetTagging::mujets)};
     mcCorr->SetJetTaggingParameters(jtps);
@@ -214,8 +216,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
     map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]),
 			      (IsNominalRun?NominalWeight:0)
-			      +(HasFlag("SYS")?SystematicWeight:0)
-			      +(HasFlag("PDFSYS")?PDFWeight:0)
+			      +(HasFlag("SYS")&&!IsDATA?SystematicWeight:0)
+			      +(HasFlag("PDFSYS")&&!IsDATA?PDFWeight:0)
 			      );
     
     if(HasFlag("SYS")){
@@ -235,8 +237,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
     map_electrons[""]=ElectronEnergyCorrection(map_electrons["_noroccor"],0,0);
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_electrons[""]),
 			      (IsNominalRun?NominalWeight:0)
-			      +(HasFlag("SYS")?SystematicWeight:0)
-			      +(HasFlag("PDFSYS")?PDFWeight:0)
+			      +(HasFlag("SYS")&&!IsDATA?SystematicWeight:0)
+			      +(HasFlag("PDFSYS")&&!IsDATA?PDFWeight:0)
 			      );
 
     if(HasFlag("SYS")){
@@ -284,8 +286,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 
     map_parameter[""]=p.Clone(emu,
 			      (IsNominalRun?NominalWeight:0)
-			      +(HasFlag("SYS")?SystematicWeight:0)
-			      +(HasFlag("PDFSYS")?PDFWeight:0)
+			      +(HasFlag("SYS")&&!IsDATA?SystematicWeight:0)
+			      +(HasFlag("PDFSYS")&&!IsDATA?PDFWeight:0)
 			      );
 
   }else{
@@ -432,12 +434,9 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
     }
   }
 }
-AFBAnalyzer::AFBAnalyzer(){
-  random=new TRandom3(4497);
-}
 AFBAnalyzer::~AFBAnalyzer(){
-  if(random) delete random;
   DeleteToy();
+  DeleteCosThetaWeight();
 }
 double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1){
   const TLorentzVector *l0,*l1;
@@ -455,7 +454,7 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1){
       l0=p1;
       l1=p0;
     }else{
-      if(random->Rndm()<0.5){
+      if(gRandom->Rndm()<0.5){
 	l0=p0;
 	l1=p1;
       }else{
@@ -464,7 +463,7 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1){
       }      
     } 
   }else{
-    if(random->Rndm()<0.5){
+    if(gRandom->Rndm()<0.5){
       l0=p0;
       l1=p1;
     }else{
@@ -492,7 +491,7 @@ double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& j
     l0=leps.at(1);
     l1=leps.at(0);
   }else{
-    if(random->Rndm()<0.5){
+    if(gRandom->Rndm()<0.5){
       l0=leps.at(0);
       l1=leps.at(1);
     }else{
@@ -668,4 +667,8 @@ void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, 
 }
 void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
   for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
+}
+void AFBAnalyzer::SetupCosThetaWeight(){
+}
+void AFBAnalyzer::DeleteCosThetaWeight(){
 }

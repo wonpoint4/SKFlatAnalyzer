@@ -115,7 +115,7 @@ public:
   const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
 
   map<TString,TH2D*> map_hist_zpt;
-  TH1D *hz0;
+  TH1D *hz0=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
@@ -125,8 +125,8 @@ public:
   double zptweight=1;
   double z0weight=1;
 
-  RoccoR* roc;
-  RocelecoR* rocele;
+  RoccoR* roc=NULL;
+  RocelecoR* rocele=NULL;
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
