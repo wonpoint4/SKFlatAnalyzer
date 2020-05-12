@@ -1,5 +1,6 @@
 #include "AFBAnalyzer.h"
 
+double l0dXY, l1dXY, l0dZ, l1dZ; // This should be deleted later
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
   if(HasFlag("bjet")||HasFlag("nobjet")){
@@ -126,6 +127,7 @@ void AFBAnalyzer::executeEvent(){
   if(HasFlag("bjet")) prefix+="bjet/";
   else if(HasFlag("nobjet")) prefix+="nobjet/";
   if(HasFlag("highmet")) prefix+="highmet/";
+  if(HasFlag("reducetau")) prefix+="reducetau/";
 			
   ///////////////// cutflow ///////////////////
   if(IsNominalRun){
@@ -171,33 +173,33 @@ void AFBAnalyzer::executeEvent(){
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && event.PassTrigger(muontrigger))
+    if(event.PassTrigger(muontrigger))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName(prefix+"mm2016");
-    if(!HasFlag("emu") && event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventWithChannelName(prefix+"ee2016");
-    if(HasFlag("emu") && event.PassTrigger(emutrigger))
+    if(event.PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventWithChannelName(prefix+"em2016");
   }else if(DataYear==2017){
     vector<TString> emutrigger={
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
+    if(event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName(prefix+"mm2017");
-    if(!HasFlag("emu") && event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventWithChannelName(prefix+"ee2017");
-    if(HasFlag("emu") && event.PassTrigger(emutrigger))
+    if(event.PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventWithChannelName(prefix+"em2017");
   }else if(DataYear==2018){
     vector<TString> emutrigger={
       "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v",
       "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
     };
-    if(!HasFlag("emu") && event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
+    if(event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName(prefix+"mm2018");
-    if(!HasFlag("emu") && event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
       if(!IsDATA||DataStream.Contains("EGamma")) executeEventWithChannelName(prefix+"ee2018");
-    if(HasFlag("emu")  && event.PassTrigger(emutrigger))
+    if(event.PassTrigger(emutrigger))
       if(!IsDATA||DataStream.Contains("MuonEG")) executeEventWithChannelName(prefix+"em2018");
   }    
 
@@ -313,6 +315,18 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
       if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dilepton",eventweight);
       if(p.leps.at(0)->Pt()>p.lep0ptcut&&p.leps.at(1)->Pt()>p.lep1ptcut){
 	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"ptcut",eventweight);
+	/// For Fun (Need to delete later)
+	l0dXY = p.leps.at(0)->dXY();
+        l1dXY = p.leps.at(1)->dZ();
+        l0dZ = p.leps.at(0)->dXY();
+        l1dZ = p.leps.at(1)->dZ();
+	///
+	if(HasFlag("reducetau")){
+	  if(p.leps.at(0)->dXY()>0.05 || p.leps.at(1)->dXY()>0.05) return;
+	  if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dxycut",eventweight);
+          if(p.leps.at(0)->dZ()>0.1 || p.leps.at(1)->dZ()>0.1) return;
+          if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dzcut",eventweight);
+	}
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
 	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
@@ -559,9 +573,23 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
     FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
     FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
 
+    FillHist(channelname+"/"+pre+"l0dxy"+suf,dimass,dirap,dipt,l0dXY,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-0.5,0.5);
+    FillHist(channelname+"/"+pre+"l1dxy"+suf,dimass,dirap,dipt,l1dXY,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-0.5,0.5);
+    FillHist(channelname+"/"+pre+"l0dz"+suf,dimass,dirap,dipt,l0dZ,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-0.5,0.5);
+    FillHist(channelname+"/"+pre+"l1dz"+suf,dimass,dirap,dipt,l1dZ,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-0.5,0.5);
+    FillHist(channelname+"/"+pre+"l0dz-z0"+suf,dimass,dirap,dipt,100*l0dZ-vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-5,5);
+    FillHist(channelname+"/"+pre+"l1dz-z0"+suf,dimass,dirap,dipt,100*l1dZ-vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,200,-5,5);
+
     if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
       FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-      FillHist(channelname+"/"+pre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
+      FillHist(channelname+"/"+pre+"met_raw"+suf,dimass,dirap,dipt,pfMET_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_PhiCor_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+      FillHist(channelname+"/"+pre+"met_T1-raw"+suf,dimass,dirap,dipt,pfMET_Type1_pt-pfMET_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-50,50);
+      FillHist(channelname+"/"+pre+"met_T1-T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_pt-pfMET_Type1_PhiCor_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-50,50);
+      FillHist(channelname+"/"+pre+"metphi_raw"+suf,dimass,dirap,dipt,pfMET_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);
+      FillHist(channelname+"/"+pre+"metphi_T1"+suf,dimass,dirap,dipt,pfMET_Type1_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);
+      FillHist(channelname+"/"+pre+"metphi_T1XY"+suf,dimass,dirap,dipt,pfMET_Type1_PhiCor_phi,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,140,-3.5,3.5);  
       FillHist(channelname+"/"+pre+"nPV"+suf,dimass,dirap,dipt,nPV,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
       FillHist(channelname+"/"+pre+"nPileUp"+suf,dimass,dirap,dipt,nPileUp,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,0,60);  
     }
