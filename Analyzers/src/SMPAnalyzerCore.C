@@ -318,18 +318,45 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
   TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
+  TFile fz0_1(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_dilep.root");
+  TFile fz0_2(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_mm.root");
   hz0=(TH1D*)fz0.Get("z0weight");
   if(hz0) hz0->SetDirectory(0);
   fz0.Close();
+  hz0_1=(TH1D*)fz0_1.Get("data");
+  if(hz0_1) hz0_1->SetDirectory(0);
+  fz0_1.Close();
+  hz0_2=(TH1D*)fz0_2.Get("data");
+  if(hz0_2) hz0_2->SetDirectory(0);
+  fz0_2.Close();
 }
-double SMPAnalyzerCore::GetZ0Weight(double valx){
-  double xmin=hz0->GetXaxis()->GetXmin();
-  double xmax=hz0->GetXaxis()->GetXmax();
-  if(xmin>=0) valx=fabs(valx);
-  if(valx<xmin) valx=xmin+0.001;
-  if(valx>xmax) valx=xmax-0.001;
-  return hz0->GetBinContent(hz0->FindBin(valx));
+double SMPAnalyzerCore::GetZ0Weight(double valx, int sys){
+  if(sys==0){
+    double xmin=hz0->GetXaxis()->GetXmin();
+    double xmax=hz0->GetXaxis()->GetXmax();
+    if(xmin>=0) valx=fabs(valx);
+    if(valx<xmin) valx=xmin+0.001;
+    if(valx>xmax) valx=xmax-0.001;
+    return hz0->GetBinContent(hz0->FindBin(valx));
+  }
+  else if(sys==1){
+    double xmin=hz0_1->GetXaxis()->GetXmin();
+    double xmax=hz0_1->GetXaxis()->GetXmax();
+    if(xmin>=0) valx=fabs(valx);
+    if(valx<xmin) valx=xmin+0.001;
+    if(valx>xmax) valx=xmax-0.001;
+    return hz0_1->GetBinContent(hz0_1->FindBin(valx));
+  }
+  else{
+    double xmin=hz0_2->GetXaxis()->GetXmin();
+    double xmax=hz0_2->GetXaxis()->GetXmax();
+    if(xmin>=0) valx=fabs(valx);
+    if(valx<xmin) valx=xmin+0.001;
+    if(valx>xmax) valx=xmax-0.001;
+    return hz0_2->GetBinContent(hz0_2->FindBin(valx));
+  }
 }
+
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
   double valzptcor_norm=1.;
@@ -360,6 +387,8 @@ void SMPAnalyzerCore::GetEventWeights(){
   zptweight=1;
   tauprefix="";
   z0weight=1;
+  z0weight_dilep=1;
+  z0weight_mm=1;
   if(!IsDATA){
     lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full");
     PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -379,7 +408,9 @@ void SMPAnalyzerCore::GetEventWeights(){
 	zptweight=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
       }else tauprefix="tau_";
     }
-    z0weight=GetZ0Weight(vertex_Z);
+    z0weight=GetZ0Weight(vertex_Z,0);
+    z0weight_dilep=GetZ0Weight(vertex_Z,1);
+    z0weight_mm=GetZ0Weight(vertex_Z,2);
   }
 }
     

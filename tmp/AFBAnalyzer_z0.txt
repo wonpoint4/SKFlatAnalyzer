@@ -1,4 +1,4 @@
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -y 2016
+SKFlat.py -a AFBAnalyzer -i DYJets -n 100 -y 2016
 SKFlat.py -a AFBAnalyzer -i TTLL_powheg -n 20 -y 2016
 SKFlat.py -a AFBAnalyzer -i DoubleEG -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer -i DoubleMuon -n 10 -y 2016
