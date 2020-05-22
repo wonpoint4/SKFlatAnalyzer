@@ -277,7 +277,7 @@ AFBPlotter::AFBPlotter(TString mode_="dab"){
   //samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_MuonEG_[A-Z]"); // For testing MuonEG
 
   //samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SingleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SingleElectron_[A-Z]");
-  samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_MuonEG_[A-Z]");
+  samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_MuonEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_EGamma_[A-Z]");
   samples["mm2016"]=Sample("data (#mu#mu2016)",Sample::Type::DATA,kBlack,20)+TRegexp("2016.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
   samples["mm2017"]=Sample("data (#mu#mu2017)",Sample::Type::DATA,kRed,20)+TRegexp("2017.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
   samples["mm2018"]=Sample("data (#mu#mu2018)",Sample::Type::DATA,kBlue,20)+TRegexp("2018.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
@@ -291,7 +291,7 @@ AFBPlotter::AFBPlotter(TString mode_="dab"){
   samples["ee"]=Sample("data (ee)",Sample::Type::DATA,kRed,22)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_EGamma_[A-Z]");
   samples["em"]=Sample("data (e#mu)",Sample::Type::DATA,kRed,22)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_MuonEG_[A-Z]");
 
-  samples["MC"]=Sample("MCtot",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_DYJets.root")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_[W-Z][W-Z]_pythia")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_TTLL_powheg")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_WJets_MG");
+  samples["mc"]=Sample("mc",Sample::Type::SIGNAL,kBlack)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_DYJets.root")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_[W-Z][W-Z]_pythia")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_TTLL_powheg")+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_WJets_MG");
   samples["ww"]=Sample("WW",Sample::Type::BG,kBlue)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_WW_pythia");
   samples["wz"]=Sample("WZ",Sample::Type::BG,kGreen)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_WZ_pythia");
   samples["zz"]=Sample("ZZ",Sample::Type::BG,kCyan)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_ZZ_pythia");

@@ -322,12 +322,12 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
     double eventweight_noz0zpt=lumiweight*PUweight*prefireweight;
     double eventweight_nozptPU=lumiweight*prefireweight*z0weight;
     double eventweight_noz0zptPU=lumiweight*prefireweight;
-    double eventweight_dilep=lumiweight*PUweight*prefireweight*z0weight_dilep*zptweight;
-    double eventweight_mm=lumiweight*PUweight*prefireweight*z0weight_mm*zptweight;
+    double eventweight_fitz0=lumiweight*PUweight*prefireweight*z0weight_fitz0*zptweight;
+    //double eventweight_fitz0BS=lumiweight*PUweight*prefireweight*z0weight_fitz0BS*zptweight;
 
     FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight",vertex_Z,eventweight,120,-15,15);
-    FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_dilep",vertex_Z,eventweight_dilep,120,-15,15);
-    FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_mm",vertex_Z,eventweight_mm,120,-15,15);
+    FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_fitz0",vertex_Z,eventweight_fitz0,120,-15,15);
+    //FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_fitz0BS",vertex_Z,eventweight_fitz0BS,120,-15,15);
     FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_noz0",vertex_Z,eventweight_noz0,120,-15,15);
     FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_nozpt",vertex_Z,eventweight_nozpt,120,-15,15);
     FillHist(channelname+"/"+prefix+"z0_before_dilepton_weight_noz0zpt",vertex_Z,eventweight_noz0zpt,120,-15,15);
@@ -348,8 +348,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
       }
       if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dilepton",eventweight);
       FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight",vertex_Z,eventweight,120,-15,15);
-      FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_dilep",vertex_Z,eventweight_dilep,120,-15,15);
-      FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_mm",vertex_Z,eventweight_mm,120,-15,15);
+      FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_fitz0",vertex_Z,eventweight_fitz0,120,-15,15);
+      //FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_fitz0BS",vertex_Z,eventweight_fitz0BS,120,-15,15);
       FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_noz0",vertex_Z,eventweight_noz0,120,-15,15);
       FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_nozpt",vertex_Z,eventweight_nozpt,120,-15,15);
       FillHist(channelname+"/"+prefix+"z0_before_ptcut_weight_noz0zpt",vertex_Z,eventweight_noz0zpt,120,-15,15);
@@ -364,8 +364,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
           if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dzcut",eventweight);
 	}
 	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight",vertex_Z,eventweight,120,-15,15);
-	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_dilep",vertex_Z,eventweight_dilep,120,-15,15);
-	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_mm",vertex_Z,eventweight_mm,120,-15,15);
+	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_fitz0",vertex_Z,eventweight_fitz0,120,-15,15);
+        //FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_fitz0BS",vertex_Z,eventweight_fitz0BS,120,-15,15);
 	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_noz0",vertex_Z,eventweight_noz0,120,-15,15);
 	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_nozpt",vertex_Z,eventweight_nozpt,120,-15,15);
 	FillHist(channelname+"/"+prefix+"z0_after_ptcut_weight_noz0zpt",vertex_Z,eventweight_noz0zpt,120,-15,15);
@@ -429,8 +429,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 	map<TString,double> map_weight;
 	if(p.weightbit&NominalWeight){
 	  map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
-          map_weight["_dilep"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_dilep*RECOSF*IDSF*ISOSF*triggerSF;
-          map_weight["_mm"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_mm*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_fitz0"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0*RECOSF*IDSF*ISOSF*triggerSF;
+          //map_weight["_fitz0BS"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0BS*RECOSF*IDSF*ISOSF*triggerSF;
 
 	  map_weight["_noz0"]=lumiweight*PUweight*prefireweight*zptweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozpt"]=lumiweight*PUweight*prefireweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;

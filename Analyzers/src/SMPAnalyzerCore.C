@@ -3,7 +3,10 @@
 SMPAnalyzerCore::SMPAnalyzerCore(){
   roc=NULL;
   rocele=NULL;
-  hz0=NULL;
+  hz0_data=NULL;
+  hz0_mc=NULL;
+  hz1_data=NULL;
+  hz1_mc=NULL;
 }
 
 SMPAnalyzerCore::~SMPAnalyzerCore(){
@@ -12,7 +15,10 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   }
   if(roc) delete roc;
   if(rocele) delete rocele;
-  if(hz0) delete hz0;
+  if(hz0_data) delete hz0_data;
+  if(hz0_mc) delete hz0_mc;
+  if(hz1_data) delete hz1_data;
+  if(hz1_mc) delete hz1_mc;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -317,43 +323,32 @@ void SMPAnalyzerCore::SetupRoccoR(){
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
-  TFile fz0_1(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_dilep.root");
-  TFile fz0_2(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_mm.root");
-  hz0=(TH1D*)fz0.Get("z0weight");
-  if(hz0) hz0->SetDirectory(0);
+  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won.root");
+  hz0_data=(TH1D*)fz0.Get("data");
+  hz0_mc=(TH1D*)fz0.Get("mc");
+  hz1_data=(TF1*)fz0.Get("data_fit");
+  hz1_mc=(TF1*)fz0.Get("mc_fit");
+  if(hz0_data) hz0_data->SetDirectory(0);
+  if(hz0_mc) hz0_mc->SetDirectory(0);
   fz0.Close();
-  hz0_1=(TH1D*)fz0_1.Get("data");
-  if(hz0_1) hz0_1->SetDirectory(0);
-  fz0_1.Close();
-  hz0_2=(TH1D*)fz0_2.Get("data");
-  if(hz0_2) hz0_2->SetDirectory(0);
-  fz0_2.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx, int sys){
-  if(sys==0){
-    double xmin=hz0->GetXaxis()->GetXmin();
-    double xmax=hz0->GetXaxis()->GetXmax();
+  if(sys==0){ //Use TH1 weight
+    double xmin=hz0_data->GetXaxis()->GetXmin();
+    double xmax=hz0_data->GetXaxis()->GetXmax();
     if(xmin>=0) valx=fabs(valx);
     if(valx<xmin) valx=xmin+0.001;
     if(valx>xmax) valx=xmax-0.001;
-    return hz0->GetBinContent(hz0->FindBin(valx));
+    double data_valx = hz0_data->GetBinContent(hz0_data->FindBin(valx));
+    double mc_valx = hz0_mc->GetBinContent(hz0_mc->FindBin(valx));
+    double norm = hz0_mc->Integral()/hz0_data->Integral();
+    return norm*data_valx/mc_valx;
   }
-  else if(sys==1){
-    double xmin=hz0_1->GetXaxis()->GetXmin();
-    double xmax=hz0_1->GetXaxis()->GetXmax();
-    if(xmin>=0) valx=fabs(valx);
-    if(valx<xmin) valx=xmin+0.001;
-    if(valx>xmax) valx=xmax-0.001;
-    return hz0_1->GetBinContent(hz0_1->FindBin(valx));
-  }
-  else{
-    double xmin=hz0_2->GetXaxis()->GetXmin();
-    double xmax=hz0_2->GetXaxis()->GetXmax();
-    if(xmin>=0) valx=fabs(valx);
-    if(valx<xmin) valx=xmin+0.001;
-    if(valx>xmax) valx=xmax-0.001;
-    return hz0_2->GetBinContent(hz0_2->FindBin(valx));
+  else{ //Use TF1 weight
+    double data_val = hz1_data->Eval(valx);
+    double mc_val = hz1_mc->Eval(valx);
+    double norm = hz1_mc->Integral(-100,100)/hz1_data->Integral(-100,100);
+    return norm*data_val/mc_val;
   }
 }
 
@@ -387,8 +382,7 @@ void SMPAnalyzerCore::GetEventWeights(){
   zptweight=1;
   tauprefix="";
   z0weight=1;
-  z0weight_dilep=1;
-  z0weight_mm=1;
+  z0weight_fitz0=1;
   if(!IsDATA){
     lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full");
     PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -409,8 +403,7 @@ void SMPAnalyzerCore::GetEventWeights(){
       }else tauprefix="tau_";
     }
     z0weight=GetZ0Weight(vertex_Z,0);
-    z0weight_dilep=GetZ0Weight(vertex_Z,1);
-    z0weight_mm=GetZ0Weight(vertex_Z,2);
+    z0weight_fitz0=GetZ0Weight(vertex_Z,1);
   }
 }
     
