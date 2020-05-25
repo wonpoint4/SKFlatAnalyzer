@@ -15,6 +15,7 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
+  if(MaxEvent>0) reductionweight=1.*fChain->GetEntries()/MaxEvent;
   SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
@@ -356,7 +357,7 @@ void SMPAnalyzerCore::GetEventWeights(){
   tauprefix="";
   z0weight=1;
   if(!IsDATA){
-    lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full");
+    lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full")*reductionweight;
     PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
     PUweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
     PUweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
@@ -375,6 +376,8 @@ void SMPAnalyzerCore::GetEventWeights(){
       }else tauprefix="tau_";
     }
     z0weight=GetZ0Weight(vertex_Z);
+  }else{
+    lumiweight=reductionweight;
   }
 }
     
