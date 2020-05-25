@@ -110,10 +110,6 @@ void AFBAnalyzer::executeEvent(){
       int nhardjet=(hardj0?1:0)+(hardj1?1:0)+(hardj2?1:0);
       */
      
-      map<TString,double> map_weight;
-      map_weight[""]=lumiweight*zptweight;
-      map_weight["_nozptweight"]=lumiweight;
-
       TLorentzVector gen_dilepton=gen_l0+gen_l1;
       double gen_dimass=gen_dilepton.M();
       double gen_dirap=gen_dilepton.Rapidity();
@@ -136,10 +132,14 @@ void AFBAnalyzer::executeEvent(){
 	cout<<"wrong pid for parton"<<endl;
 	exit(EXIT_FAILURE);
       }
-      costhetaweight=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,abs(lhe_l0.ID())==11?Lepton::Flavour::ELECTRON:Lepton::Flavour::MUON,"_aew129");
-      costhetaweight_up=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,abs(lhe_l0.ID())==11?Lepton::Flavour::ELECTRON:Lepton::Flavour::MUON,"_aew128");
-      costhetaweight_down=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,abs(lhe_l0.ID())==11?Lepton::Flavour::ELECTRON:Lepton::Flavour::MUON,"_aew130");
+      costhetaweight=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,"_pdg");
+      costhetaweight_up=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,"_up");
+      costhetaweight_down=GetCosThetaWeight(gen_dimass,gen_dipt,gen_cost_correct,"_down");
       
+      map<TString,double> map_weight;
+      map_weight[""]=lumiweight*zptweight*costhetaweight;
+      map_weight["_noweight"]=lumiweight;
+
       //////////////// Fill LHE,Gen hists //////////////////////
       if(IsNominalRun&&!IsSkimmed&&!HasFlag("ALL")){
 	FillHists(channelname,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
@@ -405,7 +405,9 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 
 	///////////////////////map_weight//////////////////
 	map<TString,double> map_weight;
-	if(p.weightbit&NominalWeight) map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+	if(p.weightbit&NominalWeight){
+	  map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+	}
 	if(p.weightbit&SystematicWeight){
 	  map_weight["_noPUweight"]=lumiweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_PUweight_up"]=lumiweight*PUweight_up*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
@@ -441,6 +443,10 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 	  map_weight["_triggerSF_up"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF_up;
 	  map_weight["_triggerSF_down"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF_down;
 	  
+	  map_weight["_nocosthetaweight"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
+	  map_weight["_costhetaweight_up"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight_up*RECOSF*IDSF*ISOSF*triggerSF;
+	  map_weight["_costhetaweight_down"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight_down*RECOSF*IDSF*ISOSF*triggerSF;
+
 	}
 	if(p.weightbit&PDFWeight){
 	  for(unsigned int i=0;i<PDFWeights_Scale->size();i++){
@@ -731,13 +737,12 @@ void AFBAnalyzer::DeleteCosThetaWeight(){
   for(auto& iter:map_hist_cost)
     if(iter.second) delete iter.second;
 }
-double AFBAnalyzer::GetCosThetaWeight(double mass,double pt,double cost,Lepton::Flavour flavour,TString suffix){
+double AFBAnalyzer::GetCosThetaWeight(double mass,double pt,double cost,TString suffix){
   double val=1.;
   if(!IsDYSample) return val;
-  TString sflavour=flavour==Lepton::MUON?"muon":"electron";
   TString MCName=MCSample;
   MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
-  TString hname=MCName+"_"+sflavour+suffix;
+  TString hname=MCName+suffix;
   auto it=map_hist_cost.find(hname);
   if(it!=map_hist_cost.end())
     val*=GetBinContentUser(it->second,mass,pt,cost,0);

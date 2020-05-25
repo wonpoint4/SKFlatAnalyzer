@@ -32,7 +32,7 @@ public:
   void FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
   void SetupCosThetaWeight();
   void DeleteCosThetaWeight();
-  double GetCosThetaWeight(double mass,double pt,double cost,Lepton::Flavour flavour,TString suffix);
+  double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
   
   TString hardprefix;
   vector<TRandom3*> toy_random;
