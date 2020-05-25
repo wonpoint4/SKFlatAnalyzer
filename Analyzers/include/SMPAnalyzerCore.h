@@ -120,6 +120,7 @@ public:
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
+  double reductionweight=1;
   double lumiweight=1;
   double PUweight=1,PUweight_up=1,PUweight_down=1;
   double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
