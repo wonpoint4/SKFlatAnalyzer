@@ -339,12 +339,12 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
       if(HasFlag("REGION_cf")){
 	if(p.leps.at(0)->Charge()>0&&p.leps.at(1)->Charge()>0) prefix="pp_"+prefix;
 	else if(p.leps.at(0)->Charge()<0&&p.leps.at(1)->Charge()<0) prefix="mm_"+prefix;
-	else return;
+	else continue;
       }else{
 	if(p.leps.at(0)->Charge()*p.leps.at(1)->Charge()>0) prefix="ss_"+prefix;
       }
       if(channelname.Contains(TRegexp("em20[0-9][0-9]"))){
-	if(p.leps.at(0)->LeptonFlavour() == p.leps.at(1)->LeptonFlavour()) return;
+	if(p.leps.at(0)->LeptonFlavour() == p.leps.at(1)->LeptonFlavour()) continue;
       }
       if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"dilepton",eventweight);
       if(p.leps.at(0)->Pt()>p.lep0ptcut&&p.leps.at(1)->Pt()>p.lep1ptcut){
