@@ -631,6 +631,10 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
     FillHist(channelname+"/"+pre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
     FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
 
+    FillHist(channelname+"/"+pre+"z0_dimass"+suf,vertex_Z,dimass,map_weight,120,-15,15, 40,60,1260);
+    FillHist(channelname+"/"+pre+"z0_dirap"+suf,vertex_Z,dirap,map_weight,120,-15,15, 30,-3,3);
+    FillHist(channelname+"/"+pre+"z0_dipt"+suf,vertex_Z,dipt,map_weight,120,-15,15, 50,0,1000);
+
     if(!pre.Contains("gen")&&!pre.Contains("lhe")&&!pre.Contains("truth")){
       //FillHist(channelname+"/"+pre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
       //FillHist(channelname+"/"+pre+"met_raw"+suf,dimass,dirap,dipt,pfMET_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
