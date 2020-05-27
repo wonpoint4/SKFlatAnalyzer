@@ -3,7 +3,7 @@
 #include"Plotter.cc"
 class AFBPlotter:public Plotter{
 public:
-  void SetupEntries();
+  void SetupEntries(TString mode);
   void SetupSystematics();
   int Setup(TString mode_);
   TString mode;
@@ -128,7 +128,7 @@ TH1* AFBPlotter::GetHist(const Sample& sample,Plot plot,TString additional_optio
   }
 }
 void AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot){
-  if(DEBUG>3) std::cout<<"###DEBUG### [AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot)"<<endl;
+  PAll("[AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot)");
   if(strstr(obj->ClassName(),"TH4D")!=NULL){
     TH4D* hist4d=(TH4D*)obj;
     int ixmin=0,iymin=0,izmin=0,iumin=0;
@@ -156,11 +156,11 @@ void AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot){
     else if(axisstring=="(z)") obj=(TObject*)hist4d->ProjectionZ("_pz",ixmin,ixmax,iymin,iymax,iumin,iumax);
     else if(axisstring=="(u)") obj=(TObject*)hist4d->ProjectionU("_pu",ixmin,ixmax,iymin,iymax,izmin,izmax);
     else{
-      if(DEBUG>0) std::cout<<"###ERROR### [Plotter::GetHist] wrong axisstring or classname"<<endl;
+      PError("[Plotter::GetHist] wrong axisstring or classname");
     }
     delete hist4d;
   }else{
-    if(DEBUG>1) std::cout<<"###WARNING## [AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot)] Unsupported class name "<<obj->ClassName()<<endl;
+    PError((TString)"[AFBPlotter::GetHistActionForAdditionalClass(TObject*& obj,Plot plot)] Unsupported class name "+obj->ClassName());
   }
 }
 void AFBPlotter::AddPlot(TString plotkey,TString option){
@@ -206,9 +206,9 @@ pair<double,double> AFBPlotter::GetAFBAndError(TH1* hist){
 }
 
 TH1* AFBPlotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den){
-  if(DEBUG>3) std::cout<<"###DEBUG### [AFBPlotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den)]"<<endl;
+  PDebug("[AFBPlotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,TH1* hist_backward_num,TH1* hist_backward_den)]");
   if(!hist_forward_num||!hist_forward_den||!hist_backward_num||!hist_backward_den){
-    if(DEBUG>1) std::cout<<"###WARING### [AFBPlotter::GetHistweightedAFB] It is null TH1*"<<endl;
+    PError("[AFBPlotter::GetHistweightedAFB] It is null TH1*");
     return NULL;
   }
   hist_forward_num=GetTH1(hist_forward_num,true);
@@ -233,9 +233,9 @@ TH1* AFBPlotter::GetHistWeightedAFB(TH1* hist_forward_num,TH1* hist_forward_den,
   return hist;
 }
 TH1* AFBPlotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward){
-  if(DEBUG>3) std::cout<<"###DEBUG### [AFBPlotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward)]"<<endl;
+  PDebug("[AFBPlotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward)]");
   if(!hist_forward||!hist_backward){
-    if(DEBUG>1) std::cout<<"###WARING### [AFBPlotter::GetHistAFB] It is null TH1*"<<endl;
+    PError("[AFBPlotter::GetHistAFB] It is null TH1*");
     return NULL;
   }
   hist_forward=GetTH1(hist_forward,true);
@@ -260,14 +260,7 @@ TH1* AFBPlotter::GetHistAFB(TH1* hist_forward,TH1* hist_backward){
 
 AFBPlotter::AFBPlotter(TString mode_="dab"){
   SetupTH4D();
-  vector<TString> files=Split(gSystem->GetFromPipe("find $SKFlatOutputDir$SKFlatV/AFBAnalyzer/ -type f"),"\n");
-  for(int i=0;i<files.size();i++){
-    TString file=files[i];
-    TString key=Replace(file,TString()+getenv("SKFlatOutputDir")+getenv("SKFlatV")+"/AFBAnalyzer/","");
-    Sample frag(key,Sample::Type::UNDEF,i%8+2);
-    frag.files.push_back(make_tuple(file,1.,"",""));
-    samples[key]=frag;
-  } 
+  ScanFiles(TString()+getenv("SKFlatOutputDir")+getenv("SKFlatV")+"/AFBAnalyzer/");
   
   //############# Testing z0 without requiring trigger firing
   //samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SingleElectron_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_EGamma_[A-Z]"); // For testing SingleElectron
@@ -278,6 +271,9 @@ AFBPlotter::AFBPlotter(TString mode_="dab"){
 
   //samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SingleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SingleElectron_[A-Z]");
   samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_MuonEG_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_EGamma_[A-Z]");
+=======
+  samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_SkimTree_Dilepton_.*EG.*_[A-Z]")+TRegexp("/DATA/AFBAnalyzer_.*Electron.*_[A-Z]");
+>>>>>>> a1cb7c6924d540c1a4190d43c5d71a32f0a212f3
   samples["mm2016"]=Sample("data (#mu#mu2016)",Sample::Type::DATA,kBlack,20)+TRegexp("2016.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
   samples["mm2017"]=Sample("data (#mu#mu2017)",Sample::Type::DATA,kRed,20)+TRegexp("2017.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
   samples["mm2018"]=Sample("data (#mu#mu2018)",Sample::Type::DATA,kBlue,20)+TRegexp("2018.*/DATA/AFBAnalyzer_SkimTree_Dilepton_DoubleMuon_[A-Z]");
@@ -299,11 +295,12 @@ AFBPlotter::AFBPlotter(TString mode_="dab"){
   samples["wjets"]=Sample("W",Sample::Type::BG,kYellow)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_WJets_MG");
   samples["tt"]=Sample("t#bar{t}",Sample::Type::BG,kMagenta)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_TTLL_powheg");
 
-  samples["amc"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_DYJets.root");
-  samples["amcJet"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DY[0-9]Jets.root");
-  samples["amcPt"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_Pt-[0-9]*To[0-9Inf]*.root");
-  samples["amcM"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_M-[0-9]*to[0-9Inf]*.root");
-  samples["mg"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_MG.root");
+  samples["amc"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_SkimTree_Dilepton_DYJets$");
+  samples["amcJet"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DY[0-9]Jet$");
+  samples["amcPt"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_Pt-[0-9]*To[0-9Inf]*$t");
+  samples["amcM"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_M-[0-9]*to[0-9Inf]*$");
+  samples["mg"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/AFBAnalyzer_DYJets_MG$");
+
   TString dysamples[]={"amc","amcJet","amcPt","amcM","mg"};
   for(auto dysample:dysamples){
     samples["tau_"+dysample]="tau_"%(Sample("#gamma*/Z#rightarrow#tau#tau",Sample::Type::BG,kGreen)+dysample);
@@ -313,11 +310,18 @@ AFBPlotter::AFBPlotter(TString mode_="dab"){
     samples["truth_"+dysample]="truth_"%(Sample("#gamma*/Z#rightarrowll (truth)",Sample::Type::SIGNAL,kCyan)+dysample);
   }
     
-  samples["amcPt_stack"]=Sample("DY Pt-binned",Sample::Type::STACK,kBlue)+TRegexp("/AFBAnalyzer_.*DYJets_Pt-[0-9]*To[0-9Inf]*.root");
+  samples["amcPt_stack"]=Sample("DY Pt-binned",Sample::Type::STACK,kBlue)+TRegexp("/AFBAnalyzer_.*DYJets_Pt-[0-9]*To[0-9Inf]*$");
   for(auto& sub:samples["amcPt_stack"].subs) sub.title=sub.title(TRegexp("Pt-[0-9]*To[0-9Inf]*"));
-  samples["amcM_stack"]=Sample("DY M-binned",Sample::Type::STACK,kBlue)+TRegexp("/AFBAnalyzer_.*DYJets_M-[0-9]*to[0-9Inf]*.root");
+  samples["amcM_stack"]=Sample("DY M-binned",Sample::Type::STACK,kBlue)+TRegexp("/AFBAnalyzer_.*DYJets_M-[0-9]*to[0-9Inf]*$");
   for(auto& sub:samples["amcM_stack"].subs) sub.title=sub.title(TRegexp("M-[0-9]*to[0-9Inf]*"));
-  
+
+  /*
+  samples["private"]=Sample("aMC@NLO private",Sample::Type::A,Style(kBlue,20));
+  samples["private"].replace["([em][em])20[0-9][0-9]"]="$1";
+  samples["private"].files.push_back(make_tuple("/data8/Users/hsseo/GeneratorTools/Hist/DY4D_MG_DY_NLO0_aew$",1,"",""));
+  samples["private_correct"]=(Sample("correct direction",Sample::Type::A,Style(kRed,20))+"private")%"_correct";
+  samples["private_0"]=(Sample("PDG sin^{2}#theta",Sample::Type::A,Style(kRed,20))+"private")%"_0";
+  */
   plot_axisnames["dimass"]="m(ll) [GeV]";
   plot_axisnames["dirap"]="y(ll)";
   plot_axisnames["dipt"]="p_{T}(ll) [GeV]";
@@ -356,19 +360,20 @@ int AFBPlotter::Setup(TString mode_){
     //exit(1);
   }
 
-  SetupEntries();
+  SetupEntries(mode);
   SetupSystematics();
   SetupPlots("plot_AFBAnalyzer/"+mode+"/plot.dat");
 
-  if(DEBUG) std::cout<<"[AFBPlotter::Setup] nentries: "<<entries.size()<<endl;
-  if(DEBUG) std::cout<<"[AFBPlotter::Setup] nsys: "<<systematics.size()<<endl;
-  if(DEBUG) std::cout<<"[AFBPlotter::Setup] nplot: "<<plots.size()<<endl;
+  if(Verbosity) std::cout<<"[AFBPlotter::Setup] nentries: "<<entries.size()<<endl;
+  if(Verbosity) std::cout<<"[AFBPlotter::Setup] nsys: "<<systematics.size()<<endl;
+  if(Verbosity) std::cout<<"[AFBPlotter::Setup] nplot: "<<plots.size()<<endl;
 
   return 1;
 }
  
-void AFBPlotter::SetupEntries(){
-  if(DEBUG) std::cout<<"[AFBPlotter::SetupEntries] mode="<<mode<<endl;
+void AFBPlotter::SetupEntries(TString mode){
+  if(Verbosity) std::cout<<"[AFBPlotter::SetupEntries] mode="<<mode<<endl;
+  entries.clear();
   if(mode.Contains(TRegexp("muon$"))||mode.Contains(TRegexp("electron$"))){
     TString schannel;
     if(mode.Contains(TRegexp("muon$"))) schannel="muon";
@@ -416,6 +421,10 @@ void AFBPlotter::SetupEntries(){
       TPRegexp("^\\*").Substitute(entry_key,"");
       TPRegexp("([+-])").Substitute(entry_key," $1","g");
       vector<TString> sample_keys=Split(entry_key," ");
+      if(sample_keys.size()==1){
+	AddEntry(entry_key);
+	continue;
+      }
       for(int i=0;i<(int)sample_keys.size();i++){
 	TString sample_key=Replace(sample_keys[i],"[+-]","");
 	Sample sample;
@@ -434,7 +443,7 @@ void AFBPlotter::SetupEntries(){
 	  else if(mode.Contains("amc")) sample=sample-"tau_amc";
 	  sample="ss_"%(sample-"vv"-"wjets"-"tt");
 	}else{
-	  if(DEBUG>0) std::cout<<"###ERROR### [AFBPlotter::SetupEntries] No "<<entry_key<<" in samples"<<endl;
+	  PError("[AFBPlotter::SetupEntries] No "+entry_key+" in samples");
 	  exit(1);
 	}
 	if(i==0){
@@ -444,7 +453,7 @@ void AFBPlotter::SetupEntries(){
 	}else if(sample_keys[i].BeginsWith("+")) entry=entry+sample;
 	else if(sample_keys[i].BeginsWith("-")) entry=entry-sample;
 	else{
-	  if(DEBUG>0) std::cout<<"###ERROR### [AFBPlotter::SetupEntries] Wrong syntax "<<entry_key<<endl;
+	  PError("###ERROR### [AFBPlotter::SetupEntries] Wrong syntax "+entry_key);
 	  exit(1);
 	}
       }
@@ -455,7 +464,7 @@ void AFBPlotter::SetupEntries(){
   
   
 void AFBPlotter::SetupSystematics(){
-  if(DEBUG>0)  std::cout<<"[AFBPlotter::SetupSystematics]"<<endl;
+  if(Verbosity)  std::cout<<"[AFBPlotter::SetupSystematics]"<<endl;
   systematics["RECOSF"]=MakeSystematic("RECOSF",Systematic::Type::ENVELOPE,(1<<Sample::Type::SIGNAL)+(1<<Sample::Type::BG),"_RECOSF_up _RECOSF_down");
   systematics["IDSF"]=MakeSystematic("IDSF",Systematic::Type::ENVELOPE,(1<<Sample::Type::SIGNAL)+(1<<Sample::Type::BG),"_IDSF_up _IDSF_down");
   systematics["ISOSF"]=MakeSystematic("ISOSF",Systematic::Type::ENVELOPE,(1<<Sample::Type::SIGNAL)+(1<<Sample::Type::BG),"_ISOSF_up _ISOSF_down");

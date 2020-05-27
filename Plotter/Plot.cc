@@ -9,6 +9,7 @@ public:
   TString histname;
   TString sysname;
   TString suffix;
+  TString xtitle,ytitle;
   int varibit=0;
   Type type=Type::CompareAndRatio;
   int rebin=0;
@@ -21,6 +22,7 @@ public:
   void Print(std::ostream& out=cout) const;
   void SetOption(TString option_);
   void RemoveOption(TString option_);
+  vector<TString> SplitOptions(TString option_);
   bool IsMultiPad() const;
   Plot operator-(const char* opt);
   Plot operator+(const char* opt);
@@ -44,7 +46,7 @@ Plot Plot::operator/(Plot p){
   return temp;
 }
 void Plot::SetOption(TString option_){
-  for(const auto& opt:Split(option_," ")){
+  for(const auto& opt:SplitOptions(option_)){
     if(opt.Contains(TRegexp("^name:"))) name=opt(5,999);
     else if(opt.Contains(TRegexp("^histname:"))) histname=opt(9,999); 
     else if(opt.Contains(TRegexp("^type:"))) type=(Type)TString(opt(5,999)).Atoi();
@@ -60,6 +62,8 @@ void Plot::SetOption(TString option_){
     else if(opt.Contains(TRegexp("^sysname:"))) sysname=opt(8,999);
     else if(opt.Contains(TRegexp("^suffix:"))) suffix=opt(7,999);
     else if(opt.Contains(TRegexp("^varibit:"))) varibit=TString(opt(8,999)).Atoi();
+    else if(opt.Contains(TRegexp("^xtitle:"))) xtitle=opt(7,999);
+    else if(opt.Contains(TRegexp("^ytitle:"))) ytitle=opt(7,999);
     else option+=" "+opt;
   }
 }   
@@ -80,6 +84,8 @@ void Plot::RemoveOption(TString option_){
     else if(remove=="sysname") sysname="";
     else if(remove=="suffix") suffix="";
     else if(remove=="varibit") varibit=0;
+    else if(remove=="xtitle") xtitle="";
+    else if(remove=="ytitle") ytitle="";
     else{
       for(int i=0;i<options.size();i++){
         if(options[i].Contains(TRegexp("^"+remove))){
@@ -93,8 +99,23 @@ void Plot::RemoveOption(TString option_){
   for(const auto& opt:options) newoption+=opt+" ";
   option=newoption;
 }
+vector<TString> Plot::SplitOptions(TString option_){
+  vector<TString> options_raw=Split(option_," ");
+  vector<TString> options_out;
+  for(const auto& opt:options_raw){
+    if(options_out.size()&&options_out.back().CountChar('\'')%2==1) options_out.back()+=" "+opt;
+    else options_out.push_back(opt);
+  }
+  for(auto& opt:options_out){
+    if(opt.CountChar('\'')%2==0){
+      opt.ReplaceAll("'","");
+    }
+  }
+  return options_out;
+}
+    
+  
 void Plot::Print(std::ostream& out) const{
-  //if(DEBUG>3) std::cout<<"###DEBUG### [void Plot::Print(std::ostream& out) const]"<<endl;
   out<<"<Plot> ";
   out<<"name:"<<name<<" histname:"<<histname;
   if(type!=Type::UNDEF) out<<" type:"<<type;
@@ -121,13 +142,11 @@ void Plot::Print(std::ostream& out) const{
   out<<" </Plot>\n";
 }
 Plot::~Plot(){
-  if(DEBUG>3) std::cout<<"###DEBUG### [Plot::~Plot()]"<<endl;
 }
 Plot::Plot(vector<TString> words){
-  if(DEBUG>3) std::cout<<"###DEBUG### [Plot::Plot(vector<TString> words)]"<<endl;
   int imax=words.size();
   if(imax==0) return;
-  if(words[0]!="<Plot>") cout<<"###ERROR### [Plot::Plot] Wrong format"<<endl;
+  if(words[0]!="<Plot>") PError("[Plot::Plot] Wrong format");
   vector<TString> subplot_words;
   int depth=0;
   for(int i=0;i<imax;i++){
@@ -149,10 +168,9 @@ Plot::Plot(vector<TString> words){
       else if(depth>1) subplot_words.push_back(words[i]);
     }      
   }
-  this->Print();
+  //this->Print();
 }  
 Plot::Plot(TString line="") : Plot(Split(line," ")){
-  if(DEBUG>3) std::cout<<"###DEBUG### [Plot::Plot(TString line="")]"<<endl;
 }
 bool Plot::IsMultiPad() const {
   if(type==Type::CompareAndRatio||type==Type::CompareAndDiff||type==Type::CompareAndSig) return true;

@@ -36,7 +36,7 @@ Style::Style(int color,int marker,int fillstyle_,TString drawoption_){
 }
     
 void Style::Apply(TH1* hist) const {
-  if(DEBUG>3) cout<<"###DEBUG### [Style::Apply(TH1* hist)]"<<endl;
+  PAll("[Style::Apply(TH1* hist)]");
   if(hist){
     if(strstr(hist->ClassName(),"THStack")==NULL){
       if(linecolor>=0) hist->SetLineColor(linecolor);
@@ -52,7 +52,16 @@ void Style::Apply(TH1* hist) const {
   }
 }
 void Style::Print() const{
-  cout<<"fillcolor:"<<fillcolor<<" fillstyle:"<<fillstyle<<" linecolor:"<<linecolor<<" linestyle:"<<linestyle<<" linewidth:"<<linewidth<<" markercolor:"<<markercolor<<" markerstyle:"<<markerstyle<<" markersize:"<<markersize<<" drawoption:"<<drawoption<<endl;
+  if(fillcolor!=-1) cout<<"FC:"<<fillcolor<<" ";
+  if(fillstyle!=-1) cout<<"FS:"<<fillstyle<<" ";
+  if(linecolor!=-1) cout<<"LC:"<<linecolor<<" ";
+  if(linestyle!=-1) cout<<"LS:"<<linestyle<<" ";
+  if(linewidth!=-1) cout<<"LW:"<<linewidth<<" ";
+  if(markercolor!=-1) cout<<"MC:"<<markercolor<<" ";
+  if(markerstyle!=-1) cout<<"MS:"<<markerstyle<<" ";
+  if(markersize!=-1) cout<<"MW:"<<markersize<<" ";
+  if(drawoption!="") cout<<"DO:'"<<drawoption<<"' ";
+  cout<<endl;
 }
 
 #endif

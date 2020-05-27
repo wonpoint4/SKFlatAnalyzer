@@ -3,36 +3,28 @@
 #define __EFFICIENCYPLOTTER_CC__
 class EfficiencyPlotter:public Plotter{
 public:
-  void SetupEntries();
   void SetupSystematics();
   int Setup(TString mode_);
   TString mode;
   EfficiencyPlotter(TString mode_="data sim_stack");
-  double GetChi2(TH1* h1,TH1* h2=NULL);
 };
 EfficiencyPlotter::EfficiencyPlotter(TString mode_){
-  vector<TString> files=Split(gSystem->GetFromPipe("find $SKFlatOutputDir$SKFlatV/EfficiencyValidation/ -type f"),"\n");
-  for(int i=0;i<files.size();i++){
-    TString file=files[i];
-    TString key=Replace(file,TString()+getenv("SKFlatOutputDir")+getenv("SKFlatV")+"/EfficiencyValidation/","");
-    Sample sample(key,Sample::Type::UNDEF,i%8+2);
-    sample.files.push_back(make_tuple(file,1.,"",""));
-    samples[key]=sample;
-  } 
+  ScanFiles((TString)getenv("SKFlatOutputDir")+getenv("SKFlatV")+"/EfficiencyValidation/");
 
   samples["muon"]=Sample("data (ee)",Sample::Type::DATA,kBlack,20)+TRegexp("/DATA/EfficiencyValidation_DoubleMuon_[A-Z]")+TRegexp("/DATA/EfficiencyValidation_SingleMuon_[A-Z]");
   samples["electron"]=Sample("data (#mu#mu)",Sample::Type::DATA,kBlack,20)+TRegexp("/EfficiencyValidation_.*EG.*_[A-Z]")+TRegexp("/EfficiencyValidation_SingleElectron_[A-Z]");
   samples["data"]=Sample("data",Sample::Type::DATA,kBlack,20)+"muon"+"electron";
-  samples["amc"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/EfficiencyValidation_DYJets.root");
-  samples["amctt"]="tau_"%(Sample("#gamma*/Z#rightarrow#tau#tau",Sample::Type::BG,kGreen)+TRegexp("/EfficiencyValidation_DYJets.root"));
-  samples["vv"]=Sample("Diboson",Sample::Type::BG,kBlue)+TRegexp("/EfficiencyValidation_[W-Z][W-Z]_pythia.root");
-  samples["wjets"]=Sample("W",Sample::Type::BG,kYellow)+TRegexp("/EfficiencyValidation_WJets_MG.root");
-  samples["tt"]=Sample("t#bar{t}",Sample::Type::BG,kMagenta)+TRegexp("/EfficiencyValidation_TTLL_powheg.root");
+  samples["amc"]=Sample("#gamma*/Z#rightarrowll",Sample::Type::SIGNAL,kRed)+TRegexp("/EfficiencyValidation_DYJets$");
+  samples["amctt"]="tau_"%(Sample("#gamma*/Z#rightarrow#tau#tau",Sample::Type::BG,kGreen)+TRegexp("/EfficiencyValidation_DYJets$"));
+  samples["vv"]=Sample("Diboson",Sample::Type::BG,kBlue)+TRegexp("/EfficiencyValidation_[W-Z][W-Z]_pythia$");
+  samples["wjets"]=Sample("W",Sample::Type::BG,kYellow)+TRegexp("/EfficiencyValidation_WJets_MG$");
+  samples["tt"]=Sample("t#bar{t}",Sample::Type::BG,kMagenta)+TRegexp("/EfficiencyValidation_TTLL_powheg$");
 
   samples["sim_stack"]=Sample("sim",Sample::Type::STACK,Style(kRed,-1,3001,"e2"),Style(kCyan,-1,3001,"e2"))+"amc"+"amctt"+"vv"+"wjets"+"tt";
-  samples["sim"]=Sample("sim",Sample::Type::SUM,kRed)+"amc"+"amctt"+"vv"+"wjets"+"tt";
-  samples["sim_noSF"]=(Sample("sim",Sample::Type::SUM,kBlue)+"amc"+"amctt"+"vv"+"wjets"+"tt")%"_noefficiencySF";
+  samples["sim"]=Sample("simulation",Sample::Type::SUM,Style(kRed,22,3001,"e2"),Style(kCyan,-1,3001,"e2"))+"amc"+"amctt"+"vv"+"wjets"+"tt";
+  samples["sim_noSF"]=(Sample("w/o efficiency SF",Sample::Type::SUM,kBlue)+"amc"+"amctt"+"vv"+"wjets"+"tt")%"_noefficiencySF";
   for(auto& sub:samples["sim_noSF"].subs) sub.type=Sample::Type::A;
+  samples["sim_noSF"].style.linewidth=1;
 
   Setup(mode_);
 }
@@ -42,7 +34,7 @@ int EfficiencyPlotter::Setup(TString mode_){
 
   mode=mode_;
 
-  SetupEntries();
+  SetupEntries(mode_);
   SetupSystematics();
   SetupPlots("plot_EfficiencyValidation/"+mode+"/plot.dat");
 
@@ -51,20 +43,6 @@ int EfficiencyPlotter::Setup(TString mode_){
   if(DEBUG) std::cout<<"[Setup] nplot: "<<plots.size()<<endl;
 
   return 1;
-}
-
-void EfficiencyPlotter::SetupEntries(){
-  if(DEBUG)  cout<<"[EfficiencyPlotter::SetupEntries] mode="<<mode<<endl;
-  vector<TString> entry_keys=Split(mode," ");
-  for(auto entry_key:entry_keys){
-    if(samples.find(entry_key)!=samples.end())
-      entries.push_back(samples[entry_key]);
-    else{
-      if(DEBUG>0) std::cout<<"###ERROR### [EfficiencyPlotter::SetupEntries] No "<<entry_key<<" in samples"<<endl;
-    }
-  }
-  if(DEBUG>1) PrintEntries();
-  return;
 }
 void EfficiencyPlotter::SetupSystematics(){
   if(DEBUG)  cout<<"[SetupSystematics]"<<endl;
@@ -83,18 +61,4 @@ void EfficiencyPlotter::SetupSystematics(){
   systematics["efficiencySF"]=MakeSystematic("efficiencySF",Systematic::Type::MULTI,0,"RECOSF IDSF ISOSF triggerSF");
 
 }
-
-double EfficiencyPlotter::GetChi2(TH1* h1,TH1* h2){
-  double chi2=0;
-  for(int i=h1->GetXaxis()->GetFirst();i<h1->GetXaxis()->GetLast()+1;i++){
-    double x1=h1->GetBinContent(i);
-    double ex1=h1->GetBinError(i);
-    double x2=h2?h2->GetBinContent(i):0.;
-    double ex2=h2?h2->GetBinError(i):0.;
-    chi2+=pow((x1-x2)/(ex1-ex2),2);
-  }
-  chi2/=h1->GetXaxis()->GetLast()-h1->GetXaxis()->GetFirst()+1;
-  return chi2;
-}
-  
 #endif
