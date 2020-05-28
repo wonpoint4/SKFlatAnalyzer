@@ -152,7 +152,7 @@ void EfficiencyValidation::executeEventWithChannelName(TString channelname){
       TString prefix=tauprefix;
       if(p.leps.at(0)->Charge()*p.leps.at(1)->Charge()>0)
 	//prefix="ss_"+prefix;
-	return;
+	continue;
       FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"OS dilepton",eventweight);
       if(p.leps.at(0)->Pt()>p.lep0ptcut&&p.leps.at(1)->Pt()>p.lep1ptcut){
 	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"LepPtCut",eventweight);
@@ -260,6 +260,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
     
     //for leptons
     for(int i=0;i<(int)leps.size();i++){
+      if(i>1) break;
       double pt=leps.at(i)->Pt();
       double eta=leps.at(i)->Eta();
       TString charge=leps.at(i)->Charge()>0?"p":"m";

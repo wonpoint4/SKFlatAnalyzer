@@ -97,8 +97,9 @@ public:
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
   void PrintGens(const vector<Gen>& gens);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
+  double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed);
+  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -115,18 +116,19 @@ public:
   const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
 
   map<TString,TH2D*> map_hist_zpt;
-  TH1D *hz0;
+  TH1D *hz0=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
+  double reductionweight=1;
   double lumiweight=1;
   double PUweight=1,PUweight_up=1,PUweight_down=1;
   double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
   double zptweight=1;
   double z0weight=1;
 
-  RoccoR* roc;
-  RocelecoR* rocele;
+  RoccoR* roc=NULL;
+  RocelecoR* rocele=NULL;
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
