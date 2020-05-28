@@ -35,6 +35,7 @@ AnalyzerCore::~AnalyzerCore(){
   //==== output rootfile
 
   if(outfile) outfile->Close();
+  delete outfile;
 
   //==== Tools
 
