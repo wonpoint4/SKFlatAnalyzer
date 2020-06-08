@@ -467,13 +467,17 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 
 	  map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_fitz0"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
-          //map_weight["_fitz0BS"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0BS*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_noz0"]=lumiweight*PUweight*prefireweight*zptweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 
+          map_weight["_nocos_noz0"]=lumiweight*PUweight*prefireweight*zptweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_nocos"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_nocos_fitz0"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0*RECOSF*IDSF*ISOSF*triggerSF;
-	  map_weight["_noz0"]=lumiweight*PUweight*prefireweight*zptweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_nocos_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_nozpt_noz0"]=lumiweight*PUweight*prefireweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozpt"]=lumiweight*PUweight*prefireweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
-	  map_weight["_noz0zpt"]=lumiweight*PUweight*prefireweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+	  map_weight["_nozpt_fitz0"]=lumiweight*PUweight*prefireweight*z0weight_fitz0*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+          map_weight["_nozpt_fitz1"]=lumiweight*PUweight*prefireweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozptPU"]=lumiweight*prefireweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_noz0zptPU"]=lumiweight*prefireweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_noz0zptPUcos"]=lumiweight*prefireweight*RECOSF*IDSF*ISOSF*triggerSF;

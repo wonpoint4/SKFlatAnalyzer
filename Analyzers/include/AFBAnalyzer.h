@@ -53,8 +53,8 @@ public:
 
   static const int grid_mbinnum=5;
   const double grid_mbin[grid_mbinnum+1]={60,80,100,120,400,3000};
-  static const int grid_ybinnum=4;
-  const double grid_ybin[grid_ybinnum+1]={-2.4,-1.2,0,1.2,2.4};
+  static const int grid_ybinnum=6;
+  const double grid_ybin[grid_ybinnum+1]={-2.4,-2,-1.2,0,1.2,2,2.4};
   static const int grid_ptbinnum=4;
   const double grid_ptbin[grid_ptbinnum+1]={0,20,50,100,650};
 

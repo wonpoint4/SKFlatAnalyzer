@@ -118,7 +118,7 @@ public:
   map<TString,TH2D*> map_hist_zpt;
 
   TH1D *hz0_data=NULL, *hz0_mc=NULL;
-  TF1 *hz1_data=NULL, *hz1_mc=NULL;
+  TF1 *hz1_data=NULL, *hz1_mc=NULL, *hz2_data=NULL, *hz2_mc=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
@@ -127,7 +127,7 @@ public:
   double PUweight=1,PUweight_up=1,PUweight_down=1;
   double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
   double zptweight=1;
-  double z0weight=1, z0weight_fitz0=1;
+  double z0weight=1, z0weight_fitz0=1, z0weight_fitz1=1;
 
   RoccoR* roc=NULL;
   RocelecoR* rocele=NULL;

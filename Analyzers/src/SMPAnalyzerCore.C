@@ -322,6 +322,8 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   hz0_mc=(TH1D*)fz0.Get("mc");
   hz1_data=(TF1*)fz0.Get("data_fit");
   hz1_mc=(TF1*)fz0.Get("mc_fit");
+  hz2_data=(TF1*)fz0.Get("data_fit_z0_less15");
+  hz2_mc=(TF1*)fz0.Get("mc_fit_z0_less15");
   if(hz0_data) hz0_data->SetDirectory(0);
   if(hz0_mc) hz0_mc->SetDirectory(0);
   fz0.Close();
@@ -335,13 +337,19 @@ double SMPAnalyzerCore::GetZ0Weight(double valx, int sys){
     if(valx>xmax) valx=xmax-0.001;
     double data_valx = hz0_data->GetBinContent(hz0_data->FindBin(valx));
     double mc_valx = hz0_mc->GetBinContent(hz0_mc->FindBin(valx));
-    double norm = hz0_mc->Integral()/hz0_data->Integral();
+    double norm = hz0_mc->Integral(1,hz0_mc->GetNbinsX())/hz0_data->Integral(1,hz0_data->GetNbinsX());
     return norm*data_valx/mc_valx;
   }
-  else{ //Use TF1 weight
+  else if(sys==1){ //Use TF1 weight
     double data_val = hz1_data->Eval(valx);
     double mc_val = hz1_mc->Eval(valx);
     double norm = hz1_mc->Integral(-100,100)/hz1_data->Integral(-100,100);
+    return norm*data_val/mc_val;
+  }
+  else{
+    double data_val = hz2_data->Eval(valx);
+    double mc_val = hz2_mc->Eval(valx);
+    double norm = hz2_mc->Integral(-100,100)/hz2_data->Integral(-100,100);
     return norm*data_val/mc_val;
   }
 }
@@ -377,6 +385,7 @@ void SMPAnalyzerCore::GetEventWeights(){
   tauprefix="";
   z0weight=1;
   z0weight_fitz0=1;
+  z0weight_fitz1=1;
   if(!IsDATA){
     lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full")*reductionweight;
     PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -398,6 +407,7 @@ void SMPAnalyzerCore::GetEventWeights(){
     }
     z0weight=GetZ0Weight(vertex_Z,0);
     z0weight_fitz0=GetZ0Weight(vertex_Z,1);
+    z0weight_fitz1=GetZ0Weight(vertex_Z,2);
   }else{
     lumiweight=reductionweight;
   }
