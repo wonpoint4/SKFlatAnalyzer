@@ -7,7 +7,8 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   }
   if(roc) delete roc;
   if(rocele) delete rocele;
-  if(hz0) delete hz0;
+  if(hz0_data) delete hz0_data;
+  if(hz0_mc) delete hz0_mc;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -314,17 +315,15 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
   TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
-  hz0=(TH1D*)fz0.Get("z0weight");
-  if(hz0) hz0->SetDirectory(0);
+  hz0_data=(TF1*)fz0.Get("data_fit");
+  hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
-  double xmin=hz0->GetXaxis()->GetXmin();
-  double xmax=hz0->GetXaxis()->GetXmax();
-  if(xmin>=0) valx=fabs(valx);
-  if(valx<xmin) valx=xmin+0.001;
-  if(valx>xmax) valx=xmax-0.001;
-  return hz0->GetBinContent(hz0->FindBin(valx));
+    double data_val = hz0_data->Eval(valx);
+    double mc_val = hz0_mc->Eval(valx);
+    double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
+    return norm*data_val/mc_val;
 }
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
