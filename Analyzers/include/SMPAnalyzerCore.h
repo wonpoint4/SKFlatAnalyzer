@@ -116,7 +116,7 @@ public:
   const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
 
   map<TString,TH2D*> map_hist_zpt;
-  TH1D *hz0=NULL;
+  TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
