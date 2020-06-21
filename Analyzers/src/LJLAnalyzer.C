@@ -7,10 +7,10 @@ LJLAnalyzer::~LJLAnalyzer(){
 void LJLAnalyzer::executeEvent(){
   tauprefix="";
 
-  if(IsDYSample){
+  if(IsWSample){
     vector<LHE> lhes=GetLHEs();
     LHE l0,l1;
-    GetDYLHEParticles(lhes,l0,l1);
+    GetWLHEParticles(lhes,l0,l1);
     if(abs(l0.ID())==15) tauprefix="tau_";
   }
   

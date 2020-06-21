@@ -98,8 +98,8 @@ public:
   void PrintGens(const vector<Gen>& gens);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
-  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  void GetWLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
+  void GetWGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -118,7 +118,7 @@ public:
   map<TString,TH2D*> map_hist_zpt;
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TString tauprefix;
-  bool IsDYSample=false;
+  bool IsWSample=false;
   Event event;
   double reductionweight=1;
   double lumiweight=1;

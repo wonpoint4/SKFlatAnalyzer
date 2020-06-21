@@ -1,0 +1,29 @@
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  DYJets -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  SingleElectron -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  SingleMuon -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WW_pythia -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WZ_pythia -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  ZZ_pythia -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WJets_MG -n 40 -y 2016 --memory 5000
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLL_powheg -n 20 -y 2016
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLJ_powheg -n 20 -y 2016
+
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  DYJets -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  SingleElectron -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  SingleMuon -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WW_pythia -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WZ_pythia -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  ZZ_pythia -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WJets_MG -n 40 -y 2017 --memory 5000
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLL_powheg -n 20 -y 2017
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLJ_powheg -n 20 -y 2017
+
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  DYJets -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  EGamma -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  SingleMuon -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WW_pythia -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WZ_pythia -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  ZZ_pythia -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  WJets_MG -n 40 -y 2018 --memory 5000
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLL_powheg -n 20 -y 2018
+SKFlat.py -a AFBAnalyzer --userflags WAsym -i  TTLJ_powheg -n 20 -y 2018

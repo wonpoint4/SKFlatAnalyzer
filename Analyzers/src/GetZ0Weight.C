@@ -30,11 +30,11 @@ void GetZ0Weight::executeEvent(){
   costhetaweight=1.;
   costhetaweight_up=1.;
   costhetaweight_down=1.;
-  if(IsDYSample){
+  if(IsWSample){
     //////////////////////// Check LHE /////////////////////////
     vector<LHE> lhes=GetLHEs();
     LHE lhe_l0,lhe_l1;
-    GetDYLHEParticles(lhes,lhe_l0,lhe_l1);
+    GetWLHEParticles(lhes,lhe_l0,lhe_l1);
     TString channelname="";
     if(abs(lhe_l0.ID())!=15){
       double l0ptcut,l1ptcut,letacut;
@@ -57,9 +57,9 @@ void GetZ0Weight::executeEvent(){
       //////////////////////// GEN /////////////////////////
       vector<Gen> gens=GetGens();
       Gen gen_parton0,gen_parton1,gen_l0,gen_l1,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
-      GetDYGenParticles(gens,gen_parton0,gen_parton1,gen_l0,gen_l1,3);
-      GetDYGenParticles(gens,gen_parton0,gen_parton1,gen_l0_dressed,gen_l1_dressed,1);
-      GetDYGenParticles(gens,gen_parton0,gen_parton1,gen_l0_bare,gen_l1_bare,0);
+      GetWGenParticles(gens,gen_parton0,gen_parton1,gen_l0,gen_l1,3);
+      GetWGenParticles(gens,gen_parton0,gen_parton1,gen_l0_dressed,gen_l1_dressed,1);
+      GetWGenParticles(gens,gen_parton0,gen_parton1,gen_l0_bare,gen_l1_bare,0);
 
       TLorentzVector gen_dilepton=gen_l0+gen_l1;
       double gen_dimass=gen_dilepton.M();
@@ -444,7 +444,7 @@ void GetZ0Weight::executeEventWithChannelName(TString channelname){
         if(HasFlag("TOY")) FillHistsToy(channelname,prefix,suffix,(Particle*)p.leps[0],(Particle*)p.leps[1],map_weight);
         else{
           FillHists(channelname,prefix,suffix,(Particle*)p.leps[0],(Particle*)p.leps[1],map_weight);
-          if(IsDYSample&&prefix==""&&IsNominalRun){
+          if(IsWSample&&prefix==""&&IsNominalRun){
             vector<Gen> gens=GetGens();
             Gen truth_l0=GetGenMatchedLepton(*p.leps[0],gens);
             Gen truth_l1=GetGenMatchedLepton(*p.leps[1],gens);
@@ -713,7 +713,7 @@ void GetZ0Weight::DeleteCosThetaWeight(){
 }
 double GetZ0Weight::GetCosThetaWeight(double mass,double pt,double cost,TString suffix){
   double val=1.;
-  if(!IsDYSample) return val;
+  if(!IsWSample) return val;
   TString MCName=MCSample;
   MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
   TString hname=MCName+suffix;

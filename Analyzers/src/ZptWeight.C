@@ -9,10 +9,10 @@ void ZptWeight::executeEvent(){
   GetEventWeights();
 
   ////////////////////////check genlevel//////////////////
-  if(IsDYSample){
+  if(IsWSample){
     vector<Gen> gens=GetGens();
     Gen parton0,parton1,l0,l1;
-    GetDYGenParticles(gens,parton0,parton1,l0,l1,3);
+    GetWGenParticles(gens,parton0,parton1,l0,l1,3);
     if(tauprefix!="tau_"){
       TLorentzVector genZ=(l0+l1);
       FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap"),genZ.Pt(),fabs(genZ.Rapidity()),lumiweight*zptweight,ptbinnum,ptbin,rapbinnum,rapbin);
