@@ -91,7 +91,7 @@ public:
   void SetupZ0Weight();
   void SetupRoccoR();
   double GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour);
-  double GetZ0Weight(double z0, int sys=0);
+  double GetZ0Weight(double z0);
   double Lepton_SF(TString histkey,const Lepton* lep,int sys);
   double LeptonTrigger_SF(TString triggerSF_key,const vector<Lepton*>& leps,int sys);
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
@@ -99,7 +99,9 @@ public:
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
+  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0);
   void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
   Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -117,8 +119,7 @@ public:
 
   map<TString,TH2D*> map_hist_zpt;
 
-  TH1D *hz0_data=NULL, *hz0_mc=NULL;
-  TF1 *hz1_data=NULL, *hz1_mc=NULL, *hz2_data=NULL, *hz2_mc=NULL;
+  TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
@@ -127,7 +128,7 @@ public:
   double PUweight=1,PUweight_up=1,PUweight_down=1;
   double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
   double zptweight=1;
-  double z0weight=1, z0weight_fitz0=1, z0weight_fitz1=1;
+  double z0weight=1.;
 
   RoccoR* roc=NULL;
   RocelecoR* rocele=NULL;

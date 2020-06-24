@@ -1,7 +1,7 @@
-#include "SMPAnalyzerCore.h"
+B#include "SMPAnalyzerCore.h"
 
 
-SMPAnalyzerCore::SMPAnalyzerCore(){}
+S1;95;0cMPAnalyzerCore::SMPAnalyzerCore(){}
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   for(auto& iter:map_hist_zpt){
     if(iter.second) delete iter.second;
@@ -10,8 +10,6 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(rocele) delete rocele;
   if(hz0_data) delete hz0_data;
   if(hz0_mc) delete hz0_mc;
-  if(hz1_data) delete hz1_data;
-  if(hz1_mc) delete hz1_mc;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -317,41 +315,16 @@ void SMPAnalyzerCore::SetupRoccoR(){
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won.root");
-  hz0_data=(TH1D*)fz0.Get("data");
-  hz0_mc=(TH1D*)fz0.Get("mc");
-  hz1_data=(TF1*)fz0.Get("data_fit");
-  hz1_mc=(TF1*)fz0.Get("mc_fit");
-  hz2_data=(TF1*)fz0.Get("data_fit_z0_less15");
-  hz2_mc=(TF1*)fz0.Get("mc_fit_z0_less15");
-  if(hz0_data) hz0_data->SetDirectory(0);
-  if(hz0_mc) hz0_mc->SetDirectory(0);
+  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won_y[-2,2].root");
+  hz0_data=(TF1*)fz0.Get("data_fit");
+  hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();
 }
-double SMPAnalyzerCore::GetZ0Weight(double valx, int sys){
-  if(sys==0){ //Use TH1 weight
-    double xmin=hz0_data->GetXaxis()->GetXmin();
-    double xmax=hz0_data->GetXaxis()->GetXmax();
-    if(xmin>=0) valx=fabs(valx);
-    if(valx<xmin) valx=xmin+0.001;
-    if(valx>xmax) valx=xmax-0.001;
-    double data_valx = hz0_data->GetBinContent(hz0_data->FindBin(valx));
-    double mc_valx = hz0_mc->GetBinContent(hz0_mc->FindBin(valx));
-    double norm = hz0_mc->Integral(1,hz0_mc->GetNbinsX())/hz0_data->Integral(1,hz0_data->GetNbinsX());
-    return norm*data_valx/mc_valx;
-  }
-  else if(sys==1){ //Use TF1 weight
-    double data_val = hz1_data->Eval(valx);
-    double mc_val = hz1_mc->Eval(valx);
-    double norm = hz1_mc->Integral(-100,100)/hz1_data->Integral(-100,100);
-    return norm*data_val/mc_val;
-  }
-  else{
-    double data_val = hz2_data->Eval(valx);
-    double mc_val = hz2_mc->Eval(valx);
-    double norm = hz2_mc->Integral(-100,100)/hz2_data->Integral(-100,100);
-    return norm*data_val/mc_val;
-  }
+double SMPAnalyzerCore::GetZ0Weight(double valx){
+  double data_val = hz0_data->Eval(valx);
+  double mc_val = hz0_mc->Eval(valx);
+  double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
+  return norm*data_val/mc_val;
 }
 
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
@@ -384,8 +357,6 @@ void SMPAnalyzerCore::GetEventWeights(){
   zptweight=1;
   tauprefix="";
   z0weight=1;
-  z0weight_fitz0=1;
-  z0weight_fitz1=1;
   if(!IsDATA){
     lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full")*reductionweight;
     PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -403,11 +374,9 @@ void SMPAnalyzerCore::GetEventWeights(){
       if(abs(l0.PID())==11||abs(l0.PID())==13){
 	TLorentzVector genZ=(l0+l1);
 	zptweight=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
-      }else tauprefix="tau_";
+      }else tauprefix+="tau_";
     }
-    z0weight=GetZ0Weight(vertex_Z,0);
-    z0weight_fitz0=GetZ0Weight(vertex_Z,1);
-    z0weight_fitz1=GetZ0Weight(vertex_Z,2);
+    z0weight=GetZ0Weight(vertex_Z);
   }else{
     lumiweight=reductionweight;
   }
@@ -474,8 +443,28 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1)
   }
 }
 
-
-void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0){
+  if(!IsDYSample){
+    cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  for(int i=0;i<(int)lhes.size();i++){
+    //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
+    if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
+    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
+    if(j0.ID()==0&&abs(lhes[i].ID())==5) j0=lhes[i];
+  }
+  if(l0.ID()==0||l1.ID()==0){
+    cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(l0.Pt()<l1.Pt()){
+    LHE temp=l0;
+    l0=l1;
+    l1=temp;
+  }
+}
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode){
   //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
   if(!IsDYSample){
     cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
@@ -483,8 +472,11 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
   vector<const Gen*> leptons;
   vector<const Gen*> photons;
+  vector<const Gen*> jets;
+
   int ngen=gens.size();
   for(int i=0;i<ngen;i++){
+    //gens.at(i).Print();
     if(!gens.at(i).isPrompt()) continue;
     int genpid=gens.at(i).PID();
     if(gens.at(i).isHardProcess()){
@@ -497,6 +489,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
       else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
     }
+    if(!gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)) jets.push_back(&gens[i]);
   }
   int nlepton=leptons.size();
   for(int i=0;i<nlepton;i++){
@@ -512,6 +505,11 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
 	}
       }
     }
+  }
+  int njet=jets.size();
+  for(int i=0;i<njet;i++){
+    if(!(jets[i]->PID()==5||jets[i]->PID()==-5)) continue;
+    if((jets[i]->Pt()>j0.Pt())) j0=*jets[i];
   }
   if(mode>=3){
     if(nlepton>=4){
@@ -540,7 +538,72 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     }
   }
 }
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR                                                                                                                                                                                           
+  if(!IsDYSample){
+    cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  vector<const Gen*> leptons;
+  vector<const Gen*> photons;
 
+  int ngen=gens.size();
+  for(int i=0;i<ngen;i++){
+    if(!gens.at(i).isPrompt()) continue;
+    int genpid=gens.at(i).PID();
+    if(gens.at(i).isHardProcess()){
+      if(abs(genpid)<7||genpid==21){
+        if(parton0.IsEmpty()) parton0=gens[i];
+        else if(parton1.IsEmpty()) parton1=gens[i];
+      }
+    }
+    if(gens.at(i).Status()==1){
+      if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
+      else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
+    }
+  }
+  int nlepton=leptons.size();
+  for(int i=0;i<nlepton;i++){
+    for(int j=i+1;j<nlepton;j++){
+      if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){
+        if(leptons[i]->Pt()>leptons[j]->Pt()){
+          l0=*leptons[i];
+          l1=*leptons[j];
+        }else{
+          l0=*leptons[j];
+          l1=*leptons[i];
+        }
+      }
+    }
+  }
+  if(mode>=3){
+    if(nlepton>=4){
+      for(int i=0;i<nlepton;i++){
+        if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+        for(int j=i+1;j<nlepton;j++){
+          if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+          if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+          vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+          vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+          if(history_i.at(1)==history_j.at(1)) photons.push_back(&gens[history_i.at(1)]);
+        }
+      }
+    }
+    for(const auto& photon:photons){
+      vector<int> history=TrackGenSelfHistory(*photon,gens);
+      if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
+      else if(gens[history.at(1)].PID()==l1.PID()) l1+=*photon;
+    }
+  }else if(mode>=1){
+    double delr=mode==1?0.1:0.4;
+    for(const auto& photon:photons){
+      if(l0.DeltaR(*photon)>delr&&l1.DeltaR(*photon)>delr) continue;
+      if(l0.DeltaR(*photon)<l1.DeltaR(*photon)) l0+=*photon;
+      else l1+=*photon;
+    }
+  }
+}
 Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
   //0: default
   //1: dressed 0.1
@@ -557,7 +620,6 @@ Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<
     
   return gen_lepton;
 }
-
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
   if(id=="passMediumID_Selective"){
