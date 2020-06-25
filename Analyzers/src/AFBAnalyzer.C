@@ -174,7 +174,7 @@ void AFBAnalyzer::executeEvent(){
 	FillHist(channelname+"/gen_neu_mass",gen_dimass,gen_dirap,gen_dipt,gen_l1.M(),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,40,-5,5);
 	FillHist(channelname+"/gen_neu_pt-met",gen_dimass,gen_dirap,gen_dipt,gen_l1.Pt()-pfMET_Type1_pt,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,100,-100,100);
 
-	TLorentzVector met(pfMET_Type1_pt,pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0);
+	TLorentzVector met(pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0,pfMET_Type1_pt);
 	FillHist(channelname+"/gen_mass-mass",gen_dimass,gen_dirap,gen_dipt,gen_dimass-(gen_l1+met).M(),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,500,-1000,1000);
 	FillHist(channelname+"/gen_rap-rap",gen_dimass,gen_dirap,gen_dipt,gen_dirap-(gen_l1+met).Rapidity(),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,120,-15,25);
         FillHist(channelname+"/gen_rap",gen_dimass,gen_dirap,gen_dipt,gen_dirap,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,150,-20,30);
@@ -512,7 +512,7 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
 } 
 double AFBAnalyzer::GetCosThetaCS(const Particle *p0,int direction){
   const TLorentzVector *l0,*l1;
-  TLorentzVector *met= new TLorentzVector(pfMET_Type1_pt,pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0);
+  TLorentzVector *met= new TLorentzVector(pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0,pfMET_Type1_pt);
   if(p0->Charge()<0){
     l0=p0;
     l1=met;
@@ -558,7 +558,7 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,int direction){
 double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut){
   TLorentzVector *l0,*l1;
   if(leps.size()==1){
-    TLorentzVector *met= new TLorentzVector(pfMET_Type1_pt,pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0);
+    TLorentzVector *met= new TLorentzVector(pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0,pfMET_Type1_pt);
     if(leps.at(0)->Charge()<0){
       l0=leps.at(0);
       l1=met;
@@ -627,7 +627,7 @@ void AFBAnalyzer::FillHistsToy(TString channelname,TString pre,TString suf,Parti
   for(int i=0;i<n_toy;i++) FillHists(channelname,pre,suf+Form("_toy%d",i),l0,l1,Multiply(map_weight,toy_weight[i]));
 }
 void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle* l0,map<TString,double> map_weight){
-  TLorentzVector met(pfMET_Type1_pt,pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0);
+  TLorentzVector met(pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0,pfMET_Type1_pt);
   TLorentzVector dilepton=(*l0)+met;
   double dimass=dilepton.M();
   double dirap=dilepton.Rapidity();
