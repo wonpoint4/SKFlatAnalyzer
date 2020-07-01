@@ -1,7 +1,7 @@
-B#include "SMPAnalyzerCore.h"
+#include "SMPAnalyzerCore.h"
 
 
-S1;95;0cMPAnalyzerCore::SMPAnalyzerCore(){}
+SMPAnalyzerCore::SMPAnalyzerCore(){}
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   for(auto& iter:map_hist_zpt){
     if(iter.second) delete iter.second;
@@ -452,7 +452,7 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,
     //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
     if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
     if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
-    if(j0.ID()==0&&abs(lhes[i].ID())==5) j0=lhes[i];
+    if(j0.ID()==0&&abs(lhes[i].ID())==5&&lhes[i].Status()==1) j0=lhes[i];
   }
   if(l0.ID()==0||l1.ID()==0){
     cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
@@ -489,7 +489,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
       else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
     }
-    if(!gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)) jets.push_back(&gens[i]);
+    if(gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)&&gens.at(i).Pt()>5.) jets.push_back(&gens[i]);
   }
   int nlepton=leptons.size();
   for(int i=0;i<nlepton;i++){

@@ -41,8 +41,11 @@ public:
   double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
+  std::vector<Jet> jets;
   std::vector<Jet> bjets;
   int n_bjet=0;
+  double bjet_charge=-1.5;
+  double bjet_rap=0;
 
   static const int afb_mbinnum=40;
   const double afb_mbin[afb_mbinnum+1]={60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
