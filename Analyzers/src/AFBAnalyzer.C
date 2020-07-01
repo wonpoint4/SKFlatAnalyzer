@@ -265,7 +265,7 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
   map<TString,Parameter> map_parameter;
   
   if(channelname.Contains(TRegexp("mm20[0-9][0-9]"))){
-    Parameter p("IDISO_SF_MediumID_trkIsoLoose_Q","",{"Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q"},20.,10.);
+    Parameter p("IDISO_SF_MediumID_trkIsoLoose_Q","",{"Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q"},50.,30.);
     
     map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]),
@@ -285,7 +285,7 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
       map_parameter["_noroccor"]=p.Clone(MakeLeptonPointerVector(map_muons["_noroccor"]));
     }
   }else if(channelname.Contains(TRegexp("ee20[0-9][0-9]"))){
-    Parameter p("ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"},25.,15.);
+    Parameter p("ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"},50.,30.);
     
     map_electrons["_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
     map_electrons[""]=ElectronEnergyCorrection(map_electrons["_noroccor"],0,0);
@@ -326,8 +326,8 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
     p.electronIDSF="ID_SF_MediumID_Q";
     p.muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
     p.triggerSF={"",""};
-    p.lep0ptcut=25.;
-    p.lep1ptcut=15.;
+    p.lep0ptcut=50.;
+    p.lep1ptcut=30.;
 
     map_electrons["_noroccor"]=SMPGetElectrons("passMediumID",0.0,2.4);
     map_electrons[""]=ElectronEnergyCorrection(map_electrons["_noroccor"],0,0);
@@ -467,17 +467,17 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 
 	  map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_fitz0"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
-          map_weight["_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+          //map_weight["_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_noz0"]=lumiweight*PUweight*prefireweight*zptweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 
           map_weight["_nocos_noz0"]=lumiweight*PUweight*prefireweight*zptweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_nocos"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_nocos_fitz0"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz0*RECOSF*IDSF*ISOSF*triggerSF;
-          map_weight["_nocos_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*RECOSF*IDSF*ISOSF*triggerSF;
+          //map_weight["_nocos_fitz1"]=lumiweight*PUweight*prefireweight*zptweight*z0weight_fitz1*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_nozpt_noz0"]=lumiweight*PUweight*prefireweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozpt"]=lumiweight*PUweight*prefireweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozpt_fitz0"]=lumiweight*PUweight*prefireweight*z0weight_fitz0*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
-          map_weight["_nozpt_fitz1"]=lumiweight*PUweight*prefireweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
+          //map_weight["_nozpt_fitz1"]=lumiweight*PUweight*prefireweight*z0weight_fitz1*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_nozptPU"]=lumiweight*prefireweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
 	  map_weight["_noz0zptPU"]=lumiweight*prefireweight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF;
           map_weight["_noz0zptPUcos"]=lumiweight*prefireweight*RECOSF*IDSF*ISOSF*triggerSF;

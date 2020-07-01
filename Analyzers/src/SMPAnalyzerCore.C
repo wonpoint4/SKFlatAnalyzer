@@ -317,13 +317,13 @@ void SMPAnalyzerCore::SetupRoccoR(){
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won.root");
+  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won_y[-2,2].root");
   hz0_data=(TH1D*)fz0.Get("data");
   hz0_mc=(TH1D*)fz0.Get("mc");
   hz1_data=(TF1*)fz0.Get("data_fit");
   hz1_mc=(TF1*)fz0.Get("mc_fit");
-  hz2_data=(TF1*)fz0.Get("data_fit_z0_less15");
-  hz2_mc=(TF1*)fz0.Get("mc_fit_z0_less15");
+  //hz2_data=(TF1*)fz0.Get("data_fit_z0_less15");
+  //hz2_mc=(TF1*)fz0.Get("mc_fit_z0_less15");
   if(hz0_data) hz0_data->SetDirectory(0);
   if(hz0_mc) hz0_mc->SetDirectory(0);
   fz0.Close();
@@ -407,7 +407,7 @@ void SMPAnalyzerCore::GetEventWeights(){
     }
     z0weight=GetZ0Weight(vertex_Z,0);
     z0weight_fitz0=GetZ0Weight(vertex_Z,1);
-    z0weight_fitz1=GetZ0Weight(vertex_Z,2);
+    //z0weight_fitz1=GetZ0Weight(vertex_Z,2);
   }else{
     lumiweight=reductionweight;
   }
