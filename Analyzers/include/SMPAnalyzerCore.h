@@ -150,10 +150,10 @@ public:
     double lep0ptcut=0,lep1ptcut=0;
     int weightbit=NominalWeight;
     vector<Lepton*> leps;
-    inline Parameter Clone(vector<Lepton*> leps_,int weightbit_=0){
+    inline Parameter Clone(vector<Lepton*> leps_,int weightbit_=-1){
       Parameter out=*this;
       out.leps=leps_;
-      if(weightbit_) out.weightbit=weightbit_;
+      if(weightbit_>=0) out.weightbit=weightbit_;
       return out;
     }
     Parameter(){

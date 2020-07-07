@@ -331,7 +331,9 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
   zrap=fabs(zrap);
   TString sflavour=flavour==Lepton::MUON?"muon":"electron";
   TString MCName=MCSample;
-  MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
+  if(MCName.Contains(TRegexp("^DY[0-9]Jets$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_Pt-[0-9]*To[0-9Inf]*$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_M-[0-9]*to[0-9Inf]*$"))) MCName="DYJets";
   TString hzptname=MCName+"_"+sflavour;
   TString hnormname=hzptname+"_norm";
   auto it=map_hist_zpt.find(hzptname);

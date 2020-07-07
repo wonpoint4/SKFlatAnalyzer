@@ -247,7 +247,7 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
   if(channelname.Contains(TRegexp("mm20[0-9][0-9]"))){
     Parameter p("IDISO_SF_MediumID_trkIsoLoose_Q","",{"Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q"},20.,10.);
     
-    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
+    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,3);
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]),
 			      (IsNominalRun?NominalWeight:0)
 			      +(HasFlag("SYS")&&!IsDATA?SystematicWeight:0)
@@ -442,10 +442,6 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 	  map_weight["_notriggerSF"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF;
 	  map_weight["_triggerSF_up"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF_up;
 	  map_weight["_triggerSF_down"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight*RECOSF*IDSF*ISOSF*triggerSF_down;
-	  
-	  map_weight["_nocosthetaweight"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
-	  map_weight["_costhetaweight_up"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight_up*RECOSF*IDSF*ISOSF*triggerSF;
-	  map_weight["_costhetaweight_down"]=lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight_down*RECOSF*IDSF*ISOSF*triggerSF;
 
 	}
 	if(p.weightbit&PDFWeight){
@@ -589,8 +585,8 @@ void AFBAnalyzer::FillHists(TString channelname,TString pre,TString suf,Particle
   double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
   double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
   FillHist(channelname+"/"+pre+"costhetaCS"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
-  FillHist(channelname+"/"+pre+"costhetaCS_den"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
-  FillHist(channelname+"/"+pre+"costhetaCS_num"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+  //FillHist(channelname+"/"+pre+"costhetaCS_den"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,den_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+  //FillHist(channelname+"/"+pre+"costhetaCS_num"+suf,dimass,dirap,dipt,cost,Multiply(map_weight,num_weight),afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 
   if(!HasFlag("PDFSYS")){
     FillHist(channelname+"/"+pre+"l0pt"+suf,dimass,dirap,dipt,l0->Pt(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,lptbinnum,(double*)lptbin);
@@ -741,7 +737,9 @@ double AFBAnalyzer::GetCosThetaWeight(double mass,double pt,double cost,TString 
   double val=1.;
   if(!IsDYSample) return val;
   TString MCName=MCSample;
-  MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
+  if(MCName.Contains(TRegexp("^DY[0-9]Jets$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_Pt-[0-9]*To[0-9Inf]*$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_M-[0-9]*to[0-9Inf]*$"))) MCName="DYJets";
   TString hname=MCName+suffix;
   auto it=map_hist_cost.find(hname);
   if(it!=map_hist_cost.end())
