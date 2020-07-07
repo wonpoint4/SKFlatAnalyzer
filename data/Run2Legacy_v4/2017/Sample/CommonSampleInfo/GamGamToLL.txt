@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumw
+GamGamToLL GamGamToLL 14.4178 151456.000000 151446.000000
