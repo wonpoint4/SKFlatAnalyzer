@@ -40,6 +40,7 @@ public:
   bool PassID(TString ID) const;
 
   double GetTaggerResult(JetTagging::Tagger tg) const;
+  double GetPileupJetId();
 
 private:
 

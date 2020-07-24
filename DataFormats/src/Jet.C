@@ -124,3 +124,6 @@ double Jet::GetTaggerResult(JetTagging::Tagger tg) const {
   }
 }
 
+double Jet::GetPileupJetId(){
+  return j_PileupJetId;
+}

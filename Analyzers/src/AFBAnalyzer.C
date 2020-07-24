@@ -4,7 +4,7 @@ void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
   SetupCosThetaWeight();
   
-  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::mujets,JetTagging::mujets)};
+  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets)};
   mcCorr->SetJetTaggingParameters(jtps);
 
   SetupToy(100);
@@ -31,13 +31,13 @@ void AFBAnalyzer::executeEvent(){
   costhetaweight_down=1.;
 
   jets.clear();
-  jets=GetJets("tightLepVeto",20,2.7);
+  jets=GetJets("tightLepVeto",30,2.4);
   std::sort(jets.begin(),jets.end(),PtComparing);
   n_bjet=0;
   bjet_charge=-1.5;
   bjet_rap=0;
   bjets.clear();
-  JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::mujets,JetTagging::mujets);
+  JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
   for(const auto& jet:jets){
     if(mcCorr->IsBTagged_2a(jtp,jet)){
       n_bjet++;
@@ -156,54 +156,95 @@ void AFBAnalyzer::executeEvent(){
       //map_weight["_noweight"]=lumiweight;
       map_weight[""]=lumiweight; 
 
-      if((gen_parton0.PID()==21&&abs(gen_parton1.PID())==5) || (gen_parton1.PID()==21&&abs(gen_parton0.PID())==5)){
-	//if(gen_parton1.PID()==21&&abs(gen_parton0.PID())==5){
-	if(gen_j0.PID()==5 && lhe_j0.ID()==5) tauprefix+="Dyb_";
-	else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) tauprefix+="Dybbar_";
-	//else tauprefix+="bBkg1_";
+      // This test yields nothing as expected!
+      //if(lhes[0].ID()!=gen_parton0.PID()||lhes[1].ID()!=gen_parton1.PID()) tauprefix+="Weird1_";
+      //if(lhes[0].Pz()<0||lhes[1].Pz()>0) tauprefix+="Weird2_";
+
+      // Only qg, gq collisions
+      if((abs(gen_parton0.PID())<=5&&gen_parton1.PID()==21) || (gen_parton0.PID()==21&&abs(gen_parton1.PID())<=5)){
+	//if((abs(gen_parton0.PID())<=5&&gen_parton1.PID()==21)) tauprefix+="qg_";
+	//else tauprefix+="gq_";
+
+	if(gen_parton0.PID()==5||gen_parton1.PID()==5) tauprefix+="Dyb_";
+	else if(gen_parton0.PID()==-5||gen_parton1.PID()==-5) tauprefix+="Dybbar_";
+        else if(gen_parton0.PID()==4||gen_parton1.PID()==4) tauprefix+="Dyc_";
+        else if(gen_parton0.PID()==-4||gen_parton1.PID()==-4) tauprefix+="Dycbar_";
+	else if(abs(gen_parton0.PID())<4||abs(gen_parton1.PID())<4) tauprefix+="Dyudsg_";
+	else tauprefix+="Weird_"; //this should be empty
       }
+      //qq qqbar gg collsions
       else{
-	//if(gen_j0.PID()==5 && lhe_j0.ID()==5) tauprefix+="bBkg2_";
-        //else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) tauprefix+="bBkg3_";
-	//else if(abs(lhe_j0.ID())==5) tauprefix+="bBkg4_";
-        //else if(abs(gen_j0.PID())==5) tauprefix+="bBkg5_";
+	/*
+	if(gen_j0.PID()==5 && lhe_j0.ID()==5) tauprefix+="bBkg2_";
+        else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) tauprefix+="bBkg3_";
+	else if(gen_j0.PID()==4 && lhe_j0.ID()==4) tauprefix+="cBkg2_";
+        else if(gen_j0.PID()==-4 && lhe_j0.ID()==-4) tauprefix+="cBkg3_";
+	else if(abs(lhe_j0.ID())==5) tauprefix+="bBkg4_";
+        else if(abs(gen_j0.PID())==5) tauprefix+="bBkg5_";
+        else if(abs(lhe_j0.ID())==4) tauprefix+="cBkg4_";
+        else if(abs(gen_j0.PID())==4) tauprefix+="cBkg5_";
+	*/
       }
     
       //////////////// Fill LHE,Gen hists //////////////////////
       if(IsNominalRun){
-        FillHist(channelname+"/"+tauprefix+"lhe_jetID",lhe_j0.ID(),map_weight,20,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jetpT",lhe_j0.Pt(),map_weight,200,0,1000);
-        FillHist(channelname+"/"+tauprefix+"lhe_jeteta",lhe_j0.Eta(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy",(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy2",(lhe_l0+lhe_l1).Rapidity()+lhe_j0.Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy3",(lhe_l0+lhe_l1-lhe_j0).Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy4",(lhe_l0+lhe_l1+lhe_j0).Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy5",(lhe_l0+lhe_l1-lhe_j0).Pz(),map_weight,100,-1000,1000);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy6",(lhe_l0+lhe_l1+lhe_j0).Pz(),map_weight,100,-1000,1000);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy7",((lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy8",((lhe_l0+lhe_l1-lhe_j0).Rapidity())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy9",((lhe_l0+lhe_l1-lhe_j0).Pz())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zdy10",((lhe_l0+lhe_l1-lhe_j0).Eta())>0?1:0,map_weight,10,-5,5);
+	vector<TString> accp = {""};//, "accep_"};
+	for(unsigned int k=0;k<accp.size();k++){
+	  if(accp.at(k)=="accep_"){
+	    if(abs(lhe_l0.Rapidity())>2.4 || abs(lhe_l1.Rapidity())>2.4 || abs(lhe_j0.Rapidity())>2.4) continue;
+	  }
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jetID",lhe_j0.ID(),map_weight,50,-25,25);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jetpT",lhe_j0.Pt(),map_weight,200,0,1000);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jeteta",lhe_j0.Eta(),map_weight,200,-10,10);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdy",(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity(),map_weight,200,-10,10);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdphi",(lhe_l0+lhe_l1).DeltaPhi(lhe_j0),map_weight,100,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zy",(lhe_l0+lhe_l1).Rapidity(),map_weight,200,-10,10);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zy_2D",(lhe_l0+lhe_l1).Rapidity(),lhe_j0.Rapidity(),map_weight,200,-10,10,200,-10,10);
+	  /*FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest0",((lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest1",(((lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity()) * ((lhe_l0+lhe_l1).Rapidity()+lhe_j0.Rapidity()))>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest2",((lhe_l0+lhe_l1).Rapidity()*lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest3",(lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest4",(((lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity()) * (lhe_j0.Rapidity()))>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest5",(((lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity()) * ((lhe_l0+lhe_l1).Rapidity()+lhe_j0.Rapidity()) * (lhe_l0+lhe_l1).Rapidity()*lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest6",(0.9*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest7",(0.8*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest8",(0.7*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest9",(0.6*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest10",(0.5*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_jet_Zdytest11",(0.4*(lhe_l0+lhe_l1).Rapidity()-lhe_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest0",((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest1",(((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity()) * ((gen_l0+gen_l1).Rapidity()+gen_j0.Rapidity()))>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest2",((gen_l0+gen_l1).Rapidity()*gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest3",(gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest4",(((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity()) * (gen_j0.Rapidity()))>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest5",(((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity()) * ((gen_l0+gen_l1).Rapidity()+gen_j0.Rapidity()) * (gen_l0+gen_l1).Rapidity()*gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest6",(0.9*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest7",(0.8*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest8",(0.7*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest9",(0.6*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest10",(0.5*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdytest11",(0.4*(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  */
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jetID",gen_j0.PID(),map_weight,50,-25,25);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jetpT",gen_j0.Pt(),map_weight,200,0,1000);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jeteta",gen_j0.Eta(),map_weight,200,-10,10);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdy",(gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity(),map_weight,200,-10,10);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zdphi",(gen_l0+gen_l1).DeltaPhi(gen_j0),map_weight,100,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zy",(gen_l0+gen_l1).Rapidity(),map_weight,200,-10,10);
+	  //FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy",((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_jet_Zy_2D",(gen_l0+gen_l1).Rapidity(),gen_j0.Rapidity(),map_weight,200,-10,10,200,-10,10);
 
-        FillHist(channelname+"/"+tauprefix+"lhe_jet_Zy",(lhe_l0+lhe_l1).Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"gen_jetID",gen_j0.PID(),map_weight,20,-10,10);
-        FillHist(channelname+"/"+tauprefix+"gen_jetpT",gen_j0.Pt(),map_weight,200,0,1000);
-        FillHist(channelname+"/"+tauprefix+"gen_jeteta",gen_j0.Eta(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy",((gen_l0+gen_l1).Rapidity()-gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
-	FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy2",((gen_l0+gen_l1).Rapidity()+gen_j0.Rapidity())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy3",((gen_l0+gen_l1-gen_j0).Rapidity())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy4",((gen_l0+gen_l1+gen_j0).Rapidity())>0?1:0,map_weight,10,-5,5);
-	FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy5",((gen_l0+gen_l1-gen_j0).Pz())>0?1:0,map_weight,10,-5,5);
-	FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy6",((gen_l0+gen_l1+gen_j0).Pz())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy7",((gen_l0+gen_l1).Eta()-gen_j0.Eta())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy8",((gen_l0+gen_l1).Eta()+gen_j0.Eta())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy9",((gen_l0+gen_l1-gen_j0).Eta())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zdy10",((gen_l0+gen_l1+gen_j0).Eta())>0?1:0,map_weight,10,-5,5);
-        FillHist(channelname+"/"+tauprefix+"gen_jet_Zy",(gen_l0+gen_l1).Rapidity(),map_weight,200,-10,10);
-        FillHist(channelname+"/"+tauprefix+"lhe_gen_dpT",lhe_j0.Pt()-gen_j0.Pt(),map_weight,200,-50,50);
-        FillHist(channelname+"/"+tauprefix+"lhe_gen_dR",lhe_j0.DeltaR(gen_j0),map_weight,100,0,5);
-        FillHist(channelname+"/"+tauprefix+"lhe_gen_dID",lhe_j0.ID()-gen_j0.PID(),map_weight,30,-15,15);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_gen_dpT",lhe_j0.Pt()-gen_j0.Pt(),map_weight,200,-50,50);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_gen_dR",lhe_j0.DeltaR(gen_j0),map_weight,100,0,5);
+	  FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_gen_dID",lhe_j0.ID()-gen_j0.PID(),map_weight,100,-50,50);
 
+	  if(bjets.size()>0){
+	    FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_bjetdpT",lhe_j0.Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
+	    FillHist(channelname+"/"+tauprefix+accp.at(k)+"lhe_bjetdR",lhe_j0.DeltaR(bjets.at(0)),map_weight,100,0,5);
+	    FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_bjetdpT",gen_j0.Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
+	    FillHist(channelname+"/"+tauprefix+accp.at(k)+"gen_bjetdR",gen_j0.DeltaR(bjets.at(0)),map_weight,100,0,5);
+	  }
+	}
         FillHists(channelname,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
 	FillHists(channelname,"gen_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	FillHists(channelname,"gen_","_dressed",(Particle*)&gen_l0_dressed,(Particle*)&gen_l1_dressed,map_weight);
@@ -213,19 +254,11 @@ void AFBAnalyzer::executeEvent(){
 	}
 	FillHist(channelname+"/"+tauprefix+"gen_costhetaCS_correct",gen_dimass,gen_dirap,gen_dipt,gen_cost_correct,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
       }
-      if(bjets.size()>0){
-	FillHist(channelname+"/"+tauprefix+"lhe_bjetdpT",lhe_j0.Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
-	FillHist(channelname+"/"+tauprefix+"lhe_bjetdR",lhe_j0.DeltaR(bjets.at(0)),map_weight,100,0,5);
-	FillHist(channelname+"/"+tauprefix+"gen_bjetdpT",gen_j0.Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
-	FillHist(channelname+"/"+tauprefix+"gen_bjetdR",gen_j0.DeltaR(bjets.at(0)),map_weight,100,0,5);
-      }
     }
   }
   
   if(!PassMETFilter()) return;
-
   TString prefix="";
-  if(HasFlag("highmet")) prefix+="highmet/";
 			
   ///////////////// cutflow ///////////////////
   if(IsNominalRun){
@@ -235,11 +268,6 @@ void AFBAnalyzer::executeEvent(){
     FillCutflow(prefix+tauprefix+"cutflow","zpt",lumiweight*PUweight*prefireweight*zptweight);
     FillCutflow(prefix+tauprefix+"cutflow","z0",lumiweight*PUweight*prefireweight*zptweight*z0weight);
     FillCutflow(prefix+tauprefix+"cutflow","costheta",lumiweight*PUweight*prefireweight*zptweight*z0weight*costhetaweight);
-  }
-
-  if(HasFlag("highmet")){
-    if(pfMET_Type1_pt<60) return;
-    if(IsNominalRun) FillCutflow(prefix+tauprefix+"cutflow","METCut",lumiweight*PUweight*prefireweight*zptweight*z0weight);
   }
 
   vector<TString> mmtrigger, eetrigger, emtrigger;
@@ -421,11 +449,46 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
       if(p.leps.at(0)->Pt()>p.lep0ptcut&&p.leps.at(1)->Pt()>p.lep1ptcut){
 	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"ptcut",eventweight);
 
-	FillHist(channelname+"/"+prefix+"bjetNum",bjets.size(),eventweight,20,0,10);
+	FillHist(channelname+"/"+prefix+"nbjet"+suffix,bjets.size(),eventweight,7,0,7);
 	if(n_bjet!=1) return;
         if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"onebjet",eventweight);
 	bjet_charge=bjets.at(0).Charge();
 	bjet_rap=bjets.at(0).Rapidity();
+
+	if(pfMET_Type1_pt>60) return;
+	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"MET60Cut",eventweight);
+
+	if(bjets.at(0).Pt()<30){
+	  if(bjets.at(0).GetPileupJetId() <0.18) return;
+	}else if(bjets.at(0).Pt()<50){
+	  if(bjets.at(0).GetPileupJetId() <0.61) return;
+	}  
+	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"bjetPUIDCut",eventweight);
+
+	TLorentzVector *l0,*l1;
+	l0=p.leps.at(0);
+	l1=p.leps.at(1);
+	if(abs((*l0+*l1).DeltaPhi(bjets.at(0)))<1.57) return;
+        if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"ZbdPhiCut",eventweight);
+
+	vector<Jet> realjets;
+	realjets.clear();
+	for(unsigned int l=0; l<jets.size();l++){
+	  if(jets.at(l).Pt()<30){
+	    if(jets.at(l).GetPileupJetId() >0.18) realjets.push_back(jets.at(l));
+	  }else if(jets.at(l).Pt()<50){
+	    if(jets.at(l).GetPileupJetId() >0.61) realjets.push_back(jets.at(l));
+	  }
+	  else realjets.push_back(jets.at(l));
+	}
+        FillHist(channelname+"/"+prefix+"nrealjet",realjets.size(),eventweight,10,0,10);  
+	FillHist(channelname+"/"+prefix+"njet",jets.size(),eventweight,10,0,10);
+
+	if(realjets.size()>2) return;
+	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"2realjet",eventweight);
+
+        if(bjet_charge > -0.3 && bjet_charge < 0.3) return;
+	if(p.weightbit&NominalWeight) FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"bjetcharge030Cut",eventweight);
 
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
@@ -541,7 +604,7 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 	}
 
 	///////////////////////fill hists///////////////////////
-        if(bjet_charge > -0.5 && bjet_charge < 0.5) prefix += "bbmixed_";
+        //if(bjet_charge > -0.33 && bjet_charge < 0.33) prefix += "bbmixed_";
 	if(HasFlag("TOY")) FillHistsToy(channelname,prefix,suffix,(Particle*)p.leps[0],(Particle*)p.leps[1],map_weight);
 	else{
 	  FillHists(channelname,prefix,suffix,(Particle*)p.leps[0],(Particle*)p.leps[1],map_weight);
@@ -549,18 +612,25 @@ void AFBAnalyzer::executeEventWithChannelName(TString channelname){
 	  FillHist(channelname+"/"+prefix+"bjeteta",bjets.at(0).Eta(),map_weight,100,-5,5);
 	  FillHist(channelname+"/"+prefix+"bjetM",bjets.at(0).M(),map_weight,200,0,20);
 	  FillHist(channelname+"/"+prefix+"bjetCharge",bjet_charge,map_weight,200,-2,2);
+	  FillHist(channelname+"/"+prefix+"bjetPUID",bjets.at(0).GetPileupJetId(),map_weight,200,-2,2);
 
-	  TLorentzVector *l0,*l1;
-	  l0=p.leps.at(0);
-	  l1=p.leps.at(1);
-          FillHist(channelname+"/"+prefix+"yZ",(*l0+*l1).Rapidity(),map_weight,200,-10,10);
-	  FillHist(channelname+"/"+prefix+"dy_Zb",(*l0+*l1).Rapidity()-bjets.at(0).Rapidity(),map_weight,200,-10,10);
+          FillHist(channelname+"/"+prefix+"yZ",(*l0+*l1).Rapidity(),map_weight,60,-3,3);
+          FillHist(channelname+"/"+prefix+"yb",bjets.at(0).Rapidity(),map_weight,60,-3,3);
+	  FillHist(channelname+"/"+prefix+"Zb_dy",(*l0+*l1).Rapidity()-bjets.at(0).Rapidity(),map_weight,100,-5,5);
+	  FillHist(channelname+"/"+prefix+"Zb_dphi",(*l0+*l1).DeltaPhi(bjets.at(0)),map_weight,100,-5,5);
+          FillHist(channelname+"/"+prefix+"Zb_y2D",(*l0+*l1).Rapidity(),bjets.at(0).Rapidity(),map_weight,30,-3,3,30,-3,3);
 
-          FillHist(channelname+"/"+prefix+"jetNum",jets.size(),map_weight,10,0,10);
 	  for(unsigned int j=0;j<jets.size();j++){
 	    FillHist(channelname+"/"+prefix+"jet_"+Form("%i",j)+"_pT",jets.at(j).Pt(),map_weight,200,0,1000);
             FillHist(channelname+"/"+prefix+"jet_"+Form("%i",j)+"_dpT",jets.at(j).Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
+            FillHist(channelname+"/"+prefix+"jet_"+Form("%i",j)+"_PUID",jets.at(j).GetPileupJetId(),map_weight,200,-2,2);
 	  }
+	  /*
+	  for(unsigned int j=0;j<realjets.size();j++){
+	    FillHist(channelname+"/"+prefix+"realjet_"+Form("%i",j)+"_pT",realjets.at(j).Pt(),map_weight,200,0,1000);
+            FillHist(channelname+"/"+prefix+"realjet_"+Form("%i",j)+"_dpT",realjets.at(j).Pt()-bjets.at(0).Pt(),map_weight,200,-100,100);
+            FillHist(channelname+"/"+prefix+"realjet_"+Form("%i",j)+"_PUID",realjets.at(j).GetPileupJetId(),map_weight,200,-2,2);
+	    }*/
 	  if(IsDYSample&&prefix==""&&IsNominalRun){
 	    vector<Gen> gens=GetGens();
 	    Gen truth_l0=GetGenMatchedLepton(*p.leps[0],gens);
@@ -620,8 +690,8 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
   double l1pm=(l1->E()-l1->Pz())/sqrt(2);
   double dimass=dilepton.M();
   double dipt=dilepton.Pt();
-  if(direction==0) direction=(dilepton.Rapidity()-bjet_rap)>0?1:-1;
-  if(bjet_charge>0.5) direction *= -1.;
+  if(direction==0) direction=(0.75*dilepton.Rapidity()-bjet_rap)>0?1:-1;
+  if(bjet_charge>0.3) direction *= -1.;
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 } 
 double AFBAnalyzer::GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut){

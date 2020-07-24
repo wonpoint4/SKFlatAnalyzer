@@ -452,7 +452,12 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,
     //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
     if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
     if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
-    if(j0.ID()==0&&abs(lhes[i].ID())==5&&lhes[i].Status()==1) j0=lhes[i];
+    if(j0.ID()==0&&(abs(lhes[i].ID())<7||lhes[i].ID()==21)&&lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark. (if gluon radiation only, then gluon)
+    //else if(j0.ID()&&lhes[i].ID()==j0.ID()) continue;
+    //else if(j0.ID()&&lhes[i].ID()==-j0.ID()){
+    //  j0.SetIndexIDStatus(i,21,1);
+    //  j0+=lhes[i];
+    //}
   }
   if(l0.ID()==0||l1.ID()==0){
     cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
@@ -508,7 +513,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
   int njet=jets.size();
   for(int i=0;i<njet;i++){
-    if(!(jets[i]->PID()==5||jets[i]->PID()==-5)) continue;
+    //if(!(abs(jets[i]->PID())==4||abs(jets[i]->PID())==5)) continue;
     if((jets[i]->Pt()>j0.Pt())) j0=*jets[i];
   }
   if(mode>=3){
