@@ -41,8 +41,9 @@ public:
   double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
-  std::vector<Jet> jets;
-  std::vector<Jet> bjets;
+  std::vector<Muon> muons, softmus, bmuon;
+  std::vector<Electron> electrons;
+  std::vector<Jet> jets, realjets, bjets;
   int n_bjet=0;
   double bjet_charge=-1.5;
   double bjet_rap=0;

@@ -86,6 +86,7 @@ void Gen::SetGenStatusFlag_isMostlyLikePythia6Status3(int i){
 
 void Gen::Print() const{
 
-  cout << "(Index, PID, Status, MotherIndex, Pt, Pz, Eta, Phi, M) = " << Index() << "\t" << PID() << "\t" << Status() << "\t" << MotherIndex() << "\t" << isHardProcess() << "\t" << Pt() << "\t" << Pz() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << endl;
+  //cout << "(Index, PID, Status, MotherIndex, IsHard, IsProm, Pt, Pz, Eta, Phi, M) = " << Index() << "\t" << PID() << "\t" << Status() << "\t" << MotherIndex() << "\t" << isHardProcess() << "\t" << isPrompt() << "\t" << Pt() << "\t" << Pz() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << endl;
+  cout << Index() << "\t" << PID() << "\t" << Status() << "\t" << MotherIndex() << "\t" << isHardProcess() << "\t" << isPrompt() << "\t" << Pt() << "\t" << Pz() << "\t" << Eta() << "\t" << Phi() << "\t" << M() << endl;
 
 }

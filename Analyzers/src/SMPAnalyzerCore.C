@@ -374,7 +374,7 @@ void SMPAnalyzerCore::GetEventWeights(){
       if(abs(l0.PID())==11||abs(l0.PID())==13){
 	TLorentzVector genZ=(l0+l1);
 	zptweight=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
-      }else tauprefix+="tau_";
+      }else tauprefix="tau_";
     }
     z0weight=GetZ0Weight(vertex_Z);
   }else{
@@ -384,10 +384,10 @@ void SMPAnalyzerCore::GetEventWeights(){
     
   
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
-  cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
+  cout<<"index\tpid\tstatus\tmother\tHard\tPrompt\tpt\tpz\teta\tphi\tmass\n";
   for(int i=0;i<(int)gens.size();i++){
     gens[i].Print();
-    cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
+    //cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
   }
 }
 
@@ -442,17 +442,21 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1)
     l1=temp;
   }
 }
-
+// This function used for DY+b analysis (in especially, qG or Gq collisions)
 void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0){
   if(!IsDYSample){
     cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
   }
+  int bnum=0;
+  int incomingQuarkID=min(lhes[0].ID(),lhes[1].ID());
   for(int i=0;i<(int)lhes.size();i++){
     //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
     if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
     if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
-    if(j0.ID()==0&&(abs(lhes[i].ID())<7||lhes[i].ID()==21)&&lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark. (if gluon radiation only, then gluon)
+    if(j0.ID()==0&&lhes[i].ID()==incomingQuarkID&&lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark. (if gluon radiation only, then gluon)
+    if(lhes[i].ID()==5&&lhes[i].Status()==1) bnum += 3;
+    else if(lhes[i].ID()==-5&&lhes[i].Status()==1) bnum -= 2;
     //else if(j0.ID()&&lhes[i].ID()==j0.ID()) continue;
     //else if(j0.ID()&&lhes[i].ID()==-j0.ID()){
     //  j0.SetIndexIDStatus(i,21,1);
@@ -468,7 +472,17 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,
     l0=l1;
     l1=temp;
   }
+  /*
+  if(bnum==1) tauprefix += "bB_";
+  else if(bnum==4) tauprefix += "bbB_";
+  else if(bnum==-1) tauprefix += "BbB_";
+  else if(bnum==3) tauprefix += "b_";
+  else if(bnum==-2) tauprefix += "B_";
+  else if(bnum==0) tauprefix += "";
+  else tauprefix = tauprefix+"b"+Form("%d",bnum)+"_";
+  */
 }
+// This function used for DY+b analysis (in especially, qG or Gq collisions)
 void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode){
   //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
   if(!IsDYSample){
@@ -494,7 +508,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
       else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
     }
-    if(gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)&&gens.at(i).Pt()>5.) jets.push_back(&gens[i]);
+    if(gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)) jets.push_back(&gens[i]);
   }
   int nlepton=leptons.size();
   for(int i=0;i<nlepton;i++){
@@ -513,6 +527,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
   int njet=jets.size();
   for(int i=0;i<njet;i++){
+    if(jets[i]->PID()!=min(parton0.PID(),parton1.PID())) continue;
     //if(!(abs(jets[i]->PID())==4||abs(jets[i]->PID())==5)) continue;
     if((jets[i]->Pt()>j0.Pt())) j0=*jets[i];
   }
