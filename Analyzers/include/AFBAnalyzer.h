@@ -9,13 +9,13 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
-  void executeEventFromParameter(TString channelname,Event* ev);
+  void executeEventWithChannelName(TString channelname);
 
   AFBAnalyzer();
   ~AFBAnalyzer();
 
   //double GetCosThetaCS(const vector<Lepton*>& leps);
-  double GetCosThetaCS(const Particle *p0,const Particle *p1);
+  double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
   double GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut);
   void FillHists(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHistsToy(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
@@ -30,12 +30,16 @@ public:
   void FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
   void FillHistToy(TString histname, double value_x, double value_y, double value_z, double weight, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
   void FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
+  void SetupCosThetaWeight();
+  void DeleteCosThetaWeight();
+  double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
   
-  TRandom3* random;
   TString hardprefix;
   vector<TRandom3*> toy_random;
   vector<double> toy_weight;
-  bool IsSYS=false;
+  map<TString,TH3D*> map_hist_cost;
+  double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
+  bool IsNominalRun=true;
   bool IsSkimmed=false;
   
   static const int afb_mbinnum=40;

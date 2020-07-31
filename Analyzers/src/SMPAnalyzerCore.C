@@ -1,18 +1,14 @@
 #include "SMPAnalyzerCore.h"
 
-SMPAnalyzerCore::SMPAnalyzerCore(){
-  roc=NULL;
-  rocele=NULL;
-  hz0=NULL;
-}
-
+SMPAnalyzerCore::SMPAnalyzerCore(){}
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   for(auto& iter:map_hist_zpt){
     if(iter.second) delete iter.second;
   }
   if(roc) delete roc;
   if(rocele) delete rocele;
-  if(hz0) delete hz0;
+  if(hz0_data) delete hz0_data;
+  if(hz0_mc) delete hz0_mc;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -20,6 +16,7 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
+  if(MaxEvent>0) reductionweight=1.*fChain->GetEntries()/MaxEvent;
   SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
@@ -28,13 +25,10 @@ void SMPAnalyzerCore::initializeAnalyzer(){
 }
 
 TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
-
   TH4D *h = NULL;
   std::map<TString, TH4D*>::iterator mapit = maphist_TH4D.find(histname);
-  if(mapit != maphist_TH4D.end()) return mapit->second;                                                                                                                                                     
-
+  if(mapit != maphist_TH4D.end()) return mapit->second;
   return h;
-
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
@@ -321,17 +315,15 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
   TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
-  hz0=(TH1D*)fz0.Get("z0weight");
-  if(hz0) hz0->SetDirectory(0);
+  hz0_data=(TF1*)fz0.Get("data_fit");
+  hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
-  double xmin=hz0->GetXaxis()->GetXmin();
-  double xmax=hz0->GetXaxis()->GetXmax();
-  if(xmin>=0) valx=fabs(valx);
-  if(valx<xmin) valx=xmin+0.001;
-  if(valx>xmax) valx=xmax-0.001;
-  return hz0->GetBinContent(hz0->FindBin(valx));
+    double data_val = hz0_data->Eval(valx);
+    double mc_val = hz0_mc->Eval(valx);
+    double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
+    return norm*data_val/mc_val;
 }
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
@@ -339,7 +331,9 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
   zrap=fabs(zrap);
   TString sflavour=flavour==Lepton::MUON?"muon":"electron";
   TString MCName=MCSample;
-  MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
+  if(MCName.Contains(TRegexp("^DY[0-9]Jets$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_Pt-[0-9]*To[0-9Inf]*$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_M-[0-9]*to[0-9Inf]*$"))) MCName="DYJets";
   TString hzptname=MCName+"_"+sflavour;
   TString hnormname=hzptname+"_norm";
   auto it=map_hist_zpt.find(hzptname);
@@ -352,6 +346,43 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
   }
   return valzptcor*valzptcor_norm;
 }
+void SMPAnalyzerCore::GetEventWeights(){
+  lumiweight=1;
+  PUweight=1;
+  PUweight_up=1;
+  PUweight_down=1;
+  prefireweight=1;
+  prefireweight_up=1;
+  prefireweight_down=1;
+  zptweight=1;
+  tauprefix="";
+  z0weight=1;
+  if(!IsDATA){
+    lumiweight=weight_norm_1invpb*event.MCweight()*event.GetTriggerLumi("Full")*reductionweight;
+    PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
+    PUweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
+    PUweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
+    if(DataYear<2018){
+      prefireweight=L1PrefireReweight_Central;
+      prefireweight_up=L1PrefireReweight_Up;
+      prefireweight_down=L1PrefireReweight_Down;
+    }
+    if(IsDYSample){
+      vector<Gen> gens=GetGens();
+      Gen parton0,parton1,l0,l1;
+      GetDYGenParticles(gens,parton0,parton1,l0,l1,3);
+      if(abs(l0.PID())==11||abs(l0.PID())==13){
+	TLorentzVector genZ=(l0+l1);
+	zptweight=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
+      }else tauprefix="tau_";
+    }
+    z0weight=GetZ0Weight(vertex_Z);
+  }else{
+    lumiweight=reductionweight;
+  }
+}
+    
+  
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
   for(int i=0;i<(int)gens.size();i++){
@@ -374,6 +405,24 @@ double SMPAnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int 
   return hist->GetBinContent(hist->FindBin(valx,valy))+sys*hist->GetBinError(hist->FindBin(valx,valy));
 }
 
+double SMPAnalyzerCore::GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys){
+  double xmin=hist->GetXaxis()->GetXmin();
+  double xmax=hist->GetXaxis()->GetXmax();
+  double ymin=hist->GetYaxis()->GetXmin();
+  double ymax=hist->GetYaxis()->GetXmax();
+  double zmin=hist->GetZaxis()->GetXmin();
+  double zmax=hist->GetZaxis()->GetXmax();
+  if(xmin>=0) valx=fabs(valx);
+  if(valx<xmin) valx=xmin+0.001;
+  if(valx>xmax) valx=xmax-0.001;
+  if(ymin>=0) valy=fabs(valy);
+  if(valy<ymin) valy=ymin+0.001;
+  if(valy>ymax) valy=ymax-0.001;
+  if(zmin>=0) valz=fabs(valz);
+  if(valz<zmin) valz=zmin+0.001;
+  if(valz>zmax) valz=zmax-0.001;
+  return hist->GetBinContent(hist->FindBin(valx,valy,valz))+sys*hist->GetBinError(hist->FindBin(valx,valy,valz));
+}
 void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1){
   if(!IsDYSample){
     cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
@@ -395,7 +444,8 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1)
 }
 
 
-void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed){
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
   if(!IsDYSample){
     cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
@@ -432,12 +482,30 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       }
     }
   }
-  if(dressed){
-    int nphoton=photons.size();
-    for(int i=0;i<nphoton;i++){
-      if(l0.DeltaR(*photons[i])>0.4&&l1.DeltaR(*photons[i])>0.4) continue;
-      if(l0.DeltaR(*photons[i])<l1.DeltaR(*photons[i])) l0+=*photons[i];
-      else l1+=*photons[i];
+  if(mode>=3){
+    if(nlepton>=4){
+      for(int i=0;i<nlepton;i++){
+	if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+	for(int j=i+1;j<nlepton;j++){
+	  if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+	  if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+	  vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+	  vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+	  if(history_i.at(1)==history_j.at(1)) photons.push_back(&gens[history_i.at(1)]);
+	}
+      }
+    }	
+    for(const auto& photon:photons){
+      vector<int> history=TrackGenSelfHistory(*photon,gens);
+      if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
+      else if(gens[history.at(1)].PID()==l1.PID()) l1+=*photon;
+    }    
+  }else if(mode>=1){
+    double delr=mode==1?0.1:0.4;
+    for(const auto& photon:photons){
+      if(l0.DeltaR(*photon)>delr&&l1.DeltaR(*photon)>delr) continue;
+      if(l0.DeltaR(*photon)<l1.DeltaR(*photon)) l0+=*photon;
+      else l1+=*photon;
     }
   }
 }

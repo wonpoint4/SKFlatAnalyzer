@@ -5,199 +5,162 @@ ZptWeight::ZptWeight(){
 ZptWeight::~ZptWeight(){
 }
 void ZptWeight::executeEvent(){
-  tauprefix="";
+  event=GetEvent();
+  GetEventWeights();
+
   ////////////////////////check genlevel//////////////////
-  zptcor=1.;
   if(IsDYSample){
     vector<Gen> gens=GetGens();
     Gen parton0,parton1,l0,l1;
-    GetDYGenParticles(gens,parton0,parton1,l0,l1,true);
-    if(abs(l0.PID())==11||abs(l0.PID())==13){
+    GetDYGenParticles(gens,parton0,parton1,l0,l1,3);
+    if(tauprefix!="tau_"){
       TLorentzVector genZ=(l0+l1);
-      zptcor*=GetZptWeight(genZ.Pt(),genZ.Rapidity(),abs(l0.PID())==13?Lepton::Flavour::MUON:Lepton::Flavour::ELECTRON);
-      FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap"),genZ.Pt(),fabs(genZ.Rapidity()),weight_norm_1invpb*gen_weight*zptcor,ptbinnum,ptbin,rapbinnum,rapbin);
-      FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap_nozptcor"),genZ.Pt(),fabs(genZ.Rapidity()),weight_norm_1invpb*gen_weight,ptbinnum,ptbin,rapbinnum,rapbin);
-    }else{
-      tauprefix="tau_";
+      FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap"),genZ.Pt(),fabs(genZ.Rapidity()),lumiweight*zptweight,ptbinnum,ptbin,rapbinnum,rapbin);
+      FillHist(Form("%s%d/%s",abs(l0.PID())==13?"mm":"ee",DataYear,"/gen_diptdirap_nozptweight"),genZ.Pt(),fabs(genZ.Rapidity()),lumiweight,ptbinnum,ptbin,rapbinnum,rapbin);
     }
   }
 
   if(!PassMETFilter()) return;
 
-  Event* ev=new Event;
-  *ev=GetEvent();
   if(DataYear==2016){
     vector<TString> doublemuontrigger;
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v");
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     doublemuontrigger.push_back("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
-    if(ev->PassTrigger(doublemuontrigger)){
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2016",ev);
-    }
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")){
-      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2016",ev);
-    }
-  }else if(DataYear==2017){
-    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")){
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2017",ev);
-    }
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")){
-      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventFromParameter("ee2017",ev);
-    }
-  }else if(DataYear==2018){
-    if(ev->PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
-      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventFromParameter("mm2018",ev);
+    if(event.PassTrigger(doublemuontrigger))
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName("mm2016");
     
-    if(ev->PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
-      if(!IsDATA||DataStream.Contains("EGamma")) executeEventFromParameter("ee2018",ev);
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))
+      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventWithChannelName("ee2016");
+    
+  }else if(DataYear==2017){
+    if(event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName("mm2017");
+    
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+      if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventWithChannelName("ee2017");
+    
+  }else if(DataYear==2018){
+    if(event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"))
+      if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName("mm2018");
+    
+    if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
+      if(!IsDATA||DataStream.Contains("EGamma")) executeEventWithChannelName("ee2018");
     
   }    
 
-  delete ev;
 }
 
-void ZptWeight::executeEventFromParameter(TString channelname,Event* ev){
-  map< TString, std::vector<Muon> > map_muons;
-  map< TString, std::vector<Electron> > map_electrons;
-  //suffix, lepton vector, SF1, SF2, TriggerSF1, TriggerSF2
-  map< TString, tuple<vector<Lepton*>,TString,TString,TString,TString> > map_leps;
+void ZptWeight::executeEventWithChannelName(TString channelname){
+  map<TString,vector<Muon>> map_muons;
+  map<TString,vector<Electron>> map_electrons;
+  map<TString,Parameter> map_parameter;
 
-
-  double lep0ptcut,lep1ptcut;
-  if(channelname.Contains(TRegexp("^mm"))){
-    lep0ptcut=20.;
-    lep1ptcut=10.;
-    map_muons[""]=SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4);
-    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons[""]),"IDISO_SF_MediumID_trkIsoLoose_Q","","Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q");
-  }else if(channelname.Contains(TRegexp("^ee"))){
-    lep0ptcut=25.;
-    lep1ptcut=15.;
+  if(channelname.Contains(TRegexp("mm20[0-9][0-9]"))){
+    Parameter p;
+    p.muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
+    p.triggerSF={"Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q"};
+    p.lep0ptcut=20.;
+    p.lep1ptcut=10.;
+    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
+    map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]));
+  }else if(channelname.Contains(TRegexp("ee20[0-9][0-9]"))){
+    Parameter p;
+    p.electronIDSF="ID_SF_MediumID_Q";
+    p.triggerSF={"Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"};
+    p.lep0ptcut=25.;
+    p.lep1ptcut=15.;
     map_electrons[""]=ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.4),0,0);
-    map_leps[""]=make_tuple(MakeLeptonPointerVector(map_electrons[""]),"ID_SF_MediumID_Q","","Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"); 
+    map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_electrons[""]));
   }else{
     cout<<"[ZptWeight::executeEventFromParameter] wrong channelname"<<endl;
     exit(EXIT_FAILURE);
   }
-  
-  /////////////////lumi weight///////////////////
-  double weight=1.,totalweight=1.;
-  if(!IsDATA){
-    weight=weight_norm_1invpb*ev->MCweight()*ev->GetTriggerLumi("Full");
-  }
-  totalweight*=weight;
-  FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",totalweight);
 
-  /////////////////PUreweight///////////////////
-  double PUreweight=1.;//,PUreweight_up=1.,PUreweight_down=1.;
-  if(!IsDATA){
-    PUreweight=mcCorr->GetPileUpWeight(nPileUp,0);
-    //PUreweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
-    //PUreweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
-  }
-  totalweight*=PUreweight;
-  FillCutflow(channelname+"/"+tauprefix+"cutflow","PU",totalweight);
-  
-  //////////////////////PrefileWeight////////////////////
-  double prefireweight=1.;
-  //double prefireweight_up=1.;
-  //double prefireweight_down=1.;
-  if(!IsDATA&&DataYear<2018){
-    prefireweight=L1PrefireReweight_Central;
-    //prefireweight_up=L1PrefireReweight_Up;
-    //prefireweight_down=L1PrefireReweight_Down;
-  }
-  totalweight*=prefireweight;
-  FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",totalweight);
-
-  /////////////////// zpt correction //////////////////////
-  totalweight*=zptcor;
-  FillCutflow(channelname+"/"+tauprefix+"cutflow","zptcor",totalweight);
-
-  //////////////////////Z0 weight///////////////////////
-  double z0weight=1.;
-  if(!IsDATA){
-    z0weight=GetZ0Weight(vertex_Z);
-  }
-  totalweight*=z0weight;
-  FillCutflow(channelname+"/"+tauprefix+"cutflow","z0",totalweight);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",lumiweight);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","PU",lumiweight*PUweight);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","prefire",lumiweight*prefireweight);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","zpt",lumiweight*prefireweight*zptweight);
+  FillCutflow(channelname+"/"+tauprefix+"cutflow","z0",lumiweight*prefireweight*zptweight*z0weight);
 
   ///////////////////////lepton selection///////////////////////
-  for(const auto& element_leps: map_leps){
-    TString idsuffix=element_leps.first;
-    auto const& leps=get<0>(element_leps.second);
+  for(const auto& [suffix,p]:map_parameter){
+    TString prefix=tauprefix;
+    double eventweight=lumiweight*PUweight*prefireweight*z0weight*zptweight;
 
-    FillHist(channelname+"/"+tauprefix+"nlepton"+idsuffix,leps.size(),totalweight,10,0,10);
-    if(leps.size()>=2){
-      TString prefix=tauprefix;
-      if(leps.at(0)->Charge()*leps.at(1)->Charge()>0) return;
-      FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"dilepton",totalweight);
-      if(leps.at(0)->Pt()>lep0ptcut&&leps.at(1)->Pt()>lep1ptcut){
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"LepPtCut",totalweight);
+    FillHist(channelname+"/"+prefix+"nlepton"+suffix,p.leps.size(),eventweight,10,0,10);
+    if(p.leps.size()>=2){
+      if(p.leps.at(0)->Charge()*p.leps.at(1)->Charge()>0) return;
+      FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"OS dilepton",eventweight);
+      if(p.leps.at(0)->Pt()>p.lep0ptcut&&p.leps.at(1)->Pt()>p.lep1ptcut){
+	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"LepPtCut",eventweight);
 	/////////////////efficiency scale factors///////////////////
 	double IDSF=1.,IDSF_up=1.,IDSF_down=1.;
 	double ISOSF=1.,ISOSF_up=1.,ISOSF_down=1.;
 	double RECOSF=1.,RECOSF_up=1.,RECOSF_down=1.;
 	if(!IsDATA){
-	  TString LeptonIDSF_key=get<1>(element_leps.second);
-	  TString LeptonISOSF_key=get<2>(element_leps.second);
-	  for(unsigned int i=0;i<leps.size();i++){	  
-            if(leps[i]->LeptonFlavour()==Lepton::ELECTRON){
+	  for(const auto& lep:p.leps){
+	    TString LeptonIDSF_key="";
+            if(lep->LeptonFlavour()==Lepton::ELECTRON){
+	      LeptonIDSF_key=p.electronIDSF;
+
 	      double this_pt,this_eta;
-              this_pt=((Electron*)leps.at(i))->UncorrPt();
-              this_eta=((Electron*)leps.at(i))->scEta();
+              this_pt=((Electron*)lep)->UncorrPt();
+              this_eta=((Electron*)lep)->scEta();
 
 	      double this_RECOSF=mcCorr->ElectronReco_SF(this_eta,this_pt,0);
 	      double this_RECOSF_up=mcCorr->ElectronReco_SF(this_eta,this_pt,1);
 	      double this_RECOSF_down=mcCorr->ElectronReco_SF(this_eta,this_pt,-1);
 	      RECOSF*=this_RECOSF; RECOSF_up*=this_RECOSF_up; RECOSF_down*=this_RECOSF_down;
-            }
-	  
-	    double this_IDSF=Lepton_SF(LeptonIDSF_key,leps.at(i),0);
-	    double this_IDSF_up=Lepton_SF(LeptonIDSF_key,leps.at(i),1);
-	    double this_IDSF_down=Lepton_SF(LeptonIDSF_key,leps.at(i),-1);
+            }else if(lep->LeptonFlavour()==Lepton::MUON){
+	      LeptonIDSF_key=p.muonIDSF;
+
+	      double this_ISOSF=Lepton_SF(p.muonISOSF,lep,0);
+	      double this_ISOSF_up=Lepton_SF(p.muonISOSF,lep,1);
+	      double this_ISOSF_down=Lepton_SF(p.muonISOSF,lep,-1);
+	      ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
+	    }
+
+	    double this_IDSF=Lepton_SF(LeptonIDSF_key,lep,0);
+	    double this_IDSF_up=Lepton_SF(LeptonIDSF_key,lep,1);
+	    double this_IDSF_down=Lepton_SF(LeptonIDSF_key,lep,-1);
 	    IDSF*=this_IDSF; IDSF_up*=this_IDSF_up; IDSF_down*=this_IDSF_down;
 	  
-	    double this_ISOSF=Lepton_SF(LeptonISOSF_key,leps.at(i),0);
-	    double this_ISOSF_up=Lepton_SF(LeptonISOSF_key,leps.at(i),1);
-	    double this_ISOSF_down=Lepton_SF(LeptonISOSF_key,leps.at(i),-1);
-	    ISOSF*=this_ISOSF; ISOSF_up*=this_ISOSF_up; ISOSF_down*=this_ISOSF_down;
 	  }
 	}
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"RECOSF",totalweight*RECOSF);
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"IDSF",totalweight*RECOSF*IDSF);
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"ISOSF",totalweight*RECOSF*IDSF*ISOSF);
-      
+
 	double triggerSF=1.,triggerSF_up=1.,triggerSF_down=1.;
 	if(!IsDATA){
-	  if(channelname.Contains(TRegexp("^ee"))||channelname.Contains(TRegexp("^mm"))){
-	    TString triggerSF_key0=get<3>(element_leps.second);
-	    TString triggerSF_key1=get<4>(element_leps.second);
-	    triggerSF*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,0);
-	    triggerSF_up*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,1);
-	    triggerSF_down*=DileptonTrigger_SF(triggerSF_key0,triggerSF_key1,leps,-1);
-	  }else if(channelname.Contains(TRegexp("^el"))||channelname.Contains(TRegexp("^mu"))){
-	    TString triggerSF_key=get<3>(element_leps.second);
-	    triggerSF*=LeptonTrigger_SF(triggerSF_key,leps,0);
-	    triggerSF_up*=LeptonTrigger_SF(triggerSF_key,leps,1);
-	    triggerSF_down*=LeptonTrigger_SF(triggerSF_key,leps,-1);
-	  }	    
+	  if(p.triggerSF.size()==1){
+	    triggerSF*=LeptonTrigger_SF(p.triggerSF[0],p.leps,0);
+	    triggerSF_up*=LeptonTrigger_SF(p.triggerSF[0],p.leps,1);
+	    triggerSF_down*=LeptonTrigger_SF(p.triggerSF[0],p.leps,-1);
+	  }else if(p.triggerSF.size()==2){
+	    triggerSF*=DileptonTrigger_SF(p.triggerSF[0],p.triggerSF[1],p.leps,0);
+	    triggerSF_up*=DileptonTrigger_SF(p.triggerSF[0],p.triggerSF[1],p.leps,1);
+	    triggerSF_down*=DileptonTrigger_SF(p.triggerSF[0],p.triggerSF[1],p.leps,-1);
+	  }
 	}
-	FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"triggerSF",totalweight*RECOSF*IDSF*ISOSF*triggerSF);
+
+	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"RECOSF",eventweight*RECOSF);
+	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"IDSF",eventweight*RECOSF*IDSF);
+	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"ISOSF",eventweight*RECOSF*IDSF*ISOSF);
+      	FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"triggerSF",eventweight*RECOSF*IDSF*ISOSF*triggerSF);
 
 	///////////////////////weight systematics//////////////////
 	map<TString,double> map_weight;
-	map_weight[""]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight*zptcor;
+	map_weight[""]=lumiweight*PUweight*prefireweight*zptweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
 	if(!IsDATA){	  
-	  map_weight["_nozptcor"]=weight*PUreweight*RECOSF*IDSF*ISOSF*triggerSF*prefireweight;
+	  map_weight["_nozptweight"]=lumiweight*PUweight*prefireweight*z0weight*RECOSF*IDSF*ISOSF*triggerSF;
 	}
 	
 	///////////////////////fill hists///////////////////////
-	TLorentzVector dilepton=(*leps.at(0))+(*leps.at(1));
+	TLorentzVector dilepton=(*p.leps.at(0))+(*p.leps.at(1));
 	double dimass=dilepton.M();
 	if(dimass>=80&&dimass<100){
-	  FillCutflow(channelname+"/"+tauprefix+"cutflow"+idsuffix,"m80to100",map_weight[""]);
-	  FillHistsZptWeight(channelname+"/m80to100/"+prefix,idsuffix,leps,map_weight);
+	  FillCutflow(channelname+"/"+prefix+"cutflow"+suffix,"m80to100",map_weight[""]);
+	  FillHistsZptWeight(channelname+"/m80to100/"+prefix,suffix,p.leps,map_weight);
 	}
       }
     }

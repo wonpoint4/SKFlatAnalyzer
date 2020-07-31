@@ -15,12 +15,14 @@ KNU :  ~/scartch/
 ```
 #### When first time gie clone, use the option "--recursive" to initiate the submodules
 git clone --recursive git@github.com:CMSSNU/SKFlatAnalyzer.git
+cd SKFlatAnalyzer
 #### add your remote repo
 git remote add <nickname> git@github.com:<gitaccount>/SKFlatAnalyzer.git
 git checkout <your working branch>
 
 #### First time setup script
 source bin/FirstTimeSetup.sh 
+source setup.sh
 
 #### You have to edit user info
 #### First, copy the temply using the command below

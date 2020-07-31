@@ -526,10 +526,11 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
       this_SF_err = sqrt(this_SF_staterr*this_SF_staterr+this_SF_systerr*this_SF_systerr);
     }
     else if(DataYear==2018){
-      //==== TODO not yet supported
-      //==== copying 2017
-      this_SF         = (IsBarrel ? 0.967 : 0.973);
-      this_SF_staterr = (IsBarrel ? 0.001 : 0.002);
+
+      //==== https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaRunIIRecommendations#HEEPv7_0_2018Prompt
+
+      this_SF         = (IsBarrel ? 0.969 : 0.984);
+      this_SF_staterr = (IsBarrel ? 0.000 : 0.001);
 
       if(IsBarrel) this_SF_systerr = (pt<90. ? 0.01 : min(1.+(pt-90.)*0.0022,3.)*0.01) * this_SF;
       else         this_SF_systerr = (pt<90. ? 0.02 : min(1.+(pt-90.)*0.0143,5.)*0.01) * this_SF;

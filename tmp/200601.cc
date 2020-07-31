@@ -1,0 +1,138 @@
+{
+  EfficiencyPlotter aa("data ^sim_stack+ss");
+
+  EfficiencyPlotter data("data data data data data data");
+  data.entries[0].replace["Year"]="2016";
+  data.entries[1].replace["Year"]="2017";
+  data.entries[2].replace["Year"]="2018";
+  data.entries[3].replace["Year"]="2016";
+  data.entries[4].replace["Year"]="2017";
+  data.entries[5].replace["Year"]="2018";
+  data.entries[0].replace["Id"]="MediumID_trkIsoLoose_Q";
+  data.entries[1].replace["Id"]="MediumID_trkIsoLoose_Q";
+  data.entries[2].replace["Id"]="MediumID_trkIsoLoose_Q";
+  data.entries[3].replace["Id"]="TightID_PFIsoTight";
+  data.entries[4].replace["Id"]="TightID_PFIsoTight";
+  data.entries[5].replace["Id"]="TightID_PFIsoTight";
+  data.entries[0].title="data 2016 Medium";
+  data.entries[1].title="data 2017 Medium";
+  data.entries[2].title="data 2018 Medium";
+  data.entries[3].title="data 2016 Tight";
+  data.entries[4].title="data 2017 Tight";
+  data.entries[5].title="data 2018 Tight";
+  data.entries[0].style=Style(1,20,-1,"hist e");
+  data.entries[1].style=Style(2,20,-1,"hist e");
+  data.entries[2].style=Style(3,20,-1,"hist e");
+  data.entries[3].style=Style(4,22,-1,"hist e");
+  data.entries[4].style=Style(7,22,-1,"hist e");
+  data.entries[5].style=Style(6,22,-1,"hist e");
+  data.entries[0].weight=1/35.918;
+  data.entries[1].weight=1/41.528;
+  data.entries[2].weight=1/59.736;
+  data.entries[3].weight=1/35.918;
+  data.entries[4].weight=1/41.528;
+  data.entries[5].weight=1/59.736;
+
+  EfficiencyPlotter amc("amc amc amc amc amc amc");
+  amc.entries[0].replace["Year"]="2016";
+  amc.entries[1].replace["Year"]="2017";
+  amc.entries[2].replace["Year"]="2018";
+  amc.entries[3].replace["Year"]="2016";
+  amc.entries[4].replace["Year"]="2017";
+  amc.entries[5].replace["Year"]="2018";
+  amc.entries[0].replace["Id"]="MediumID_trkIsoLoose_Q";
+  amc.entries[1].replace["Id"]="MediumID_trkIsoLoose_Q";
+  amc.entries[2].replace["Id"]="MediumID_trkIsoLoose_Q";
+  amc.entries[3].replace["Id"]="TightID_PFIsoTight";
+  amc.entries[4].replace["Id"]="TightID_PFIsoTight";
+  amc.entries[5].replace["Id"]="TightID_PFIsoTight";
+  amc.entries[0].title="amc 2016 Medium";
+  amc.entries[1].title="amc 2017 Medium";
+  amc.entries[2].title="amc 2018 Medium";
+  amc.entries[3].title="amc 2016 Tight";
+  amc.entries[4].title="amc 2017 Tight";
+  amc.entries[5].title="amc 2018 Tight";
+  amc.entries[0].style=Style(1,20,-1,"hist e");
+  amc.entries[1].style=Style(2,20,-1,"hist e");
+  amc.entries[2].style=Style(3,20,-1,"hist e");
+  amc.entries[3].style=Style(4,22,-1,"hist e");
+  amc.entries[4].style=Style(7,22,-1,"hist e");
+  amc.entries[5].style=Style(6,22,-1,"hist e");
+  amc.entries[0].weight=1/35.918;
+  amc.entries[1].weight=1/41.528;
+  amc.entries[2].weight=1/59.736;
+  amc.entries[3].weight=1/35.918;
+  amc.entries[4].weight=1/41.528;
+  amc.entries[5].weight=1/59.736;
+  
+  EfficiencyPlotter ss("ss ss ss ss ss ss");
+  ss.entries[0].replace["Year"]="2016";
+  ss.entries[1].replace["Year"]="2017";
+  ss.entries[2].replace["Year"]="2018";
+  ss.entries[3].replace["Year"]="2016";
+  ss.entries[4].replace["Year"]="2017";
+  ss.entries[5].replace["Year"]="2018";
+  ss.entries[0].replace["Id"]="MediumID_trkIsoLoose_Q";
+  ss.entries[1].replace["Id"]="MediumID_trkIsoLoose_Q";
+  ss.entries[2].replace["Id"]="MediumID_trkIsoLoose_Q";
+  ss.entries[3].replace["Id"]="TightID_PFIsoTight";
+  ss.entries[4].replace["Id"]="TightID_PFIsoTight";
+  ss.entries[5].replace["Id"]="TightID_PFIsoTight";
+  ss.entries[0].title="ss 2016 Medium";
+  ss.entries[1].title="ss 2017 Medium";
+  ss.entries[2].title="ss 2018 Medium";
+  ss.entries[3].title="ss 2016 Tight";
+  ss.entries[4].title="ss 2017 Tight";
+  ss.entries[5].title="ss 2018 Tight";
+  ss.entries[0].style=Style(1,20,-1,"hist e");
+  ss.entries[1].style=Style(2,20,-1,"hist e");
+  ss.entries[2].style=Style(3,20,-1,"hist e");
+  ss.entries[3].style=Style(4,22,-1,"hist e");
+  ss.entries[4].style=Style(7,22,-1,"hist e");
+  ss.entries[5].style=Style(6,22,-1,"hist e");
+  ss.entries[0].weight=1/35.918;
+  ss.entries[1].weight=1/41.528;
+  ss.entries[2].weight=1/59.736;
+  ss.entries[3].weight=1/35.918;
+  ss.entries[4].weight=1/41.528;
+  ss.entries[5].weight=1/59.736;
+
+  AFBPlotter bb("data ^amc+tau_amc+vv+wjets+tt+ss");
+
+  bool delete_canvas=false;
+  aa.SavePlot("mass/mm2016_medium","histname:mm2016/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mm2017_medium","histname:mm2017/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mm2018_medium","histname:mm2018/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mm2016_tight","histname:mm2016/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+  aa.SavePlot("mass/mm2017_tight","histname:mm2017/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+  aa.SavePlot("mass/mm2018_tight","histname:mm2018/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+  aa.SavePlot("mass/mu2016_medium","histname:mu2016/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mu2017_medium","histname:mu2017/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mu2018_medium","histname:mu2018/m60to120/dimass_MediumID_trkIsoLoose_Q norm",delete_canvas);
+  aa.SavePlot("mass/mu2016_tight","histname:mu2016/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+  aa.SavePlot("mass/mu2017_tight","histname:mu2017/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+  aa.SavePlot("mass/mu2018_tight","histname:mu2018/m60to120/dimass_TightID_PFIsoTight norm",delete_canvas);
+
+  data.SavePlot("mass/mm_data","histname:mmYear/m60to120/dimass_Id 2:widey norm",delete_canvas);
+  amc.SavePlot("mass/mm_amc","histname:mmYear/m60to120/dimass_Id 2:widey norm",delete_canvas);
+  ss.SavePlot("mass/mm_ss","histname:mmYear/m60to120/dimass_Id 2:widey rebin:4",delete_canvas);
+
+  data.SavePlot("mass/mu_data","histname:muYear/m60to120/dimass_Id 2:widey norm",delete_canvas);
+  amc.SavePlot("mass/mu_amc","histname:muYear/m60to120/dimass_Id 2:widey norm",delete_canvas);
+  ss.SavePlot("mass/mu_ss","histname:muYear/m60to120/dimass_Id 2:widey rebin:4",delete_canvas);
+
+  bb.SavePlot("mass/mm2016","histname:mm2016/costhetaCS(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2017","histname:mm2017/costhetaCS(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2018","histname:mm2018/costhetaCS(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2016_test0","histname:mm2016/costhetaCS_test0(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2017_test0","histname:mm2017/costhetaCS_test0(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2018_test0","histname:mm2018/costhetaCS_test0(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2016_test2","histname:mm2016/costhetaCS_test2(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2017_test2","histname:mm2017/costhetaCS_test2(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2018_test2","histname:mm2018/costhetaCS_test2(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+
+  bb.SavePlot("mass/mm2016_roccor3","histname:mm2016/costhetaCS_roccor3(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2017_roccor3","histname:mm2017/costhetaCS_roccor3(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+  bb.SavePlot("mass/mm2018_roccor3","histname:mm2018/costhetaCS_roccor3(x) xmin:60 xmax:150 widthweight norm",delete_canvas);
+
+}

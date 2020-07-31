@@ -97,8 +97,9 @@ public:
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
   void PrintGens(const vector<Gen>& gens);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
+  double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,bool dressed);
+  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -115,19 +116,66 @@ public:
   const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
 
   map<TString,TH2D*> map_hist_zpt;
-  TH1D *hz0;
+  TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TString tauprefix;
-  double zptcor;
   bool IsDYSample=false;
+  Event event;
+  double reductionweight=1;
+  double lumiweight=1;
+  double PUweight=1,PUweight_up=1,PUweight_down=1;
+  double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
+  double zptweight=1;
+  double z0weight=1;
 
-  RoccoR* roc;
-  RocelecoR* rocele;
+  RoccoR* roc=NULL;
+  RocelecoR* rocele=NULL;
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();
 
+  void GetEventWeights();
+
+  enum{
+    NominalWeight=1<<0,
+    SystematicWeight=1<<1,
+    PDFWeight=1<<2,
+  };
+
+  class Parameter{
+  public:
+    TString electronIDSF,muonIDSF,muonISOSF;
+    vector<TString> triggerSF;
+    double lep0ptcut=0,lep1ptcut=0;
+    int weightbit=NominalWeight;
+    vector<Lepton*> leps;
+    inline Parameter Clone(vector<Lepton*> leps_,int weightbit_=-1){
+      Parameter out=*this;
+      out.leps=leps_;
+      if(weightbit_>=0) out.weightbit=weightbit_;
+      return out;
+    }
+    Parameter(){
+      electronIDSF="ID_SF_MediumID_Q";
+      muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
+    }
+    Parameter(TString elID,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
+      electronIDSF=elID;
+      triggerSF=Trig;
+      if(l0ptcut>0) lep0ptcut=l0ptcut;
+      if(l1ptcut>0) lep1ptcut=l1ptcut;
+      if(leps_.size()) leps=leps_;
+    }
+    Parameter(TString muID,TString muISO,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
+      muonIDSF=muID;
+      muonISOSF=muISO;
+      triggerSF=Trig;
+      if(l0ptcut>0) lep0ptcut=l0ptcut;
+      if(l1ptcut>0) lep1ptcut=l1ptcut;
+      if(leps_.size()) leps=leps_;
+    }
+  };
 };
 #endif
 

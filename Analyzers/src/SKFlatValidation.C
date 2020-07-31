@@ -403,42 +403,42 @@ void SKFlatValidation::executeEventFromParameter(AnalyzerParameter param){
 
       if(it_map->second){
 
-        JSFillHist(this_region, "NEvent_"+this_region, 0., weight, 1, 0., 1.);
+        FillHist(this_region+"/NEvent_"+this_region, 0., weight, 1, 0., 1.);
 
-        JSFillHist(this_region, "nPileUp_"+this_region, nPileUp, weight, 200., 0., 200.);
-        JSFillHist(this_region, "nPV_"+this_region, nPV, weight, 200., 0., 200.);
-        JSFillHist(this_region, "nPUForReweight_"+this_region, nPUForReweight, weight, 200., 0., 200.);
+        FillHist(this_region+"/nPileUp_"+this_region, nPileUp, weight, 200., 0., 200.);
+        FillHist(this_region+"/nPV_"+this_region, nPV, weight, 200., 0., 200.);
+        FillHist(this_region+"/nPUForReweight_"+this_region, nPUForReweight, weight, 200., 0., 200.);
 
-        JSFillHist(this_region, "MET_"+this_region, METv.Pt(), weight, 500, 0., 500.);
-        JSFillHist(this_region, "METphi_"+this_region, METv.Phi(), weight, 60, -3., 3.);
+        FillHist(this_region+"/MET_"+this_region, METv.Pt(), weight, 500, 0., 500.);
+        FillHist(this_region+"/METphi_"+this_region, METv.Phi(), weight, 60, -3., 3.);
 
-        JSFillHist(this_region, "HT_"+this_region, HT, weight, 1000, 0., 1000.);
+        FillHist(this_region+"/HT_"+this_region, HT, weight, 1000, 0., 1000.);
 
-        JSFillHist(this_region, "Jet_Size_"+this_region, myjets.size(), weight, 10, 0., 10.);
-        JSFillHist(this_region, "NBJets_NoSF_"+this_region, NBJets_NoSF, weight, 10, 0., 10.);
-        JSFillHist(this_region, "NBJets_WithSF_1a_"+this_region, NBJets_NoSF, weight*btagWeight_1a, 10, 0., 10.);
-        JSFillHist(this_region, "NBJets_WithSF_1d_"+this_region, NBJets_NoSF, weight*btagWeight_1d, 10, 0., 10.);
-        JSFillHist(this_region, "NBJets_WithSF_2a_"+this_region, NBJets_WithSF_2a, weight, 10, 0., 10.);
+        FillHist(this_region+"/Jet_Size_"+this_region, myjets.size(), weight, 10, 0., 10.);
+        FillHist(this_region+"/NBJets_NoSF_"+this_region, NBJets_NoSF, weight, 10, 0., 10.);
+        FillHist(this_region+"/NBJets_WithSF_1a_"+this_region, NBJets_NoSF, weight*btagWeight_1a, 10, 0., 10.);
+        FillHist(this_region+"/NBJets_WithSF_1d_"+this_region, NBJets_NoSF, weight*btagWeight_1d, 10, 0., 10.);
+        FillHist(this_region+"/NBJets_WithSF_2a_"+this_region, NBJets_WithSF_2a, weight, 10, 0., 10.);
 
         for(unsigned int ij=0; ij<myjets.size(); ij++){
           TString this_itoa = TString::Itoa(ij,10);
 
           double this_discr = myjets.at(ij).GetTaggerResult(JetTagging::DeepCSV);
-          JSFillHist(this_region, "Jet_"+this_itoa+"_DeepCSV_"+this_region, this_discr, weight, 120, 0., 1.2);
-          JSFillHist(this_region, "Jet_"+this_itoa+"_DeepCSV_Scaled_"+this_region, this_discr, weight*btagWeight_1d, 120, 0., 1.2);
+          FillHist(this_region+"/Jet_"+this_itoa+"_DeepCSV_"+this_region, this_discr, weight, 120, 0., 1.2);
+          FillHist(this_region+"/Jet_"+this_itoa+"_DeepCSV_Scaled_"+this_region, this_discr, weight*btagWeight_1d, 120, 0., 1.2);
         }
 
         FillLeptonPlots(leps, this_region, weight);
 
         if(n_lepton==1){
-          JSFillHist(this_region, "MT_"+this_region, this_MT, weight, 500, 0., 500.);
+          FillHist(this_region+"/MT_"+this_region, this_MT, weight, 500, 0., 500.);
         }
 
         if(n_lepton>=2){
 
-          JSFillHist(this_region, "ZCand_Mass_"+this_region, Z.M(), weight, 7000, 0., 7000.);
-          JSFillHist(this_region, "ZCand_Pt_"+this_region, Z.Pt(), weight, 500, 0., 500.);
-          JSFillHist(this_region, "ZCand_Eta_"+this_region, Z.Eta(), weight, 60, -3., 3.);
+          FillHist(this_region+"/ZCand_Mass_"+this_region, Z.M(), weight, 7000, 0., 7000.);
+          FillHist(this_region+"/ZCand_Pt_"+this_region, Z.Pt(), weight, 500, 0., 500.);
+          FillHist(this_region+"/ZCand_Eta_"+this_region, Z.Eta(), weight, 60, -3., 3.);
 
         }
 
