@@ -315,7 +315,7 @@ void SMPAnalyzerCore::SetupRoccoR(){
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight_won_y[-2,2].root");
+  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
   hz0_data=(TF1*)fz0.Get("data_fit");
   hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();
@@ -333,7 +333,9 @@ double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flav
   zrap=fabs(zrap);
   TString sflavour=flavour==Lepton::MUON?"muon":"electron";
   TString MCName=MCSample;
-  MCName=Replace(MCName,"DY[0-9]Jets","DYJets");
+  if(MCName.Contains(TRegexp("^DY[0-9]Jets$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_Pt-[0-9]*To[0-9Inf]*$"))) MCName="DYJets";
+  if(MCName.Contains(TRegexp("^DYJets_M-[0-9]*to[0-9Inf]*$"))) MCName="DYJets";
   TString hzptname=MCName+"_"+sflavour;
   TString hnormname=hzptname+"_norm";
   auto it=map_hist_zpt.find(hzptname);
@@ -559,7 +561,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
 }
 void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
-  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR                                                                                                                                                                                           
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
   if(!IsDYSample){
     cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);

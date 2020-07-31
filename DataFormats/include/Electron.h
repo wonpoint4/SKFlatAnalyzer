@@ -117,6 +117,7 @@ public:
   inline bool passMVAID_iso_WP80() const {return PassSelector(POG_MVA_ISO_WP80); }
   inline bool passMVAID_iso_WP90() const {return PassSelector(POG_MVA_ISO_WP90); }
   inline bool passHEEPID() const {return PassSelector(POG_HEEP); }
+  bool passHEEP2018Prompt() const;
 
   bool Pass_SUSYMVAWP(TString wp) const;
   bool Pass_SUSYTight() const;

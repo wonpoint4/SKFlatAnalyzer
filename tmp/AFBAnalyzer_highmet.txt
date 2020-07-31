@@ -8,8 +8,8 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i WJets_
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i TTLL_powheg -n 40 -y 2016
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i TTLJ_powheg -n 40 -y 2016
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_sch_Lep -n 10 -y 2016
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2016
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2016
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_antitop_Incl -n 10 -y 2016
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_top_Incl -n 10 -y 2016
 
@@ -23,8 +23,8 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i WJets_
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i TTLL_powheg -n 20 -y 2017
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i TTLJ_powheg -n 40 -y 2017
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_sch_Lep -n 10 -y 2017
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2017
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2017
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_antitop_Incl -n 10 -y 2017
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_top_Incl -n 10 -y 2017
 
@@ -38,7 +38,7 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i WJets_
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i TTLL_powheg -n 20 -y 2018
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i TTLJ_powheg -n 40 -y 2018
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_sch_Lep -n 10 -y 2018
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2018
-SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_antitop_NoFullyHad -n 10 -y 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton --userflags DYbStudy -i SingleTop_tW_top_NoFullyHad -n 10 -y 2018
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_antitop_Incl -n 10 -y 2018
 SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_top_Incl -n 10 -y 2018
