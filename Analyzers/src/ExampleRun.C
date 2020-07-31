@@ -188,7 +188,7 @@ void ExampleRun::executeEvent(){
     //cout << "[ExampleRun::executeEvent] PDF reweight for error set (NErrorSet = "<<pdfReweight->NErrorSet<< ") :" << endl;
     for(int i=0; i<pdfReweight->NErrorSet; i++){
       //cout << "[ExampleRun::executeEvent]   " << GetPDFReweight(i) << endl;
-      JSFillHist("NewPDF_PDFErrorSet", "PDFReweight_Member_"+TString::Itoa(i,10), GetPDFReweight(i), 1., 2000, 0.90, 1.10);
+      FillHist("NewPDF_PDFErrorSet/PDFReweight_Member_"+TString::Itoa(i,10), GetPDFReweight(i), 1., 2000, 0.90, 1.10);
     }
   }
 
@@ -206,15 +206,15 @@ void ExampleRun::executeEvent(){
     //==== 1) PDF Error
     //==== Obtain RMS of the distribution later
     for(unsigned int i=0; i<PDFWeights_Error->size(); i++){
-      JSFillHist("XSecError", "MET_PDFError_"+TString::Itoa(i,10), MET, PDFWeights_Error->at(i), 200, 0., 200.);
+      FillHist("XSecError/MET_PDFError_"+TString::Itoa(i,10), MET, PDFWeights_Error->at(i), 200, 0., 200.);
     }
 
     //==== 2) PDF AlphaS
     //==== Look for PDF4LHC paper..
     //==== https://arxiv.org/abs/1510.03865
     if(PDFWeights_AlphaS->size()==2){
-      JSFillHist("XSecError", "MET_PDFAlphaS_Down", MET, PDFWeights_AlphaS->at(0), 200, 0., 200.);
-      JSFillHist("XSecError", "MET_PDFAlphaS_Up", MET, PDFWeights_AlphaS->at(1), 200, 0., 200.);
+      FillHist("XSecError/MET_PDFAlphaS_Down", MET, PDFWeights_AlphaS->at(0), 200, 0., 200.);
+      FillHist("XSecError/MET_PDFAlphaS_Up", MET, PDFWeights_AlphaS->at(1), 200, 0., 200.);
     }
 
     //==== 3) Scale
@@ -223,7 +223,7 @@ void ExampleRun::executeEvent(){
       //==== i=5 and 7 are unphysical
       if(i==5) continue;
       if(i==7) continue;
-      JSFillHist("XSecError", "MET_Scale_"+TString::Itoa(i,10), MET, PDFWeights_Scale->at(i), 200, 0., 200.);
+      FillHist("XSecError/MET_Scale_"+TString::Itoa(i,10), MET, PDFWeights_Scale->at(i), 200, 0., 200.);
     }
 
   }
@@ -236,7 +236,7 @@ void ExampleRun::executeEventFromParameter(AnalyzerParameter param){
   //==== No Cut
   //=============
 
-  JSFillHist(param.Name, "NoCut_"+param.Name, 0., 1., 1, 0., 1.);
+  FillHist(param.Name+"/NoCut_"+param.Name, 0., 1., 1, 0., 1.);
 
   //========================
   //==== MET Filter
@@ -401,7 +401,7 @@ void ExampleRun::executeEventFromParameter(AnalyzerParameter param){
   //==== Now fill histograms
   //==========================
 
-  JSFillHist(param.Name, "ZCand_Mass_"+param.Name, ZCand.M(), weight, 40, 70., 110.);
+  FillHist(param.Name+"/ZCand_Mass_"+param.Name, ZCand.M(), weight, 40, 70., 110.);
 
 }
 
