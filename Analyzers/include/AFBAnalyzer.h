@@ -16,6 +16,7 @@ public:
 
   //double GetCosThetaCS(const vector<Lepton*>& leps);
   double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
+  double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
   double GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut);
   void FillHists(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHistsToy(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
@@ -45,8 +46,9 @@ public:
   std::vector<Electron> electrons;
   std::vector<Jet> jets, realjets, bjets;
   int n_bjet=0;
+  int n_powerbjet=0;
   double bjet_charge=-1.5;
-  double bjet_rap=0;
+  TLorentzVector bjet;
 
   static const int afb_mbinnum=40;
   const double afb_mbin[afb_mbinnum+1]={60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};

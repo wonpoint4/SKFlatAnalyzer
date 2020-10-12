@@ -450,13 +450,18 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,
     cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
   }
+  bool IsqG = false;
+  if(lhes[0].ID() !=lhes[1].ID() && max(lhes[0].ID(),lhes[1].ID()) == 21) IsqG = true;
   int bnum=0;
-  int incomingQuarkID=min(lhes[0].ID(),lhes[1].ID());
   for(int i=0;i<(int)lhes.size();i++){
     //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
     if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
     if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
-    if(j0.ID()==0&&lhes[i].ID()==incomingQuarkID&&lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark. (if gluon radiation only, then gluon)
+    if(IsqG){ 
+      if(j0.ID()==0 && lhes[i].ID()==min(lhes[0].ID(),lhes[1].ID()) && lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark.
+    }else{                                                                                              // (if gluon radiation only, then gluon)
+      if(j0.ID()==0 && (abs(lhes[i].ID())<6 || lhes[i].ID()==21) && lhes[i].Status()==1) j0=lhes[i];
+    }
     if(lhes[i].ID()==5&&lhes[i].Status()==1) bnum += 3;
     else if(lhes[i].ID()==-5&&lhes[i].Status()==1) bnum -= 2;
     //else if(j0.ID()&&lhes[i].ID()==j0.ID()) continue;
@@ -527,12 +532,18 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       }
     }
   }
+  
+  bool IsqG = false;
+  if(parton0.PID() !=parton1.PID() && max(parton0.PID(),parton1.PID()) == 21) IsqG = true;
+
   int njet=jets.size();
   for(int i=0;i<njet;i++){
-    if(jets[i]->PID()!=min(parton0.PID(),parton1.PID())) continue;
-    //if(!(abs(jets[i]->PID())==4||abs(jets[i]->PID())==5)) continue;
+    if(IsqG){
+      if(jets[i]->PID()!=min(parton0.PID(),parton1.PID())) continue;
+    }
     if((jets[i]->Pt()>j0.Pt())) j0=*jets[i];
   }
+
   if(mode>=3){
     if(nlepton>=4){
       for(int i=0;i<nlepton;i++){
