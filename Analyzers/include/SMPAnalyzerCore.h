@@ -90,6 +90,10 @@ public:
   void SetupZptWeight();
   void SetupZ0Weight();
   void SetupRoccoR();
+  double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+  void SetupPUJetWeight(TString ID="Medium");
+  double GetPUJetWeight(const vector<Jet>& jets, int sys);
+  bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
   double GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double GetZ0Weight(double z0);
   double Lepton_SF(TString histkey,const Lepton* lep,int sys);
@@ -120,6 +124,7 @@ public:
   map<TString,TH2D*> map_hist_zpt;
 
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
+  TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;
@@ -129,6 +134,8 @@ public:
   double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
   double zptweight=1;
   double z0weight=1.;
+  double btagweight=1.;
+  double pujetweight=1.;
 
   RoccoR* roc=NULL;
   RocelecoR* rocele=NULL;
