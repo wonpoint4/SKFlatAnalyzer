@@ -1,6 +1,5 @@
 #include "SMPAnalyzerCore.h"
 
-
 SMPAnalyzerCore::SMPAnalyzerCore(){}
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   for(auto& iter:map_hist_zpt){
@@ -10,6 +9,11 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(rocele) delete rocele;
   if(hz0_data) delete hz0_data;
   if(hz0_mc) delete hz0_mc;
+  //if(heff_data) delete heff_data;
+  //if(heff_mc) delete heff_mc;
+  //if(hmistag_data) delete hmistag_data;
+  //if(hmistag_mc) delete hmistag_mc;
+
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -21,6 +25,7 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
+  SetupPUJetWeight();
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
 }
@@ -810,4 +815,166 @@ TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
   int start=str.Index(reg,&extent);
   if(start>=0) return str.Replace(start,extent,repl);
   else return str;
+}
+
+double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst){
+
+  if(IsDATA) return 1.;
+
+  double Prob_MC(1.), Prob_DATA(1.);
+  for(unsigned int i=0; i<jets.size(); i++){
+    double this_MC_EffT = mcCorr->GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_MC_EffL = mcCorr->GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_SFT = mcCorr->GetJetTaggingSF(jtpT,
+					      jets.at(i).hadronFlavour(),
+					      jets.at(i).Pt(),
+					      jets.at(i).Eta(),
+					      jets.at(i).GetTaggerResult(jtpT.j_Tagger),
+					      Syst );
+    double this_SFL = mcCorr->GetJetTaggingSF(jtpL,
+					      jets.at(i).hadronFlavour(),
+					      jets.at(i).Pt(),
+					      jets.at(i).Eta(),
+					      jets.at(i).GetTaggerResult(jtpL.j_Tagger),
+					      Syst );
+    double this_DATA_EffT = this_MC_EffT*this_SFT;
+    double this_DATA_EffL = this_MC_EffL*this_SFL;
+
+    bool isTaggedT = jets.at(i).GetTaggerResult(jtpT.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpT.j_Tagger, jtpT.j_WP);
+    bool isTaggedL = jets.at(i).GetTaggerResult(jtpL.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpL.j_Tagger, jtpL.j_WP);
+    if(isTaggedT){
+      Prob_MC *= this_MC_EffT;
+      Prob_DATA *= this_DATA_EffT;
+    }
+    else if(isTaggedL){
+      Prob_MC *= this_MC_EffL - this_MC_EffT;
+      Prob_DATA *= this_DATA_EffL - this_DATA_EffT;
+    }
+    else{
+      Prob_MC *= 1.-this_MC_EffL;
+      Prob_DATA *= 1.-this_DATA_EffL;
+    }
+  }
+
+  return Prob_DATA/Prob_MC;
+
+}
+
+void SMPAnalyzerCore::SetupPUJetWeight(TString ID){
+  cout<<"[SMPAnalyzerCore::SetupPUJetWeight] setting PUJetWeight with ID "+ID<<endl;
+  /*
+  TString WP;
+  if(ID=="Loose") WP = "L";
+  else if(ID=="Medium") WP = "M";
+  else WP = "T";
+  TString datapath = getenv("DATA_DIR");
+  TFile feff(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_eff_"+TString::Itoa(DataYear,10)+".root");
+  TFile fmistag(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_mistag_"+TString::Itoa(DataYear,10)+".root");
+
+  heff_data=(TH2F*)feff.Get("h2_eff_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+
+  //This makes crash problems!! why?? z0weight case was okay
+  feff.Close();
+  fmistag.Close();
+  */
+}
+
+double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
+  sys = 0;
+  if(IsDATA) return 1.;
+
+  vector<Gen> gens=GetGens();
+
+  TString datapath = getenv("DATA_DIR");
+  TFile feff(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_eff_"+TString::Itoa(DataYear,10)+".root");
+  TFile fmistag(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_mistag_"+TString::Itoa(DataYear,10)+".root");
+  
+  TString WP = "M";
+  heff_data=(TH2F*)feff.Get("h2_eff_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+
+  double Prob_MC(1.), Prob_DATA(1.);
+  for(unsigned int i=0; i<jets.size(); i++){
+    double jetpt = jets.at(i).Pt();
+    double jeteta = jets.at(i).Eta();
+    if(jets.at(i).Pt() < 15) cout<<"jet pt < 15GeV, something wrong"<<endl;;//jetpt = 15.001;
+    if(jets.at(i).Pt() > 50) continue;//jetpt = 49.999;
+    if(abs(jets.at(i).Eta()) > 5) jeteta = 4.999;
+
+    double this_DATA_eff = heff_data->GetBinContent(heff_data->FindBin(jetpt, jeteta));
+    double this_MC_eff = heff_mc->GetBinContent(heff_mc->FindBin(jetpt, jeteta));
+    double this_DATA_mistag = hmistag_data->GetBinContent(hmistag_data->FindBin(jetpt, jeteta));
+    double this_MC_mistag = hmistag_mc->GetBinContent(hmistag_mc->FindBin(jetpt, jeteta));
+    if(this_DATA_eff * this_MC_eff * this_DATA_mistag * this_MC_mistag == 0.) continue;
+
+    bool isRealJet = false;
+    // Since partonFlavour==0 means not matched to Gen parton, assume it means jet is not true jet, and it's a PU jet
+    // See also comments of https://github.com/cms-sw/cmssw/blob/277cb56baa2e8187367f1897cdc3405c998ec2de/PhysicsTools/JetMCAlgos/plugins/JetFlavourClustering.cc
+    //if(jets.at(i).partonFlavour() !=0) isRealJet = true;
+    //if(jets.at(i).partonPdgId() !=0) isRealJet = true;
+    // ### Not Working Properly, It is using dR=0.3 to determine partonFlavour for gen,jet matching. I think it is too small.
+
+    //isRealJet = isGenMatchedJet(jets.at(i), gens);
+    if(!isRealJet){
+      //this_DATA_eff = this_DATA_mistag;
+      //this_MC_eff = this_MC_mistag;
+    }
+
+    // Default set is Medium ID cut
+    bool isPassID = ( (jets.at(i).Pt() <30 && jets.at(i).PileupJetId() >0.18) || (jets.at(i).Pt() >30 && jets.at(i).PileupJetId() >0.61));
+    if(isPassID){
+      //if(isRealJet) cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") real Jet passing ID"<<endl;
+      //else cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") PU Jet passing ID"<<endl;
+    }else{
+      //if(isRealJet) cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") real Jet failing ID"<<endl;
+      //else cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") PU Jet failing ID"<<endl;
+    }
+    
+    if(isPassID){
+      Prob_DATA *= this_DATA_eff;
+      Prob_MC *= this_MC_eff;
+    }else{
+      Prob_DATA *= 1.-this_DATA_mistag;
+      Prob_MC *= 1.-this_MC_mistag;
+      //Prob_DATA *= 1.-this_DATA_eff;
+      //Prob_MC *= 1.-this_MC_eff;
+   }
+  }
+
+  feff.Close();
+  fmistag.Close();
+  return Prob_DATA/Prob_MC;
+
+}
+
+bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
+  
+  if(IsDATA){
+    cout<<"This is for MC, something wrong here" <<endl;
+    return false;
+  }
+
+  //Before using Gen Jet, we should use anti-kt algorithm clustering gen particles
+  //But now, I used parton as an axis of gen jet, so dR(jet, gen parton) will criteria for matching
+  int NumNearGen = 0;
+  double GenpTSum = 0.;
+  for(unsigned int i=0; i<gens.size(); i++){
+    //gens.at(i).Print();
+    if(gens.at(i).Status() != 1) continue;
+    if(abs(gens.at(i).PID()) ==12 || abs(gens.at(i).PID()) ==14 ||  abs(gens.at(i).PID()) ==16) continue;
+    //if(abs(gens.at(i).PID()) >10 && abs(gens.at(i).PID()) <17) continue;
+    //if(abs(gens.at(i).PID()) == 24 || gens.at(i).PID() == 22 || gens.at(i).PID() == 23 || gens.at(i).PID() == 25) continue;
+
+    if(jet.DeltaR(gens.at(i)) <1.0) GenpTSum += gens.at(i).Pt();//return true;
+    if(jet.DeltaR(gens.at(i)) <1.0) NumNearGen += 1;
+  }
+  cout<<"reco jet pT = "<<jet.Pt()<<", gen pT sum = "<<GenpTSum<<", and ratio = "<<GenpTSum/jet.Pt()<<" , #ofnearGen is "<<NumNearGen<<endl;
+  if(GenpTSum > jet.Pt()*0.5 && GenpTSum < jet.Pt()*1.5) return true;
+  return false;
+
 }

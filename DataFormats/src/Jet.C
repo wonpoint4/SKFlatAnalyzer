@@ -25,6 +25,7 @@ Jet::Jet() : Particle() {
   j_muonEnergyFraction=-999.;
   j_chargedMultiplicity=-999;
   j_neutralMultiplicity=-999;
+  j_partonPdgId=-999;
   j_PileupJetId=-999.;
   j_En_up=1.;
   j_En_down=1.;;
@@ -41,9 +42,10 @@ Jet::~Jet(){
 void Jet::SetArea(double area){
   j_area = area;
 }
-void Jet::SetGenFlavours(double pf, double hf){
+void Jet::SetGenFlavours(double pf, double hf, double pdg){
   j_partonFlavour = pf;
   j_hadronFlavour = hf;
+  j_partonPdgId = pdg;
 }
 void Jet::SetTaggerResults(std::vector<double> ds){
   j_CSVv2             = ds.at(0);
@@ -124,6 +126,3 @@ double Jet::GetTaggerResult(JetTagging::Tagger tg) const {
   }
 }
 
-double Jet::GetPileupJetId(){
-  return j_PileupJetId;
-}
