@@ -24,8 +24,8 @@ TSCorrection::~TSCorrection(){
 void TSCorrection::ReadFittedError(TString fileName){
 
   TString datapath = getenv("SKFlat_WD");
-  datapath += "data/Run2Legacy_v4";
-  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/TSCorrection";
+  datapath += "/data/Run2Legacy_v4";
+  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/TSCorrection/";
   std::ifstream reader(datapath + fileName);
 
   TString key, formula;
@@ -38,8 +38,8 @@ void TSCorrection::ReadFittedError(TString fileName){
 void TSCorrection::ReadFittedMean(TString fileName){
 
   TString datapath = getenv("SKFlat_WD");
-  datapath += "data/Run2Legacy_v4";
-  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/TSCorrection";
+  datapath += "/data/Run2Legacy_v4";
+  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/TSCorrection/";
   std::ifstream reader(datapath + fileName);
 
   TString key, formula;

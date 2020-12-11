@@ -367,9 +367,8 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== leading muon has trigger-safe pt
   if( muons.at(0).Pt() <= TriggerSafePtCut ) return;
 
-  //==== On-Z
-  Particle ZCand = muons.at(0) + muons.at(1);
-  if(!IsOnZ(ZCand.M(), 15.)) return;
+  if(jets.size()<4) return;
+  if(NBJets_NoSF<2) return;
 
   //=======================
   //==== Kinematic Fitter
@@ -380,13 +379,17 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   for(auto& jet : jets){
     jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
   }
+  if(jet_vector.size() != btag_vector.size()){
+    cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
+    exit(1);
+  }
   lepton = (TLorentzVector)(muons.at(0));
   met    = GetEvent().GetMETVector();
   fitter->SetAllObjects(jet_vector,
-		        btag_vector,
-			lepton,
-			met
-		       );
+        	        btag_vector,
+        		lepton,
+        		met
+        	       );
   fitter->FindBestChi2Fit();
   auto fitter_results = fitter->GetResults();
 
@@ -430,8 +433,11 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==========================
   //==== Now fill histograms
   //==========================
-
-  FillHist(param.Name+"/WCan_Mass_"+param.Name,fitter_results->fitted_dijet_M, weight, 40, 0., 200.);
+  
+  if(fitter_results->size()>0){
+    double fitted_dijet_M = fitter_results->at(0).fitted_dijet_M;
+    FillHist(param.Name+"/WCan_Mass_"+param.Name,fitted_dijet_M, weight, 40, 0., 200.);
+  }
 
 }
 

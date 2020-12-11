@@ -1,4 +1,5 @@
-all: TH4D DataFormats AnalyzerTools GEScaleSyst KinematicFitter Analyzers Archive
+all: TH4D DataFormats KinematicFitter AnalyzerTools GEScaleSyst Analyzers Archive
+#all: TH4D DataFormats AnalyzerTools GEScaleSyst Analyzers Archive
 
 TH4D::
 	(cd external/TH4D; make)
@@ -10,6 +11,11 @@ DataFormats::
 	(mvexist.sh DataFormats/src/DataFormats_Dict_rdict.pcm lib/)
 	(mvexist.sh DataFormats/libDataFormats.rootmap lib/)
 
+KinematicFitter::
+	(cd external/KinematicFitter; make)
+	(mvexist.sh external/KinematicFitter/src/KinematicFitter_Dict_rdict.pcm lib/)
+	(mvexist.sh external/KinematicFitter/libKinematicFitter.rootmap lib/)
+
 AnalyzerTools::
 	(cd AnalyzerTools; make)
 	(mvexist.sh AnalyzerTools/src/AnalyzerTools_Dict_rdict.pcm lib/)
@@ -19,11 +25,6 @@ GEScaleSyst::
 	(cd external/GEScaleSyst; make)
 	(mvexist.sh external/GEScaleSyst/GEScaleSyst_Dict_rdict.pcm lib/)
 	(mvexist.sh external/GEScaleSyst/libGEScaleSyst.rootmap lib/)
-
-KinematicFitter::
-	(cd external/KinematicFitter; make)
-	(mvexist.sh external/KinematicFitter/KinematicFitter_Dict_rdict.pcm lib/)
-	(mvexist.sh external/KinematicFitter/libKinematicFitter.rootmap lib/)
 
 Analyzers::
 	(cd Analyzers; make)

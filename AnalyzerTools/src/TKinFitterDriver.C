@@ -6,6 +6,10 @@ TKinFitterDriver::TKinFitterDriver(){
 
 
 TKinFitterDriver::TKinFitterDriver(int DataYear_){
+  //if(gSystem->Load("librat.so")){  
+  //  cout << "TKinFitterDriver::TKinFitterDriver,   librat.so is not loaded" << endl;
+  //  exit(EXIT_FAILURE);   
+  //}
 
   DataYear = DataYear_;
 
@@ -435,11 +439,16 @@ bool TKinFitterDriver::Check_BJet_Assignment(){
 
   bool true_bjet_assignment=false;
   if(nbtags>=2 && nbtags_in_four_jets==2){
-    if(btag_csv_vector.at(w_ch_up_type_jet_idx) <= btag_csv_vector.at(w_ch_down_type_jet_idx)){
-      true_bjet_assignment=true;
+    if(btag_csv_vector.size()>0){
+      if(btag_csv_vector.at(w_ch_up_type_jet_idx) <= btag_csv_vector.at(w_ch_down_type_jet_idx)){
+        true_bjet_assignment=true;
+      }
+      else{
+        //pass
+      }
     }
     else{
-      //pass
+      true_bjet_assignment=true;
     }
   }
 
