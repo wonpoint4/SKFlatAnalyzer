@@ -10,7 +10,13 @@ IgnoreNoHist(false)
   genFinderDY = new GenFinderForDY();
 
 }
-
+vector<TString> MCCorrection::Split(TString s,TString del){
+  TObjArray* array=s.Tokenize(del);
+  vector<TString> out;
+  for(const auto& obj:*array) out.push_back(((TObjString*)obj)->String());
+  array->Delete();
+  return out;
+}
 void MCCorrection::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
@@ -20,37 +26,40 @@ void MCCorrection::ReadHistograms(){
   //==== ID/Trigger
   TString IDpath = datapath+"/"+TString::Itoa(DataYear,10)+"/ID/";
 
-  string elline;
-  ifstream in(IDpath+"/Electron/histmap.txt");
-  while(getline(in,elline)){
-    std::istringstream is( elline );
+  vector<TString> elhistmaps=Split(gSystem->GetFromPipe("find "+IDpath+"/Electron/ -name 'histmap*.txt' -type f"),"\n");
+  for(const auto& elhistmap:elhistmaps){
+    string elline;
+    ifstream in(elhistmap);
+    while(getline(in,elline)){
+      std::istringstream is( elline );
 
-    TString tstring_elline = elline;
-    if(tstring_elline.Contains("#")) continue;
+      TString tstring_elline = elline;
+      if(tstring_elline.Contains("#")) continue;
 
-    TString a,b,c,d,e,f;
-    is >> a; // ID,RECO
-    is >> b; // Eff,SF
-    is >> c; // <WPnames>
-    is >> d; // <rootfilename>
-    is >> e; // <histname>
-    is >> f; // Class
-    TFile *file = new TFile(IDpath+"/Electron/"+d);
-
-    if(f=="TH2F"){
-      histDir->cd();
-      map_hist_Electron[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
+      TString a,b,c,d,e,f;
+      is >> a; // ID,RECO
+      is >> b; // Eff,SF
+      is >> c; // <WPnames>
+      is >> d; // <rootfilename>
+      is >> e; // <histname>
+      is >> f; // Class
+      TFile *file = new TFile(IDpath+"/Electron/"+d);
+      
+      if(f=="TH2F"){
+	histDir->cd();
+	map_hist_Electron[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
+      }
+      else if(f=="TGraphAsymmErrors"){
+	histDir->cd();
+	map_graph_Electron[a+"_"+b+"_"+c] = (TGraphAsymmErrors *)file->Get(e)->Clone();
+      }
+      else{
+	cout << "[MCCorrection::MCCorrection] Wrong class type : " << elline << endl;
+      }
+      file->Close();
+      delete file;
+      origDir->cd();
     }
-    else if(f=="TGraphAsymmErrors"){
-      histDir->cd();
-      map_graph_Electron[a+"_"+b+"_"+c] = (TGraphAsymmErrors *)file->Get(e)->Clone();
-    }
-    else{
-      cout << "[MCCorrection::MCCorrection] Wrong class type : " << elline << endl;
-    }
-    file->Close();
-    delete file;
-    origDir->cd();
   }
 
   cout << "[MCCorrection::MCCorrection] map_hist_Electron :" << endl;
@@ -63,26 +72,29 @@ void MCCorrection::ReadHistograms(){
   }
 
 
-  string elline2;
-  ifstream in2(IDpath+"/Muon/histmap.txt");
-  while(getline(in2,elline2)){
-    std::istringstream is( elline2 );
+  vector<TString> muhistmaps=Split(gSystem->GetFromPipe("find "+IDpath+"/Muon/ -name 'histmap*.txt' -type f"),"\n");
+  for(const auto& muhistmap:muhistmaps){
+    string elline2;
+    ifstream in2(muhistmap);
+    while(getline(in2,elline2)){
+      std::istringstream is( elline2 );
 
-    TString tstring_elline = elline2;
-    if(tstring_elline.Contains("#")) continue;
-
-    TString a,b,c,d,e;
-    is >> a; // ID,RERCO
-    is >> b; // Eff,SF
-    is >> c; // <WPnames>
-    is >> d; // <rootfilename>
-    is >> e; // <histname>
-    TFile *file = new TFile(IDpath+"/Muon/"+d);
-    histDir->cd();
-    map_hist_Muon[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
-    file->Close();
-    delete file;
-    origDir->cd();
+      TString tstring_elline = elline2;
+      if(tstring_elline.Contains("#")) continue;
+      
+      TString a,b,c,d,e;
+      is >> a; // ID,RERCO
+      is >> b; // Eff,SF
+      is >> c; // <WPnames>
+      is >> d; // <rootfilename>
+      is >> e; // <histname>
+      TFile *file = new TFile(IDpath+"/Muon/"+d);
+      histDir->cd();
+      map_hist_Muon[a+"_"+b+"_"+c] = (TH2F *)file->Get(e)->Clone();
+      file->Close();
+      delete file;
+      origDir->cd();
+    }
   }
 
   cout << "[MCCorrection::MCCorrection] map_hist_Muon :" << endl;

@@ -13,6 +13,8 @@
 #include "TH2D.h"
 #include "TGraph.h"
 #include "TGraphAsymmErrors.h"
+#include "TObjString.h"
+#include "TSystem.h"
 
 #include "Lepton.h"
 #include "Muon.h"
@@ -34,6 +36,7 @@ public:
   ~MCCorrection();
 
   TDirectory *histDir;
+  static vector<TString> Split(TString s,TString del);
   void ReadHistograms();
 
   TString MCSample;
