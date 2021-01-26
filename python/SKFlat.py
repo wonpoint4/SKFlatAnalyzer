@@ -53,7 +53,11 @@ string_ThisTime = ""
 ## Environment Variables
 
 USER = os.environ['USER']
-exec('from UserInfo_'+USER+' import *')
+if os.path.exists('python/UserInfo_'+USER+'.py'):
+  exec('from UserInfo_'+USER+' import *')
+else:
+  print("No UserInfo file")
+  exit(1)
 SKFlatLogEmail = UserInfo['SKFlatLogEmail']
 SKFlatLogWebDir = UserInfo['SKFlatLogWebDir']
 LogEvery = UserInfo['LogEvery']
