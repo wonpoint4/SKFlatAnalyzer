@@ -89,9 +89,12 @@ public:
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
   void SetupZptWeight();
   void SetupZ0Weight();
+  void SetupOSSSWeight();
   void SetupRoccoR();
   double GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double GetZ0Weight(double z0);
+  double GetOSSSWeight(double dimass);
+  double GetOSSSWeight(double dimass, double dipt);
   double Lepton_SF(TString histkey,const Lepton* lep,int sys);
   double LeptonTrigger_SF(TString triggerSF_key,const vector<Lepton*>& leps,int sys);
   double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
@@ -117,6 +120,7 @@ public:
 
   map<TString,TH2D*> map_hist_zpt;
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
+  TH1D *hOS=NULL, *hSS=NULL, *hOS0=NULL, *hSS0=NULL, *hOS1=NULL, *hSS1=NULL, *hOS2=NULL, *hSS2=NULL, *hOS3=NULL, *hSS3=NULL, *hOS4=NULL, *hSS4=NULL;
   TString tauprefix;
   bool IsDYSample=false;
   Event event;

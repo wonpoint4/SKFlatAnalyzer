@@ -9,6 +9,8 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(rocele) delete rocele;
   if(hz0_data) delete hz0_data;
   if(hz0_mc) delete hz0_mc;
+  if(hOS) delete hOS;
+  if(hSS) delete hSS;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -20,6 +22,7 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
+  //SetupOSSSWeight();
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
 }
@@ -325,6 +328,54 @@ double SMPAnalyzerCore::GetZ0Weight(double valx){
     double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
     return norm*data_val/mc_val;
 }
+void SMPAnalyzerCore::SetupOSSSWeight(){
+  cout<<"[SMPAnalyzerCore::SetupOSSSWeight] setting OSSWeight"<<endl;
+  TString datapath=getenv("DATA_DIR");
+  TFile fOSSS(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/OSSS_ratio.root");
+  hOS=(TH1D*)fOSSS.Get("os_antiIso010_dimass60");
+  hSS=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60");
+  hOS->SetDirectory(0);
+  hSS->SetDirectory(0);
+  hOS0=(TH1D*)fOSSS.Get("os_antiIso010_dimass60_pt0");
+  hSS0=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60_pt0");
+  hOS0->SetDirectory(0);
+  hSS0->SetDirectory(0);
+  hOS1=(TH1D*)fOSSS.Get("os_antiIso010_dimass60_pt10");
+  hSS1=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60_pt10");
+  hOS1->SetDirectory(0);
+  hSS1->SetDirectory(0);
+  hOS2=(TH1D*)fOSSS.Get("os_antiIso010_dimass60_pt20");
+  hSS2=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60_pt20");
+  hOS2->SetDirectory(0);
+  hSS2->SetDirectory(0);
+  hOS3=(TH1D*)fOSSS.Get("os_antiIso010_dimass60_pt40");
+  hSS3=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60_pt40");
+  hOS3->SetDirectory(0);
+  hSS3->SetDirectory(0);
+  hOS4=(TH1D*)fOSSS.Get("os_antiIso010_dimass60_pt80");
+  hSS4=(TH1D*)fOSSS.Get("ss_antiIso010_dimass60_pt80");
+  hOS4->SetDirectory(0);
+  hSS4->SetDirectory(0);
+  fOSSS.Close();
+}
+double SMPAnalyzerCore::GetOSSSWeight(double dimass){
+  double OS_val = hOS->GetBinContent(hOS->FindBin(dimass));
+  double SS_val = hSS->GetBinContent(hSS->FindBin(dimass));
+  if(dimass < 60. || SS_val == 0.) return 1.;
+  else return OS_val/SS_val;
+}double SMPAnalyzerCore::GetOSSSWeight(double dimass, double dipt){
+  TH1D *this_hist_OS = NULL, *this_hist_SS = NULL;
+  if(dipt < 10.){ this_hist_OS = hOS0; this_hist_SS = hSS0; }
+  else if(dipt < 20.){ this_hist_OS = hOS1; this_hist_SS = hSS1; }
+  else if(dipt < 40.){ this_hist_OS = hOS2; this_hist_SS = hSS2; }
+  else if(dipt < 80.){ this_hist_OS = hOS3; this_hist_SS = hSS3; }
+  else{ this_hist_OS = hOS4; this_hist_SS = hSS4; }
+
+  double OS_val = this_hist_OS->GetBinContent(hOS->FindBin(dimass));
+  double SS_val = this_hist_SS->GetBinContent(hSS->FindBin(dimass));
+  if(dimass < 60. || SS_val == 0.) return 1.;
+  else return OS_val/SS_val;
+}
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
   double valzptcor_norm=1.;
@@ -566,6 +617,87 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
     for(auto const& muon: muons){
       //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso015"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.15) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso020"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.20) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso025"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.25) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso030"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.30) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso035"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.35) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso040"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.40) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso045"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.45) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso050"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.50) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso055"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.55) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso060"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<0.60) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkIso999"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()<999) out.push_back(muon);
+      //if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkAntiIso005"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()>0.05) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkAntiIso010"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()>0.10) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkAntiIso020"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()>0.20) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkAntiIso030"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()>0.30) out.push_back(muon);
+    }
+  }else if(id=="POGMediumWithLooseTrkAntiIso040"){
+    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.TrkIso()/muon.Pt()>0.40) out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
     vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
