@@ -11,9 +11,11 @@ public:
   ~Jet();
 
   void SetArea(double area);
-  void SetGenFlavours(double pf, double hf);
+  void SetGenFlavours(double pf, double hf, double pdg);
   inline int partonFlavour() const { return j_partonFlavour; }
   inline int hadronFlavour() const { return j_hadronFlavour; }
+  inline int partonPdgId() const { return j_partonPdgId; }
+  inline double PileupJetId() const { return j_PileupJetId; }
   void SetTaggerResults(std::vector<double> ds);
   void SetEnergyFractions(double cH, double nH, double nEM, double cEM, double muE);
   void SetMultiplicities(double cM, double nM);
@@ -65,6 +67,7 @@ private:
   double j_muonEnergyFraction;
   int j_chargedMultiplicity;
   int j_neutralMultiplicity;
+  int j_partonPdgId;
   double j_PileupJetId;
   double j_En_up;
   double j_En_down;

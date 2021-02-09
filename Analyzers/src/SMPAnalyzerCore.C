@@ -9,6 +9,11 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(rocele) delete rocele;
   if(hz0_data) delete hz0_data;
   if(hz0_mc) delete hz0_mc;
+  //if(heff_data) delete heff_data;
+  //if(heff_mc) delete heff_mc;
+  //if(hmistag_data) delete hmistag_data;
+  //if(hmistag_mc) delete hmistag_mc;
+
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -20,6 +25,7 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupZptWeight();
   SetupRoccoR();
   SetupZ0Weight();
+  SetupPUJetWeight();
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
 }
@@ -320,11 +326,12 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   fz0.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
-    double data_val = hz0_data->Eval(valx);
-    double mc_val = hz0_mc->Eval(valx);
-    double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
-    return norm*data_val/mc_val;
+  double data_val = hz0_data->Eval(valx);
+  double mc_val = hz0_mc->Eval(valx);
+  double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
+  return norm*data_val/mc_val;
 }
+
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
   double valzptcor_norm=1.;
@@ -384,10 +391,10 @@ void SMPAnalyzerCore::GetEventWeights(){
     
   
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
-  cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
+  cout<<"index\tpid\tstatus\tmother\tHard\tPrompt\tpt\tpz\teta\tphi\tmass\n";
   for(int i=0;i<(int)gens.size();i++){
     gens[i].Print();
-    cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
+    //cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
   }
 }
 
@@ -442,9 +449,53 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1)
     l1=temp;
   }
 }
-
-
-void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+// This function used for DY+b analysis (in especially, qG or Gq collisions)
+void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0){
+  if(!IsDYSample){
+    cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  bool IsqG = false;
+  if(lhes[0].ID() !=lhes[1].ID() && max(lhes[0].ID(),lhes[1].ID()) == 21) IsqG = true;
+  int bnum=0;
+  for(int i=0;i<(int)lhes.size();i++){
+    //cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
+    if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
+    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
+    if(IsqG){ 
+      if(j0.ID()==0 && lhes[i].ID()==min(lhes[0].ID(),lhes[1].ID()) && lhes[i].Status()==1) j0=lhes[i]; //Among status=1 lhes, the first,second are always leptons, the third is quark.
+    }else{                                                                                              // (if gluon radiation only, then gluon)
+      if(j0.ID()==0 && (abs(lhes[i].ID())<6 || lhes[i].ID()==21) && lhes[i].Status()==1) j0=lhes[i];
+    }
+    if(lhes[i].ID()==5&&lhes[i].Status()==1) bnum += 3;
+    else if(lhes[i].ID()==-5&&lhes[i].Status()==1) bnum -= 2;
+    //else if(j0.ID()&&lhes[i].ID()==j0.ID()) continue;
+    //else if(j0.ID()&&lhes[i].ID()==-j0.ID()){
+    //  j0.SetIndexIDStatus(i,21,1);
+    //  j0+=lhes[i];
+    //}
+  }
+  if(l0.ID()==0||l1.ID()==0){
+    cout <<"[AFBAnalyzer::GetLHEParticles] something is wrong"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(l0.Pt()<l1.Pt()){
+    LHE temp=l0;
+    l0=l1;
+    l1=temp;
+  }
+  /*
+  if(bnum==1) tauprefix += "bB_";
+  else if(bnum==4) tauprefix += "bbB_";
+  else if(bnum==-1) tauprefix += "BbB_";
+  else if(bnum==3) tauprefix += "b_";
+  else if(bnum==-2) tauprefix += "B_";
+  else if(bnum==0) tauprefix += "";
+  else tauprefix = tauprefix+"b"+Form("%d",bnum)+"_";
+  */
+}
+// This function used for DY+b analysis (in especially, qG or Gq collisions)
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode){
   //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
   if(!IsDYSample){
     cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
@@ -452,8 +503,11 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   }
   vector<const Gen*> leptons;
   vector<const Gen*> photons;
+  vector<const Gen*> jets;
+
   int ngen=gens.size();
   for(int i=0;i<ngen;i++){
+    //gens.at(i).Print();
     if(!gens.at(i).isPrompt()) continue;
     int genpid=gens.at(i).PID();
     if(gens.at(i).isHardProcess()){
@@ -466,6 +520,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
       else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
     }
+    if(gens.at(i).isHardProcess()&&(abs(genpid)<7||genpid==21)) jets.push_back(&gens[i]);
   }
   int nlepton=leptons.size();
   for(int i=0;i<nlepton;i++){
@@ -482,6 +537,18 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       }
     }
   }
+  
+  bool IsqG = false;
+  if(parton0.PID() !=parton1.PID() && max(parton0.PID(),parton1.PID()) == 21) IsqG = true;
+
+  int njet=jets.size();
+  for(int i=0;i<njet;i++){
+    if(IsqG){
+      if(jets[i]->PID()!=min(parton0.PID(),parton1.PID())) continue;
+    }
+    if((jets[i]->Pt()>j0.Pt())) j0=*jets[i];
+  }
+
   if(mode>=3){
     if(nlepton>=4){
       for(int i=0;i<nlepton;i++){
@@ -509,7 +576,72 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     }
   }
 }
+void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
+  if(!IsDYSample){
+    cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  vector<const Gen*> leptons;
+  vector<const Gen*> photons;
 
+  int ngen=gens.size();
+  for(int i=0;i<ngen;i++){
+    if(!gens.at(i).isPrompt()) continue;
+    int genpid=gens.at(i).PID();
+    if(gens.at(i).isHardProcess()){
+      if(abs(genpid)<7||genpid==21){
+        if(parton0.IsEmpty()) parton0=gens[i];
+        else if(parton1.IsEmpty()) parton1=gens[i];
+      }
+    }
+    if(gens.at(i).Status()==1){
+      if(abs(genpid)==11||abs(genpid)==13) leptons.push_back(&gens[i]);
+      else if(gens.at(i).PID()==22) photons.push_back(&gens[i]);
+    }
+  }
+  int nlepton=leptons.size();
+  for(int i=0;i<nlepton;i++){
+    for(int j=i+1;j<nlepton;j++){
+      if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){
+        if(leptons[i]->Pt()>leptons[j]->Pt()){
+          l0=*leptons[i];
+          l1=*leptons[j];
+        }else{
+          l0=*leptons[j];
+          l1=*leptons[i];
+        }
+      }
+    }
+  }
+  if(mode>=3){
+    if(nlepton>=4){
+      for(int i=0;i<nlepton;i++){
+        if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+        for(int j=i+1;j<nlepton;j++){
+          if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+          if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+          vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+          vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+          if(history_i.at(1)==history_j.at(1)) photons.push_back(&gens[history_i.at(1)]);
+        }
+      }
+    }
+    for(const auto& photon:photons){
+      vector<int> history=TrackGenSelfHistory(*photon,gens);
+      if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
+      else if(gens[history.at(1)].PID()==l1.PID()) l1+=*photon;
+    }
+  }else if(mode>=1){
+    double delr=mode==1?0.1:0.4;
+    for(const auto& photon:photons){
+      if(l0.DeltaR(*photon)>delr&&l1.DeltaR(*photon)>delr) continue;
+      if(l0.DeltaR(*photon)<l1.DeltaR(*photon)) l0+=*photon;
+      else l1+=*photon;
+    }
+  }
+}
 Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
   //0: default
   //1: dressed 0.1
@@ -526,7 +658,6 @@ Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<
     
   return gen_lepton;
 }
-
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
   if(id=="passMediumID_Selective"){
@@ -684,4 +815,166 @@ TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
   int start=str.Index(reg,&extent);
   if(start>=0) return str.Replace(start,extent,repl);
   else return str;
+}
+
+double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst){
+
+  if(IsDATA) return 1.;
+
+  double Prob_MC(1.), Prob_DATA(1.);
+  for(unsigned int i=0; i<jets.size(); i++){
+    double this_MC_EffT = mcCorr->GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_MC_EffL = mcCorr->GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_SFT = mcCorr->GetJetTaggingSF(jtpT,
+					      jets.at(i).hadronFlavour(),
+					      jets.at(i).Pt(),
+					      jets.at(i).Eta(),
+					      jets.at(i).GetTaggerResult(jtpT.j_Tagger),
+					      Syst );
+    double this_SFL = mcCorr->GetJetTaggingSF(jtpL,
+					      jets.at(i).hadronFlavour(),
+					      jets.at(i).Pt(),
+					      jets.at(i).Eta(),
+					      jets.at(i).GetTaggerResult(jtpL.j_Tagger),
+					      Syst );
+    double this_DATA_EffT = this_MC_EffT*this_SFT;
+    double this_DATA_EffL = this_MC_EffL*this_SFL;
+
+    bool isTaggedT = jets.at(i).GetTaggerResult(jtpT.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpT.j_Tagger, jtpT.j_WP);
+    bool isTaggedL = jets.at(i).GetTaggerResult(jtpL.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpL.j_Tagger, jtpL.j_WP);
+    if(isTaggedT){
+      Prob_MC *= this_MC_EffT;
+      Prob_DATA *= this_DATA_EffT;
+    }
+    else if(isTaggedL){
+      Prob_MC *= this_MC_EffL - this_MC_EffT;
+      Prob_DATA *= this_DATA_EffL - this_DATA_EffT;
+    }
+    else{
+      Prob_MC *= 1.-this_MC_EffL;
+      Prob_DATA *= 1.-this_DATA_EffL;
+    }
+  }
+
+  return Prob_DATA/Prob_MC;
+
+}
+
+void SMPAnalyzerCore::SetupPUJetWeight(TString ID){
+  cout<<"[SMPAnalyzerCore::SetupPUJetWeight] setting PUJetWeight with ID "+ID<<endl;
+  /*
+  TString WP;
+  if(ID=="Loose") WP = "L";
+  else if(ID=="Medium") WP = "M";
+  else WP = "T";
+  TString datapath = getenv("DATA_DIR");
+  TFile feff(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_eff_"+TString::Itoa(DataYear,10)+".root");
+  TFile fmistag(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_mistag_"+TString::Itoa(DataYear,10)+".root");
+
+  heff_data=(TH2F*)feff.Get("h2_eff_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+
+  //This makes crash problems!! why?? z0weight case was okay
+  feff.Close();
+  fmistag.Close();
+  */
+}
+
+double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
+  sys = 0;
+  if(IsDATA) return 1.;
+
+  vector<Gen> gens=GetGens();
+
+  TString datapath = getenv("DATA_DIR");
+  TFile feff(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_eff_"+TString::Itoa(DataYear,10)+".root");
+  TFile fmistag(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_mistag_"+TString::Itoa(DataYear,10)+".root");
+  
+  TString WP = "M";
+  heff_data=(TH2F*)feff.Get("h2_eff_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
+  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
+
+  double Prob_MC(1.), Prob_DATA(1.);
+  for(unsigned int i=0; i<jets.size(); i++){
+    double jetpt = jets.at(i).Pt();
+    double jeteta = jets.at(i).Eta();
+    if(jets.at(i).Pt() < 15) cout<<"jet pt < 15GeV, something wrong"<<endl;;//jetpt = 15.001;
+    if(jets.at(i).Pt() > 50) continue;//jetpt = 49.999;
+    if(abs(jets.at(i).Eta()) > 5) jeteta = 4.999;
+
+    double this_DATA_eff = heff_data->GetBinContent(heff_data->FindBin(jetpt, jeteta));
+    double this_MC_eff = heff_mc->GetBinContent(heff_mc->FindBin(jetpt, jeteta));
+    double this_DATA_mistag = hmistag_data->GetBinContent(hmistag_data->FindBin(jetpt, jeteta));
+    double this_MC_mistag = hmistag_mc->GetBinContent(hmistag_mc->FindBin(jetpt, jeteta));
+    if(this_DATA_eff * this_MC_eff * this_DATA_mistag * this_MC_mistag == 0.) continue;
+
+    bool isRealJet = false;
+    // Since partonFlavour==0 means not matched to Gen parton, assume it means jet is not true jet, and it's a PU jet
+    // See also comments of https://github.com/cms-sw/cmssw/blob/277cb56baa2e8187367f1897cdc3405c998ec2de/PhysicsTools/JetMCAlgos/plugins/JetFlavourClustering.cc
+    //if(jets.at(i).partonFlavour() !=0) isRealJet = true;
+    //if(jets.at(i).partonPdgId() !=0) isRealJet = true;
+    // ### Not Working Properly, It is using dR=0.3 to determine partonFlavour for gen,jet matching. I think it is too small.
+
+    //isRealJet = isGenMatchedJet(jets.at(i), gens);
+    if(!isRealJet){
+      //this_DATA_eff = this_DATA_mistag;
+      //this_MC_eff = this_MC_mistag;
+    }
+
+    // Default set is Medium ID cut
+    bool isPassID = ( (jets.at(i).Pt() <30 && jets.at(i).PileupJetId() >0.18) || (jets.at(i).Pt() >30 && jets.at(i).PileupJetId() >0.61));
+    if(isPassID){
+      //if(isRealJet) cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") real Jet passing ID"<<endl;
+      //else cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") PU Jet passing ID"<<endl;
+    }else{
+      //if(isRealJet) cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") real Jet failing ID"<<endl;
+      //else cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") PU Jet failing ID"<<endl;
+    }
+    
+    if(isPassID){
+      Prob_DATA *= this_DATA_eff;
+      Prob_MC *= this_MC_eff;
+    }else{
+      Prob_DATA *= 1.-this_DATA_mistag;
+      Prob_MC *= 1.-this_MC_mistag;
+      //Prob_DATA *= 1.-this_DATA_eff;
+      //Prob_MC *= 1.-this_MC_eff;
+   }
+  }
+
+  feff.Close();
+  fmistag.Close();
+  return Prob_DATA/Prob_MC;
+
+}
+
+bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
+  
+  if(IsDATA){
+    cout<<"This is for MC, something wrong here" <<endl;
+    return false;
+  }
+
+  //Before using Gen Jet, we should use anti-kt algorithm clustering gen particles
+  //But now, I used parton as an axis of gen jet, so dR(jet, gen parton) will criteria for matching
+  int NumNearGen = 0;
+  double GenpTSum = 0.;
+  for(unsigned int i=0; i<gens.size(); i++){
+    //gens.at(i).Print();
+    if(gens.at(i).Status() != 1) continue;
+    if(abs(gens.at(i).PID()) ==12 || abs(gens.at(i).PID()) ==14 ||  abs(gens.at(i).PID()) ==16) continue;
+    //if(abs(gens.at(i).PID()) >10 && abs(gens.at(i).PID()) <17) continue;
+    //if(abs(gens.at(i).PID()) == 24 || gens.at(i).PID() == 22 || gens.at(i).PID() == 23 || gens.at(i).PID() == 25) continue;
+
+    if(jet.DeltaR(gens.at(i)) <1.0) GenpTSum += gens.at(i).Pt();//return true;
+    if(jet.DeltaR(gens.at(i)) <1.0) NumNearGen += 1;
+  }
+  cout<<"reco jet pT = "<<jet.Pt()<<", gen pT sum = "<<GenpTSum<<", and ratio = "<<GenpTSum/jet.Pt()<<" , #ofnearGen is "<<NumNearGen<<endl;
+  if(GenpTSum > jet.Pt()*0.5 && GenpTSum < jet.Pt()*1.5) return true;
+  return false;
+
 }

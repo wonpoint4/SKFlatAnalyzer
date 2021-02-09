@@ -52,7 +52,7 @@ export MYBIN=$SKFlat_WD/bin/
 export PYTHONDIR=$SKFlat_WD/python/
 export PATH=${MYBIN}:${PYTHONDIR}:${PATH}
 
-export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/DataFormats/include/:$SKFlat_WD/AnalyzerTools/include/:$SKFlat_WD/Analyzers/include/
+export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/DataFormats/include/:$SKFlat_WD/AnalyzerTools/include/:$SKFlat_WD/Analyzers/include/:$SKFlat_WD/external/KinematicFitter/include
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SKFlat_LIB_PATH
 
 source $SKFlat_WD/bin/BashColorSets.sh

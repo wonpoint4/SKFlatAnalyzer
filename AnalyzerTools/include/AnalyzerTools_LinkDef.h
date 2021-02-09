@@ -16,5 +16,7 @@
 #pragma link C++ class GenFinderForDY+;
 #pragma link C++ class RoccoR+;
 #pragma link C++ class RocelecoR+;
+#pragma link C++ class TSCorrection+;
+#pragma link C++ class TKinFitterDriver+;
 
 #endif

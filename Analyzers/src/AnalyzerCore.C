@@ -377,7 +377,7 @@ std::vector<Jet> AnalyzerCore::GetAllJets(){
     jet.SetCharge(jet_charge->at(i));
 
     jet.SetArea(jet_area->at(i));
-    jet.SetGenFlavours(jet_partonFlavour->at(i), jet_hadronFlavour->at(i));
+    jet.SetGenFlavours(jet_partonFlavour->at(i), jet_hadronFlavour->at(i), jet_partonPdgId->at(i));
     std::vector<double> tvs = {
       jet_CSVv2->at(i),
       jet_DeepCSV->at(i),

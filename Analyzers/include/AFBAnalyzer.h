@@ -16,6 +16,7 @@ public:
 
   //double GetCosThetaCS(const vector<Lepton*>& leps);
   double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
+  double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
   double GetCosTheta(const vector<Lepton*>& leps,const vector<Jet>& jets,TString option,double fcut);
   void FillHists(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHistsToy(TString channelname,TString pre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
@@ -41,7 +42,14 @@ public:
   double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
-  
+  std::vector<Muon> muons, softmus, bmuon;
+  std::vector<Electron> electrons;
+  std::vector<Jet> jets, realjets, bjets;
+  int n_bjet=0;
+  int n_powerbjet=0;
+  double bjet_charge=-1.5;
+  TLorentzVector bjet;
+
   static const int afb_mbinnum=40;
   const double afb_mbin[afb_mbinnum+1]={60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
   static const int afb_ybinnum=12;
@@ -53,8 +61,8 @@ public:
 
   static const int grid_mbinnum=5;
   const double grid_mbin[grid_mbinnum+1]={60,80,100,120,400,3000};
-  static const int grid_ybinnum=4;
-  const double grid_ybin[grid_ybinnum+1]={-2.4,-1.2,0,1.2,2.4};
+  static const int grid_ybinnum=6;
+  const double grid_ybin[grid_ybinnum+1]={-2.4,-2,-1.2,0,1.2,2,2.4};
   static const int grid_ptbinnum=4;
   const double grid_ptbin[grid_ptbinnum+1]={0,20,50,100,650};
 

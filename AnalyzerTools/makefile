@@ -3,9 +3,10 @@ OBJDIR = obj
 DEPDIR = $(OBJDIR)/dep
 SRCDIR = src
 INCDIR = include
-ADDITIONAL_ROOTMAPLIBRARY= -rml libDataFormats.so -rml libHist.so
+ADDITIONAL_ROOTMAPLIBRARY= -rml libDataFormats.so -rml libHist.so -rml libKinematicFitter.so
 
 include $(SKFlat_WD)/makefile.common
 
 INCLUDES += -I$(SKFlat_WD)/DataFormats/include/
+INCLUDES += -I$(SKFlat_WD)/external/KinematicFitter/include/
 #INCLUDES += -I/cvmfs/cms.cern.ch/slc6_amd64_gcc630/external/lhapdf/6.2.1-fmblme/include/
