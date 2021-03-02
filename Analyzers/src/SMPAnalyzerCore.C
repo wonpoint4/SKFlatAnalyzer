@@ -308,7 +308,7 @@ void SMPAnalyzerCore::SetupZptWeight(){
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
   TString datapath=getenv("DATA_DIR");
-  roc=new RoccoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RoccoR"+TString::Itoa(DataYear,10)+".txt").Data());
+  roc=new RoccoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RoccoR"+TString::Itoa(DataYear,10)+"UL.txt").Data());
   rocele=new RocelecoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RocelecoR"+TString::Itoa(DataYear,10)+"_new.txt").Data());
 }
 void SMPAnalyzerCore::SetupZ0Weight(){

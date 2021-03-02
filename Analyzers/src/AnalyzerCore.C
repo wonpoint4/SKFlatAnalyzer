@@ -892,7 +892,7 @@ bool AnalyzerCore::PassMETFilter(){
   if(IsDATA && !Flag_eeBadScFilter) return false;
 
   if(DataYear>=2017){
-    if(!Flag_ecalBadCalibReducedMINIAODFilter) return false;
+    //if(!Flag_ecalBadCalibReducedMINIAODFilter) return false; // TODO WIP for UL
   }
 
   return true;
@@ -958,11 +958,10 @@ double AnalyzerCore::GetPileUpWeight(int N_pileup, int syst){
       return mcCorr->GetPileUpWeight(N_pileup, syst);
     }
     else if(DataYear==2017){
-      return mcCorr->GetPileUpWeightBySampleName(N_pileup, syst);
+      return mcCorr->GetPileUpWeight(N_pileup, syst);
     }
     else if(DataYear==2018){
-      //==== TODO 2018 not yet added
-      return 1.;
+      return mcCorr->GetPileUpWeight(N_pileup, syst);
     }
     else{
       cout << "[AnalyzerCore::GetPileUpWeight] Wrong year : " << DataYear << endl;

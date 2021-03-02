@@ -783,9 +783,6 @@ double MCCorrection::GetPileUpWeightBySampleName(int N_pileup, int syst){
 
 double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
 
-  int this_bin = N_pileup+1;
-  if(N_pileup >= 100) this_bin=100;
-
   TString this_histname = "MC_" + TString::Itoa(DataYear,10);
   if(syst == 0){
     this_histname += "_central_pileup";
@@ -797,16 +794,19 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
     this_histname += "_sig_up_pileup";
   }
   else{
-    cerr << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
+    cerr << "[MCCorrection::GetPileUpWeight] syst should be 0, -1, or +1" << endl;
     exit(EXIT_FAILURE);
   }
 
   TH1D *this_hist = map_hist_pileup[this_histname];
   if(!this_hist){
-    cerr << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
+    cerr << "[MCCorrection::GetPileUpWeight] No " << this_histname << endl;
     exit(EXIT_FAILURE);
   }
   
+  int this_bin = N_pileup+1;
+  if(this_bin>this_hist->GetNbinsX()) this_bin=this_hist->GetNbinsX();
+
   //FIXME 
   double pu_weight=this_hist->GetBinContent(this_bin);
   if(pu_weight>5) pu_weight=5;

@@ -35,6 +35,9 @@ void ZptWeight::executeEvent(){
       if(!IsDATA||DataStream.Contains("DoubleEG")) executeEventWithChannelName("ee2016");
     
   }else if(DataYear==2017){
+    if(event.PassTrigger("HLT_IsoMu24_v")||event.PassTrigger("HLT_IsoMu27_v"))
+      if(!IsDATA||DataStream.Contains("SingleMuon")) executeEventWithChannelName("mu2017");
+
     if(event.PassTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"))
       if(!IsDATA||DataStream.Contains("DoubleMuon")) executeEventWithChannelName("mm2017");
     
@@ -62,6 +65,14 @@ void ZptWeight::executeEventWithChannelName(TString channelname){
     p.muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
     p.triggerSF={"Mu17Leg1_MediumID_trkIsoLoose_Q","Mu8Leg2_MediumID_trkIsoLoose_Q"};
     p.lep0ptcut=20.;
+    p.lep1ptcut=10.;
+    map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
+    map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]));
+  }else if(channelname.Contains(TRegexp("mu20[0-9][0-9]"))){
+    Parameter p;
+    p.muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
+    p.triggerSF={"IsoMu2427_MediumID_trkIsoLoose_Q"};
+    p.lep0ptcut=25.;
     p.lep1ptcut=10.;
     map_muons[""]=MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0);
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_muons[""]));

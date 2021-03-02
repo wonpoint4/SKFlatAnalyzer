@@ -16,7 +16,8 @@ public:
 
   TTree *newtree;
 
-  vector<TString> triggers;
+  vector<TString> double_triggers;
+  vector<TString> single_triggers;
   void WriteHist();
 
 };

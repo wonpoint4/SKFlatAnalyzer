@@ -1,15 +1,18 @@
 TString analyzer="ZptWeight";
-TString recoskim="SkimTree_Dilepton";
+//TString recoskim="SkimTree_Dilepton";
+TString recoskim="";
 TString genskim="";
 
 TString dyname="DYJets";
-vector<TString> backgrounds={"TTLL_powheg","WJets_MG","WW_pythia","WZ_pythia","ZZ_pythia"};
+//vector<TString> backgrounds={"TTLL_powheg","WJets_MG","WW_pythia","WZ_pythia","ZZ_pythia"};
+vector<TString> backgrounds={};
 map<TString,vector<TString>> datas={
   {"ee2016", {"DoubleEG_B_ver2","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F","DoubleEG_G","DoubleEG_H"}},
   {"mm2016", {"DoubleMuon_B_ver2","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F","DoubleMuon_G","DoubleMuon_H"}},
   {"2016",{"DoubleEG_B_ver2","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F","DoubleEG_G","DoubleEG_H","DoubleMuon_B_ver2","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F","DoubleMuon_G","DoubleMuon_H"}},
   {"ee2017", {"DoubleEG_B","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F"}},
   {"mm2017", {"DoubleMuon_B","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F"}},
+  {"mu2017", {"SingleMuon_B","SingleMuon_C","SingleMuon_D","SingleMuon_E","SingleMuon_F"}},
   {"2017",{"DoubleEG_B","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F","DoubleMuon_B","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F"}},
   {"ee2018", {"EGamma_A","EGamma_B","EGamma_C","EGamma_D"}},
   {"mm2018", {"DoubleMuon_A","DoubleMuon_B","DoubleMuon_C","DoubleMuon_D"}},
@@ -30,6 +33,7 @@ TH1* GetZptWeight(TString mode){
   TString syear=mode(2,4);
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
+  else if(mode.BeginsWith("mu")) schannel="muon";
   else if(mode.BeginsWith("ee")) schannel="electron";
   else {
     cout<<"Unknown mode "<<mode<<endl;
@@ -72,7 +76,10 @@ TH1* GetNormWeight(TString mode){
   TString syear=mode(2,4);
   TString prefix=mode;
   if(mode.BeginsWith("mm")) schannel="muon";
-  else if(mode.BeginsWith("ee")) schannel="electron";
+  else if(mode.BeginsWith("mu")){
+    schannel="muon";
+    prefix=mode.ReplaceAll("mu","mm");
+  }else if(mode.BeginsWith("ee")) schannel="electron";
   else {
     cout<<"Unknown mode "<<mode<<endl;
     exit(1);
@@ -83,9 +90,9 @@ TH1* GetNormWeight(TString mode){
   }
   
   TH2D* hdy=(TH2D*)GetHist(mcfileprefix+dyname+".root",prefix+"/gen_diptdirap");
-  TH2D* hdy_nozptcor=(TH2D*)GetHist(mcfileprefix+dyname+".root",prefix+"/gen_diptdirap_nozptcor");
+  TH2D* hdy_nozptcor=(TH2D*)GetHist(mcfileprefix+dyname+".root",prefix+"/gen_diptdirap_nozptweight");
   TH1D* dirap=hdy->ProjectionY("dirap");
-  TH1D* dirap_nozptcor=hdy_nozptcor->ProjectionY("dirap_nozptcor");
+  TH1D* dirap_nozptcor=hdy_nozptcor->ProjectionY("dirap_nozptweight");
   vector<double> xbin={hdy->GetXaxis()->GetBinLowEdge(1),hdy->GetXaxis()->GetBinLowEdge(hdy->GetNbinsX()+1)};
   vector<double> ybin;
   for(int i=1;i<dirap->GetNbinsX()+2;i++){
@@ -103,6 +110,7 @@ void SaveZptWeight(TString mode){
   TString syear=mode(2,4);
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
+  else if(mode.BeginsWith("mu")) schannel="muon";
   else if(mode.BeginsWith("ee")) schannel="electron";
   else {
     cout<<"Unknown mode "<<mode<<endl;
@@ -124,6 +132,7 @@ void SaveNormWeight(TString mode){
   TString syear=mode(2,4);
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
+  else if(mode.BeginsWith("mu")) schannel="muon";
   else if(mode.BeginsWith("ee")) schannel="electron";
   else {
     cout<<"Unknown mode "<<mode<<endl;
@@ -146,6 +155,7 @@ void Iterate(TString mode,int n=3){
   TString syear=mode(2,4);
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
+  else if(mode.BeginsWith("mu")) schannel="muon";
   else if(mode.BeginsWith("ee")) schannel="electron";
   else if(mode.Contains(TRegexp("^201[6-8]$"))){
     syear=mode;
