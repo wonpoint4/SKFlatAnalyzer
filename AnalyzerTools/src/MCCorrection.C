@@ -24,7 +24,7 @@ void MCCorrection::ReadHistograms(){
   TDirectory* origDir = gDirectory;
 
   //==== ID/Trigger
-  TString IDpath = datapath+"/"+TString::Itoa(DataYear,10)+"/ID/";
+  TString IDpath = datapath+"/"+GetEra()+"/ID/";
 
   vector<TString> elhistmaps=Split(gSystem->GetFromPipe("find "+IDpath+"/Electron/ -name 'histmap*.txt' -type f"),"\n");
   for(const auto& elhistmap:elhistmaps){
@@ -104,7 +104,7 @@ void MCCorrection::ReadHistograms(){
 
 
   // == Get Prefiring maps
-  TString PrefirePath  = datapath+"/"+TString::Itoa(DataYear,10)+"/Prefire/";
+  TString PrefirePath  = datapath+"/"+GetEra()+"/Prefire/";
 
   string elline3;
   ifstream in3(PrefirePath+"/histmap.txt");
@@ -129,7 +129,7 @@ void MCCorrection::ReadHistograms(){
 
 
   // == Get Pileup Reweight maps
-  TString PUReweightPath = datapath+"/"+TString::Itoa(DataYear,10)+"/PileUp/";
+  TString PUReweightPath = datapath+"/"+GetEra()+"/PileUp/";
 
   string elline4;
   ifstream  in4(PUReweightPath+"/histmap.txt");
@@ -166,7 +166,7 @@ void MCCorrection::ReadHistograms(){
 */
   
   // == Get Official DY Pt reweight maps
-  TString DYPtReweightPath = datapath+"/"+TString::Itoa(DataYear,10)+"/DYPtReweight/Zpt_weights_"+TString::Itoa(DataYear,10)+".root";
+  TString DYPtReweightPath = datapath+"/"+GetEra()+"/DYPtReweight/Zpt_weights_"+TString::Itoa(DataYear,10)+".root";
   TFile *file_DYPtReweightPath = new TFile(DYPtReweightPath);
   histDir->cd();
   hist_DYPtReweight_2D = (TH2D *)file_DYPtReweightPath->Get("zptmass_weights")->Clone();
@@ -183,9 +183,6 @@ MCCorrection::~MCCorrection(){
 
 void MCCorrection::SetMCSample(TString s){
   MCSample = s;
-}
-void MCCorrection::SetDataYear(int i){
-  DataYear = i;
 }
 void MCCorrection::SetIsDATA(bool b){
   IsDATA = b;

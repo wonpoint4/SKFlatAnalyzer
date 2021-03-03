@@ -279,14 +279,14 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
 void SMPAnalyzerCore::SetupZptWeight(){
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
   TString datapath=getenv("DATA_DIR");
-  ifstream file_check(datapath+"/"+TString::Itoa(DataYear,10)+"/Zpt/ZptWeight.root");
+  ifstream file_check(datapath+"/"+GetEra()+"/Zpt/ZptWeight.root");
   bool isexist=file_check.is_open();
   file_check.close();
   if(!isexist){
     cout<<"[SMPAnalyzerCore::SetupZptWeight] no ZptWeight.root"<<endl;
     return;
   }
-  TFile fzpt(datapath+"/"+TString::Itoa(DataYear,10)+"/Zpt/ZptWeight.root");
+  TFile fzpt(datapath+"/"+GetEra()+"/Zpt/ZptWeight.root");
   for(const auto&& key:*(fzpt.GetListOfKeys())){
     TH2D* this_hist=(TH2D*)((TKey*)key)->ReadObj();
     TString histname=this_hist->GetName();
@@ -308,13 +308,13 @@ void SMPAnalyzerCore::SetupZptWeight(){
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
   TString datapath=getenv("DATA_DIR");
-  roc=new RoccoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RoccoR"+TString::Itoa(DataYear,10)+"UL.txt").Data());
-  rocele=new RocelecoR((datapath+"/"+TString::Itoa(DataYear,10)+"/RoccoR/RocelecoR"+TString::Itoa(DataYear,10)+"_new.txt").Data());
+  roc=new RoccoR((datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEra()+"UL.txt").Data());
+  rocele=new RocelecoR((datapath+"/"+GetEra()+"/RoccoR/RocelecoR"+GetEra()+"_new.txt").Data());
 }
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
-  TFile fz0(datapath+"/"+TString::Itoa(DataYear,10)+"/Z0/Z0Weight.root");
+  TFile fz0(datapath+"/"+GetEra()+"/Z0/Z0Weight.root");
   hz0_data=(TF1*)fz0.Get("data_fit");
   hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();

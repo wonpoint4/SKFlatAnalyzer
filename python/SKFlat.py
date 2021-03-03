@@ -19,16 +19,24 @@ parser.add_argument('-l', dest='InputSampleList', default="")
 parser.add_argument('-n', dest='NJobs', default=1, type=int)
 parser.add_argument('-o', dest='Outputdir', default="")
 parser.add_argument('-q', dest='Queue', default="fastq")
-parser.add_argument('-y', dest='Year', default="2017")
-parser.add_argument('--skim', dest='Skim', default="")
+parser.add_argument('-e', dest='Era', default="2017",help="2016preVFP(2016a), 2016postVFP(2016b), 2017, 2018")
+parser.add_argument('-y', dest='Year', default="",help="deprecated. use -e")
+parser.add_argument('--skim', dest='Skim', default="", help="ex) SkimTree_Dilepton")
 parser.add_argument('--no_exec', action='store_true')
 parser.add_argument('--FastSim', action='store_true')
 parser.add_argument('--userflags', dest='Userflags', default="")
-parser.add_argument('--nmax', dest='NMax', default=0, type=int)
+parser.add_argument('--nmax', dest='NMax', default=0, type=int, help="maximum running jobs")
 parser.add_argument('--reduction', dest='Reduction', default=1, type=float)
 parser.add_argument('--memory', dest='Memory', default=0, type=float)
 parser.add_argument('--batchname',dest='BatchName', default="")
 args = parser.parse_args()
+
+if args.Year!="":
+  print("-y is deprecated. Using -e (Era) instead")
+  args.Era=args.Year
+
+if args.Era=="2016a": args.Era="2016preVFP"
+if args.Era=="2016b": args.Era="2016postVFP"
 
 ## make userflags as a list
 Userflags = []
@@ -66,7 +74,7 @@ SCRAM_ARCH = os.environ['SCRAM_ARCH']
 cmsswrel = os.environ['cmsswrel']
 SKFlat_WD = os.environ['SKFlat_WD']
 SKFlatV = os.environ['SKFlatV']
-SAMPLE_DATA_DIR = SKFlat_WD+'/data/'+SKFlatV+'/'+args.Year+'/Sample/'
+SAMPLE_DATA_DIR = SKFlat_WD+'/data/'+SKFlatV+'/'+args.Era+'/Sample/'
 SKFlatRunlogDir = os.environ['SKFlatRunlogDir']
 SKFlatOutputDir = os.environ['SKFlatOutputDir']
 SKFlat_LIB_PATH = os.environ['SKFlat_LIB_PATH']
@@ -122,14 +130,17 @@ if IsKNU:
 
 InputSample_Data = ["DoubleMuon", "DoubleEG", "SingleMuon", "SingleElectron", "SinglePhoton", "MuonEG", "EGamma"]
 AvailableDataPeriods = []
-if args.Year == "2016":
-  AvailableDataPeriods = ["B_ver2","C","D","E","F","G","H"]
-elif args.Year == "2017":
+if args.Era == "2016preVFP":
+  AvailableDataPeriods = ["B_ver2","C","D","E","F"]
+elif args.Era == "2016postVFP":
+  AvailableDataPeriods = ["F","G","H"]
+elif args.Era == "2017":
   AvailableDataPeriods = ["B","C","D","E","F"]
-elif args.Year == "2018":
+elif args.Era == "2018":
   AvailableDataPeriods = ["A", "B","C","D"]
 else:
-  print "[SKFlat.py] Wrong Year : "+args.Year
+  print "[SKFlat.py] Wrong Era : "+args.Era
+  exit(1)
 
 InputSamples = []
 StringForHash = ""
@@ -164,7 +175,7 @@ for flag in Userflags:
 
 ## Get Random Number for webdir
 
-random.seed(hash(StringForHash+timestamp+args.Year))
+random.seed(hash(StringForHash+timestamp+args.Era))
 RandomNumber = int(random.random()*1000000)
 str_RandomNumber = str(RandomNumber)
 webdirname = timestamp+"_"+str_RandomNumber
@@ -180,7 +191,7 @@ if args.Skim!="":
 
 ## Define MasterJobDir
 
-MasterJobDir = SKFlatRunlogDir+'/'+timestamp+'__'+str_RandomNumber+"__"+args.Analyzer+'__'+'Year'+args.Year
+MasterJobDir = SKFlatRunlogDir+'/'+timestamp+'__'+str_RandomNumber+"__"+args.Analyzer+'__'+'Era'+args.Era
 if args.Skim!="":
   MasterJobDir += "__"+args.Skim
 for flag in Userflags:
@@ -227,7 +238,7 @@ for InputSample in InputSamples:
   os.system('mkdir -p '+base_rundir+'/output/')
 
   ## Create webdir
-  ## cf) base_rundir = $SKFlatRunlogDir/2019_02_26_222038__GetEffLumi__Year2016__KISTI/WW_pythia/
+  ## cf) base_rundir = $SKFlatRunlogDir/2019_02_26_222038__GetEffLumi__Era2016__KISTI/WW_pythia/
 
   this_webdir = webdirpathbase+'/'+base_rundir.replace(SKFlatRunlogDir,'').replace(HOSTNAME+'/',HOSTNAME+'__')
   os.system('mkdir -p '+this_webdir)
@@ -309,7 +320,7 @@ for InputSample in InputSamples:
 
   if IsKISTI or IsTAMSA:
 
-    commandsfilename = args.Analyzer+'_'+args.Year+'_'+InputSample
+    commandsfilename = args.Analyzer+'_'+args.Era+'_'+InputSample
     if IsDATA:
       commandsfilename += '_'+DataPeriod
     for flag in Userflags:
@@ -477,7 +488,7 @@ void {2}(){{
       else:
         out.write('  m.IsFastSim = false;\n')
 
-    out.write('  m.DataYear = '+str(args.Year)+';\n')
+    out.write('  m.SetEra("'+str(args.Era)+'");\n')
 
     if len(Userflags)>0:
       out.write('  m.Userflags = {\n')
@@ -493,14 +504,14 @@ void {2}(){{
       tmp_filename = lines_files[ FileRanges[it_job][0] ].strip('\n')
       ## /data7/DATA/SKFlat/v949cand2_2/2017/DATA/SingleMuon/periodB/181107_231447/0000/SKFlatNtuple_2017_DATA_100.root
       ## /data7/DATA/SKFlat/v949cand2_2/2017/MC/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/181108_152345/0000/SKFlatNtuple_2017_MC_100.root
-      skimoutdir = '/gv0/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
+      skimoutdir = '/gv0/DATA/SKFlat/'+SKFlatV+'/'+args.Era+'/'
       skimoutfilename = ""
       if IsDATA:
         skimoutdir += "DATA_"+args.Analyzer+"/"+InputSample+"/period"+DataPeriod+"/"
-        skimoutfilename = "SKFlatNtuple_"+args.Year+"_DATA_"+str(it_job)+".root"
+        skimoutfilename = "SKFlatNtuple_"+args.Era+"_DATA_"+str(it_job)+".root"
       else:
         skimoutdir += "MC_"+args.Analyzer+"/"+this_dasname+"/"
-        skimoutfilename = "SKFlatNtuple_"+args.Year+"_MC_"+str(it_job)+".root"
+        skimoutfilename = "SKFlatNtuple_"+args.Era+"_MC_"+str(it_job)+".root"
       skimoutdir += timestamp+"/"
 
       os.system('mkdir -p '+skimoutdir)
@@ -581,13 +592,13 @@ if args.no_exec:
 
 FinalOutputPath = args.Outputdir
 if args.Outputdir=="":
-  FinalOutputPath = SKFlatOutputDir+'/'+SKFlatV+'/'+args.Analyzer+'/'+args.Year+'/'
+  FinalOutputPath = SKFlatOutputDir+'/'+SKFlatV+'/'+args.Analyzer+'/'+args.Era+'/'
   for flag in Userflags:
     FinalOutputPath += flag+"__"
   if IsDATA:
     FinalOutputPath += '/DATA/'
 if IsSkimTree:
-  FinalOutputPath = '/gv0/DATA/SKFlat/'+SKFlatV+'/'+args.Year+'/'
+  FinalOutputPath = '/gv0/DATA/SKFlat/'+SKFlatV+'/'+args.Era+'/'
 
 os.system('mkdir -p '+FinalOutputPath)
 
@@ -599,7 +610,7 @@ print '- Skim = '+args.Skim
 print '- InputSamples =',
 print InputSamples
 print '- NJobs = '+str(NJobs)
-print '- Year = '+args.Year
+print '- Era = '+args.Era
 print '- UserFlags =',
 print Userflags
 if IsKNU:
@@ -655,7 +666,7 @@ try:
         base_rundir = base_rundir+'_period'+DataPeriod
       base_rundir = base_rundir+"/"
 
-      ## base_rundir = $SKFlatRunlogDir/2019_02_26_222038__GetEffLumi__Year2016__KISTI/WW_pythia/
+      ## base_rundir = $SKFlatRunlogDir/2019_02_26_222038__GetEffLumi__Era2016__KISTI/WW_pythia/
 
       this_webdir = webdirpathbase+'/'+base_rundir.replace(SKFlatRunlogDir,'').replace(HOSTNAME+'/',HOSTNAME+'__')
 
@@ -891,13 +902,13 @@ JobFinishEmail = '''#### Job Info ####
 HOST = {3}
 JobID = {6}
 Analyzer = {0}
-Year = {7}
+Era = {7}
 Skim = {5}
 # of Jobs = {4}
 InputSample = {1}
 {8}
 Output sent to : {2}
-'''.format(args.Analyzer,InputSamples,FinalOutputPath,HOSTNAME,NJobs,args.Skim,str_RandomNumber,args.Year,GetXSECTable(InputSamples,XsecForEachSample))
+'''.format(args.Analyzer,InputSamples,FinalOutputPath,HOSTNAME,NJobs,args.Skim,str_RandomNumber,args.Era,GetXSECTable(InputSamples,XsecForEachSample))
 JobFinishEmail += '''##################
 Job started at {0}
 Job finished at {1}

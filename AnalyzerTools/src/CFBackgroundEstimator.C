@@ -10,7 +10,7 @@ CFBackgroundEstimator::CFBackgroundEstimator()
 void CFBackgroundEstimator::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
-  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/CFRate/";
+  datapath = datapath+"/"+GetEra()+"/CFRate/";
 
   TDirectory* origDir = gDirectory;
 
@@ -58,10 +58,6 @@ void CFBackgroundEstimator::ReadHistograms(){
 
 CFBackgroundEstimator::~CFBackgroundEstimator(){
 
-}
-
-void CFBackgroundEstimator::SetDataYear(int i){
-  DataYear = i;
 }
 
 double CFBackgroundEstimator::GetElectronCFRate(TString ID, TString key, double eta, double pt, int sys){

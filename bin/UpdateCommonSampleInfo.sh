@@ -35,7 +35,7 @@ do
 	    read -p "select cross section: " CROSSSECTION
 	    [ -z "$CROSSSECTION" ] && CROSSSECTION=FIXMECROSSSECTION
 	fi
-	NUMS=($(echo 'cout<<Form("%f\t%f\t",sumW->GetEntries(),sumW->GetSum())<<endl;'|root -b -l ${line}|tail -n1))
+	NUMS=($(echo 'cout<<Form("%d\t%.1f\t",(int)sumW->GetEntries(),sumW->GetSum())<<endl;'|root -b -l ${line}|tail -n1))
 
 	## for CommonSampleInfo file
 	OUT=$SKFlat_WD/data/$SKFlatV/$YEAR/Sample/CommonSampleInfo/${NAME}.txt

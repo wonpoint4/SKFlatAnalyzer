@@ -39,6 +39,7 @@ public :
    TString MCSample;
    bool IsFastSim;
    int DataYear;
+   TString DataEra;
    double xsec, sumW, weight_norm_1invpb;
    vector<TString> Userflags;
 
@@ -48,6 +49,13 @@ public :
    virtual void executeEvent(){
 
    };
+
+   virtual void SetEra(TString era){
+     DataEra=era;
+     DataYear=TString(era(0,4)).Atoi();
+   }
+   virtual TString GetEra() const { return DataEra; }
+   virtual int GetYear() const { return DataYear; }
 
    std::string AddZeroToTime(int twodigit){
      if(twodigit<10){

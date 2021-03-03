@@ -48,12 +48,12 @@ void AFBAnalyzer::executeEvent(){
     if(abs(lhe_l0.ID())!=15){
       double l0ptcut,l1ptcut,letacut;
       if(abs(lhe_l0.ID())==11){
-	channelname=Form("ee%d",DataYear);
+	channelname="ee"+GetEra();
 	l0ptcut=25.;
 	l1ptcut=15.;
 	letacut=2.4;
       }else if(abs(lhe_l0.ID())==13){
-	channelname=Form("mm%d",DataYear);
+	channelname="mm"+GetEra();
 	l0ptcut=20.;
 	l1ptcut=10.;
 	letacut=2.4;
@@ -712,14 +712,14 @@ void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, 
 void AFBAnalyzer::SetupCosThetaWeight(){
   cout<<"[AFBAnalyzer::SetupCosThetaWeight] Setup"<<endl;
   TString datapath=getenv("DATA_DIR");
-  ifstream file_check(datapath+"/"+TString::Itoa(DataYear,10)+"/CosTheta/CosThetaWeight.root");
+  ifstream file_check(datapath+"/"+GetEra()+"/CosTheta/CosThetaWeight.root");
   bool isexist=file_check.is_open();
   file_check.close();
   if(!isexist){
     cout<<"[AFBAnalyzer::SetupCosThetaWeight] no CosThetaWeight.root"<<endl;
     return;
   }
-  TFile fcost(datapath+"/"+TString::Itoa(DataYear,10)+"/CosTheta/CosThetaWeight.root");
+  TFile fcost(datapath+"/"+GetEra()+"/CosTheta/CosThetaWeight.root");
   for(const auto&& key:*(fcost.GetListOfKeys())){
     TObject* obj=((TKey*)key)->ReadObj();
     if(!obj->InheritsFrom("TH3D")) continue;

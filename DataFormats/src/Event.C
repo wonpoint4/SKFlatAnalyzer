@@ -6,6 +6,7 @@ Event::Event(){
   j_MCweight = 1.;
   j_nPV = -999;
   j_DataYear = -999;
+  j_DataEra = "";
 }
 
 Event::~Event(){
@@ -50,7 +51,7 @@ bool Event::PassTrigger(std::vector<TString> trigs){
 }
 
 double Event::GetTriggerLumi(TString trig){
-
+  //=== FIXME: recalc lumis for 2016preVFP and 2016postVFP
   if(j_DataYear==2016){
     if(trig=="Full"){
       return 35918.219;
@@ -361,6 +362,3 @@ void Event::SetMET(double pt, double phi){
   j_METVector.SetPtEtaPhiE(pt, 0, phi, pt);
 }
 
-void Event::SetDataYear(int y){
-  j_DataYear = y;
-}

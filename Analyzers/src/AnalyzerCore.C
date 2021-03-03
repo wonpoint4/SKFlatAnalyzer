@@ -82,7 +82,7 @@ Event AnalyzerCore::GetEvent(){
   ev.SetTrigger(*HLT_TriggerName);
   ev.SetMET(pfMET_Type1_pt,pfMET_Type1_phi);
   ev.SetnPV(nPV);
-  ev.SetDataYear(DataYear);
+  ev.SetEra(GetEra());
 
   return ev;
 
@@ -903,7 +903,7 @@ void AnalyzerCore::initializeAnalyzerTools(){
 
   //==== MCCorrection
   mcCorr->SetMCSample(MCSample);
-  mcCorr->SetDataYear(DataYear);
+  mcCorr->SetEra(GetEra());
   mcCorr->SetIsDATA(IsDATA);
   mcCorr->SetEventInfo(run, lumi, event);
   mcCorr->SetIsFastSim(IsFastSim);
@@ -912,15 +912,15 @@ void AnalyzerCore::initializeAnalyzerTools(){
     mcCorr->SetupJetTagging();
   }
 
-  puppiCorr->SetDataYear(DataYear);
+  puppiCorr->SetEra(GetEra());
   puppiCorr->ReadHistograms();
 
   //==== FakeBackgroundEstimator
-  fakeEst->SetDataYear(DataYear);
+  fakeEst->SetEra(GetEra());
   fakeEst->ReadHistograms();
 
   //==== CFBackgroundEstimator
-  cfEst->SetDataYear(DataYear);
+  cfEst->SetEra(GetEra());
   cfEst->ReadHistograms();
 
 }
@@ -950,27 +950,8 @@ double AnalyzerCore::GetPrefireWeight(int sys){
 }
 
 double AnalyzerCore::GetPileUpWeight(int N_pileup, int syst){
-
   if(IsDATA) return 1.;
-  else{
-
-    if(DataYear==2016){
-      return mcCorr->GetPileUpWeight(N_pileup, syst);
-    }
-    else if(DataYear==2017){
-      return mcCorr->GetPileUpWeight(N_pileup, syst);
-    }
-    else if(DataYear==2018){
-      return mcCorr->GetPileUpWeight(N_pileup, syst);
-    }
-    else{
-      cout << "[AnalyzerCore::GetPileUpWeight] Wrong year : " << DataYear << endl;
-      exit(EXIT_FAILURE);
-      return 1.;
-    }
-
-  }
-
+  else return mcCorr->GetPileUpWeight(N_pileup, syst);
 }
 
 double AnalyzerCore::GetPDFWeight(LHAPDF::PDF* pdf_){

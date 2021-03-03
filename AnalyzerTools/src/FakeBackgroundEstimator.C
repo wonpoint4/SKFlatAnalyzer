@@ -12,7 +12,7 @@ HasLooseLepton(false)
 void FakeBackgroundEstimator::ReadHistograms(){
 
   TString datapath = getenv("DATA_DIR");
-  datapath = datapath+"/"+TString::Itoa(DataYear,10)+"/FakeRate/";
+  datapath = datapath+"/"+GetEra()+"/FakeRate/";
 
   TDirectory* origDir = gDirectory;
 
@@ -60,10 +60,6 @@ void FakeBackgroundEstimator::ReadHistograms(){
 
 FakeBackgroundEstimator::~FakeBackgroundEstimator(){
 
-}
-
-void FakeBackgroundEstimator::SetDataYear(int i){
-  DataYear = i;
 }
 
 double FakeBackgroundEstimator::GetElectronFakeRate(TString ID, TString key, double eta, double pt, int sys){
