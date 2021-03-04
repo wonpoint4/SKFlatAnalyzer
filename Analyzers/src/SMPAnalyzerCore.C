@@ -9,10 +9,10 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(rocele) delete rocele;
   if(hz0_data) delete hz0_data;
   if(hz0_mc) delete hz0_mc;
-  //if(heff_data) delete heff_data;
-  //if(heff_mc) delete heff_mc;
-  //if(hmistag_data) delete hmistag_data;
-  //if(hmistag_mc) delete hmistag_mc;
+  if(heff_data) delete heff_data;
+  if(heff_mc) delete heff_mc;
+  if(hmistag_data) delete hmistag_data;
+  if(hmistag_mc) delete hmistag_mc;
 
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
@@ -862,7 +862,6 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
 
 void SMPAnalyzerCore::SetupPUJetWeight(TString ID){
   cout<<"[SMPAnalyzerCore::SetupPUJetWeight] setting PUJetWeight with ID "+ID<<endl;
-  /*
   TString WP;
   if(ID=="Loose") WP = "L";
   else if(ID=="Medium") WP = "M";
@@ -876,10 +875,13 @@ void SMPAnalyzerCore::SetupPUJetWeight(TString ID){
   hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
   hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
 
-  //This makes crash problems!! why?? z0weight case was okay
+  heff_data->SetDirectory(0);
+  heff_mc->SetDirectory(0);
+  hmistag_data->SetDirectory(0);
+  hmistag_mc->SetDirectory(0);
+
   feff.Close();
   fmistag.Close();
-  */
 }
 
 double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
@@ -887,16 +889,6 @@ double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
   if(IsDATA) return 1.;
 
   vector<Gen> gens=GetGens();
-
-  TString datapath = getenv("DATA_DIR");
-  TFile feff(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_eff_"+TString::Itoa(DataYear,10)+".root");
-  TFile fmistag(datapath+"/"+TString::Itoa(DataYear,10)+"/ID/PUJet/TH2D_PUID_mistag_"+TString::Itoa(DataYear,10)+".root");
-  
-  TString WP = "M";
-  heff_data=(TH2F*)feff.Get("h2_eff_data"+TString::Itoa(DataYear,10)+"_"+WP);
-  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+TString::Itoa(DataYear,10)+"_"+WP);
-  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+TString::Itoa(DataYear,10)+"_"+WP);
-  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+TString::Itoa(DataYear,10)+"_"+WP);
 
   double Prob_MC(1.), Prob_DATA(1.);
   for(unsigned int i=0; i<jets.size(); i++){
@@ -943,13 +935,9 @@ double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
       Prob_MC *= 1.-this_MC_mistag;
       //Prob_DATA *= 1.-this_DATA_eff;
       //Prob_MC *= 1.-this_MC_eff;
-   }
+    }
   }
-
-  feff.Close();
-  fmistag.Close();
   return Prob_DATA/Prob_MC;
-
 }
 
 bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
