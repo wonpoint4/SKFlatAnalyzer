@@ -6,15 +6,15 @@
 #include <iostream>
 #include <numeric>
 
-#include "TFitConstraintM.h"
+#include "PhysicsTools/KinFitter/interface/TFitConstraintM.h"
 //#include "TFitConstraintM2Gaus.h"
-#include "TFitConstraintMGaus.h"
-#include "TAbsFitParticle.h"
+#include "TFitConstraintMGaus_mod.h"
+#include "PhysicsTools/KinFitter/interface/TAbsFitParticle.h"
 #include "TFitParticlePt.h"
 //#include "TFitParticlePz.h"
-#include "TFitParticleMCCart.h"
+#include "PhysicsTools/KinFitter/interface/TFitParticleMCCart.h"
 //#include "TFitParticleEtPhi.h"
-#include "TKinFitter.h"
+#include "TKinFitter_mod.h"
 #include "TSCorrection.h"
 
 
@@ -189,7 +189,7 @@ private:
   double CalcEachChi2(TAbsFitParticle* ptr);
   double CalcPull(TAbsFitParticle* ptr);
   double CalcEachChi2(TFitConstraintM* ptr, double width);
-  double CalcEachChi2(TFitConstraintMGaus* ptr);
+  double CalcEachChi2(TFitConstraintMGaus_mod* ptr);
 
   void SetCurrentPermutationJets();
   bool Check_BJet_Assignment();
@@ -202,7 +202,7 @@ private:
   double neutrino_pz_sol[2];
   bool IsRealNeuPz;
 
-  TKinFitter *fitter;
+  TKinFitter_mod *fitter;
   TSCorrection *ts_correction;
 
   std::vector<TLorentzVector> jet_vector;
@@ -256,11 +256,11 @@ private:
   TMatrixD error_neutrino_pxpypz;
 
   TFitConstraintM *constrain_hadronic_top_M;
-  //TFitConstraintMGaus *constrain_hadronic_top_MGaus;
+  //TFitConstraintMGaus_mod *constrain_hadronic_top_MGaus;
   TFitConstraintM *constrain_leptonic_top_M;
-  //TFitConstraintMGaus *constrain_leptonic_top_MGaus;
+  //TFitConstraintMGaus_mod *constrain_leptonic_top_MGaus;
   TFitConstraintM *constrain_leptonic_W_M;
-  //TFitConstraintMGaus *constrain_leptonic_W_MGaus;
+  //TFitConstraintMGaus_mod *constrain_leptonic_W_MGaus;
 
   TKinFitterDriver::ResultContainer fit_result;
 
