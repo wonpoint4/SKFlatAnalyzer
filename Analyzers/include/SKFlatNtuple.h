@@ -28,8 +28,8 @@ public :
      fChain = new TChain(tname);
    }
 
-   virtual void AddFile(TString filename){
-     fChain->Add(filename);
+   virtual int AddFile(TString filename){
+     return fChain->Add(filename,-1);
    }
 
    Long64_t MaxEvent, NSkipEvent;
@@ -55,6 +55,7 @@ public :
      DataYear=TString(era(0,4)).Atoi();
    }
    virtual TString GetEra() const { return DataEra; }
+   virtual TString GetEraShort() const;
    virtual int GetYear() const { return DataYear; }
 
    std::string AddZeroToTime(int twodigit){

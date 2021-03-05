@@ -11,7 +11,7 @@ do
 	if cat $SUMMARYFILE|grep -q "$NAME.*$PERIOD"; then
 	    OLDLINE=$(cat $SUMMARYFILE|grep "$NAME.*$PERIOD")
 	    if [ "$(echo $OLDLINE|awk '{print $3}')" -ne "${NUMS[0]}" ];then
-		echo -e "$OLDLINE\t-->\t$NAME\t$PERIOD\t${NUMS[0]}"
+		echo -e "$SUMMARYFILE: $OLDLINE\t-->\t$NAME\t$PERIOD\t${NUMS[0]}"
 		read -p "(y/n): " YES
 		[ "$YES" = "y" ] && sed -i "s/.*$NAME.*$PERIOD.*/$NAME\t$PERIOD\t${NUMS[0]}/" $SUMMARYFILE
 	    fi

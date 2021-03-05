@@ -85,7 +85,7 @@ void LJLAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
     case 2018: 
       map_leps[""]=make_tuple(MakeLeptonPointerVector(map_muons["iso"]),MakeLeptonPointerVector(map_muons["noniso"]),"ID_SF_NUM_TightID_DEN_genTracks","ISO_SF_NUM_TightRelIso_DEN_TightIDandIPCut","IsoMu24_POGTight");
       break;
-    default: cout<<"[LJLAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(EXIT_FAILURE);break;
+    default: cout<<"[LJLAnalyzer::executeEventFromParameter] wrong year"<<endl;exit(ENODATA);break;
     }
  }else if(channelname.Contains("electron")){
     /*
@@ -106,12 +106,12 @@ void LJLAnalyzer::executeEventFromParameter(TString channelname,Event* ev){
       break;
     default: 
       cout<<"[LJLAnalyzer::executeEventFromParameter] wrong year"<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
     */
   }else{
     cout<<"[LJLAnalyzer::executeEventFromParameter] wrong channelname"<<endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
   
   /////////////////lumi weight///////////////////

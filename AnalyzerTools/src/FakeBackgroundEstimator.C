@@ -84,7 +84,7 @@ double FakeBackgroundEstimator::GetElectronFakeRate(TString ID, TString key, dou
     if(IgnoreNoHist) return 1.;
     else{
       cout << "[FakeBackgroundEstimator::GetElectronFakeRate] No"<< ID+"_"+key <<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -120,7 +120,7 @@ double FakeBackgroundEstimator::GetMuonFakeRate(TString ID, TString key, double 
     if(IgnoreNoHist) return 1.;
     else{
       cout << "[FakeBackgroundEstimator::GetMuonFakeRate] No"<< ID+"_"+key <<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 

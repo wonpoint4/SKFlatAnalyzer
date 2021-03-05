@@ -227,7 +227,7 @@ double MCCorrection::MuonReco_SF(TString key, double eta, double p, int sys){
     if(IgnoreNoHist) return 1.;
     else{
       cerr << "[MCCorrection::MuonReco_SF] No "<<"RECO_SF_"+key<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -268,7 +268,7 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
     if(IgnoreNoHist) return 1.;
     else{
       cerr << "[MCCorrection::MuonID_SF] No "<<"ID_SF_"+ID<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -316,7 +316,7 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
     if(IgnoreNoHist) return 1.;
     else{
       cerr << "[MCCorrection::MuonISO_SF] No "<<"ISO_SF_"+ID<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -413,7 +413,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
   }
   else{
     cerr << "[MCCorrection::MuonTrigger_Eff] Wrong year : " << DataYear << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   TString histkey = "Trigger_Eff_DATA_"+trig+"_"+ID;
@@ -424,7 +424,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
     if(IgnoreNoHist) return 1.;
     else{
       cerr << "[MCCorrection::MuonTrigger_Eff] No "<<histkey<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -548,7 +548,7 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
     }
     else{
       cerr << "[MCCorrection::ElectronID_SF] (Hist) Wrong year "<< DataYear << endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
 
     return this_SF+double(sys)*this_SF_err;
@@ -561,7 +561,7 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
       if(IgnoreNoHist) return 1.;
       else{
         cerr << "[MCCorrection::ElectronID_SF] (Hist) No "<<"ID_SF_"+ID<<endl;
-        exit(EXIT_FAILURE);
+        exit(ENODATA);
       }
     }
 
@@ -593,7 +593,7 @@ double MCCorrection::ElectronReco_SF(double sceta, double pt, int sys){
     if(IgnoreNoHist) return 1.;
     else{
       cerr << "[MCCorrection::ElectronReco_SF] No "<<"RECO_SF_"+ptrange<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
   }
 
@@ -638,7 +638,7 @@ double MCCorrection::ElectronTrigger_Eff(TString ID, TString trig, int DataOrMC,
       if(IgnoreNoHist) return 1.;
       else{
         cerr << "[MCCorrection::ElectronTrigger_Eff] No "<<histkey<<endl;
-        exit(EXIT_FAILURE);
+        exit(ENODATA);
       }
     }
 
@@ -765,13 +765,13 @@ double MCCorrection::GetPileUpWeightBySampleName(int N_pileup, int syst){
   }
   else{
     cerr << "[MCCorrection::GetPileUpWeightBySampleName] syst should be 0, -1, or +1" << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   TH1D *this_hist = map_hist_pileup[this_histname];
   if(!this_hist){
     cerr << "[MCCorrection::GetPileUpWeightBySampleName] No " << this_histname << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   return this_hist->GetBinContent(this_bin);
@@ -780,7 +780,7 @@ double MCCorrection::GetPileUpWeightBySampleName(int N_pileup, int syst){
 
 double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
 
-  TString this_histname = "MC_" + TString::Itoa(DataYear,10);
+  TString this_histname = "MC_" + GetEra();
   if(syst == 0){
     this_histname += "_central_pileup";
   }
@@ -792,13 +792,13 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
   }
   else{
     cerr << "[MCCorrection::GetPileUpWeight] syst should be 0, -1, or +1" << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   TH1D *this_hist = map_hist_pileup[this_histname];
   if(!this_hist){
     cerr << "[MCCorrection::GetPileUpWeight] No " << this_histname << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
   
   int this_bin = N_pileup+1;
@@ -898,7 +898,7 @@ void MCCorrection::SetupJetTagging(){
     }
     else{
       cerr << "[MCCorrection::ReadJetTaggingCVSs()] Wrong WP : " << this_wp << endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
     //==== When using iterativefit method, use BTagEntry::OP_RESHAPING
     if(jetTaggingPars.at(i).j_MeasurmentType_Light==JetTagging::iterativefit ||
@@ -1005,7 +1005,7 @@ double MCCorrection::GetJetTaggingSF(JetTagging::Parameters jtp, int JetFlavor, 
   if(it== map_BTagCalibrationReader.end()){
     cerr << "[MCCorrection::GetJetTaggingSF] b tag SF map not found for key = " << key << endl;
     return 1.;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   double this_SF = it->second->eval_auto_bounds(Syst, jf, fabs(JetEta), JetPt, Jetdiscr);
@@ -1065,7 +1065,7 @@ double MCCorrection::GetJetTaggingCutValue(JetTagging::Tagger tagger, JetTagging
   cout << "[MCCorrection::GetJetTaggingCutValue] DataYear = " << DataYear << endl;
   cout << "[MCCorrection::GetJetTaggingCutValue] tagger = " << tagger << endl;
   cout << "[MCCorrection::GetJetTaggingCutValue] wp = " << wp << endl;
-  exit(EXIT_FAILURE);
+  exit(ENODATA);
 
   return 1;
 
@@ -1110,7 +1110,7 @@ double MCCorrection::GetBTaggingReweight_1d(const vector<Jet>& jets, JetTagging:
     cout << "[MCCorrection::GetBTaggingReweight_1d] This method only works for iterativefit method" << endl;
     cout << "[MCCorrection::GetBTaggingReweight_1d] jtp.j_MeasurmentType_Light = " << jtp.j_MeasurmentType_Light << endl;
     cout << "[MCCorrection::GetBTaggingReweight_1d] jtp.j_MeasurmentType_Heavy = " << jtp.j_MeasurmentType_Heavy << endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
     return 1.;
   }
 

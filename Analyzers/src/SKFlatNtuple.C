@@ -47,7 +47,7 @@ void SKFlatNtuple::Loop(){
       cout << "[SKFlatNtuple::Loop RUNNING] " << jentry << "/" << nentries << " ("<<100.*jentry/nentries<<" %) @ " << printcurrunttime() << endl;
     }
 
-    fChain->GetEntry(jentry);
+    if(!fChain->GetEntry(jentry)) exit(EIO);
 
     executeEvent();
 
@@ -88,6 +88,13 @@ Int_t SKFlatNtuple::GetEntry(Long64_t entry)
 // Read contents of entry.
   if (!fChain) return 0;
   return fChain->GetEntry(entry);
+}
+
+TString SKFlatNtuple::GetEraShort() const
+{
+  if(DataEra=="2016preVFP") return "2016a";
+  else if(DataEra=="2016postVFP") return "2016b";
+  else return DataEra;
 }
 
 void SKFlatNtuple::Init()

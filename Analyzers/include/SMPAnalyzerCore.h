@@ -87,6 +87,7 @@ public:
 
   void FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w);
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
+  bool IsExists(TString filepath);
   void SetupZptWeight();
   void SetupZ0Weight();
   void SetupRoccoR();
@@ -145,36 +146,21 @@ public:
 
   class Parameter{
   public:
+    TString prefix,suffix;
     TString electronIDSF,muonIDSF,muonISOSF;
     vector<TString> triggerSF;
     double lep0ptcut=0,lep1ptcut=0;
     int weightbit=NominalWeight;
     vector<Lepton*> leps;
-    inline Parameter Clone(vector<Lepton*> leps_,int weightbit_=-1){
-      Parameter out=*this;
-      out.leps=leps_;
-      if(weightbit_>=0) out.weightbit=weightbit_;
-      return out;
-    }
-    Parameter(){
-      electronIDSF="ID_SF_MediumID_Q";
-      muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
-    }
-    Parameter(TString elID,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
-      electronIDSF=elID;
-      triggerSF=Trig;
-      if(l0ptcut>0) lep0ptcut=l0ptcut;
-      if(l1ptcut>0) lep1ptcut=l1ptcut;
-      if(leps_.size()) leps=leps_;
-    }
-    Parameter(TString muID,TString muISO,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}){
-      muonIDSF=muID;
-      muonISOSF=muISO;
-      triggerSF=Trig;
-      if(l0ptcut>0) lep0ptcut=l0ptcut;
-      if(l1ptcut>0) lep1ptcut=l1ptcut;
-      if(leps_.size()) leps=leps_;
-    }
+    TString option;
+
+    Parameter();
+    ~Parameter();
+    Parameter(TString pre,TString suf,TString elID,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={});
+    Parameter(TString elID,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}); //deprecated
+    Parameter(TString pre,TString suf,TString muID,TString muISO,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={});
+    Parameter(TString muID,TString muISO,vector<TString> Trig,double l0ptcut=-1,double l1ptcut=-1,vector<Lepton*> leps_={}); //deprecated
+    Parameter Clone(vector<Lepton*> leps_,int weightbit_=-1) const;
   };
 };
 #endif

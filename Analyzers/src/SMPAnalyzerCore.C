@@ -156,6 +156,10 @@ void SMPAnalyzerCore::FillDileptonHists(TString pre,TString suf,Particle *l0,Par
   FillHist(pre+"lldelphi"+suf,l0->DeltaPhi(*l1),w,80,-4,4);
   FillHist(pre+"lldeleta"+suf,fabs(l0->Eta()-l1->Eta()),w,100,-5,5);
 }
+bool SMPAnalyzerCore::IsExists(TString filepath){
+  ifstream fcheck(filepath);
+  return fcheck.good();
+} 
 double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   if(IsDATA) return 1.;
   if(histkey=="") return 1.;
@@ -209,7 +213,7 @@ double SMPAnalyzerCore::Lepton_SF(TString histkey,const Lepton* lep,int sys){
   }
   if(!this_hist){
     cout <<"[SMPAnalyzerCore::Lepton_SF] no hist "<<histkey<<endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }    
   double this_x,this_y;
   if(this_hist->GetXaxis()->GetXmax()>this_hist->GetYaxis()->GetXmax()){
@@ -277,12 +281,10 @@ double SMPAnalyzerCore::DileptonTrigger_SF(TString triggerSF_key0,TString trigge
   else return data_eff/mc_eff;
 }
 void SMPAnalyzerCore::SetupZptWeight(){
+  /// TODO: currently, temp Zpt weight from 2017 single muon for all other channels
   cout<<"[SMPAnalyzerCore::SetupZptWeight] setting zptcor"<<endl;
   TString datapath=getenv("DATA_DIR");
-  ifstream file_check(datapath+"/"+GetEra()+"/Zpt/ZptWeight.root");
-  bool isexist=file_check.is_open();
-  file_check.close();
-  if(!isexist){
+  if(!IsExists(datapath+"/"+GetEra()+"/Zpt/ZptWeight.root")){
     cout<<"[SMPAnalyzerCore::SetupZptWeight] no ZptWeight.root"<<endl;
     return;
   }
@@ -308,22 +310,31 @@ void SMPAnalyzerCore::SetupZptWeight(){
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
   TString datapath=getenv("DATA_DIR");
-  roc=new RoccoR((datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEra()+"UL.txt").Data());
-  rocele=new RocelecoR((datapath+"/"+GetEra()+"/RoccoR/RocelecoR"+GetEra()+"_new.txt").Data());
+  TString rocpath=datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEraShort()+"UL.txt";
+  if(IsExists(rocpath)) roc=new RoccoR(rocpath.Data());
+  else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocpath<<endl;
+  TString rocelepath=datapath+"/"+GetEra()+"/RoccoR/RocelecoR"+GetEraShort()+"_new.txt";
+  if(IsExists(rocelepath)) rocele=new RocelecoR(rocelepath.Data());
+  else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocelepath<<endl;  
 }
 void SMPAnalyzerCore::SetupZ0Weight(){
   cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
   TString datapath=getenv("DATA_DIR");
+  if(!IsExists(datapath+"/"+GetEra()+"/Z0/Z0Weight.root")){
+    cout<<"[SMPAnalyzerCore::SetupZ0Weight] no Z0Weight.root"<<endl;
+    return;
+  }
   TFile fz0(datapath+"/"+GetEra()+"/Z0/Z0Weight.root");
   hz0_data=(TF1*)fz0.Get("data_fit");
   hz0_mc=(TF1*)fz0.Get("mc_fit");
   fz0.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
-    double data_val = hz0_data->Eval(valx);
-    double mc_val = hz0_mc->Eval(valx);
-    double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
-    return norm*data_val/mc_val;
+  return 1.; /// FIXME: no Z0 weight for UL
+  double data_val = hz0_data->Eval(valx);
+  double mc_val = hz0_mc->Eval(valx);
+  double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
+  return norm*data_val/mc_val;
 }
 double SMPAnalyzerCore::GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour){
   double valzptcor=1.;
@@ -583,6 +594,7 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
 }
 
 std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set,int member){
+  if(!roc) return std::vector<Muon>(muons);
   std::vector<Muon> out;
   vector<Gen> gens;
   if(!IsData) gens=GetGens();
@@ -613,6 +625,7 @@ std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& mu
 }
 
 std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Electron>& electrons,int set,int member){
+  if(!rocele) return std::vector<Electron>(electrons);
   std::vector<Electron> out;
   vector<Gen> gens;
   if(!IsData) gens=GetGens();
@@ -646,7 +659,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
       electron*=electron.UncorrE()/electron.E();
     }else{
       cout<<"[SMPAnalyzerCore::ElectronEnergyCorrection] wrong set "<<set<<endl;
-      exit(EXIT_FAILURE);
+      exit(ENODATA);
     }
     out.push_back(electron);
   }
@@ -684,4 +697,51 @@ TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
   int start=str.Index(reg,&extent);
   if(start>=0) return str.Replace(start,extent,repl);
   else return str;
+}
+
+SMPAnalyzerCore::Parameter::Parameter(){
+  electronIDSF="ID_SF_MediumID_Q";
+  muonIDSF="IDISO_SF_MediumID_trkIsoLoose_Q";
+}
+SMPAnalyzerCore::Parameter::~Parameter(){
+}
+SMPAnalyzerCore::Parameter::Parameter(TString pre,TString suf,TString elID,vector<TString> Trig,double l0ptcut,double l1ptcut,vector<Lepton*> leps_){
+  prefix=pre;
+  suffix=suf;
+  electronIDSF=elID;
+  triggerSF=Trig;
+  if(l0ptcut>0) lep0ptcut=l0ptcut;
+  if(l1ptcut>0) lep1ptcut=l1ptcut;
+  if(leps_.size()) leps=leps_;
+}
+SMPAnalyzerCore::Parameter::Parameter(TString elID,vector<TString> Trig,double l0ptcut,double l1ptcut,vector<Lepton*> leps_){
+  electronIDSF=elID;
+  triggerSF=Trig;
+  if(l0ptcut>0) lep0ptcut=l0ptcut;
+  if(l1ptcut>0) lep1ptcut=l1ptcut;
+  if(leps_.size()) leps=leps_;
+}
+SMPAnalyzerCore::Parameter::Parameter(TString pre,TString suf,TString muID,TString muISO,vector<TString> Trig,double l0ptcut,double l1ptcut,vector<Lepton*> leps_){
+  prefix=pre;
+  suffix=suf;
+  muonIDSF=muID;
+  muonISOSF=muISO;
+  triggerSF=Trig;
+  if(l0ptcut>0) lep0ptcut=l0ptcut;
+  if(l1ptcut>0) lep1ptcut=l1ptcut;
+  if(leps_.size()) leps=leps_;
+}
+SMPAnalyzerCore::Parameter::Parameter(TString muID,TString muISO,vector<TString> Trig,double l0ptcut,double l1ptcut,vector<Lepton*> leps_){
+  muonIDSF=muID;
+  muonISOSF=muISO;
+  triggerSF=Trig;
+  if(l0ptcut>0) lep0ptcut=l0ptcut;
+  if(l1ptcut>0) lep1ptcut=l1ptcut;
+  if(leps_.size()) leps=leps_;
+}
+SMPAnalyzerCore::Parameter SMPAnalyzerCore::Parameter::Clone(vector<Lepton*> leps_,int weightbit_) const {
+  Parameter out=*this;
+  out.leps=leps_;
+  if(weightbit_>=0) out.weightbit=weightbit_;
+  return out;
 }

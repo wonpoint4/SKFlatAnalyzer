@@ -330,7 +330,6 @@ for InputSample in InputSamples:
 SECTION=`printf $1`
 WORKDIR=`pwd`
 
-SumNoAuth=999
 Trial=0
 
 #### make sure use C locale
@@ -355,30 +354,26 @@ source /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/$cmsswrel/external/$SCRAM_ARCH/bin/thi
 ### modifying LD_LIBRARY_PATH to use libraries in base_rundir
 export LD_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH|sed 's@'$SKFlat_WD'/lib@{0}/lib@')
 
-while [ "$SumNoAuth" -ne 0 ]; do
-
-  if [ "$Trial" -gt 9999 ]; then
-    break
-  fi
-
+while [ "$Trial" -lt 3 ]; do
   echo "#### running ####"
   echo "root -l -b -q {1}/run_${{SECTION}}.C"
-  root -l -b -q {1}/run_${{SECTION}}.C 2> err.log || echo "EXIT_FAILURE" >> err.log
-  NoAuthError_Open=`grep "Error in <TNetXNGFile::Open>" err.log -R | wc -l`
-  NoAuthError_Close=`grep "Error in <TNetXNGFile::Close>" err.log -R | wc -l`
-
-  SumNoAuth=$(($NoAuthError_Open + $NoAuthError_Close))
-
-  if [ "$SumNoAuth" -ne 0 ]; then
-    echo "SumNoAuth="$SumNoAuth
-    echo "AUTH error occured.. running again in 30 seconds.."
+  root -l -b -q {1}/run_${{SECTION}}.C 2> err.log 
+  EXITCODE=$?
+  if [ "$EXITCODE" -eq 5 ]; then
+    echo "IO error occured.. running again in 300 seconds.."
     Trial=$((Trial+=1))
-    sleep 30
+    sleep 300
+  else
+    break
   fi
-
 done
 
+if [ "$EXITCODE" -ne 0 ]; then
+  perror $EXITCODE >> err.log
+fi
+
 cat err.log >&2
+exit $EXITCODE
 '''.format(MasterJobDir, base_rundir, SCRAM_ARCH, cmsswrel)
     run_commands.close()
 
@@ -498,7 +493,7 @@ void {2}(){{
 
     for it_file in FileRanges[it_job]:
       thisfilename = lines_files[it_file].strip('\n')
-      out.write('  m.AddFile("'+thisfilename+'");\n')
+      out.write('  if(!m.AddFile("'+thisfilename+'")) exit(EIO);\n')
 
     if IsSkimTree:
       tmp_filename = lines_files[ FileRanges[it_job][0] ].strip('\n')
@@ -585,6 +580,7 @@ root -l -b -q run.C 1>stdout.log 2>stderr.log
     KillCommand.close()
 
 if args.no_exec:
+  print '- RunDir = '+base_rundir
   exit()
 
 ## Set Output directory
@@ -615,6 +611,7 @@ print '- UserFlags =',
 print Userflags
 if IsKNU:
   print '- Queue = '+args.Queue
+print '- RunDir = '+base_rundir
 print '- output will be send to : '+FinalOutputPath
 print '##################################################'
 

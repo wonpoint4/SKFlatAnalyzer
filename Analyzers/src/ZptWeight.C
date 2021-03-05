@@ -86,7 +86,7 @@ void ZptWeight::executeEventWithChannelName(TString channelname){
     map_parameter[""]=p.Clone(MakeLeptonPointerVector(map_electrons[""]));
   }else{
     cout<<"[ZptWeight::executeEventFromParameter] wrong channelname"<<endl;
-    exit(EXIT_FAILURE);
+    exit(ENODATA);
   }
 
   FillCutflow(channelname+"/"+tauprefix+"cutflow","lumi",lumiweight);

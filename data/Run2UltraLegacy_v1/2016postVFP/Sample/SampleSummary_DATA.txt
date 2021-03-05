@@ -2,13 +2,13 @@
 SingleElectron	F	8835883
 SingleElectron	G	152098617
 SingleElectron	H	127093812
-SingleMuon	F	65047318
-SingleMuon	G	147941144
+SingleMuon	F	8003612
+SingleMuon	G	147945745
 SingleMuon	H	171137991
 DoubleEG	F	4321960
 DoubleEG	G	76538906
 DoubleEG	H	82569064
-DoubleMuon	F	20178544
+DoubleMuon	F	2421401
 DoubleMuon	G	44581284
 DoubleMuon	H	48028641
 MuonEG	F	15897683
