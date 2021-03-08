@@ -22,13 +22,13 @@ SKFlat.py -a SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 0 -e 2018
 #SKFlat.py -a SkimTree_Dilepton -i DoubleMuon -p E -n 0 -e 2017
 #SKFlat.py -a SkimTree_Dilepton -i DoubleMuon -p F -n 0 -e 2017
 #SKFlat.py -a SkimTree_Dilepton -i DYJets -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i WW_pythia -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i WZ_pythia -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i ZZ_pythia -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i WJets_MG -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i TTLL_powheg -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 0 -e 2017
-#SKFlat.py -a SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i WW_pythia -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i WZ_pythia -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i ZZ_pythia -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i WJets_MG -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i TTLL_powheg -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 0 -e 2017
+SKFlat.py -a SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 0 -e 2017
 
 #SKFlat.py -a SkimTree_Dilepton -i DoubleEG -p B_ver2 -n 0 -e 2016preVFP
 #SKFlat.py -a SkimTree_Dilepton -i DoubleEG -p C -n 0 -e 2016preVFP

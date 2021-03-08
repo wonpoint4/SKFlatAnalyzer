@@ -6,6 +6,14 @@ SKFlat.py -a GetEffLumi -i ZZ_pythia -e 2018 -n 10
 SKFlat.py -a GetEffLumi -i SingleTop_tW_top_NoFullyHad -e 2018 -n 10
 SKFlat.py -a GetEffLumi -i SingleTop_tW_antitop_NoFullyHad -e 2018 -n 10
 
+SKFlat.py -a GetEffLumi -i TTLL_powheg -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i WJets_MG -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i WW_pythia -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i WZ_pythia -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i ZZ_pythia -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i SingleTop_tW_top_NoFullyHad -e 2017 -n 10
+SKFlat.py -a GetEffLumi -i SingleTop_tW_antitop_NoFullyHad -e 2017 -n 10
+
 SKFlat.py -a GetEffLumi -i DYJetsToEE_MiNNLO -e 2016preVFP -n 10
 SKFlat.py -a GetEffLumi -i DYJetsToMuMu_MiNNLO -e 2016preVFP -n 10
 SKFlat.py -a GetEffLumi -i DYJetsToTauTau_MiNNLO -e 2016preVFP -n 10
