@@ -57,10 +57,12 @@ while read line <&3; do
     elif [ "$NTIMESTAMP" -eq 1 ]; then
 	TIMESTAMP=$(ls $line|sort -V|tail -n1)
     elif [ "$NTIMESTAMP" -gt 1 ]; then
-	read -p "Multiple timestamps $(ls $line|sort -V|awk 'BEGIN{ORS=" "}{print}'). which one? (ALL/LATEST): " TIMESTAMPSELECTION
+	echo "Multiple timestamps at $line:"
+	echo "  $(ls $line|sort -V|awk 'BEGIN{ORS=" "}{print}')"
+	read -p "which one? (ALL/LATEST): " TIMESTAMPSELECTION
 	if [ "$TIMESTAMPSELECTION" = "ALL" ]; then
 	    TIMESTAMP=""
-	elif [ "$TIMESTAMPSELECTION" = "LATEST"]; then
+	elif [ "$TIMESTAMPSELECTION" = "LATEST" ]; then
 	    TIMESTAMP=$(ls $line|sort -V|tail -n1)
 	else
 	    echo "Exit..."

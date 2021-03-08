@@ -303,6 +303,9 @@ for InputSample in InputSamples:
   this_xsec = -1
   this_sumw = -1
   if not IsDATA:
+    if not os.path.exists(SAMPLE_DATA_DIR+'/CommonSampleInfo/'+InputSample+'.txt'):
+      print("No "+SAMPLE_DATA_DIR+'/CommonSampleInfo/'+InputSample+'.txt')
+      exit(2)
     lines_SamplePath = open(SAMPLE_DATA_DIR+'/CommonSampleInfo/'+InputSample+'.txt').readlines()
     for line in lines_SamplePath:
       if line[0]=="#":

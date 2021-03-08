@@ -63,16 +63,16 @@ do
 	## for summary file
 	SUMMARYFILE=$SKFlat_WD/data/$SKFlatV/$YEAR/Sample/SampleSummary_MC.txt
 	EXISTSUMMARY=$(grep "^$NAME[^a-zA-Z0-9_]*$DASSNAME[^a-zA-Z0-9_].*$" $SUMMARYFILE)
-	if [ "$EXISTSUMMARY" != "$(echo -e "$NEWLINE")" ];then
+	if [ -z "$EXISTSUMMARY" ]
+	then
+	    echo "SampleSummary_MC.txt: add $NEWLINE"
+	    echo -e "$NEWLINE" >> $SUMMARYFILE
+	elif [ "$EXISTSUMMARY" != "$(echo -e "$NEWLINE")" ];then
 	    echo -e "SampleSummary_MC.txt: $EXISTSUMMARY --> $NEWLINE"
 	    read -p "(y/n): " YES
 	    if [ "$YES" = "y" ];then
 		sed -i "s/^$NAME[^a-zA-Z0-9_]*$DASSNAME[^a-zA-Z0-9_].*$/$NEWLINE/" $SUMMARYFILE
 	    fi
-	elif [ -z "$EXISTSUMMARY" ]
-	then
-	    echo "SampleSummary_MC.txt: add $NEWLINE"
-	    echo -e "$NEWLINE" >> $SUMMARYFILE
 	fi
     fi
 done 3< <(find $SKFlatOutputDir$SKFlatV/GetEffLumi -type f|sort)
