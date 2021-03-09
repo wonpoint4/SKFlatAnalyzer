@@ -1,21 +1,52 @@
-SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p A -n 10 -e 2018
-SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p B -n 10 -e 2018
-SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p C -n 10 -e 2018
-SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p D -n 20 -e 2018
-#SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p A -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p B -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p C -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p D -n 60 -e 2018
-#SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p A -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p B -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p C -n 30 -e 2018
-#SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p D -n 60 -e 2018
-SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 60 -e 2018
-#SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 10 -e 2018
-#SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 10 -e 2018
-#SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 10 -e 2018
-#SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2018
-#SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p C -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p D -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p E -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p F -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p D -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p E -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p C -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p D -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p E -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p F -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p D -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p E -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2016a
+SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 5 -e 2016a
+SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 5 -e 2016a
+SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 5 -e 2016a
+SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016a
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016a
+
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p F -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p G -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p H -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p G -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p H -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p F -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p G -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p H -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p G -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p H -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2016b
+SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 5 -e 2016b
+SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 5 -e 2016b
+SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 5 -e 2016b
+SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016b
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016b
 
 SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p B -n 10 -e 2017
 SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p C -n 10 -e 2017
@@ -38,54 +69,32 @@ SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p D -n
 SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p E -n 10 -e 2017
 SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2017
 SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2017
-#SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 10 -e 2017
-#SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 10 -e 2017
-#SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 10 -e 2017
-#SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2017
-#SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2017
+SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 5 -e 2017
+SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 5 -e 2017
+SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 5 -e 2017
+SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2017
+SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2017
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2017
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2017
 
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p C -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p D -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p E -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p F -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p D -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p E -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p C -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p D -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p E -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p F -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p B_ver2 -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p D -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p E -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016a
-SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2016a
-#SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 10 -e 2016a
-#SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 10 -e 2016a
-#SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 10 -e 2016a
-#SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2016a
-#SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2016a
+SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p A -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p B -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p C -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -p D -n 20 -e 2018
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p A -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p B -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p D -n 20 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p A -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p B -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p C -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p D -n 20 -e 2018
+SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2018
+SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 5 -e 2018
+SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 5 -e 2018
+SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 5 -e 2018
+SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2018
+SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2018
 
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p F -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p G -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -p H -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p G -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -p H -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p F -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p G -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleElectron --skim SkimTree_Dilepton -p H -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p F -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p G -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i SingleMuon --skim SkimTree_Dilepton -p H -n 10 -e 2016b
-SKFlat.py -a EfficiencyValidation -i DYJets --skim SkimTree_Dilepton -n 40 -e 2016b
-#SKFlat.py -a EfficiencyValidation -i WW_pythia --skim SkimTree_Dilepton -n 10 -e 2016b
-#SKFlat.py -a EfficiencyValidation -i WZ_pythia --skim SkimTree_Dilepton -n 10 -e 2016b
-#SKFlat.py -a EfficiencyValidation -i ZZ_pythia --skim SkimTree_Dilepton -n 10 -e 2016b
-#SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 2016b
-#SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 10 -e 2016b

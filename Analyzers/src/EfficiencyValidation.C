@@ -116,8 +116,8 @@ void EfficiencyValidation::executeEvent(){
 	executeEventWithParameter(Parameter("ee2017/","",
 					    "ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"},
 					    25,15,MakeLeptonPointerVector(map_electrons["MediumID"])));
-	executeEventWithParameter(Parameter("ee2017/","_v3_3",
-					    "ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q_v3_3","Ele12Leg2_MediumID_Q"},
+	executeEventWithParameter(Parameter("ee2017/","_noL1",
+					    "ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q_v3_2","Ele12Leg2_MediumID_Q"},
 					    25,15,MakeLeptonPointerVector(map_electrons["MediumID"])));	
       }	
     if(event.PassTrigger("HLT_Ele27_WPTight_Gsf_v")||event.PassTrigger("HLT_Ele32_WPTight_Gsf_v"))
@@ -144,10 +144,14 @@ void EfficiencyValidation::executeEvent(){
 					    "IDISO_SF_MediumID_trkIsoLoose_Q","",{"IsoMu24_MediumID_trkIsoLoose_Q"},
 					    25,10,MakeLeptonPointerVector(map_muons["MediumID_trkIsoLoose"])));
     if(event.PassTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"))
-      if(!IsDATA||DataStream.Contains("EGamma"))
+      if(!IsDATA||DataStream.Contains("EGamma")){
 	executeEventWithParameter(Parameter("ee2018/","",
 					    "ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q","Ele12Leg2_MediumID_Q"},
 					    25,15,MakeLeptonPointerVector(map_electrons["MediumID"])));
+	executeEventWithParameter(Parameter("ee2018/","_noL1",
+					    "ID_SF_MediumID_Q",{"Ele23Leg1_MediumID_Q_v3","Ele12Leg2_MediumID_Q"},
+					    25,15,MakeLeptonPointerVector(map_electrons["MediumID"])));
+      }
     if(event.PassTrigger("HLT_Ele28_WPTight_Gsf_v")||event.PassTrigger("HLT_Ele32_WPTight_Gsf_v"))
       if(!IsDATA||DataStream.Contains("EGamma")){
 	executeEventWithParameter(Parameter("el2018/","",
@@ -356,7 +360,7 @@ void EfficiencyValidation::FillHistsEfficiency(TString pre,TString suffix,const 
     double dimass=dilepton.M();
     double dipt=dilepton.Pt();
     double dirap=dilepton.Rapidity();
-    FillHist(pre+"dimass"+suf,dimass,w,400,0,400);
+    FillHist(pre+"dimass"+suf,dimass,w,120,60,120);
     FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
     FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
     FillHist(pre+"nlepton"+suf,leps.size(),w,10,0,10);
