@@ -46,9 +46,9 @@ public :
    virtual void Init();
    virtual void Loop();
 
-   virtual void executeEvent(){
-
-   };
+   virtual void beginEvent(){};
+   virtual void executeEvent(){};
+   virtual void endEvent(){};
 
    virtual void SetEra(TString era){
      DataEra=era;

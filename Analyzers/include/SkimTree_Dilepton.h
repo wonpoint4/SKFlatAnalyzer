@@ -17,7 +17,8 @@ public:
   TTree *newtree;
 
   vector<TString> double_triggers;
-  vector<TString> single_triggers;
+  vector<TString> single_muon_triggers;
+  vector<TString> single_electron_triggers;
   void WriteHist();
 
 };

@@ -1,15 +1,15 @@
 TString analyzer="ZptWeight";
-//TString recoskim="SkimTree_Dilepton";
-TString recoskim="";
+TString recoskim="SkimTree_Dilepton";
 TString genskim="";
 
-TString dyname="DYJets";
-//vector<TString> backgrounds={"TTLL_powheg","WJets_MG","WW_pythia","WZ_pythia","ZZ_pythia"};
-vector<TString> backgrounds={};
+TString dyname="DYJets_MG";
+TString taudyname="";
+vector<TString> backgrounds={"TTLL_powheg","WJets_MG","WW_pythia","WZ_pythia","ZZ_pythia"};
 map<TString,vector<TString>> datas={
   {"ee2016", {"DoubleEG_B_ver2","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F","DoubleEG_G","DoubleEG_H"}},
   {"mm2016", {"DoubleMuon_B_ver2","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F","DoubleMuon_G","DoubleMuon_H"}},
   {"2016",{"DoubleEG_B_ver2","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F","DoubleEG_G","DoubleEG_H","DoubleMuon_B_ver2","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F","DoubleMuon_G","DoubleMuon_H"}},
+  {"mm2016b", {"DoubleMuon_F","DoubleMuon_G","DoubleMuon_H"}},
   {"ee2017", {"DoubleEG_B","DoubleEG_C","DoubleEG_D","DoubleEG_E","DoubleEG_F"}},
   {"mm2017", {"DoubleMuon_B","DoubleMuon_C","DoubleMuon_D","DoubleMuon_E","DoubleMuon_F"}},
   {"mu2017", {"SingleMuon_B","SingleMuon_C","SingleMuon_D","SingleMuon_E","SingleMuon_F"}},
@@ -31,6 +31,8 @@ TH1* GetZptWeight(TString mode){
   TH1::SetDefaultSumw2(true);
   TString prefix=mode;
   TString syear=mode(2,4);
+  if(mode.Contains("2016a")) syear="2016preVFP";
+  else if(mode.Contains("2016b")) syear="2016postVFP";
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
   else if(mode.BeginsWith("mu")) schannel="muon";
@@ -58,7 +60,8 @@ TH1* GetZptWeight(TString mode){
     }
   }
   cout<<"hdata-= tau from "<<mcfileprefix+dyname+".root"<<endl;
-  hdata->Add(GetHist(mcfileprefix+dyname+".root",prefix+"/m80to100/tau_diptdirap"),-1);
+  if(taudyname!="") hdata->Add(GetHist(mcfileprefix+taudyname+".root",prefix+"/m80to100/tau_diptdirap"),-1);
+  else hdata->Add(GetHist(mcfileprefix+dyname+".root",prefix+"/m80to100/tau_diptdirap"),-1);
   for(const auto& bkname:backgrounds){
     TString file=mcfileprefix+bkname+".root";
     cout<<"hdata-="<<file<<endl;
@@ -74,6 +77,8 @@ TH1* GetNormWeight(TString mode){
   TH1::SetDefaultSumw2(true);
   TString schannel;
   TString syear=mode(2,4);
+  if(mode.Contains("2016a")) syear="2016preVFP";
+  else if(mode.Contains("2016b")) syear="2016postVFP";
   TString prefix=mode;
   if(mode.BeginsWith("mm")) schannel="muon";
   else if(mode.BeginsWith("mu")){
@@ -108,6 +113,8 @@ TH1* GetNormWeight(TString mode){
 }
 void SaveZptWeight(TString mode){
   TString syear=mode(2,4);
+  if(mode.Contains("2016a")) syear="2016preVFP";
+  else if(mode.Contains("2016b")) syear="2016postVFP";
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
   else if(mode.BeginsWith("mu")) schannel="muon";
@@ -130,6 +137,8 @@ void SaveZptWeight(TString mode){
 }
 void SaveNormWeight(TString mode){
   TString syear=mode(2,4);
+  if(mode.Contains("2016a")) syear="2016preVFP";
+  else if(mode.Contains("2016b")) syear="2016postVFP";
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
   else if(mode.BeginsWith("mu")) schannel="muon";
@@ -152,12 +161,12 @@ void Iterate(TString mode,int n=3){
     exit(1);
   }					 
   TString prefix=mode;
-  TString syear=mode(2,4);
+  TString syear=mode(2,5);
   TString schannel;
   if(mode.BeginsWith("mm")) schannel="muon";
   else if(mode.BeginsWith("mu")) schannel="muon";
   else if(mode.BeginsWith("ee")) schannel="electron";
-  else if(mode.Contains(TRegexp("^201[6-8]$"))){
+  else if(mode.Contains(TRegexp("^201[6-8][ab]?$"))){
     syear=mode;
   }else{
     cout<<"Unknown mode "<<mode<<endl;
@@ -165,15 +174,20 @@ void Iterate(TString mode,int n=3){
   }      
   TString cmd;
   for(const auto& data:datas[mode]){
-    cmd+="SKFlat.py -a ZptWeight -n 10 -y "+syear+" -i "+data(0,data.Index('_'))+" -p "+data(data.Index('_')+1,999);
+    cmd+="SKFlat.py -a ZptWeight -n 10 -e "+syear+" -i "+data(0,data.Index('_'))+" -p "+data(data.Index('_')+1,999);
     if(recoskim!="") cmd+=" --skim "+recoskim;
     cmd+=" &";
   }
-  cmd+="SKFlat.py -a ZptWeight -n 40 -y "+syear+" -i "+dyname;
+  cmd+="SKFlat.py -a ZptWeight -n 40 -e "+syear+" -i "+dyname;
   if(recoskim!="") cmd+=" --skim "+recoskim;
   cmd+=" &";
+  if(taudyname!=""){
+    cmd+="SKFlat.py -a ZptWeight -n 10 -e "+syear+" -i "+taudyname;
+    if(recoskim!="") cmd+=" --skim "+recoskim;
+    cmd+=" &";
+  }
   for(const auto& bk:backgrounds){
-    cmd+="SKFlat.py -a ZptWeight -n 10 -y "+syear+" -i "+bk;
+    cmd+="SKFlat.py -a ZptWeight -n 10 -e "+syear+" -i "+bk;
     if(recoskim!="") cmd+=" --skim "+recoskim;
     cmd+=" &";
   }
@@ -189,7 +203,7 @@ void Iterate(TString mode,int n=3){
     SaveZptWeight(mode);
   }    
   for(int i=1;i<n;i++){
-    TString dycmd="SKFlat.py -a ZptWeight -n 60 -y "+syear+" -i "+dyname;
+    TString dycmd="SKFlat.py -a ZptWeight -n 100 -e "+syear+" -i "+dyname;
     if(recoskim!="") dycmd+=" --skim "+recoskim;
     cout<<"Iteration "<<i<<", "<<mode<<endl;
     cout<<dycmd<<endl;
@@ -202,7 +216,7 @@ void Iterate(TString mode,int n=3){
       SaveZptWeight(mode);
     }    
   }
-  TString gendycmd="SKFlat.py -a ZptWeight -n 60 -y "+syear+" -i "+dyname;
+  TString gendycmd="SKFlat.py -a ZptWeight -n 100 -e "+syear+" -i "+dyname;
   if(genskim!="") gendycmd+=" --skim "+genskim;
   cout<<"Iteration for normalization, "<<mode<<endl;
   system(gendycmd);

@@ -34,18 +34,20 @@ AnalyzerCore::~AnalyzerCore(){
   
   //==== output rootfile
 
-  if(outfile) outfile->Close();
-  delete outfile;
+  if(outfile){
+    outfile->Close();
+    delete outfile;
+  }
 
   //==== Tools
 
-  delete mcCorr;
-  delete puppiCorr;
-  delete fakeEst;
-  delete cfEst;
-  delete pdfReweight;
-  delete muonGE;
-  delete muonGEScaleSyst;
+  if(mcCorr) delete mcCorr;
+  if(puppiCorr) delete puppiCorr;
+  if(fakeEst) delete fakeEst;
+  if(cfEst) delete cfEst;
+  if(pdfReweight) delete pdfReweight;
+  if(muonGE) delete muonGE;
+  if(muonGEScaleSyst) delete muonGEScaleSyst;
 
 }
 

@@ -77,7 +77,7 @@ while read line <&3; do
     if [ -f $TARGET ]; then
 	diffout="$(diff $TARGET <(find $SOURCE -type f|sort -V))"
 	if [ $(echo "$diffout"|wc -l) -gt 1 ]; then
-	    echo "$diffout"|tail
+	    diff -u <(tail -n5 $TARGET) <(find $SOURCE -type f|sort -V|tail -n5)
 	else continue
 	fi
     fi

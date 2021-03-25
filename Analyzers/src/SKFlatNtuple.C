@@ -47,9 +47,11 @@ void SKFlatNtuple::Loop(){
       cout << "[SKFlatNtuple::Loop RUNNING] " << jentry << "/" << nentries << " ("<<100.*jentry/nentries<<" %) @ " << printcurrunttime() << endl;
     }
 
-    if(!fChain->GetEntry(jentry)) exit(EIO);
+    if(fChain->GetEntry(jentry)<0) exit(EIO);
 
+    beginEvent();
     executeEvent();
+    endEvent();
 
     //std::cout << jentry << " :" << muon_pt->size() << std::endl;
 

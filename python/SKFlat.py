@@ -372,7 +372,7 @@ while [ "$Trial" -lt 3 ]; do
 done
 
 if [ "$EXITCODE" -ne 0 ]; then
-  perror $EXITCODE >> err.log
+  echo "ERROR errno=$EXITCODE" >> err.log
 fi
 
 cat err.log >&2

@@ -20,9 +20,8 @@
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
 #pragma link C++ class EfficiencyValidation+;
-#pragma link C++ class LJLAnalyzer+;
-#pragma link C++ class SkimTree_LJL+;
 #pragma link C++ class ZptWeight+;
-#pragma link C++ class GetZ0Weight+;
+#pragma link C++ class ZpeakAnalyzer+;
+//#pragma link C++ class GetZ0Weight+;
 
 #endif
