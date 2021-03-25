@@ -6,33 +6,10 @@ ExampleRun_kinFitter::ExampleRun_kinFitter(){
 
 void ExampleRun_kinFitter::initializeAnalyzer(){
 
-  //================================================================
-  //====  Example 1
-  //====  Dimuon Z-peak events with two muon IDs, with systematics
-  //================================================================
+  MuonIDs = { "POGMediumWithLooseTrkIso" };
+  MuonIDSFKeys = { "IDISO_SF_MediumID_trkIsoLoose_Q" };
+  MuonTrigSFKeys = { "IsoMu27_MediumID_trkIsoLoose_Q" };
 
-  //==== if you use "--userflags RunSyst" with SKFlat.py, HasFlag("RunSyst") will return "true"
-  RunSyst = HasFlag("RunSyst");
-  cout << "[ExampleRun_kinFitter::initializeAnalyzer] RunSyst = " << RunSyst << endl;
-
-  //==== Dimuon Z-peak with two muon IDs
-  //==== I defined "vector<TString> MuonIDs;" in Analyzers/include/ExampleRun_kinFitter.h
-  MuonIDs = {
-    "POGMedium",
-    "POGTight"
-  };
-  //==== corresponding Muon ID SF Keys for mcCorr->MuonID_SF()
-  MuonIDSFKeys = {
-    "NUM_MediumID_DEN_genTracks",
-    "NUM_TightID_DEN_genTracks",
-  };
-
-  //==== At this point, sample informations (e.g., IsDATA, DataStream, MCSample, or DataYear) are all set
-  //==== You can define sample-dependent or year-dependent variables here
-  //==== (Example) Year-dependent variables
-  //==== I defined "TString IsoMuTriggerName;" and "double TriggerSafePtCut;" in Analyzers/include/ExampleRun_kinFitter.h 
-  //==== IsoMuTriggerName is a year-dependent variable, and you don't want to do "if(Dataer==~~)" for every event (let's save cpu time).
-  //==== Then, do it here, which only ran once for each macro
   if(DataYear==2016){
     IsoMuTriggerName = "HLT_IsoMu24_v";
     TriggerSafePtCut = 26.;
@@ -53,44 +30,6 @@ void ExampleRun_kinFitter::initializeAnalyzer(){
   //==== set
   mcCorr->SetJetTaggingParameters(jtps);
 
-  //================================
-  //==== Example 2
-  //==== Using new PDF
-  //==== It consumes so much time, so only being actiavted with --userflags RunNewPDF
-  //================================
-
-  RunNewPDF = HasFlag("RunNewPDF");
-  cout << "[ExampleRun_kinFitter::initializeAnalyzer] RunNewPDF = " << RunNewPDF << endl;
-  if(RunNewPDF && !IsDATA){
-
-    LHAPDFHandler LHAPDFHandler_Prod;
-    LHAPDFHandler_Prod.CentralPDFName = "NNPDF31_nnlo_hessian_pdfas";
-    LHAPDFHandler_Prod.init();
-
-    LHAPDFHandler LHAPDFHandler_New;
-    LHAPDFHandler_New.CentralPDFName = "NNPDF31_nlo_hessian_pdfas";
-    LHAPDFHandler_New.ErrorSetMember_Start = 1; 
-    LHAPDFHandler_New.ErrorSetMember_End = 100; 
-    LHAPDFHandler_New.AlphaSMember_Down = 101; 
-    LHAPDFHandler_New.AlphaSMember_Up = 102; 
-    LHAPDFHandler_New.init();
-
-    pdfReweight->SetProdPDF( LHAPDFHandler_Prod.PDFCentral );
-    pdfReweight->SetNewPDF( LHAPDFHandler_New.PDFCentral );
-    pdfReweight->SetNewPDFErrorSet( LHAPDFHandler_New.PDFErrorSet );
-    pdfReweight->SetNewPDFAlphaS( LHAPDFHandler_New.PDFAlphaSDown, LHAPDFHandler_New.PDFAlphaSUp );
-
-  }
-
-  //================================================
-  //==== Example 3
-  //==== How to estimate xsec errors (PDF & Scale)
-  //==== For example, MET
-  //================================================
-
-  RunXSecSyst = HasFlag("RunXSecSyst");
-  cout << "[ExampleRun_kinFitter::initializeAnalyzer] RunXSecSyst = " << RunXSecSyst << endl;
-
   fitter = new TKinFitterDriver(DataYear);
 }
 
@@ -102,133 +41,30 @@ ExampleRun_kinFitter::~ExampleRun_kinFitter(){
 
 void ExampleRun_kinFitter::executeEvent(){
 
-  //================================================================
-  //====  Example 1
-  //====  Dimuon Z-peak events with two muon IDs, with systematics
-  //================================================================
-
-  //==== *IMPORTANT TO SAVE CPU TIME*
-  //==== Every GetMuon() funtion first collect ALL MINIAOD muons with GetAllMuons(),
-  //==== and then check ID booleans.
-  //==== GetAllMuons not only loops over all MINIAOD muons, but also actually CONSTRUCT muon objects for each muons.
-  //==== We are now running systematics, and you don't want to do this for every systematic sources
-  //==== So, I defined "vector<Muon> AllMuons;" in Analyzers/include/ExampleRun_kinFitter.h,
-  //==== and save muons objects at the very beginning of executeEvent().
-  //==== Later, do "SelectMuons(AllMuons, ID, pt, eta)" to get muons with ID cuts
   AllMuons = GetAllMuons();
-  //=== Jets too
-  AllJets = GetAllJets();
-
-  //==== Get L1Prefire reweight
-  //==== If data, 1.;
-  //==== If MC && DataYear > 2017, 1.;
-  //==== If MC && DataYear <= 2017, we have to reweight the event with this value
-  //==== I defined "double weight_Prefire;" in Analyzers/include/ExampleRun_kinFitter.h
   weight_Prefire = GetPrefireWeight(0);
-
-  //==== Declare AnalyzerParameter
-
   AnalyzerParameter param;
-
-  //==== Loop over muon IDs
 
   for(unsigned int it_MuonID=0; it_MuonID<MuonIDs.size(); it_MuonID++){
 
     TString MuonID = MuonIDs.at(it_MuonID);
     TString MuonIDSFKey = MuonIDSFKeys.at(it_MuonID);
-
-    //==== 1) First, let's run Central values of the systematics
+    TString MuonTrigSFKey = MuonTrigSFKeys.at(it_MuonID);
 
     //==== clear parameter set
     param.Clear();
 
-    //==== set which systematic sources you want to run this time
-    //==== default syst_ is AnalyzerParameter::Central
     param.syst_ = AnalyzerParameter::Central;
-
-    //==== set name of the parameter set
-    //==== this will be used for the directory name of histograms
     param.Name = MuonID+"_"+"Central";
-
     //==== You can define lepton ID string here
     param.Muon_Tight_ID = MuonID;
     param.Muon_ID_SF_Key = MuonIDSFKey;
-
-    //==== And, Jet ID
+    param.Muon_Trigger_SF_Key = MuonTrigSFKey;
     param.Jet_ID = "tight";
 
     //==== Now, all parameters are set. Run executeEventFromParameter() with this parameter set
     executeEventFromParameter(param);
-
-    //==== 2) Now, loop over systematic sources
-    //==== without --userflag RunSyst, this will not be ran
-
-    if(RunSyst){
-
-      for(int it_syst=1; it_syst<AnalyzerParameter::NSyst; it_syst++){
-
-        //==== Everything else remains same, but only change syst_ and parameter name
-
-        param.syst_ = AnalyzerParameter::Syst(it_syst);
-        param.Name = MuonID+"_"+"Syst_"+param.GetSystType();
-        executeEventFromParameter(param);
-      }
-
-    }
-
   }
-
-  //================================
-  //==== Example 2
-  //==== Using new PDF
-  //================================
-
-  if(RunNewPDF && !IsDATA){
-    //cout << "[ExampleRun_kinFitter::executeEvent] PDF reweight = " << GetPDFReweight() << endl;
-    FillHist("NewPDF_PDFReweight", GetPDFReweight(), 1., 2000, 0.90, 1.10);
-    //cout << "[ExampleRun_kinFitter::executeEvent] PDF reweight for error set (NErrorSet = "<<pdfReweight->NErrorSet<< ") :" << endl;
-    for(int i=0; i<pdfReweight->NErrorSet; i++){
-      //cout << "[ExampleRun_kinFitter::executeEvent]   " << GetPDFReweight(i) << endl;
-      FillHist("NewPDF_PDFErrorSet/PDFReweight_Member_"+TString::Itoa(i,10), GetPDFReweight(i), 1., 2000, 0.90, 1.10);
-    }
-  }
-
-  //================================================
-  //==== Example 3
-  //==== How to estimate xsec errors (PDF & Scale)
-  //==== For example, MET
-  //================================================
-
-  if(RunXSecSyst && !IsDATA){
-
-    Event ev = GetEvent();
-    double MET = ev.GetMETVector().Pt();
-
-    //==== 1) PDF Error
-    //==== Obtain RMS of the distribution later
-    for(unsigned int i=0; i<PDFWeights_Error->size(); i++){
-      FillHist("XSecError/MET_PDFError_"+TString::Itoa(i,10), MET, PDFWeights_Error->at(i), 200, 0., 200.);
-    }
-
-    //==== 2) PDF AlphaS
-    //==== Look for PDF4LHC paper..
-    //==== https://arxiv.org/abs/1510.03865
-    if(PDFWeights_AlphaS->size()==2){
-      FillHist("XSecError/MET_PDFAlphaS_Down", MET, PDFWeights_AlphaS->at(0), 200, 0., 200.);
-      FillHist("XSecError/MET_PDFAlphaS_Up", MET, PDFWeights_AlphaS->at(1), 200, 0., 200.);
-    }
-
-    //==== 3) Scale
-    //==== Obtain the envelop of the distribution later
-    for(unsigned int i=0; i<PDFWeights_Scale->size(); i++){
-      //==== i=5 and 7 are unphysical
-      if(i==5) continue;
-      if(i==7) continue;
-      FillHist("XSecError/MET_Scale_"+TString::Itoa(i,10), MET, PDFWeights_Scale->at(i), 200, 0., 200.);
-    }
-
-  }
-
 }
 
 void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
@@ -237,7 +73,7 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== No Cut
   //=============
 
-  FillHist(param.Name+"/NoCut_"+param.Name, 0., 1., 1, 0., 1.);
+  FillHist(param.Name+"/NoCut_", 0., 1., 1, 0., 1.);
 
   //========================
   //==== MET Filter
@@ -247,63 +83,12 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
 
   Event ev = GetEvent();
   Particle METv = ev.GetMETVector();
+  TLorentzVector met = GetEvent().GetMETVector();
+  if(met.Pt() < 20.) return;
 
-  //==============
-  //==== Trigger
-  //==============
   if(! (ev.PassTrigger(IsoMuTriggerName) )) return;
 
-
-
-  //======================
-  //==== Copy AllObjects
-  //======================
-
-  vector<Muon> this_AllMuons = AllMuons;
-  vector<Jet> this_AllJets = AllJets;
-
-  //==== Then, for each systematic sources
-  //==== 1) Smear or scale them
-  //==== 2) Then apply ID selections
-  //==== This order should be explicitly followed
-  //==== Below are all variables for available systematic sources
-
   if(param.syst_ == AnalyzerParameter::Central){
-
-  }
-  else if(param.syst_ == AnalyzerParameter::JetResUp){
-    this_AllJets = SmearJets( this_AllJets, +1 );
-    //this_AllFatJets = SmearFatJets( this_AllFatJets, +1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::JetResDown){
-    this_AllJets = SmearJets( this_AllJets, -1 );
-    //this_AllFatJets = SmearFatJets( this_AllFatJets, -1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::JetEnUp){
-    this_AllJets = ScaleJets( this_AllJets, +1 );
-    //this_AllFatJets = ScaleFatJets( this_AllFatJets, +1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::JetEnDown){
-    this_AllJets = ScaleJets( this_AllJets, -1 );
-    //this_AllFatJets = ScaleFatJets( this_AllFatJets, -1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::MuonEnUp){
-    this_AllMuons = ScaleMuons( this_AllMuons, +1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::MuonEnDown){
-    this_AllMuons = ScaleMuons( this_AllMuons, -1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::ElectronResUp){
-    //this_AllElectrons = SmearElectrons( this_AllElectrons, +1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::ElectronResDown){
-    //this_AllElectrons = SmearElectrons( this_AllElectrons, -1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::ElectronEnUp){
-    //this_AllElectrons = ScaleElectrons( this_AllElectrons, +1 );
-  }
-  else if(param.syst_ == AnalyzerParameter::ElectronEnDown){
-    //this_AllElectrons = ScaleElectrons( this_AllElectrons, -1 );
   }
   else{
     cout << "[ExampleRun_kinFitter::executeEventFromParameter] Wrong syst" << endl;
@@ -314,24 +99,22 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== Then, apply ID selections using this_AllXXX
   //==================================================
 
-  vector<Muon> muons = SelectMuons(this_AllMuons, param.Muon_Tight_ID, 20., 2.4);
-  vector<Jet> jets = SelectJets(this_AllJets, param.Jet_ID, 30., 2.4);
-
-  //=======================
-  //==== Sort in pt-order
-  //=======================
-
-  //==== 1) leptons : after scaling/smearing, pt ordring can differ from MINIAOD
+  vector<Muon> this_AllMuons = AllMuons;
+  vector<Muon> muons = SMPGetMuons(param.Muon_Tight_ID, 20., 2.4);
+  vector<Muon> softmus = SelectMuons(this_AllMuons, "POGLoose", 0., 2.4);
+  vector<Jet> jets = GetJets(param.Jet_ID, 30., 2.4);
   std::sort(muons.begin(), muons.end(), PtComparing);
-  //==== 2) jets : similar, but also when applying new JEC, ordering is changes. This is important if you use leading jets
+  std::sort(softmus.begin(), softmus.end(), PtComparing);
   std::sort(jets.begin(), jets.end(), PtComparing);
 
+  if(muons.size() != 1) return;
+  if(muons.at(0).Pt() <= TriggerSafePtCut ) return;
+  if(jets.size()<4) return;
 
   int NBJets_NoSF(0), NBJets_WithSF_2a(0);
   JetTagging::Parameters jtp_DeepCSV_Medium = JetTagging::Parameters(JetTagging::DeepCSV,
                                                                      JetTagging::Medium,
                                                                      JetTagging::incl, JetTagging::comb);
-
   //==== b tagging
 
   //==== method 1a)
@@ -353,47 +136,9 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     }
     //==== 2a
     if( mcCorr->IsBTagged_2a(jtp_DeepCSV_Medium, jets.at(ij)) ) NBJets_WithSF_2a++;
-
   }
 
-  
-  //=========================
-  //==== Event selections..
-  //=========================
-
-  //==== single muon
-  if(muons.size() != 1) return;
-
-  //==== leading muon has trigger-safe pt
-  if( muons.at(0).Pt() <= TriggerSafePtCut ) return;
-
-  if(jets.size()<4) return;
   if(NBJets_NoSF<2) return;
-
-  //=======================
-  //==== Kinematic Fitter
-  //=======================
-  std::vector<TLorentzVector> jet_vector{};
-  TLorentzVector lepton{};
-  TLorentzVector met{};
-  for(auto& jet : jets){
-    jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
-  }
-  if(jet_vector.size() != btag_vector.size()){
-    cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
-    exit(1);
-  }
-  lepton = (TLorentzVector)(muons.at(0));
-  met    = GetEvent().GetMETVector();
-  fitter->SetAllObjects(jet_vector,
-        	        btag_vector,
-        		lepton,
-        		met
-        	       );
-  fitter->FindBestChi2Fit();
-  auto fitter_results = fitter->GetResults();
-
-
 
   //===================
   //==== Event weight
@@ -403,43 +148,375 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== If MC
   if(!IsDATA){
 
-    //==== weight_norm_1invpb is set to be event weight normalized to 1 pb-1
-    //==== So, you have to multiply trigger luminosity
-    //==== you can pass trigger names to ev.GetTriggerLumi(), but if you are using unprescaled trigger, simply pass "Full"
-
     weight *= weight_norm_1invpb*ev.GetTriggerLumi("Full");
-
-    //==== MCweight is +1 or -1. Should be multiplied if you are using e.g., aMC@NLO NLO samples
     weight *= ev.MCweight();
-
-    //==== L1Prefire reweight
     weight *= weight_Prefire;
 
     //==== Example of applying Muon scale factors
     for(unsigned int i=0; i<muons.size(); i++){
-
-      double this_idsf  = mcCorr->MuonID_SF (param.Muon_ID_SF_Key,  muons.at(i).Eta(), muons.at(i).MiniAODPt());
-
-      //==== If you have iso SF, do below. Here we don't.
-      //double this_isosf = mcCorr->MuonISO_SF(param.Muon_ISO_SF_Key, muons.at(i).Eta(), muons.at(i).MiniAODPt());
+      Lepton *l = (Lepton *)(&muons.at(i));
+      double this_idsf  = Lepton_SF(param.Muon_ID_SF_Key, l, 0);
       double this_isosf = 1.;
-
       weight *= this_idsf*this_isosf;
-
     }
-
+    double this_trigsf = LeptonTrigger_SF(param.Muon_Trigger_SF_Key, MakeLeptonPointerVector(muons), 0);
+    weight *= this_trigsf;
   }
+
+  //=======================
+  //==== Kinematic Fitter
+  //=======================
+  std::vector<TLorentzVector> jet_vector{};
+  TLorentzVector lepton{};
+  for(auto& jet : jets){
+    jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
+  }
+  if(jet_vector.size() != btag_vector.size()){
+    cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
+    exit(1);
+  }
+  lepton = (TLorentzVector)(muons.at(0));
+  fitter->SetAllObjects(jet_vector,
+        	        btag_vector,
+        		lepton,
+        		met
+        	       );
+  fitter->FindBestChi2Fit();
+  auto fitter_results = fitter->GetResults();
+
+  FillHist(param.Name+"/Fit_results_Num", fitter_results->size(), weight, 20, 0, 20);
+  FillHist(param.Name+"/Fit_fail_rate", fitter_results->size()<1?0:1, weight, 4, 0, 4);
+  if(fitter_results->size() < 1) return;
 
   //==========================
   //==== Now fill histograms
   //==========================
-  
-  if(fitter_results->size()>0){
-    double fitted_dijet_M = fitter_results->at(0).fitted_dijet_M;
-    FillHist(param.Name+"/WCan_Mass_"+param.Name,fitted_dijet_M, weight, 40, 0., 200.);
+
+  double fitted_dijet_M = fitter_results->at(0).fitted_dijet_M;
+  double fitted_leptonic_W_M = fitter_results->at(0).leptonic_W_M;
+  double fitted_hadronic_top_M = fitter_results->at(0).hadronic_top_M;
+  double fitted_leptonic_top_M = fitter_results->at(0).leptonic_top_M;
+
+  int Fit_Score = 0;
+  if(abs(fitted_dijet_M - 80.4) < 10.) Fit_Score += 2;
+  else if(abs(fitted_dijet_M - 80.4) < 20.) Fit_Score += 1;
+  if(abs(fitted_leptonic_W_M - 80.4) < 10.) Fit_Score += 2;
+  else if(abs(fitted_leptonic_W_M - 80.4) < 20.) Fit_Score += 1;
+
+  if(abs(fitted_hadronic_top_M - 172.5) < 20.) Fit_Score += 2;
+  else if(abs(fitted_hadronic_top_M - 172.5) < 40.) Fit_Score += 1;
+  if(abs(fitted_leptonic_top_M - 172.5) < 20.) Fit_Score += 2;
+  else if(abs(fitted_leptonic_top_M - 172.5) < 40.) Fit_Score += 1;
+
+  int W_up_jet_idx = fitter_results->at(0).w_ch_up_type_jet_idx;
+  int W_down_jet_idx = fitter_results->at(0).w_ch_down_type_jet_idx;
+  Jet W_up_jet = jets.at(W_up_jet_idx);
+  Jet W_down_jet = jets.at(W_down_jet_idx);
+
+  int lept_b_idx = fitter_results->at(0).leptonic_top_b_jet_idx;
+  int hadt_b_idx = fitter_results->at(0).hadronic_top_b_jet_idx;
+  Jet lept_b = jets.at(lept_b_idx);
+  Jet hadt_b = jets.at(hadt_b_idx);
+  double lept_b_charge = lept_b.Charge();
+  double hadt_b_charge = hadt_b.Charge();
+
+  for(unsigned int i=0; i<softmus.size(); i++){
+    if(softmus.at(i).TrkIso()/softmus.at(i).Pt() <0.1) continue;
+    if(abs(softmus.at(i).IP3D())/softmus.at(i).IP3Derr() <2.5) continue;
+
+    if(lept_b.DeltaR(softmus.at(i)) <0.4){
+      if(abs(lept_b_charge) < 1. && softmus.at(i).P()*sin(softmus.at(i).Angle(lept_b.Vect())) > 1.0) lept_b_charge += softmus.at(i).Charge() * 2;
+    }
+    if(hadt_b.DeltaR(softmus.at(i)) <0.4){
+      if(abs(hadt_b_charge) < 1. && softmus.at(i).P()*sin(softmus.at(i).Angle(hadt_b.Vect())) > 1.0) hadt_b_charge += softmus.at(i).Charge() * 2;
+    }
   }
 
+  FillHist(param.Name+"/W_had_Mass", fitted_dijet_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/W_had_Massdiff", fitted_dijet_M-(W_up_jet+W_down_jet).M(), weight, 40, -100., 100.);
+
+  TLorentzVector fitted_W_jet1 = fitter_results->at(0).fitted_jet1;
+  TLorentzVector fitted_W_jet2 = fitter_results->at(0).fitted_jet2;
+  FillHist(param.Name+"/W_had1_pTdiff", fitted_W_jet1.Pt()-W_up_jet.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had1_pzdiff", fitted_W_jet1.Pz()-W_up_jet.Pz(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had1_etadiff", fitted_W_jet1.Eta()-W_up_jet.Eta(), weight, 100, -5., 5.);
+  FillHist(param.Name+"/W_had1_phidiff", fitted_W_jet1.Phi()-W_up_jet.Phi(), weight, 100, -5., 5.);
+  FillHist(param.Name+"/W_had1_Ediff", fitted_W_jet1.E()-W_up_jet.E(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had2_pTdiff", fitted_W_jet2.Pt()-W_down_jet.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had2_pzdiff", fitted_W_jet2.Pz()-W_down_jet.Pz(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had2_etadiff", fitted_W_jet2.Eta()-W_down_jet.Eta(), weight, 100, -5., 5.);
+  FillHist(param.Name+"/W_had2_phidiff", fitted_W_jet2.Phi()-W_down_jet.Phi(), weight, 100, -5., 5.);
+  FillHist(param.Name+"/W_had2_Ediff", fitted_W_jet2.E()-W_down_jet.E(), weight, 100, -50., 50.);
+
+  FillHist(param.Name+"/W_lep_Mass", fitted_leptonic_W_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/Top_had_Mass", fitted_hadronic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/Top_lep_Mass", fitted_leptonic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/W_up_jet_idx",  W_up_jet_idx, weight, 10, 0., 10.);
+  FillHist(param.Name+"/W_down_jet_idx",  W_down_jet_idx, weight, 10, 0., 10.);
+  FillHist(param.Name+"/lept_b_idx", lept_b_idx, weight, 10, 0., 10.);
+  FillHist(param.Name+"/hadt_b_idx", hadt_b_idx, weight, 10, 0., 10.);
+  if(muons.at(0).Charge() < 0){
+    if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/lept_b_Charge_Muminus", lept_b_charge, weight, 400, -4., 4.);
+    if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/hadt_b_Charge_Muminus", hadt_b_charge, weight, 400, -4., 4.);
+    if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/Easy_lept_b_Charge_Muminus", lept_b_charge>0.3?1:0, weight, 8, -4., 4.);
+    if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/Easy_hadt_b_Charge_Muminus", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+  }else{
+    if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/lept_b_Charge_Muplus", lept_b_charge, weight, 400, -4., 4.);
+    if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/hadt_b_Charge_Muplus", hadt_b_charge, weight, 400, -4., 4.);
+    if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/Easy_lept_b_Charge_Muplus", lept_b_charge>0.3?1:0, weight, 8, -4., 4.);
+    if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/Easy_hadt_b_Charge_Muplus", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+  }
+
+  //FillHist w.r.t Fit_Score
+  if(Fit_Score > 5){
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_had_Mass", fitted_dijet_M, weight, 40, 0., 200.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_lep_Mass", fitted_leptonic_W_M, weight, 40, 0., 200.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_had_Mass", fitted_hadronic_top_M, weight, 40, 100., 300.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_lep_Mass", fitted_leptonic_top_M, weight, 40, 100., 300.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_up_jet_idx", W_up_jet_idx, weight, 10, 0., 10.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_down_jet_idx", W_down_jet_idx, weight, 10, 0., 10.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_idx", lept_b_idx, weight, 10, 0., 10.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_hadt_b_idx", hadt_b_idx, weight, 10, 0., 10.);
+    if(muons.at(0).Charge() < 0){
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muminus", lept_b_charge, weight, 400, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_hadt_b_Charge_Muminus", hadt_b_charge, weight, 400, -4., 4.);
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muminus", lept_b_charge>0.3?1:0, weight, 8, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_hadt_b_Charge_Muminus", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+    }else{
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muplus", lept_b_charge, weight, 400, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_hadt_b_Charge_Muplus", hadt_b_charge, weight, 400, -4., 4.);
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muplus", lept_b_charge>0.3?1:0, weight, 8, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_hadt_b_Charge_Muplus", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+    }
+  }
+  //=======================
+  //==== Gen - Jet Matching (To check the performance of Fitter)
+  //=======================
+
+  if(!IsDATA){
+    vector<Gen> gens=GetGens();
+    Gen gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1;
+    GetTTLJGenParticles(gens, gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1,3);
+
+    //PrintGens(gens);
+    if((gen_j0+gen_j1).M() > 200 || (gen_j0+gen_j1).M() ==0){
+      cout<<"Whad wrong"<<endl;
+      cout<<"(j0 index, pid, pt, E, px, py, pz) = "<<gen_j0.Index()<<", "<<gen_j0.PID()<<", "<<gen_j0.Pt()<<", "<<gen_j0.E()<<", "<<gen_j0.Px()<<", "<<gen_j0.Py()<<", "<<gen_j0.Pz()<<endl;
+      cout<<"(j1 index, pid, pt, E, px, py, pz) = "<<gen_j1.Index()<<", "<<gen_j1.PID()<<", "<<gen_j1.Pt()<<", "<<gen_j1.E()<<", "<<gen_j1.Px()<<", "<<gen_j1.Py()<<", "<<gen_j1.Pz()<<endl;
+      PrintGens(gens);
+    }
+    if((gen_l0+gen_l1).M() > 200 || (gen_l0+gen_l1).M() ==0){
+      cout<<"Wlep wrong"<<endl;
+      cout<<"(l0 index, pid, pt, E, px, py, pz) = "<<gen_l0.Index()<<", "<<gen_l0.PID()<<", "<<gen_l0.Pt()<<", "<<gen_l0.E()<<", "<<gen_l0.Px()<<", "<<gen_l0.Py()<<", "<<gen_l0.Pz()<<endl;
+      cout<<"(l1 index, pid, pt, E, px, py, pz) = "<<gen_l1.Index()<<", "<<gen_l1.PID()<<", "<<gen_l1.Pt()<<", "<<gen_l1.E()<<", "<<gen_l1.Px()<<", "<<gen_l1.Py()<<", "<<gen_l1.Pz()<<endl;
+      PrintGens(gens);}
+
+    FillHist(param.Name+"/gen_W_had_Mass", (gen_j0+gen_j1).M(), weight, 50, 0., 200.);
+    FillHist(param.Name+"/gen_W_lep_Mass", (gen_l0+gen_l1).M(), weight, 50, 0., 200.);
+    FillHist(param.Name+"/gen_top_had1_Mass", (gen_b0+gen_j0+gen_j1).M(), weight, 75, 0., 300.);
+    FillHist(param.Name+"/gen_top_had2_Mass", (gen_b1+gen_j0+gen_j1).M(), weight, 75, 0., 300.);
+    FillHist(param.Name+"/gen_top_lep1_Mass", (gen_b0+gen_l0+gen_l1).M(), weight, 75, 0., 300.);
+    FillHist(param.Name+"/gen_top_lep2_Mass", (gen_b1+gen_l0+gen_l1).M(), weight, 75, 0., 300.);
+    if(gen_l0.PID()<0){ //gen_l0 = mu+
+      FillHist(param.Name+"/gen_top_lep_Mass", (gen_b0+gen_l0+gen_l1).M(), weight, 75, 0., 300.);
+      FillHist(param.Name+"/gen_top_had_Mass", (gen_b1+gen_j0+gen_j1).M(), weight, 75, 0., 300.);
+    }else{
+      FillHist(param.Name+"/gen_top_lep_Mass", (gen_b1+gen_l0+gen_l1).M(), weight, 75, 0., 300.);
+      FillHist(param.Name+"/gen_top_had_Mass", (gen_b0+gen_j0+gen_j1).M(), weight, 75, 0., 300.);
+    }
+
+    double match_dR = 0.4;
+    bool Gen_Fit_match = false;
+    bool Gen_Fit_match_onlyb = false;
+    //Easy charge means 0:negative, 1:positive
+    if(gen_b0.DeltaR(lept_b) < match_dR && gen_b1.DeltaR(hadt_b) < match_dR){
+      Gen_Fit_match_onlyb = true;
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/lept_b_Charge_Matched_b", lept_b_charge, weight, 400, -4., 4.);
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/Easy_lept_b_Charge_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/hadt_b_Charge_Matched_bbar", hadt_b_charge, weight, 400, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/Easy_hadt_b_Charge_Matched_bbar", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+      FillHist(param.Name+"/muon_Charge_lept_b_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+      FillHist(param.Name+"/Easy_muon_Charge_lept_b_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(lept_b_charge < -0.3) FillHist(param.Name+"/muon_Charge_lept_b_negaive_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+      if(lept_b_charge < -0.3) FillHist(param.Name+"/Easy_muon_Charge_lept_b_negaive_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(hadt_b_charge > 0.3) FillHist(param.Name+"/muon_Charge_hadt_b_positive_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+      if(hadt_b_charge > 0.3) FillHist(param.Name+"/Easy_muon_Charge_hadt_b_positive_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(muons.at(0).Charge() > 0) FillHist(param.Name+"/lept_b_Charge_Muplus_Matched_b", lept_b_charge, weight, 400, -4, 4);
+      if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() > 0) FillHist(param.Name+"/Easy_lept_b_Charge_Muplus_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+      if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_Fit_match = true;
+      //When KinFit != gen
+      if(muons.at(0).Charge() < 0) FillHist(param.Name+"/lept_b_Charge_Muminus_Matched_b", lept_b_charge, weight, 400, -4, 4);
+      if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() < 0) FillHist(param.Name+"/Easy_lept_b_Charge_Muminus_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+    }
+    else if(gen_b0.DeltaR(hadt_b) < match_dR && gen_b1.DeltaR(lept_b) < match_dR){
+      Gen_Fit_match_onlyb = true;
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/hadt_b_Charge_Matched_b", hadt_b_charge, weight, 400, -4., 4.);
+      if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/Easy_hadt_b_Charge_Matched_b", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/lept_b_Charge_Matched_bbar", lept_b_charge, weight, 400, -4., 4.);
+      if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/Easy_lept_b_Charge_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4., 4.);
+      FillHist(param.Name+"/muon_Charge_lept_b_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+      FillHist(param.Name+"/Easy_muon_Charge_lept_b_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(lept_b_charge > 0.3) FillHist(param.Name+"/muon_Charge_lept_b_positive_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+      if(lept_b_charge > 0.3) FillHist(param.Name+"/Easy_muon_Charge_lept_b_positive_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(hadt_b_charge < -0.3) FillHist(param.Name+"/muon_Charge_hadt_b_negative_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+      if(hadt_b_charge < -0.3) FillHist(param.Name+"/Easy_muon_Charge_hadt_b_negative_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+      if(muons.at(0).Charge() < 0) FillHist(param.Name+"/lept_b_Charge_Muminus_Matched_bbar", lept_b_charge, weight, 400, -4, 4);
+      if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() < 0) FillHist(param.Name+"/Easy_lept_b_Charge_Muminus_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+      if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_Fit_match = true;
+      //When KinFit != gen
+      if(muons.at(0).Charge() > 0) FillHist(param.Name+"/lept_b_Charge_Muplus_Matched_bbar", lept_b_charge, weight, 400, -4, 4);
+      if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() > 0) FillHist(param.Name+"/Easy_lept_b_Charge_Muplus_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+    }
+    FillHist(param.Name+"/Gen_b0_mindR", min(gen_b0.DeltaR(lept_b),gen_b0.DeltaR(hadt_b)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b1_mindR", min(gen_b1.DeltaR(lept_b),gen_b1.DeltaR(hadt_b)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_j0_mindR", min(gen_j0.DeltaR(W_up_jet),gen_j0.DeltaR(W_down_jet)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_j1_mindR", min(gen_j1.DeltaR(W_up_jet),gen_j1.DeltaR(W_down_jet)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_Fit_Match_onlyb", Gen_Fit_match_onlyb, weight, 2, 0, 2);
+    FillHist(param.Name+"/Gen_Fit_Match", Gen_Fit_match, weight, 2, 0, 2);
+
+    if(Fit_Score > 5){
+      Gen_Fit_match = false;
+      Gen_Fit_match_onlyb = false;
+      if(gen_b0.DeltaR(lept_b) < match_dR && gen_b1.DeltaR(hadt_b) < match_dR){
+	Gen_Fit_match_onlyb = true;
+	if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Matched_b", lept_b_charge, weight, 400, -4., 4.);
+	if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4., 4.);
+	if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_hadt_b_Charge_Matched_bbar", hadt_b_charge, weight, 400, -4., 4.);
+	if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_hadt_b_Charge_Matched_bbar", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+	FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_lept_b_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+	FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_lept_b_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+	if(lept_b_charge < -0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_lept_b_negaive_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+	if(lept_b_charge < -0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_lept_b_negaive_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+	if(hadt_b_charge > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_hadt_b_positive_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+	if(hadt_b_charge > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_hadt_b_positive_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+        if(muons.at(0).Charge() > 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muplus_Matched_b", lept_b_charge, weight, 400, -4, 4);
+	if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() > 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muplus_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+	if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_Fit_match = true;
+        //When KinFit != gen
+        if(muons.at(0).Charge() < 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muminus_Matched_b", lept_b_charge, weight, 400, -4, 4);
+	if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() < 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muminus_Matched_b", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+      }
+      else if(gen_b0.DeltaR(hadt_b) < match_dR && gen_b1.DeltaR(lept_b) < match_dR){
+	Gen_Fit_match_onlyb = true;
+	if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_hadt_b_Charge_Matched_b", hadt_b_charge, weight, 400, -4., 4.);
+	if(abs(hadt_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_hadt_b_Charge_Matched_b", hadt_b_charge>0.3?1:0, weight, 8, -4., 4.);
+	if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Matched_bbar", lept_b_charge, weight, 400, -4., 4.);
+	if(abs(lept_b_charge) > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4., 4.);
+	FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_lept_b_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+	FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_lept_b_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+	if(lept_b_charge > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_lept_b_positive_Matched_bbar", muons.at(0).Charge(), weight, 8, -4, 4);
+	if(lept_b_charge > 0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_lept_b_positive_Matched_bbar", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+	if(hadt_b_charge < -0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_muon_Charge_hadt_b_negative_Matched_b", muons.at(0).Charge(), weight, 8, -4, 4);
+	if(hadt_b_charge < -0.3) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_muon_Charge_hadt_b_negative_Matched_b", muons.at(0).Charge()<0?0:1, weight, 8, -4, 4);
+	if(muons.at(0).Charge() < 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muminus_Matched_bbar", lept_b_charge, weight, 400, -4, 4);
+	if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() < 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muminus_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+	if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_Fit_match = true;
+        //When KinFit != gen
+	if(muons.at(0).Charge() > 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_Charge_Muplus_Matched_bbar", lept_b_charge, weight, 400, -4, 4);
+	if(abs(lept_b_charge) > 0.3 && muons.at(0).Charge() > 0) FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Easy_lept_b_Charge_Muplus_Matched_bbar", lept_b_charge<-0.3?0:1, weight, 8, -4, 4);
+      }
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_b0_mindR", min(gen_b0.DeltaR(lept_b),gen_b0.DeltaR(hadt_b)), weight, 50, 0., 5.);
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_b1_mindR", min(gen_b1.DeltaR(lept_b),gen_b1.DeltaR(hadt_b)), weight, 50, 0., 5.);
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_j0_mindR", min(gen_j0.DeltaR(W_up_jet),gen_j0.DeltaR(W_down_jet)), weight, 50, 0., 5.);
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_j1_mindR", min(gen_j1.DeltaR(W_up_jet),gen_j1.DeltaR(W_down_jet)), weight, 50, 0., 5.);
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_Fit_Match_onlyb", Gen_Fit_match_onlyb, weight, 2, 0, 2);
+      FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Gen_Fit_Match", Gen_Fit_match, weight, 2, 0, 2);
+    }
+  }
 }
 
+void ExampleRun_kinFitter::GetTTLJGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& b0,Gen& b1,Gen& l0,Gen& l1,Gen& j0,Gen& j1, int mode){
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
+  vector<const Gen*> leptons;
+  vector<const Gen*> photons;
+  vector<const Gen*> jets;
 
+  int ngen=gens.size();
+  for(int i=0;i<ngen;i++){
+    if(!gens.at(i).isPrompt()) continue;
+    int genpid=gens.at(i).PID();
+    if(gens.at(i).isHardProcess()){
+      if(abs(genpid)<7||genpid==21){
+        if(parton0.IsEmpty()) parton0=gens[i];
+        else if(parton1.IsEmpty()) parton1=gens[i];
+      }
+    }
+    if(gens.at(i).Status()==1){
+      if(gens.at(i).PID()==22) photons.push_back(&gens[i]); //photon
+    }
+    if(!gens.at(i).isHardProcess()) continue;
+    if((abs(genpid)>=11 && abs(genpid)<=18) && abs(gens.at(gens.at(i).MotherIndex()).PID()) == 24) leptons.push_back(&gens[i]); //leptons from W
+    // b0 : b from t, b1 : bbar from tbar
+    if(genpid==5 && gens.at(gens.at(i).MotherIndex()).PID() == 6) b0=gens[i];
+    else if(genpid==-5 && gens.at(gens.at(i).MotherIndex()).PID() == -6) b1=gens[i];
+    else if((abs(genpid)<=5 || genpid==21) && abs(gens.at(gens.at(i).MotherIndex()).PID()) == 24) jets.push_back(&gens[i]); //jets from W
+  }
 
+  // l0 : charged lepton, l1 : neutrino
+  int nlepton=leptons.size();
+  for(int i=0;i<nlepton;i++){
+    for(int j=i+1;j<nlepton;j++){
+      if(abs(leptons[i]->PID()+leptons[j]->PID()) != 1) continue;
+      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){ //leptonic W
+        if(abs(leptons[i]->PID()) < abs(leptons[j]->PID())){
+          l0=*leptons[i]; //charged lepton
+          l1=*leptons[j]; //neutrino
+        }else{
+          l0=*leptons[j];
+          l1=*leptons[i];
+        }
+      }
+    }
+  }
+
+  // j0 : leading jet, j1 : subleading jet
+  int njet=jets.size();
+  for(int i=0;i<njet;i++){
+    for(int j=i+1;j<njet;j++){
+      if(!(abs(jets[i]->PID()+jets[j]->PID()) == 1 || abs(jets[i]->PID()+jets[j]->PID()) == 3)) continue;
+      if((*jets[i]+*jets[j]).M()>(j0+j1).M()){ //hadronic W
+	if(jets[i]->Pt() > jets[j]->Pt()){
+	  j0=*jets[i];
+	  j1=*jets[j];
+	}else{
+	  j0=*jets[j];
+	  j1=*jets[i];
+	}
+      }
+    }
+  }
+
+  //cout<<"(b0 index, pid, pt, p) = "<<b0.Index()<<", "<<b0.PID()<<", "<<b0.Pt()<<", "<<b0.P()<<endl;
+  //cout<<"(b1 index, pid, pt, p) = "<<b1.Index()<<", "<<b1.PID()<<", "<<b1.Pt()<<", "<<b1.P()<<endl;
+  //cout<<"(l0 index, pid, pt, p) = "<<l0.Index()<<", "<<l0.PID()<<", "<<l0.Pt()<<", "<<l0.P()<<endl;
+  //cout<<"(l1 index, pid, pt, p) = "<<l1.Index()<<", "<<l1.PID()<<", "<<l1.Pt()<<", "<<l1.P()<<endl;
+  //cout<<"(j0 index, pid, pt, p) = "<<j0.Index()<<", "<<j0.PID()<<", "<<j0.Pt()<<", "<<j0.P()<<endl;
+  //cout<<"(j1 index, pid, pt, p) = "<<j1.Index()<<", "<<j1.PID()<<", "<<j1.Pt()<<", "<<j1.P()<<endl;
+
+  if(mode>=3){
+    if(nlepton>=4){
+      for(int i=0;i<nlepton;i++){
+        if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+        for(int j=i+1;j<nlepton;j++){
+          if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+          if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+          vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+          vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+          if(history_i.at(1)==history_j.at(1)) photons.push_back(&gens[history_i.at(1)]);
+        }
+      }
+    }
+    for(const auto& photon:photons){
+      vector<int> history=TrackGenSelfHistory(*photon,gens);
+      if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
+      else if(gens[history.at(1)].PID()==l1.PID()) l1+=*photon;
+    }
+  }else if(mode>=1){
+    double delr=mode==1?0.1:0.4;
+    for(const auto& photon:photons){
+      if(l0.DeltaR(*photon)>delr&&l1.DeltaR(*photon)>delr) continue;
+      if(l0.DeltaR(*photon)<l1.DeltaR(*photon)) l0+=*photon;
+      else l1+=*photon;
+    }
+  }
+}

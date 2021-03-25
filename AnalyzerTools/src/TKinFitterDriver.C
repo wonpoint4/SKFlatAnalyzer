@@ -492,15 +492,18 @@ void TKinFitterDriver::SetConstraint(){
   //TODO: will update to be able to set top-mass
   // reset constrain
   constrain_hadronic_top_M->Clear();
+  new(constrain_hadronic_top_M) TFitConstraintM("hadronic_top_mass_constraint", "hadronic_top_mass_constraint", 0, 0, 172.5);
   constrain_hadronic_top_M->addParticles1(fit_hadronic_top_b_jet, fit_hadronic_w_ch_jet1, fit_hadronic_w_ch_jet2);
   //constrain_hadronic_top_MGaus->Clear();
   //constrain_hadronic_top_MGaus->addParticles1(fit_hadronic_top_b_jet, fit_hadronic_w_ch_jet1, fit_hadronic_w_ch_jet2);
   constrain_leptonic_top_M->Clear();
+  new(constrain_leptonic_top_M) TFitConstraintM("leptonic_top_mass_constraint", "leptonic_top_mass_constraint", 0, 0, 172.5);
   //constrain_leptonic_top_M->addParticles1(fit_leptonic_top_b_jet, fit_neutrino_pxpy);
   constrain_leptonic_top_M->addParticles1(fit_leptonic_top_b_jet, fit_lepton, fit_neutrino_pxpypz);
   //constrain_leptonic_top_MGaus->Clear();
   //constrain_leptonic_top_MGaus->addParticles1(fit_leptonic_top_b_jet, fit_lepton, fit_neutrino_pxpy, fit_neutrino_pz);
   constrain_leptonic_W_M->Clear();
+  new(constrain_leptonic_W_M) TFitConstraintM("leptonic_w_mass_constraint", "leptonic_w_mass_constraint", 0, 0, 80.4);
   constrain_leptonic_W_M->addParticles1(fit_neutrino_pxpypz, fit_lepton); // lepton is included in fit_neutrino_pz
   //constrain_leptonic_W_MGaus->Clear();
   //constrain_leptonic_W_MGaus->addParticles1(fit_lepton, fit_neutrino_pxpy, fit_neutrino_pz);
@@ -618,6 +621,10 @@ void TKinFitterDriver::SaveResults(){
     const TLorentzVector fitted_dijet = (*fitted_jet1) + (*fitted_jet2);
     const TLorentzVector fitted_dijet_high = fitted_jet3->Pt()>fitted_jet2->Pt() ? (*fitted_jet1) + (*fitted_jet3):fitted_dijet;
     const TLorentzVector fitted_dijet_new1 = fitted_jet3->Pt()>fitted_jet2->Pt()+30 ? (*fitted_jet1) + (*fitted_jet3):fitted_dijet;
+
+    fit_result.fitted_jet1 = TLorentzVector(fitted_jet1->Px(), fitted_jet1->Py(), fitted_jet1->Pz(), fitted_jet1->E());
+    fit_result.fitted_jet2 = TLorentzVector(fitted_jet2->Px(), fitted_jet2->Py(), fitted_jet2->Pz(), fitted_jet2->E());
+
     fit_result.fitted_dijet_M = fitted_dijet.M(); // save dijet mass
     fit_result.fitted_dijet_M_high = fitted_dijet_high.M(); // save dijet mass
     fit_result.fitted_dijet_M_new1 = fitted_dijet_new1.M(); // save dijet mass

@@ -394,7 +394,6 @@ void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tstatus\tmother\tHard\tPrompt\tpt\tpz\teta\tphi\tmass\n";
   for(int i=0;i<(int)gens.size();i++){
     gens[i].Print();
-    //cout<<gens.at(i).Index()<<"\t"<<gens.at(i).PID()<<"\t"<<gens.at(i).MotherIndex()<<"\t"<<gens.at(i).Status()<<"\t"<<gens.at(i).isPrompt()<<"\t"<<gens.at(i).isHardProcess()<<endl;
   }
 }
 

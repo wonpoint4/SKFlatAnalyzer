@@ -144,6 +144,10 @@ public:
     double w_ch_up_type_pt;
     double w_ch_down_type_pt;
 
+    //Wonjun's curiosity
+    TLorentzVector fitted_jet1;
+    TLorentzVector fitted_jet2;
+
     //idx
     int hadronic_top_b_jet_idx;
     int leptonic_top_b_jet_idx;
