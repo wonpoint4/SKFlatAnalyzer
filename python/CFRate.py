@@ -2,15 +2,17 @@ import os,sys
 import math
 from array import array
 import ROOT as rt
+rt.gROOT.LoadMacro("./Plotter/ZpeakPlotter.cc")
+from ROOT import ZpeakPlotter
 
 def evaluate(args):
-    rt.gROOT.LoadMacro("./Plotter/ZpeakPlotter.cc")
-    from ROOT import ZpeakPlotter
-    plotter=ZpeakPlotter("data mg")
+    plotter=ZpeakPlotter("data "+args.dykey)
     rt.Verbosity=0
 
     ptbins=[10,30,40,50,70,100,200]
+    #ptbins=[10,200]
     etabins=[0.0,1.0,1.4,1.7,2.0,2.5]
+    #etabins=[0,1.5,2.5]
     cfdata=rt.TH2D("cfdata","cfdata",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
     cfmc=rt.TH2D("cfmc","cfmc",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
 
@@ -107,6 +109,7 @@ def evaluate(args):
         fold=rt.TFile(cffilepath)
         cfsf_old=fold.Get("cfsf")
         if cfsf_old:
+            cfsf_old.SetNameTitle("cfsf_old","cfsf_old")
             cfsf_old.SetDirectory(0)
             h=cfsf_old.Clone()
             for i in range(h.GetNcells()):
@@ -133,68 +136,83 @@ def evaluate(args):
     for i in range(len(ptbins)-1):
         data_px=cfdata.ProjectionX("cfdata_px_{}_{}".format(ptbins[i],ptbins[i+1]),i+1,i+1)
         data_px.SetLineColor(i+1)
+        data_px.SetLineWidth(2)
         data_px.SetStats(0)
         if i==0: 
-            data_px.Draw()
+            data_px.GetYaxis().SetRangeUser(0,0.06)
+            data_px.Draw("hist e")
         else:
-            data_px.Draw("same")
+            data_px.Draw("same hist e")
         mc_px=cfmc.ProjectionX("cfmc_px_{}_{}".format(ptbins[i],ptbins[i+1]),i+1,i+1)
         mc_px.SetLineColor(i+1)
         mc_px.SetLineStyle(2)
+        mc_px.SetLineWidth(2)
         mc_px.SetStats(0)
-        mc_px.Draw("same")
+        mc_px.Draw("same hist e")
     cgcf_eta.Write("cf_eta")
 
     cgcf_pt=rt.TCanvas("cgcf_pt")
     for i in range(len(etabins)-1):
         data_py=cfdata.ProjectionY("cfdata_py_{}_{}".format(etabins[i],etabins[i+1]),i+1,i+1)
         data_py.SetLineColor(i+1)
+        data_py.SetLineWidth(2)
         data_py.SetStats(0)
         if i==0: 
-            data_py.Draw()
+            data_py.GetYaxis().SetRangeUser(0,0.06)
+            data_py.Draw("hist e")
         else:
-            data_py.Draw("same")
+            data_py.Draw("same hist e")
         mc_py=cfmc.ProjectionY("cfmc_py_{}_{}".format(etabins[i],etabins[i+1]),i+1,i+1)
         mc_py.SetLineColor(i+1)
         mc_py.SetLineStyle(2)
+        mc_py.SetLineWidth(2)
         mc_py.SetStats(0)
-        mc_py.Draw("same")
+        mc_py.Draw("same hist e")
     cgcf_pt.Write("cf_pt")
 
     cgcfsf_eta=rt.TCanvas("cgcfsf_eta")
     for i in range(len(ptbins)-1):
         sf_px=cfsf.ProjectionX("cfsf_px_{}_{}".format(ptbins[i],ptbins[i+1]),i+1,i+1)
         sf_px.SetLineColor(i+1)
+        sf_px.SetLineWidth(2)
         sf_px.SetStats(0)
         if i==0: 
-            sf_px.Draw()
+            sf_px.Draw("hist e")
+            sf_px.GetYaxis().SetRangeUser(0.5,2)
         else:
-            sf_px.Draw("same")
+            sf_px.Draw("same hist e")
     cgcfsf_eta.Write("cfsf_eta")
 
     cgcfsf_pt=rt.TCanvas("cgcfsf_pt")
     for i in range(len(etabins)-1):
         sf_py=cfsf.ProjectionY("cfsf_py_{}_{}".format(etabins[i],etabins[i+1]),i+1,i+1)
         sf_py.SetLineColor(i+1)
+        sf_py.SetLineWidth(2)
         sf_py.SetStats(0)
         if i==0: 
-            sf_py.Draw()
+            sf_py.Draw("hist e")
+            sf_py.GetYaxis().SetRangeUser(0.5,2)
         else:
-            sf_py.Draw("same")
+            sf_py.Draw("same hist e")
     cgcfsf_pt.Write("cfsf_pt")
 
     f.Close()
-
     #r=raw_input()
+    for i in range(cfsf_this.GetNcells()):
+        val=cfsf_this.GetBinContent(i)
+        err=cfsf_this.GetBinError(i)
+        if val==0: continue
+        if val<1-err or val>1+err: return False
+
+    return True
+
 
 def validate(args):
-    rt.gROOT.LoadMacro("./Plotter/ZpeakPlotter.cc")
-    from ROOT import ZpeakPlotter
-    plotter=ZpeakPlotter("data ^mg+tau_mg+vv+wjets+tttw")
+    plotter=ZpeakPlotter("data ^{}+tau_{}+vv+wjets+tttw".format(args.dykey,args.dykey))
     rt.Verbosity=0
 
     ptbins=[10,30,40,50,70,100,200]
-    etabins=[ 0.4*x for x in range(7)]
+    etabins=[0.0,1.0,1.4,1.7,2.0,2.5]
 
     binstring=""
     hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring)
@@ -203,6 +221,7 @@ def validate(args):
     plotter.entries[1].weight=normsf
     plotter.DrawPlot("ee"+args.eras+"/dimass_odd","xmin:54 xmax:150 prject:z rebin:2 2:widewidey "+binstring)
     plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
+    plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd_noCFSF","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
     plotter.entries[1].weight=1.
     r=raw_input()
 
@@ -244,34 +263,80 @@ def validate(args):
 
             r=raw_input()
 
+def iterate(args):
+    for i in range(args.maxiter):
+        print "[CFRate] Iteration {}".format(i)
+        if i==0:
+            cmd=""
+            for sample in args.samples_dy+args.samples_data:
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
+            cmd+="wait;"
+            os.system(cmd)
+        else:
+            cmd=""
+            for sample in args.samples_dy:
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} & ".format(sample,args.era,args.nmax)
+            cmd+="wait;"
+            os.system(cmd)
+
+        stop=evaluate(args)
+
+        cffilepath=os.getenv("SKFlat_WD")+"/data/"+os.getenv("SKFlatV")+"/"+args.era+"/SMP/CFRate.root"
+        if os.path.exists(cffilepath):
+            index=0
+            while os.path.exists(cffilepath.replace(".root","_old{}.root".format(index))):
+                index+=1
+            newpath=cffilepath.replace(".root","_old{}.root".format(index))
+            os.system("mv {} {}".format(cffilepath,newpath))
+        os.system("mv CFRate.root "+cffilepath)
+
+        if stop:
+            print "[CFRate] Stop at iteration {}".format(i)
+            break    
+        
 if __name__=="__main__":
     import argparse
 
     parser=argparse.ArgumentParser()
-    parser.add_argument("action",help="evaluate(eval),validate(val)")
-    parser.add_argument("era",help="2016preVFP(2016a),2016postVFP(2016b),2017,2018")
+    parser.add_argument("action",help="evaluate(eval), validate(val), iterate(iter)")
+    parser.add_argument("era",help="2016preVFP(2016a), 2016postVFP(2016b), 2017, 2018")
+    parser.add_argument("--maxiter",type=int,default=5,help="maximum iteration")
+    parser.add_argument("--nmax",type=int,default=150,help="condor concurrency limit")
     args=parser.parse_args()
 
+    args.samples_data=["DoubleEG"]
+    args.samples_dy=["DYJets_MG"]
+    args.samples_bg=["WW_pythia","WZ_pythia","ZZ_pythia","WJets_MG","TTLL_powheg","SingleTop_tW_top_NoFullyHad","SingleTop_tW_antitop_NoFullyHad"]
+    args.dykey="mg"
     if args.era in ["2016preVFP","2016a"]:
         args.era="2016preVFP"
         args.eras="2016a"
+        args.samples_dy=["DYJetsToEE_MiNNLO"]
+        args.dykey="minnlo"
     elif args.era in ["2016postVFP","2016b"]:
-        args.era="2016preVFP"
-        args.eras="2016a"
+        args.era="2016postVFP"
+        args.eras="2016b"
+        args.samples_dy=["DYJetsToEE_MiNNLO"]
+        args.dykey="minnlo"
     elif args.era=="2017":
         args.era="2017"
         args.eras="2017"
     elif args.era=="2018":
         args.era="2018"
         args.eras="2018"
+        args.samples_data=["EGamma"]
     else:
         print "unavailable era",args.era
         exit(1)
+
+
 
     if args.action in ["evaludate","eval"]:
         evaluate(args)
     elif args.action in ["validate","val"]:
         validate(args)
+    elif args.action in ["iterate","iter"]:
+        iterate(args)
     else:
         print "unavailable action",args.action
         exit(1)
