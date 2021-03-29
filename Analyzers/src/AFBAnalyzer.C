@@ -111,6 +111,7 @@ void AFBAnalyzer::executeEvent(){
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("me"));
     executeEventWithParameter(MakeParameter("mM"));
+    executeEventWithParameter(MakeParameter("mu"));
   }
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
@@ -119,6 +120,7 @@ void AFBAnalyzer::executeEvent(){
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("em"));
     executeEventWithParameter(MakeParameter("eE"));
+    executeEventWithParameter(MakeParameter("el"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));

@@ -93,6 +93,7 @@ Event AnalyzerCore::GetEvent(){
 std::vector<Muon> AnalyzerCore::GetAllMuons(){
 
   std::vector<Muon> out;
+  if(!muon_pt) return out;
   for(unsigned int i=0; i<muon_pt->size(); i++){
 
     Muon mu;
@@ -166,6 +167,7 @@ std::vector<Muon> AnalyzerCore::GetMuons(TString id, double ptmin, double fetama
 std::vector<Electron> AnalyzerCore::GetAllElectrons(){
 
   std::vector<Electron> out;
+  if(!electron_Energy) return out;
   for(unsigned int i=0; i<electron_Energy->size(); i++){
 
     Electron el;

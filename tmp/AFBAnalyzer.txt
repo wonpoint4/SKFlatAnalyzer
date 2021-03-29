@@ -1,5 +1,8 @@
 SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016a
+SKFlat.py -a AFBAnalyzer -i DYJets_Summer20 -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2016a
+SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016a
+SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_Summer20 -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2016a
@@ -20,6 +23,8 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFull
 
 SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2016b
+SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016b
+SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2016b
