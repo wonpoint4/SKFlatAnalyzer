@@ -170,8 +170,8 @@ public:
   double GetZ0Weight(double z0);
 
   void SetupCFRate();
-  double GetCFSF(const Lepton* l);
-  double GetCFSF(const Parameter& p);
+  double GetCFSF(const Lepton* l,int sys=0);
+  double GetCFSF(const Parameter& p,int sys=0);
   void DeleteCFRate();
   TH2* hcfrate_data=NULL;
   TH2* hcfrate_mc=NULL;

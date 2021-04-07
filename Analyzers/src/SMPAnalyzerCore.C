@@ -63,6 +63,7 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
   FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"IDSF",eventweight*p.w.RECOSF*p.w.IDSF);
   FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ISOSF",eventweight*p.w.RECOSF*p.w.IDSF*p.w.ISOSF);
   FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"triggerSF",eventweight*p.w.RECOSF*p.w.IDSF*p.w.ISOSF*p.w.triggerSF);
+  FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"CFSF",eventweight*p.w.RECOSF*p.w.IDSF*p.w.ISOSF*p.w.triggerSF*p.w.CFSF);
 
   ////// Fill histograms //////////
   FillHists(p);
@@ -95,6 +96,9 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
       p.w.ISOSF_down*=Lepton_SF(p.k.muonISOSF,&muon,-1);
     }
   }
+  p.w.CFSF=GetCFSF(p,0);
+  p.w.CFSF_up=GetCFSF(p,1);
+  p.w.CFSF_down=GetCFSF(p,-1);
 }
 void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   if(!IsDATA){
@@ -169,7 +173,7 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
   }
   FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"LepPtCut",weight);
 
-  if(p.lepton0->Charge()*p.lepton1->Charge()>0) p.hprefix="ss_"+p.hprefix;
+  if(p.lepton0->Charge()*p.lepton1->Charge()>0) p.hprefix+="ss_";
   FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"charge",weight);
 
   return true;
@@ -580,23 +584,20 @@ void SMPAnalyzerCore::SetupCFRate(){
   }else cout<<"[SMPAnalyzerCore::SetupCFRate] no hcfsf"<<endl;
   f.Close();
 }
-double SMPAnalyzerCore::GetCFSF(const Lepton* l){
+double SMPAnalyzerCore::GetCFSF(const Lepton* l,int sys){
   if(IsDATA) return 1.;
-  if(!l) return 1.;
   if(!hcfsf) return 1.;
+  if(!l) return 1.;
   if(l->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
-  return GetBinContentUser(hcfsf,l->Eta(),l->Pt(),0);
+  return GetBinContentUser(hcfsf,l->Eta(),l->Pt(),sys);
 }
-double SMPAnalyzerCore::GetCFSF(const Parameter& p){
+double SMPAnalyzerCore::GetCFSF(const Parameter& p,int sys){
   if(IsDATA) return 1.;
-  if(!p.lepton0||!p.lepton1) return 1.;
-  if(p.lepton0->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
-  if(p.lepton1->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
-  if(p.lepton0->Charge()*p.lepton1->Charge()<0) return 1.;
-  if(p.truth_lepton0.IsEmpty()||p.truth_lepton1.IsEmpty()) return 1.;
   double sf=1.;
-  if(p.lepton0->Charge()*p.truth_lepton0.Charge()<0) sf*=GetCFSF(p.lepton0);
-  if(p.lepton1->Charge()*p.truth_lepton1.Charge()<0) sf*=GetCFSF(p.lepton1);
+  if(p.lepton0&&!p.truth_lepton0.IsEmpty())
+    if(p.lepton0->Charge()*p.truth_lepton0.Charge()<0) sf*=GetCFSF(p.lepton0,sys);
+  if(p.lepton1&&!p.truth_lepton1.IsEmpty())
+    if(p.lepton1->Charge()*p.truth_lepton1.Charge()<0) sf*=GetCFSF(p.lepton1,sys);
   return sf;
 }
 void SMPAnalyzerCore::DeleteCFRate(){
