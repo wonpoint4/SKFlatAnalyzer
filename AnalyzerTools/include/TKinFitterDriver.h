@@ -145,8 +145,12 @@ public:
     double w_ch_down_type_pt;
 
     //Wonjun's curiosity
+    TLorentzVector fitted_hadt_bjet;
+    TLorentzVector fitted_lept_bjet;
     TLorentzVector fitted_jet1;
     TLorentzVector fitted_jet2;
+    TLorentzVector fitted_lep;
+    TLorentzVector fitted_neu;
 
     //idx
     int hadronic_top_b_jet_idx;
@@ -265,6 +269,7 @@ private:
   //TFitConstraintMGaus_mod *constrain_leptonic_top_MGaus;
   TFitConstraintM *constrain_leptonic_W_M;
   //TFitConstraintMGaus_mod *constrain_leptonic_W_MGaus;
+  TFitConstraintM *constrain_hadronic_W_M;
 
   TKinFitterDriver::ResultContainer fit_result;
 

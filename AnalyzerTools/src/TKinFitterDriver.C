@@ -47,6 +47,7 @@ TKinFitterDriver::TKinFitterDriver(int DataYear_){
   //constrain_leptonic_top_MGaus = new TFitConstraintMGaus_mod("leptonic_top_mass_constraint", "leptonic_top_mass_constraint", 0, 0, 172.5, 1.5);
   constrain_leptonic_W_M = new TFitConstraintM("leptonic_w_mass_constraint", "leptonic_w_mass_constraint", 0, 0, 80.4);
   //constrain_leptonic_W_MGaus = new TFitConstraintMGaus_mod("leptonic_w_mass_constraint", "leptonic_w_mass_constraint", 0, 0, 80.4, 2.085);
+  constrain_hadronic_W_M = new TFitConstraintM("hadronic_w_mass_constraint", "hadronic_w_mass_constraint", 0, 0, 80.4);
   //cout <<"TKinFitterDriver::TKinFitterDriver : initialized" << endl;
 }
 
@@ -68,6 +69,7 @@ TKinFitterDriver::~TKinFitterDriver(){
   //delete constrain_leptonic_top_MGaus;
   delete constrain_leptonic_W_M;
   //delete constrain_leptonic_W_MGaus;
+  delete constrain_hadronic_W_M;
   delete ts_correction;
 }
 
@@ -150,7 +152,8 @@ void TKinFitterDriver::SetHadronicTopBJets(TLorentzVector jet_){
   double Phi = hadronic_top_b_jet.Phi();
   this->SetJetError(&error_hadronic_top_b_jet, Pt, Eta, Phi, "b");
   corr_hadronic_top_b_jet = ts_correction->GetCorrectedJet("b",hadronic_top_b_jet);
-  fit_hadronic_top_b_jet->~TFitParticlePt();
+  //fit_hadronic_top_b_jet->~TFitParticlePt();
+  fit_hadronic_top_b_jet->reset();
   new(fit_hadronic_top_b_jet) TFitParticlePt("hadronic_top_b_jet",
                                                     "hadronic_top_b_jet",
                                                     &corr_hadronic_top_b_jet,
@@ -172,7 +175,8 @@ void TKinFitterDriver::SetLeptonicTopBJets(TLorentzVector jet_){
   //XXX when we vary only leptonic top b jet pt and neutrino_pxpy
   //corr_leptonic_top_b_jet = ts_correction->GetCorrectedJet("b",leptonic_top_b_jet) + lepton + neutrino_pz;
   corr_leptonic_top_b_jet = ts_correction->GetCorrectedJet("b",leptonic_top_b_jet);
-  fit_leptonic_top_b_jet->~TFitParticlePt();
+  //fit_leptonic_top_b_jet->~TFitParticlePt();
+  fit_leptonic_top_b_jet->reset();
   new(fit_leptonic_top_b_jet) TFitParticlePt("leptonic_top_b_jet",
                                                     "leptonic_top_b_jet",
                                                     &corr_leptonic_top_b_jet,
@@ -189,7 +193,8 @@ void TKinFitterDriver::SetWCHUpTypeJets(TLorentzVector jet_){
   double Phi = hadronic_w_ch_jet1.Phi();
   this->SetJetError(&error_hadronic_w_ch_jet1, Pt, Eta, Phi, "udsc");
   corr_hadronic_w_ch_jet1 = ts_correction->GetCorrectedJet("udsc",hadronic_w_ch_jet1);
-  fit_hadronic_w_ch_jet1->~TFitParticlePt();
+  //fit_hadronic_w_ch_jet1->~TFitParticlePt();
+  fit_hadronic_w_ch_jet1->reset();
   new(fit_hadronic_w_ch_jet1) TFitParticlePt("hadronic_w_ch_jet1",
                                                     "hadronic_w_ch_jet1",
                                                     &corr_hadronic_w_ch_jet1,
@@ -207,7 +212,8 @@ void TKinFitterDriver::SetWCHDownTypeJets(TLorentzVector jet_){
   TString flav =  nbtags>2 ? "b":"udsc";
   this->SetJetError(&error_hadronic_w_ch_jet2, Pt, Eta, Phi, flav);
   corr_hadronic_w_ch_jet2 = ts_correction->GetCorrectedJet(flav, hadronic_w_ch_jet2);
-  fit_hadronic_w_ch_jet2->~TFitParticlePt();
+  //fit_hadronic_w_ch_jet2->~TFitParticlePt();
+  fit_hadronic_w_ch_jet2->reset();
   new(fit_hadronic_w_ch_jet2) TFitParticlePt("hadronic_w_ch_jet2",
                                                     "hadronic_w_ch_jet2",
                                                     &corr_hadronic_w_ch_jet2,
@@ -287,7 +293,8 @@ void TKinFitterDriver::SetLepton(TLorentzVector lepton_){
   double Pt = lepton.Pt();
   double Eta = lepton.Eta();
   error_lepton(0,0)=TMath::Power(0.02*Pt,2);
-  fit_lepton->~TFitParticlePt();
+  //fit_lepton->~TFitParticlePt();
+  fit_lepton->reset();
   new(fit_lepton) TFitParticlePt("lepton",
                                         "lepton",
                                         &lepton,
@@ -337,13 +344,16 @@ void TKinFitterDriver::SetNeutrino(TLorentzVector met_, int i){
   neutrino_vec3 = neutrino_pxpypz.Vect();
 
   double MET_error_px2=0., MET_error_py2=0.;
-  for(unsigned int i(0); i<jet_pt_resolution_vector.size(); i++){
-    double jet_pt_resolution = jet_pt_resolution_vector.at(i);
-    double jet_pt  = jet_vector.at(i).Pt();
-    double jet_phi = jet_vector.at(i).Phi();
-    MET_error_px2 += TMath::Power(jet_pt_resolution*jet_pt*TMath::Cos(jet_phi), 2);
-    MET_error_py2 += TMath::Power(jet_pt_resolution*jet_pt*TMath::Sin(jet_phi), 2);
-  }
+
+  //for(unsigned int i(0); i<jet_pt_resolution_vector.size(); i++){
+  //  double jet_pt_resolution = jet_pt_resolution_vector.at(i);
+  //  double jet_pt  = jet_vector.at(i).Pt();
+  //  double jet_phi = jet_vector.at(i).Phi();
+  //  MET_error_px2 += TMath::Power(jet_pt_resolution*jet_pt*TMath::Cos(jet_phi), 2);
+  //  MET_error_py2 += TMath::Power(jet_pt_resolution*jet_pt*TMath::Sin(jet_phi), 2);
+  //}
+  MET_error_px2 = TMath::Power(0.2*met_px, 2);
+  MET_error_py2 = TMath::Power(0.2*met_py, 2);
 
   double lepton_px = lepton.Px();
   double lepton_py = lepton.Py();
@@ -356,7 +366,8 @@ void TKinFitterDriver::SetNeutrino(TLorentzVector met_, int i){
   error_neutrino_pxpypz(0,0) = std::max(0.0001, MET_error_px2);  
   error_neutrino_pxpypz(1,1) = std::max(0.0001, MET_error_py2);
   error_neutrino_pxpypz(2,2) = std::max(0.0001, error_pz2);
-  fit_neutrino_pxpypz->~TFitParticleMCCart();
+  //fit_neutrino_pxpypz->~TFitParticleMCCart();
+  fit_neutrino_pxpypz->reset();
   new(fit_neutrino_pxpypz) TFitParticleMCCart("neutrino_pxpypz",
                                           "neutrino_pxpypz",
                                           &neutrino_vec3,
@@ -464,6 +475,10 @@ bool TKinFitterDriver::Kinematic_Cut(){
   double hadronic_top_mass = hadronic_top.M();
   double leptonic_top_mass = leptonic_top.M();
 
+  //std::cout << "hadronic_top mass: " << hadronic_top_mass << std::endl;
+  //std::cout << "mbl              : " << (leptonic_top_b_jet+lepton).M() << std::endl;
+  //std::cout << "top dphi         : " << fabs(hadronic_top.DeltaPhi(leptonic_top)) << std::endl;
+
          // jet pt cut. one of b tagged jet in hadronic side allowed to be below 30GeV
   return (hadronic_w_ch_jet1.Pt() > 30. &&
           (
@@ -477,15 +492,22 @@ bool TKinFitterDriver::Kinematic_Cut(){
           (njets ==5 && hadronic_top_mass > 120 && hadronic_top_mass < 220) ||
           (njets >=6 && hadronic_top_mass > 140 && hadronic_top_mass < 200)) &&
          //(leptonic_top_mass > 100 && leptonic_top_mass < 240) &&
-         (leptonic_top_b_jet+lepton).M() < 150 &&   //Mbl
+         ((leptonic_top_b_jet+lepton).M() < 150) &&   //Mbl
          (fabs(hadronic_top.DeltaPhi(leptonic_top)) > 1.5);
 }
 
 bool TKinFitterDriver::Quality_Cut(){
-  return fabs(this->CalcEachChi2(fit_hadronic_top_b_jet))<3 &&
-         fabs(this->CalcEachChi2(fit_leptonic_top_b_jet))<3 &&
-         fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet1))<3 &&
-         fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet2))<3;
+
+  //std::cout << "njets  : " << njets << std::endl;
+  //std::cout << "chi2 1 : " << fabs(this->CalcEachChi2(fit_hadronic_top_b_jet)) << std::endl;
+  //std::cout << "chi2 2 : " << fabs(this->CalcEachChi2(fit_leptonic_top_b_jet)) << std::endl;
+  //std::cout << "chi2 3 : " << fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet1)) << std::endl;
+  //std::cout << "chi2 4 : " << fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet2)) << std::endl;
+
+  return fabs(this->CalcEachChi2(fit_hadronic_top_b_jet))<9 &&
+         fabs(this->CalcEachChi2(fit_leptonic_top_b_jet))<9 &&
+         fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet1))<9 &&
+	 fabs(this->CalcEachChi2(fit_hadronic_w_ch_jet2))<9;
 }
 
 void TKinFitterDriver::SetConstraint(){
@@ -507,6 +529,9 @@ void TKinFitterDriver::SetConstraint(){
   constrain_leptonic_W_M->addParticles1(fit_neutrino_pxpypz, fit_lepton); // lepton is included in fit_neutrino_pz
   //constrain_leptonic_W_MGaus->Clear();
   //constrain_leptonic_W_MGaus->addParticles1(fit_lepton, fit_neutrino_pxpy, fit_neutrino_pz);
+  constrain_hadronic_W_M->Clear();
+  new(constrain_hadronic_W_M) TFitConstraintM("hadronic_w_mass_constraint", "hadronic_w_mass_constraint", 0, 0, 80.4);
+  constrain_hadronic_W_M->addParticles1(fit_hadronic_w_ch_jet1, fit_hadronic_w_ch_jet2);
 }
 
 
@@ -531,6 +556,7 @@ void TKinFitterDriver::SetFitter(){
   //fitter->addConstraint( constrain_leptonic_top_MGaus );
   fitter->addConstraint( constrain_leptonic_W_M );
   //fitter->addConstraint( constrain_leptonic_W_MGaus );
+  fitter->addConstraint( constrain_hadronic_W_M );
   //Set convergence criteria
   fitter->setMaxNbIter( 50 ); //50 is default
   fitter->setMaxDeltaS( 1e-2 );
@@ -577,8 +603,6 @@ void TKinFitterDriver::SaveResults(){
   fit_result.w_ch_up_type_jet_pull = (*fit_hadronic_w_ch_jet1->getPull())(0,0);
   fit_result.w_ch_down_type_jet_pull = (*fit_hadronic_w_ch_jet2->getPull())(0,0);
                                       
-  //
-  ///////
   int down_type_jet_b_tagged = 0;
   for(UInt_t i=0; i<permutation_vector.size(); i++){
     JET_ASSIGNMENT jet_assignment_idx = permutation_vector.at(i);
@@ -594,8 +618,7 @@ void TKinFitterDriver::SaveResults(){
     }
   }
   fit_result.down_type_jet_b_tagged = down_type_jet_b_tagged;
-  ///////
-  //
+
   fit_result.chi2 = 9999;
   //if(fit_result.status!=-10){ // -10 means singular matrix
     // save S and F
@@ -618,12 +641,20 @@ void TKinFitterDriver::SaveResults(){
     const TLorentzVector *fitted_jet1 = fit_hadronic_w_ch_jet1->getCurr4Vec(); // get address of fitted object
     const TLorentzVector *fitted_jet2 = fit_hadronic_w_ch_jet2->getCurr4Vec(); // get address of fitted object
     const TLorentzVector *fitted_jet3 = fit_hadronic_top_b_jet->getCurr4Vec(); // get address of fitted object
+    const TLorentzVector *fitted_jet4 = fit_leptonic_top_b_jet->getCurr4Vec(); // get address of fitted object
+    const TLorentzVector *fitted_lep = fit_lepton->getCurr4Vec(); // get address of fitted object
+    const TLorentzVector *fitted_neu = fit_neutrino_pxpypz->getCurr4Vec(); // get address of fitted object
+
     const TLorentzVector fitted_dijet = (*fitted_jet1) + (*fitted_jet2);
     const TLorentzVector fitted_dijet_high = fitted_jet3->Pt()>fitted_jet2->Pt() ? (*fitted_jet1) + (*fitted_jet3):fitted_dijet;
     const TLorentzVector fitted_dijet_new1 = fitted_jet3->Pt()>fitted_jet2->Pt()+30 ? (*fitted_jet1) + (*fitted_jet3):fitted_dijet;
 
     fit_result.fitted_jet1 = TLorentzVector(fitted_jet1->Px(), fitted_jet1->Py(), fitted_jet1->Pz(), fitted_jet1->E());
     fit_result.fitted_jet2 = TLorentzVector(fitted_jet2->Px(), fitted_jet2->Py(), fitted_jet2->Pz(), fitted_jet2->E());
+    fit_result.fitted_hadt_bjet = TLorentzVector(fitted_jet3->Px(), fitted_jet3->Py(), fitted_jet3->Pz(), fitted_jet3->E());
+    fit_result.fitted_lept_bjet = TLorentzVector(fitted_jet4->Px(), fitted_jet4->Py(), fitted_jet4->Pz(), fitted_jet4->E());
+    fit_result.fitted_lep = TLorentzVector(fitted_lep->Px(), fitted_lep->Py(), fitted_lep->Pz(), fitted_lep->E());
+    fit_result.fitted_neu = TLorentzVector(fitted_neu->Px(), fitted_neu->Py(), fitted_neu->Pz(), fitted_neu->E());
 
     fit_result.fitted_dijet_M = fitted_dijet.M(); // save dijet mass
     fit_result.fitted_dijet_M_high = fitted_dijet_high.M(); // save dijet mass
@@ -685,6 +716,7 @@ double TKinFitterDriver::CalcChi2(TString option){
   }
   // mass constraints
   chi2 += this->CalcEachChi2(constrain_leptonic_W_M, 2.085);
+  chi2 += this->CalcEachChi2(constrain_hadronic_W_M, 2.085);
   //chi2 += this->CalcEachChi2(constrain_leptonic_W_MGaus);
   //chi2 += this->CalcEachChi2(constrain_hadronic_top_MGaus);
   chi2 += this->CalcEachChi2(constrain_hadronic_top_M, 1.5);

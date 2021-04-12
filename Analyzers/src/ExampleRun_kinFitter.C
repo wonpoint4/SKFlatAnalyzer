@@ -102,43 +102,33 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   vector<Muon> this_AllMuons = AllMuons;
   vector<Muon> muons = SMPGetMuons(param.Muon_Tight_ID, 20., 2.4);
   vector<Muon> softmus = SelectMuons(this_AllMuons, "POGLoose", 0., 2.4);
-  vector<Jet> jets = GetJets(param.Jet_ID, 30., 2.4);
+  vector<Jet> basic_jets = GetJets(param.Jet_ID, 30., 2.4);
+  //vector<Jet> jets = GetJets(param.Jet_ID, 30., 2.4);
   std::sort(muons.begin(), muons.end(), PtComparing);
   std::sort(softmus.begin(), softmus.end(), PtComparing);
+  std::sort(basic_jets.begin(), basic_jets.end(), PtComparing);
+  //std::sort(jets.begin(), jets.end(), PtComparing);
+
+  vector<Jet> jets;
+  jets.clear();
+  unsigned int nbjets = 0;
+  unsigned int njets = 0;
+  for(unsigned int i=0; i<basic_jets.size(); i++){
+    double this_discr = basic_jets.at(i).GetTaggerResult(JetTagging::DeepCSV);
+    if( this_discr > mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium) && nbjets < 2){
+      nbjets++;
+      jets.push_back(basic_jets.at(i));
+    }else if(this_discr < mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium) && njets < 3){
+      //}else if(njets < 4){
+      njets++;
+      jets.push_back(basic_jets.at(i));
+    }
+  }
   std::sort(jets.begin(), jets.end(), PtComparing);
 
   if(muons.size() != 1) return;
   if(muons.at(0).Pt() <= TriggerSafePtCut ) return;
   if(jets.size()<4) return;
-
-  int NBJets_NoSF(0), NBJets_WithSF_2a(0);
-  JetTagging::Parameters jtp_DeepCSV_Medium = JetTagging::Parameters(JetTagging::DeepCSV,
-                                                                     JetTagging::Medium,
-                                                                     JetTagging::incl, JetTagging::comb);
-  //==== b tagging
-
-  //==== method 1a)
-  //==== multiply "btagWeight" to the event weight
-  double btagWeight = mcCorr->GetBTaggingReweight_1a(jets, jtp_DeepCSV_Medium);
-  std::vector<bool> btag_vector{};
-
-  //==== method 2a)
-  for(unsigned int ij = 0 ; ij < jets.size(); ij++){
-
-    double this_discr = jets.at(ij).GetTaggerResult(JetTagging::DeepCSV);
-    //==== No SF
-    if( this_discr > mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium) ){
-      NBJets_NoSF++;
-      btag_vector.push_back(true);
-    }
-    else{
-      btag_vector.push_back(false);
-    }
-    //==== 2a
-    if( mcCorr->IsBTagged_2a(jtp_DeepCSV_Medium, jets.at(ij)) ) NBJets_WithSF_2a++;
-  }
-
-  if(NBJets_NoSF<2) return;
 
   //===================
   //==== Event weight
@@ -163,6 +153,63 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     weight *= this_trigsf;
   }
 
+  //==== b tagging
+
+  int NBJets_NoSF(0), NBJets_WithSF_2a(0);
+  JetTagging::Parameters jtp_DeepCSV_Medium = JetTagging::Parameters(JetTagging::DeepCSV,
+                                                                     JetTagging::Medium,
+                                                                     JetTagging::incl, JetTagging::comb);
+  //==== method 1a)
+  //==== multiply "btagWeight" to the event weight
+  double btagWeight = mcCorr->GetBTaggingReweight_1a(jets, jtp_DeepCSV_Medium);
+  std::vector<bool> btag_vector{};
+
+  //==== method 2a)
+  for(unsigned int ij = 0 ; ij < jets.size(); ij++){
+
+    double this_discr = jets.at(ij).GetTaggerResult(JetTagging::DeepCSV);
+    //==== No SF
+    if( this_discr > mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium)){
+      NBJets_NoSF++;
+      btag_vector.push_back(true);
+    }
+    else{
+      btag_vector.push_back(false);
+    }
+    //==== 2a
+    if( mcCorr->IsBTagged_2a(jtp_DeepCSV_Medium, jets.at(ij)) ) NBJets_WithSF_2a++;
+  }
+
+  if(NBJets_NoSF<2) return;
+
+  FillHist(param.Name+"/basicjet_Num", basic_jets.size(), weight, 15, 0, 15);
+  FillHist(param.Name+"/jet_Num", jets.size(), weight, 10, 0, 10);
+  FillHist(param.Name+"/bjet_Num", NBJets_NoSF, weight, 10, 0, 10);
+
+  /*
+  int bjet_order = 0;
+  for(unsigned int ij = 0 ; ij < jets.size(); ij++){
+    double this_discr = jets.at(ij).GetTaggerResult(JetTagging::DeepCSV);
+    if( this_discr > mcCorr->GetJetTaggingCutValue(JetTagging::DeepCSV, JetTagging::Medium) ){
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_pT", jets.at(ij).Pt(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_P", jets.at(ij).P(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_score", jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 1);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_pT_score", jets.at(ij).Pt()*jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_P_score", jets.at(ij).P()*jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_jet"+Form("%d",ij)+"_pT", jets.at(ij).Pt(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_jet"+Form("%d",ij)+"_P", jets.at(ij).P(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_"+Form("%d",bjet_order)+"_jet"+Form("%d",ij)+"_score", jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 1);
+      bjet_order++;
+    }
+    else{
+      FillHist(param.Name+"/bjet_Not_"+Form("%d",ij)+"_pT", jets.at(ij).Pt(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_Not_"+Form("%d",ij)+"_P", jets.at(ij).P(), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_Not_"+Form("%d",ij)+"_score", jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 1);
+      FillHist(param.Name+"/bjet_Not_"+Form("%d",ij)+"_pT_score", jets.at(ij).Pt()*jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 300);
+      FillHist(param.Name+"/bjet_Not_"+Form("%d",ij)+"_P_score", jets.at(ij).P()*jets.at(ij).GetTaggerResult(JetTagging::DeepCSV), weight, 100, 0, 300);
+    }
+  }
+  */
   //=======================
   //==== Kinematic Fitter
   //=======================
@@ -192,34 +239,35 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== Now fill histograms
   //==========================
 
-  double fitted_dijet_M = fitter_results->at(0).fitted_dijet_M;
-  double fitted_leptonic_W_M = fitter_results->at(0).leptonic_W_M;
-  double fitted_hadronic_top_M = fitter_results->at(0).hadronic_top_M;
-  double fitted_leptonic_top_M = fitter_results->at(0).leptonic_top_M;
-
-  int Fit_Score = 0;
-  if(abs(fitted_dijet_M - 80.4) < 10.) Fit_Score += 2;
-  else if(abs(fitted_dijet_M - 80.4) < 20.) Fit_Score += 1;
-  if(abs(fitted_leptonic_W_M - 80.4) < 10.) Fit_Score += 2;
-  else if(abs(fitted_leptonic_W_M - 80.4) < 20.) Fit_Score += 1;
-
-  if(abs(fitted_hadronic_top_M - 172.5) < 20.) Fit_Score += 2;
-  else if(abs(fitted_hadronic_top_M - 172.5) < 40.) Fit_Score += 1;
-  if(abs(fitted_leptonic_top_M - 172.5) < 20.) Fit_Score += 2;
-  else if(abs(fitted_leptonic_top_M - 172.5) < 40.) Fit_Score += 1;
-
+  // Before Fit variables
+  int lept_b_idx = fitter_results->at(0).leptonic_top_b_jet_idx;
+  int hadt_b_idx = fitter_results->at(0).hadronic_top_b_jet_idx;
   int W_up_jet_idx = fitter_results->at(0).w_ch_up_type_jet_idx;
   int W_down_jet_idx = fitter_results->at(0).w_ch_down_type_jet_idx;
   Jet W_up_jet = jets.at(W_up_jet_idx);
   Jet W_down_jet = jets.at(W_down_jet_idx);
-
-  int lept_b_idx = fitter_results->at(0).leptonic_top_b_jet_idx;
-  int hadt_b_idx = fitter_results->at(0).hadronic_top_b_jet_idx;
   Jet lept_b = jets.at(lept_b_idx);
   Jet hadt_b = jets.at(hadt_b_idx);
   double lept_b_charge = lept_b.Charge();
   double hadt_b_charge = hadt_b.Charge();
 
+  double hadronic_W_M = (W_up_jet+W_down_jet).M();
+  double leptonic_W_M = fitter_results->at(0).leptonic_W_M;
+  double hadronic_top_M = fitter_results->at(0).hadronic_top_M;
+  double leptonic_top_M = fitter_results->at(0).leptonic_top_M;
+
+  int Fit_Score = 0;
+  if(abs(hadronic_W_M - 80.4) < 10.) Fit_Score += 2;
+  else if(abs(hadronic_W_M - 80.4) < 20.) Fit_Score += 1;
+  if(abs(leptonic_W_M - 80.4) < 10.) Fit_Score += 2;
+  else if(abs(leptonic_W_M - 80.4) < 20.) Fit_Score += 1;
+
+  if(abs(hadronic_top_M - 172.5) < 20.) Fit_Score += 2;
+  else if(abs(hadronic_top_M - 172.5) < 40.) Fit_Score += 1;
+  if(abs(leptonic_top_M - 172.5) < 20.) Fit_Score += 2;
+  else if(abs(leptonic_top_M - 172.5) < 40.) Fit_Score += 1;
+
+  // bjet Charge setting
   for(unsigned int i=0; i<softmus.size(); i++){
     if(softmus.at(i).TrkIso()/softmus.at(i).Pt() <0.1) continue;
     if(abs(softmus.at(i).IP3D())/softmus.at(i).IP3Derr() <2.5) continue;
@@ -232,25 +280,49 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     }
   }
 
-  FillHist(param.Name+"/W_had_Mass", fitted_dijet_M, weight, 40, 0., 200.);
-  FillHist(param.Name+"/W_had_Massdiff", fitted_dijet_M-(W_up_jet+W_down_jet).M(), weight, 40, -100., 100.);
+  // After Fit variables
+  TLorentzVector fitted_lept_b = fitter_results->at(0).fitted_lept_bjet;
+  TLorentzVector fitted_hadt_b = fitter_results->at(0).fitted_hadt_bjet;
+  TLorentzVector fitted_W_j1 = fitter_results->at(0).fitted_jet1;
+  TLorentzVector fitted_W_j2 = fitter_results->at(0).fitted_jet2;
+  TLorentzVector fitted_lep = fitter_results->at(0).fitted_lep;
+  TLorentzVector fitted_neu = fitter_results->at(0).fitted_neu;
 
-  TLorentzVector fitted_W_jet1 = fitter_results->at(0).fitted_jet1;
-  TLorentzVector fitted_W_jet2 = fitter_results->at(0).fitted_jet2;
-  FillHist(param.Name+"/W_had1_pTdiff", fitted_W_jet1.Pt()-W_up_jet.Pt(), weight, 100, -50., 50.);
-  FillHist(param.Name+"/W_had1_pzdiff", fitted_W_jet1.Pz()-W_up_jet.Pz(), weight, 100, -50., 50.);
-  FillHist(param.Name+"/W_had1_etadiff", fitted_W_jet1.Eta()-W_up_jet.Eta(), weight, 100, -5., 5.);
-  FillHist(param.Name+"/W_had1_phidiff", fitted_W_jet1.Phi()-W_up_jet.Phi(), weight, 100, -5., 5.);
-  FillHist(param.Name+"/W_had1_Ediff", fitted_W_jet1.E()-W_up_jet.E(), weight, 100, -50., 50.);
-  FillHist(param.Name+"/W_had2_pTdiff", fitted_W_jet2.Pt()-W_down_jet.Pt(), weight, 100, -50., 50.);
-  FillHist(param.Name+"/W_had2_pzdiff", fitted_W_jet2.Pz()-W_down_jet.Pz(), weight, 100, -50., 50.);
-  FillHist(param.Name+"/W_had2_etadiff", fitted_W_jet2.Eta()-W_down_jet.Eta(), weight, 100, -5., 5.);
-  FillHist(param.Name+"/W_had2_phidiff", fitted_W_jet2.Phi()-W_down_jet.Phi(), weight, 100, -5., 5.);
-  FillHist(param.Name+"/W_had2_Ediff", fitted_W_jet2.E()-W_down_jet.E(), weight, 100, -50., 50.);
+  double fitted_hadronic_W_M = (fitted_W_j1+fitted_W_j2).M();
+  double fitted_leptonic_W_M = (fitted_lep+fitted_neu).M();
+  double fitted_hadronic_top_M = (fitted_hadt_b+fitted_W_j1+fitted_W_j2).M();
+  double fitted_leptonic_top_M = (fitted_lept_b+fitted_lep+fitted_neu).M();
 
-  FillHist(param.Name+"/W_lep_Mass", fitted_leptonic_W_M, weight, 40, 0., 200.);
-  FillHist(param.Name+"/Top_had_Mass", fitted_hadronic_top_M, weight, 40, 100., 300.);
-  FillHist(param.Name+"/Top_lep_Mass", fitted_leptonic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/W_had_Mass", hadronic_W_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/W_had_FitMass", fitted_hadronic_W_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/W_had_FitMassdiff", fitted_hadronic_W_M-hadronic_W_M, weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_lep_Mass", leptonic_W_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/W_lep_FitMass", fitted_leptonic_W_M, weight, 40, 0., 200.);
+  FillHist(param.Name+"/W_lep_FitMassdiff", fitted_leptonic_W_M-leptonic_W_M, weight, 100, -50., 50.);
+  FillHist(param.Name+"/Top_had_Mass", hadronic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/Top_had_FitMass", fitted_hadronic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/Top_had_FitMassdiff", fitted_hadronic_top_M-hadronic_top_M, weight, 100, -50., 50.);
+  FillHist(param.Name+"/Top_lep_Mass", leptonic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/Top_lep_FitMass", fitted_leptonic_top_M, weight, 40, 100., 300.);
+  FillHist(param.Name+"/Top_lep_FitMassdiff", fitted_leptonic_top_M-leptonic_top_M, weight, 100, -50., 50.);
+
+  FillHist(param.Name+"/lept_b_FitpT", fitted_lept_b.Pt(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/hadt_b_FitpT", fitted_hadt_b.Pt(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/W_had1_FitpT", fitted_W_j1.Pt(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/W_had2_FitpT", fitted_W_j2.Pt(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/lept_b_FitpTdiff", fitted_lept_b.Pt()-lept_b.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/hadt_b_FitpTdiff", fitted_hadt_b.Pt()-hadt_b.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had1_FitpTdiff", fitted_W_j1.Pt()-W_up_jet.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/W_had2_FitpTdiff", fitted_W_j2.Pt()-W_down_jet.Pt(), weight, 100, -50., 50.);
+  FillHist(param.Name+"/lept_b_hadt_b_FitdR", fitted_lept_b.DeltaR(fitted_hadt_b), weight, 100, 0., 5.);
+  FillHist(param.Name+"/lept_b_hadt_b_FitdPhi", fitted_lept_b.DeltaPhi(fitted_hadt_b), weight, 200, -5., 5.);
+  FillHist(param.Name+"/W_had1_had2_FitdR", fitted_W_j1.DeltaR(fitted_W_j2), weight, 100, 0., 5.);
+  FillHist(param.Name+"/W_had1_had2_FitdPhi", fitted_W_j1.DeltaPhi(fitted_W_j2), weight, 200, -5., 5.);
+  FillHist(param.Name+"/lept_b_P", fitted_lept_b.P(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/hadt_b_P", fitted_hadt_b.P(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/W_had1_P", fitted_W_j1.P(), weight, 100, 0., 300.);
+  FillHist(param.Name+"/W_had2_P", fitted_W_j2.P(), weight, 100, 0., 300.);
+
   FillHist(param.Name+"/W_up_jet_idx",  W_up_jet_idx, weight, 10, 0., 10.);
   FillHist(param.Name+"/W_down_jet_idx",  W_down_jet_idx, weight, 10, 0., 10.);
   FillHist(param.Name+"/lept_b_idx", lept_b_idx, weight, 10, 0., 10.);
@@ -269,10 +341,10 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
 
   //FillHist w.r.t Fit_Score
   if(Fit_Score > 5){
-    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_had_Mass", fitted_dijet_M, weight, 40, 0., 200.);
-    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_lep_Mass", fitted_leptonic_W_M, weight, 40, 0., 200.);
-    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_had_Mass", fitted_hadronic_top_M, weight, 40, 100., 300.);
-    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_lep_Mass", fitted_leptonic_top_M, weight, 40, 100., 300.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_had_Mass", hadronic_W_M, weight, 40, 0., 200.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_lep_Mass", leptonic_W_M, weight, 40, 0., 200.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_had_Mass", hadronic_top_M, weight, 40, 100., 300.);
+    FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_Top_lep_Mass", leptonic_top_M, weight, 40, 100., 300.);
     FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_up_jet_idx", W_up_jet_idx, weight, 10, 0., 10.);
     FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_W_down_jet_idx", W_down_jet_idx, weight, 10, 0., 10.);
     FillHist(param.Name+"/"+Form("%d",Fit_Score)+"_lept_b_idx", lept_b_idx, weight, 10, 0., 10.);
@@ -371,6 +443,42 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     FillHist(param.Name+"/Gen_b1_mindR", min(gen_b1.DeltaR(lept_b),gen_b1.DeltaR(hadt_b)), weight, 50, 0., 5.);
     FillHist(param.Name+"/Gen_j0_mindR", min(gen_j0.DeltaR(W_up_jet),gen_j0.DeltaR(W_down_jet)), weight, 50, 0., 5.);
     FillHist(param.Name+"/Gen_j1_mindR", min(gen_j1.DeltaR(W_up_jet),gen_j1.DeltaR(W_down_jet)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_l0_mindR", min(gen_l0.DeltaR(fitted_lep),gen_l0.DeltaR(fitted_neu)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_l1_mindR", min(gen_l1.DeltaR(fitted_neu),gen_l1.DeltaR(fitted_lep)), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b0b1_dR", gen_b0.DeltaR(gen_b1), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b0j0_dR", gen_b0.DeltaR(gen_j0), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b0j1_dR", gen_b0.DeltaR(gen_j1), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b1j0_dR", gen_b1.DeltaR(gen_j0), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b1j1_dR", gen_b1.DeltaR(gen_j1), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_j0j1_dR", gen_j0.DeltaR(gen_j1), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b0b1_dPhi", gen_b0.DeltaPhi(gen_b1), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_b0j0_dPhi", gen_b0.DeltaPhi(gen_j0), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_b0j1_dPhi", gen_b0.DeltaPhi(gen_j1), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_b1j0_dPhi", gen_b1.DeltaPhi(gen_j0), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_b1j1_dPhi", gen_b1.DeltaPhi(gen_j1), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_j0j1_dPhi", gen_j0.DeltaPhi(gen_j1), weight, 100, -5., 5.);
+    FillHist(param.Name+"/Gen_b0_dR", gen_b0.DeltaR(lept_b), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b1_dR", gen_b1.DeltaR(hadt_b), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_j0_dR", gen_j0.DeltaR(W_up_jet), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_j1_dR", gen_j1.DeltaR(W_down_jet), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_l0_dR", gen_l0.DeltaR(fitted_lep), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_l1_dR", gen_l1.DeltaR(fitted_neu), weight, 50, 0., 5.);
+    FillHist(param.Name+"/Gen_b0_pT", gen_b0.Pt(), weight, 100, 0, 300);
+    FillHist(param.Name+"/Gen_b1_pT", gen_b1.Pt(), weight, 100, 0, 300);
+    FillHist(param.Name+"/Gen_j0_pT", gen_j0.Pt(), weight, 100, 0, 300);
+    FillHist(param.Name+"/Gen_j1_pT", gen_j1.Pt(), weight, 100, 0, 300);
+    FillHist(param.Name+"/Gen_b0_pTFitdiff", gen_b0.Pt()-fitted_lept_b.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_b1_pTFitdiff", gen_b1.Pt()-fitted_hadt_b.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_j0_pTFitdiff", gen_j0.Pt()-fitted_W_j1.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_j1_pTFitdiff", gen_j1.Pt()-fitted_W_j2.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_l0_pTFitdiff", gen_l0.Pt()-fitted_lep.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_l1_pTFitdiff", gen_l1.Pt()-fitted_neu.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_b0_pTdiff", gen_b0.Pt()-lept_b.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_b1_pTdiff", gen_b1.Pt()-hadt_b.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_j0_pTdiff", gen_j0.Pt()-W_up_jet.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_j1_pTdiff", gen_j1.Pt()-W_down_jet.Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_l0_pTdiff", gen_l0.Pt()-muons.at(0).Pt(), weight, 100, -50, 50);
+    FillHist(param.Name+"/Gen_l1_pTdiff", gen_l1.Pt()-METv.Pt(), weight, 100, -50, 50);
     FillHist(param.Name+"/Gen_Fit_Match_onlyb", Gen_Fit_match_onlyb, weight, 2, 0, 2);
     FillHist(param.Name+"/Gen_Fit_Match", Gen_Fit_match, weight, 2, 0, 2);
 
