@@ -1,0 +1,43 @@
+### AFB TightID SelectiveCharge efficiency
+ID       SF        TightID_Selective_QPlus           TightID_Selective_QPlus_v3_4.root           EGamma_SF2D       TH2F
+ID       SF        TightID_Selective_QMinus          TightID_Selective_QMinus_v3_4.root          EGamma_SF2D       TH2F
+Trigger  Eff_DATA  Ele28Or_TightID_Selective_QPlus   Ele28Or_TightID_Selective_QPlus_v3_4.root   EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele28Or_TightID_Selective_QMinus  Ele28Or_TightID_Selective_QMinus_v3_4.root  EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele28Or_TightID_Selective_QPlus   Ele28Or_TightID_Selective_QPlus_v3_4.root   EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele28Or_TightID_Selective_QMinus  Ele28Or_TightID_Selective_QMinus_v3_4.root  EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele28_TightID_Selective_QPlus     Ele28_TightID_Selective_QPlus_v3_4.root     EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele28_TightID_Selective_QMinus    Ele28_TightID_Selective_QMinus_v3_4.root    EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele28_TightID_Selective_QPlus     Ele28_TightID_Selective_QPlus_v3_4.root     EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele28_TightID_Selective_QMinus    Ele28_TightID_Selective_QMinus_v3_4.root    EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele32_TightID_Selective_QPlus     Ele32_TightID_Selective_QPlus_v3_4.root     EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele32_TightID_Selective_QMinus    Ele32_TightID_Selective_QMinus_v3_4.root    EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele32_TightID_Selective_QPlus     Ele32_TightID_Selective_QPlus_v3_4.root     EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele32_TightID_Selective_QMinus    Ele32_TightID_Selective_QMinus_v3_4.root    EGamma_EffMC2D    TH2F
+### AFB MediumID efficiency
+ID       SF        MediumID_QPlus                    MediumID_QPlus_v3_4.root                    EGamma_SF2D       TH2F
+ID       SF        MediumID_QMinus                   MediumID_QMinus_v3_4.root                   EGamma_SF2D       TH2F
+Trigger  Eff_DATA  Ele28Or_MediumID_QPlus            Ele28Or_MediumID_QPlus_v3_4.root            EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele28Or_MediumID_QMinus           Ele28Or_MediumID_QMinus_v3_4.root           EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele28Or_MediumID_QPlus            Ele28Or_MediumID_QPlus_v3_4.root            EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele28Or_MediumID_QMinus           Ele28Or_MediumID_QMinus_v3_4.root           EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele28_MediumID_QPlus              Ele28_MediumID_QPlus_v3_4.root              EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele28_MediumID_QMinus             Ele28_MediumID_QMinus_v3_4.root             EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele28_MediumID_QPlus              Ele28_MediumID_QPlus_v3_4.root              EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele28_MediumID_QMinus             Ele28_MediumID_QMinus_v3_4.root             EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele32_MediumID_QPlus              Ele32_MediumID_QPlus_v3_4.root              EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele32_MediumID_QMinus             Ele32_MediumID_QMinus_v3_4.root             EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele32_MediumID_QPlus              Ele32_MediumID_QPlus_v3_4.root              EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele32_MediumID_QMinus             Ele32_MediumID_QMinus_v3_4.root             EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele23Leg1_MediumID_QPlus          Ele23Leg1_MediumID_QPlus_v3_4.root          EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele23Leg1_MediumID_QMinus         Ele23Leg1_MediumID_QMinus_v3_4.root         EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele23Leg1_MediumID_QPlus          Ele23Leg1_MediumID_QPlus_v3_4.root          EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele23Leg1_MediumID_QMinus         Ele23Leg1_MediumID_QMinus_v3_4.root         EGamma_EffMC2D    TH2F
+Trigger  Eff_DATA  Ele12Leg2_MediumID_QPlus          Ele12Leg2_MediumID_QPlus_v3_4.root          EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele12Leg2_MediumID_QMinus         Ele12Leg2_MediumID_QMinus_v3_4.root         EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele12Leg2_MediumID_QPlus          Ele12Leg2_MediumID_QPlus_v3_4.root          EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele12Leg2_MediumID_QMinus         Ele12Leg2_MediumID_QMinus_v3_4.root         EGamma_EffMC2D    TH2F
+### no L1 matching
+Trigger  Eff_DATA  Ele23Leg1_MediumID_QPlus_v3          egammaEffi.txt_EGM2D_Ele23Leg1_MediumID_QPlus_v3.root          EGamma_EffData2D  TH2F
+Trigger  Eff_DATA  Ele23Leg1_MediumID_QMinus_v3         egammaEffi.txt_EGM2D_Ele23Leg1_MediumID_QMinus_v3.root         EGamma_EffData2D  TH2F
+Trigger  Eff_MC    Ele23Leg1_MediumID_QPlus_v3          egammaEffi.txt_EGM2D_Ele23Leg1_MediumID_QPlus_v3.root          EGamma_EffMC2D    TH2F
+Trigger  Eff_MC    Ele23Leg1_MediumID_QMinus_v3         egammaEffi.txt_EGM2D_Ele23Leg1_MediumID_QMinus_v3.root         EGamma_EffMC2D    TH2F

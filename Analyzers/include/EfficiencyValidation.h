@@ -8,9 +8,9 @@ class EfficiencyValidation : public SMPAnalyzerCore {
 public:
 
   void initializeAnalyzer();
-  void executeEventWithChannelName(TString channelname);
   void executeEvent();
-  void FillHistsEfficiency(TString pre,TString suf,const vector<Lepton*>& leps,const map<TString,double>& weights);
+  void FillHists(Parameter& p);
+  void FillHistsEfficiency(Parameter& p,TString region);
 
   EfficiencyValidation();
   ~EfficiencyValidation();
