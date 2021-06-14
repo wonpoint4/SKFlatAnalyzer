@@ -1,14 +1,15 @@
 import os,ROOT
 
-sample = 'TTLL_powheg'
+sample = 'TTLJ_powheg'
 
 SKFlat_WD = os.environ['SKFlat_WD']
 SKFlatV = os.environ['SKFlatV']
 DATA_DIR = os.environ['DATA_DIR']
 SKFlatOutputDir = os.environ['SKFlatOutputDir']
 
-Years = [
-"2016",
+Eras = [
+"2016preVFP",
+"2016postVFP",
 "2017",
 "2018",
 ]
@@ -16,7 +17,7 @@ Years = [
 Taggers = [
 'DeepCSV',
 'DeepJet',
-'CSVv2',
+#'CSVv2',
 ]
 
 WPs = [
@@ -44,18 +45,18 @@ print>>out,'''double MCCorrection::GetMCJetTagEff(JetTagging::Tagger tagger, Jet
 
 '''
 
-for Year in Years:
+for Era in Eras:
 
-  f = ROOT.TFile(SKFlatOutputDir+SKFlatV+'/MeasureJetTaggingEfficiency/'+Year+'/MeasureJetTaggingEfficiency_'+sample+'.root')
+  f = ROOT.TFile(SKFlatOutputDir+SKFlatV+'/MeasureJetTaggingEfficiency/'+Era+'/MeasureJetTaggingEfficiency_'+sample+'.root')
 
-  out.write('  if(DataYear==%s){\n'%Year)
+  out.write('  if(GetEra()==%s){\n'%Era)
 
   for it_Flavour in range(0,len(Flavours)):
 
     Flavour = Flavours[it_Flavour]
     cond_Flavour = cond_Flavours[it_Flavour]
 
-    h_Den = f.Get('Jet_'+Year+'_eff_'+Flavour+'_denom')
+    h_Den = f.Get('Jet_'+Era+'_eff_'+Flavour+'_denom')
 
     out.write('    if('+cond_Flavour+'){\n')
 
@@ -67,7 +68,7 @@ for Year in Years:
 
         print>>out,'''        if(wp==JetTagging::{0}){{'''.format(WP)
 
-        h_Eff = f.Get('Jet_'+Year+'_'+Tagger+'_'+WP+'_eff_'+Flavour+'_num')
+        h_Eff = f.Get('Jet_'+Era+'_'+Tagger+'_'+WP+'_eff_'+Flavour+'_num')
         if not h_Eff:
           out.write('        }\n')
           continue
@@ -98,10 +99,10 @@ for Year in Years:
 
     out.write('    }\n') ## end of this flavour
 
-  out.write('  }\n') ## end of this Year
+  out.write('  }\n') ## end of this Era
 
 print>>out,'''  cout << "[MCCorrection::GetMCJetTagEff] No eff found for tagger = " << tagger << ", wp = " << wp << endl;
-  cout << "[MCCorrection::GetMCJetTagEff] Or, wrong pt and eta range : pt = " << JetPt << ", eta = " << JetEta << endl;'''.format(Year,Flavour)
+  cout << "[MCCorrection::GetMCJetTagEff] Or, wrong pt and eta range : pt = " << JetPt << ", eta = " << JetEta << endl;'''.format(Era,Flavour)
 out.write('  return 1.;\n')
 out.write('}\n') ## end of this flavour
 

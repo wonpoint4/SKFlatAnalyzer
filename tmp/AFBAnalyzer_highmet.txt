@@ -1,17 +1,27 @@
-#SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2017
-SKFlat.py -a AFBAnalyzer -i TTLL_powheg -n 20 -e 2017
-SKFlat.py -a AFBAnalyzer -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
-
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 60 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 10 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 40 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WW_pythia -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WZ_pythia -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 
 #SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i TTLJ_powheg -n 40 -e 2017
 #SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_sch_Lep -n 10 -e 2017
 #SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_antitop_Incl -n 10 -e 2017
 #SKFlat.py -a AFBAnalyzer --userflags DYbStudy -i SingleTop_tch_top_Incl -n 10 -e 2017
+
+SKFlat.py -a ExampleRun_kinFitter --skim SkimTree_Dilepton -i TTLJ_powheg -n 100 -e 2017 --memory 9000
+SKFlat.py -a ExampleRun_kinFitter -i SingleMuon -n 20 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i WJets_MG -n 30 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i DYJets -n 20 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i WW_pythia -n 10 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i WZ_pythia -n 10 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i ZZ_pythia -n 10 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i TTLL_powheg -n 20 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017

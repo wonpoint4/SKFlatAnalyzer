@@ -106,11 +106,18 @@ bool Muon::PassID(TString ID) const {
   if(ID=="POGHighPtWithLooseTrkIso") return Pass_POGHighPtWithLooseTrkIso();
   //==== Customized
   if(ID=="TEST") return Pass_TESTID();
+  if(ID=="POGSoft") return isPOGSoft();
+  if(ID=="POGLooseMVA") return isPOGLooseMVA();
+  if(ID=="POGSoftMVA") return isPOGLooseMVA();
+  if(ID=="GlobalMuon") return isGlobalMuon();
+  if(ID=="TrackerMuon") return isTrackerMuon();
+  if(ID=="StandAloneMuon") return isStandAloneMuon();
+  if(ID=="PFMuon") return isPFMuon();
 
   //==== No cut
   if(ID=="NOCUT") return true;
 
-  cout << "[Electron::PassID] No id : " << ID << endl;
+  cout << "[Muon::PassID] No id : " << ID << endl;
   exit(ENODATA);
 
   return false;

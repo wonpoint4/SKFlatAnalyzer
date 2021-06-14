@@ -166,10 +166,14 @@ public:
   void SetupZptWeight();
   void SetupZ0Weight();
   void SetupRoccoR();
+  double GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP wp, int JetFlavor, double JetPt, double JetEta);
+  void SetupMCJetTagEff();
+  double GetBTaggingReweight_1a(const vector<Jet>& jets, JetTagging::Parameters jtp, string Syst="central");
   double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
   void SetupPUJetWeight(TString ID="Medium");
   double GetPUJetWeight(const vector<Jet>& jets, int sys);
   bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
+  double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1.);
   double GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double GetZ0Weight(double z0);
 
@@ -208,7 +212,7 @@ public:
   static const int zptcor_nybin=6;
   const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
 
-  map<TString,TH2D*> map_hist_zpt;
+  map<TString,TH2D*> map_hist_zpt, map_hist_mcjet;
 
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
@@ -222,6 +226,8 @@ public:
   LHE lhe_l0,lhe_l1,lhe_j0;
   vector<Gen> gens;
   Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_j0,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
+  vector<Muon> softmus;
+  vector<Electron> softels;
 
   RoccoR* roc=NULL;
   RocelecoR* rocele=NULL;

@@ -45,12 +45,12 @@ public:
   bool IsNominalRun=true;
   bool IsSkimmed=false;
 
-  std::vector<Muon> Muons, softmus, bmuon;
+  std::vector<Muon> Muons;
   std::vector<Electron> Electrons;
   std::vector<Jet> jets, realjets, bjets;
   int n_bjet=0;
   int n_powerbjet=0;
-  double bjet_charge=-1.5;
+  double bjet_charge=-5.5;
   TLorentzVector bjet;
 
   static const int afb_mbinnum=42;

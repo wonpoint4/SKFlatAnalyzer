@@ -51,18 +51,17 @@ void AFBAnalyzer::executeEvent(){
     realjets.push_back(jets.at(l));
   }
 
-  vector <TString> btag = {"", "DeepJET"};
+  vector <TString> btag = {"", "DeepCSV"};
   for(unsigned int b=0; b<btag.size(); b++){
     //bjet setting
     n_bjet=0;
     n_powerbjet=0;
-    bjet_charge=-3.5;
     bjets.clear();
-    JetTagging::Parameters jtpT = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
-    JetTagging::Parameters jtpL = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
-    if(btag.at(b)=="DeepJET"){
-      jtpT = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
-      jtpL = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
+    JetTagging::Parameters jtpT = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
+    JetTagging::Parameters jtpL = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
+    if(btag.at(b)=="DeepCSV"){
+      jtpT = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
+      jtpL = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
     }
 
     /*
@@ -92,18 +91,6 @@ void AFBAnalyzer::executeEvent(){
       }
     }
     btagweight = GetBTaggingReweight_1a_2WP(realjets, jtpT, jtpL, "central");
-
-    softmus.clear();
-    softmus=GetMuons("POGLoose",0,2.4);
-    std::sort(softmus.begin(),softmus.end(),PtComparing);
-    bmuon.clear();
-    for(unsigned int l=0; l<softmus.size(); l++){
-      if(bjets.size()==0) break;
-      if(softmus.at(l).TrkIso()/softmus.at(l).Pt() <0.1) continue;
-      if(softmus.at(l).P()*sin(softmus.at(l).Angle(bjets.at(0).Vect())) <1.0) continue;
-      if(abs(softmus.at(l).IP3D())/softmus.at(l).IP3Derr() <2.5) continue;
-      if(bjets.at(0).DeltaR(softmus.at(l))<0.4) bmuon.push_back(softmus.at(l));
-    }
 
     if(IsDYSample && abs(lhe_l0.ID())!=15){
       //////////////////////// Check LHE /////////////////////////
@@ -220,12 +207,8 @@ void AFBAnalyzer::executeEvent(){
 		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_mother_flavor",motherflavor*genmu.at(k).PID()/13,map_weight,100,-50,50);
 		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT",genmu.at(k).Pt()*genmu.at(k).PID()/13,map_weight,80,-100,100);
 		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_p",genmu.at(k).P()*genmu.at(k).PID()/13,map_weight,80,-100,100);
-		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT2",genmu.at(k).P()*sin(genmu.at(k).DeltaR(bjets.at(0)))*genmu.at(k).PID()/13,map_weight,80,-10,10);
-                if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT3",genmu.at(k).P()*sin(genmu.at(k).Angle(bjets.at(0).Vect()))*genmu.at(k).PID()/13,map_weight,80,-10,10);
-		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT23",genmu.at(k).P()*(sin(genmu.at(k).DeltaR(bjets.at(0)))-sin(genmu.at(k).Angle(bjets.at(0).Vect()))),map_weight,200,-10,10);
-		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT4",genmu.at(k).P()*sin(genmu.at(k).DeltaR(gen_j0))*genmu.at(k).PID()/13,map_weight,80,-10,10);
-                if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT5",genmu.at(k).P()*sin(genmu.at(k).Angle(gen_j0.Vect()))*genmu.at(k).PID()/13,map_weight,80,-10,10);
-                if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pT45",genmu.at(k).P()*(sin(genmu.at(k).DeltaR(gen_j0))-sin(genmu.at(k).Angle(gen_j0.Vect()))),map_weight,200,-10,10);
+                if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_ptrel_b",genmu.at(k).P()*sin(genmu.at(k).Angle(bjets.at(0).Vect()))*genmu.at(k).PID()/13,map_weight,80,-10,10);
+                if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_ptrel_genb",genmu.at(k).P()*sin(genmu.at(k).Angle(gen_j0.Vect()))*genmu.at(k).PID()/13,map_weight,80,-10,10);
 		if(l==0) FillHist(p.prefix+p.hprefix+"genmu"+Form("%d",k)+"_pTRatio",genmu.at(k).Pt()/bjets.at(0).Pt()*genmu.at(k).PID()/13,map_weight,20,-1,1);
 	      }
 	    }
@@ -298,8 +281,8 @@ void AFBAnalyzer::executeEvent(){
 	  }
 	}
 
-	if(gen_j0.PID()==0 || gen_j0.PID()==21) bjet_charge *= gRandom->Rndm()>0.5?1:-1;
-	else bjet_charge *= gen_j0.PID()>0?1:-1; // bjet_charge is -3.5 when lhe_j0 is quark(b), and is +3.5 when lhe_j0 is anti-quark(bbar) ->This makes difference in direction of GetCosThetaCS(Recoil)
+	if(gen_j0.PID()==0 || gen_j0.PID()==21) bjet_charge *= (gRandom->Rndm()>0.5?1:-1);
+	else bjet_charge *= (gen_j0.PID()>0?1:-1); // bjet_charge is -5.5 when lhe_j0 is quark(b), and is +5.5 when lhe_j0 is anti-quark(bbar) ->This makes difference in direction of GetCosThetaCS(Recoil)
 
 	bjet = lhe_j0;
 	FillHistsAFB(p.prefix,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
@@ -475,8 +458,8 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+"OneTightb_bef_normjet_nobSF"+p.suffix,jets.size(),eventweight/btagweight,10,0,10);
   if(bjets.size() !=1) return;
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"oneTightb",eventweight);
-  bjet_charge = bjets.at(0).Charge();
   bjet = bjets.at(0);
+  bjet_charge = bjetCharge(bjets.at(0),0,p.prefix+p.hprefix);
 
   FillHist(p.prefix+p.hprefix+"2bveto_bef"+p.suffix,n_bjet,eventweight,5,0,5);
   FillHist(p.prefix+p.hprefix+"2bveto_bef_powerbjet"+p.suffix,n_powerbjet,eventweight,5,0,5);
@@ -510,71 +493,12 @@ void AFBAnalyzer::FillHists(Parameter& p){
   if((*l0+*l1).Pt() <20) return;
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ZpT20Cut",eventweight);
 
-  if(bmuon.size() >0){
-    for(unsigned int l=0; l<bmuon.size(); l++){
-      TString charge = "";
-      if(bmuon.at(l).Charge() > 0) charge = "P";
-      else charge = "M";
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_PFiso",bmuon.at(l).RelIso(),eventweight,50,0,1);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_Trkiso",bmuon.at(l).TrkIso()/bmuon.at(l).Pt(),eventweight,50,0,1);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT",bmuon.at(l).Pt(),eventweight,50,0,100);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_p",bmuon.at(l).P(),eventweight,50,0,100);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT2",bmuon.at(l).P()*sin(bmuon.at(l).DeltaR(bjets.at(0))),eventweight,50,0,10);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT3",bmuon.at(l).P()*sin(bmuon.at(l).Angle(bjets.at(0).Vect())),eventweight,100,0,10);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT4",bmuon.at(l).P()*bmuon.at(l).DeltaR(bjets.at(0)),eventweight,50,0,10);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pTRatio",bmuon.at(l).Pt()/bjets.at(0).Pt(),eventweight,20,0,1);
-      //FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+"_charge",bmuon.at(l).Charge(),eventweight,4,-2,2);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_deltaRlep",min(p.lepton0->DeltaR(bmuon.at(l)),p.lepton1->DeltaR(bmuon.at(l))),eventweight,40,0,2);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_deltaR",bmuon.at(l).DeltaR(bjets.at(0)),eventweight,40,0,2);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_PassMedium",bmuon.at(l).PassID("POGMedium"),eventweight,2,0,2);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_PassTight",bmuon.at(l).PassID("POGTight"),eventweight,2,0,2);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_IP3D",abs(bmuon.at(l).IP3D()),eventweight,100,0,5);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_SIP3D",abs(bmuon.at(l).IP3D())/bmuon.at(l).IP3Derr(),eventweight,40,0,20);
-      TVector3 bboost = bjets.at(0).BoostVector();
-      bmuon.at(l).Boost(-bboost);
-      FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_p2",bmuon.at(l).P(),eventweight,100,0,10);
-      if(bmuon.at(l).P() >1.3){
-	bmuon.at(l).Boost(bboost);
-	FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT3_p2_13cut",bmuon.at(l).P()*sin(bmuon.at(l).Angle(bjets.at(0).Vect())),eventweight,100,0,10);
-      }
-      else bmuon.at(l).Boost(bboost);
-      if(bmuon.at(l).P()*sin(bmuon.at(l).Angle(bjets.at(0).Vect())) >0.9){
-	FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT3_pT3_09cut",bmuon.at(l).P()*sin(bmuon.at(l).Angle(bjets.at(0).Vect())),eventweight,50,0,5);
-	bmuon.at(l).Boost(-bboost);
-	FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_p2_pT3_09cut",bmuon.at(l).P(),eventweight,50,0,5);
-	if(bmuon.at(l).P() >1.0){
-	  FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_p2_pT3_09_p2_10cut",bmuon.at(l).P(),eventweight,50,0,5);
-	  bmuon.at(l).Boost(bboost);
-	  FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_pT3_pT3_09_p2_10cut",bmuon.at(l).P()*sin(bmuon.at(l).Angle(bjets.at(0).Vect())),eventweight,50,0,5);
-	}
-      }
-      if(l==0) FillHist(p.prefix+p.hprefix+"bmuon"+Form("%d",l)+charge+"_jetcharge",bjets.at(0).Charge(),eventweight,200,-2,2);
-    }
-  }
+  bjet_charge = bjetCharge(bjets.at(0), 1, p.prefix+p.hprefix, eventweight);
 
-  FillHist(p.prefix+p.hprefix+"bjetCharge030Cut_bef",bjet_charge,eventweight,100,-1,1);
-  if(bmuon.size()!=0){
-    //p.suffix += "_SemiLeptonic";
-    if(bmuon.at(0).Charge()>0) bjet_charge += 2.;
-    else if(bmuon.at(0).Charge()<0) bjet_charge -= 2.;
-    else bjet_charge = 3.5;
-  }
-  FillHist(p.prefix+p.hprefix+"bjetCharge030Cut_bef2",bjet_charge,eventweight,300,-3,3);
-  if((bjet_charge < -1.0 || bjet_charge > 1.0)) FillHist(p.prefix+p.hprefix+"bjetCharge030Cut_bef3",bjet_charge,eventweight,300,-3,3);
-  else FillHist(p.prefix+p.hprefix+"bjetCharge030Cut_bef4",bjet_charge,eventweight,300,-3,3);
-  if(bjet_charge > -0.3 && bjet_charge < 0.3) return;
-  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"bjetcharge030Cut",eventweight);
-
-  /*
-    if(p.weightbit&NominalWeight){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"RECO",eventweight*RECOSF);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ID",eventweight*RECOSF*IDSF);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ISO",eventweight*RECOSF*IDSF*ISOSF);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"trigger",eventweight*RECOSF*IDSF*ISOSF*triggerSF);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"PUjet",eventweight*RECOSF*IDSF*ISOSF*triggerSF*pujetweight);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"BTagging",eventweight*RECOSF*IDSF*ISOSF*triggerSF*pujetweight*btagweight);
-    }
-  */
+  if(fabs(bjet_charge) > 1.) FillHist(p.prefix+p.hprefix+"bjetCharge_raw_SL",bjet_charge,eventweight,600,-6,6);
+  else FillHist(p.prefix+p.hprefix+"bjetCharge_raw_noSL",bjet_charge,eventweight,600,-6,6);
+  if(fabs(bjet_charge) < 0.2) return;
+  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"bjetcharge020Cut",eventweight);
 
   ///////////////////////fill hists///////////////////////
   if(HasFlag("TOY")) FillHistsToy(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
@@ -584,8 +508,14 @@ void AFBAnalyzer::FillHists(Parameter& p){
     FillHist(p.prefix+p.hprefix+"bjetpT",bjets.at(0).Pt(),map_weight,200,0,1000);
     FillHist(p.prefix+p.hprefix+"bjeteta",bjets.at(0).Eta(),map_weight,100,-5,5);
     FillHist(p.prefix+p.hprefix+"bjetM",bjets.at(0).M(),map_weight,200,0,20);
-    FillHist(p.prefix+p.hprefix+"bjetCharge",bjet_charge,map_weight,400,-4,4);
+    FillHist(p.prefix+p.hprefix+"bjetCharge",bjet_charge,map_weight,600,-6,6);
     FillHist(p.prefix+p.hprefix+"bjetPUID",bjets.at(0).PileupJetId(),map_weight,200,-2,2);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepJet",bjets.at(0).DeepJet(),map_weight,100,0,1);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepCSV",bjets.at(0).DeepCSV(),map_weight,100,0,1);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepJet_b",bjets.at(0).DeepJet_b(),map_weight,100,0,1);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepJet_bb",bjets.at(0).DeepJet_bb(),map_weight,100,0,1);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepJet_lepb",bjets.at(0).DeepJet_lepb(),map_weight,100,0,1);
+    FillHist(p.prefix+p.hprefix+"bjet_DeepJet_bonlyratio",(bjets.at(0).DeepJet_b()+bjets.at(0).DeepJet_lepb())/bjets.at(0).DeepJet(),map_weight,100,0,1);
 
     FillHist(p.prefix+p.hprefix+"yZ",(*l0+*l1).Rapidity(),map_weight,60,-3,3);
     FillHist(p.prefix+p.hprefix+"yb",bjets.at(0).Rapidity(),map_weight,60,-3,3);
@@ -697,9 +627,9 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
   double dimass=dilepton.M();
   double dipt=dilepton.Pt();
   if(bjet*bjet==0){
-    if(direction==0) direction=dilepton.Pz()>0?1:-1;
+    if(direction==0) direction=(dilepton.Pz()>0?1:-1);
   }else{
-    if(direction==0) direction=(0.75*dilepton.Rapidity()-bjet.Rapidity())>0?1:-1;
+    if(direction==0) direction=((0.75*dilepton.Rapidity()-bjet.Rapidity())>0?1:-1);
     if(bjet_charge>0) direction *= -1.;
   }
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));

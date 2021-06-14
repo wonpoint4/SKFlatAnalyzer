@@ -16,6 +16,11 @@ public:
   inline int hadronFlavour() const { return j_hadronFlavour; }
   inline int partonPdgId() const { return j_partonPdgId; }
   inline double PileupJetId() const { return j_PileupJetId; }
+  inline double DeepJet() const { return j_DeepFlavour_b+j_DeepFlavour_bb+j_DeepFlavour_lepb; }
+  inline double DeepCSV() const { return j_DeepCSV; }
+  inline double DeepJet_b() const { return j_DeepFlavour_b; }
+  inline double DeepJet_bb() const { return j_DeepFlavour_bb; }
+  inline double DeepJet_lepb() const { return j_DeepFlavour_lepb; }
   void SetTaggerResults(std::vector<double> ds);
   void SetEnergyFractions(double cH, double nH, double nEM, double cEM, double muE);
   void SetMultiplicities(double cM, double nM);

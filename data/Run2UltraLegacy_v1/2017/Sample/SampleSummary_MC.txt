@@ -59,8 +59,8 @@ SingleTop_tch_antitop_Incl	ST_t-channel_antitop_5f_TuneCP5_PSweights_13TeV-powhe
 SingleTop_tch_top_Incl	ST_t-channel_top_5f_TuneCP5_13TeV-powheg-pythia8	136.02	11709100	11641768
 TG	TGJets_TuneCP5_13TeV_amcatnlo_madspin_pythia8	2.967	1909000	372122
 TTG	TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8	3.795	7349100	2854142
-TTLJ_powheg	TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8	365.34	43732445	43379133
-TTLL_powheg	TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8	88.29	66259900	65725998.0
+TTLJ_powheg     TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8   365.34  355332000       355332000
+TTLL_powheg     TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8  88.29   106724000        106724000
 VBF_HToZZTo4L	VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8	0.001034	1000000	998750
 VHToNonbb	VHToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8	0.9561	918508	451414
 WGToLNuG_01J	WGToLNuG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8	489	25918966	15589532
