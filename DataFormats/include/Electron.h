@@ -137,9 +137,10 @@ public:
   bool Pass_CutBasedVeto() const;
   void SetRho(double r);
   inline double Rho() const { return j_Rho; }
-
   void SetIsGsfCtfScPixChargeConsistent(bool b);
   inline bool IsGsfCtfScPixChargeConsistent() const { return j_isGsfCtfScPixChargeConsistent; }
+  inline void SetR9(double r9) { j_r9=r9; }
+  inline double R9() const { return j_r9; }
     
 private:
 
@@ -161,6 +162,7 @@ private:
 
   double j_Rho;
   int j_isGsfCtfScPixChargeConsistent;
+  double j_r9;
 
   ClassDef(Electron,1)
 

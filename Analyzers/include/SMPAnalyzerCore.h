@@ -5,8 +5,9 @@
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
 #include "RoccoR.h"
-#include "RocelecoR.h"
+#include "Aepcor.h"
 #include "TH4D.h"
+#include "EfficiencyTool.h"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 
@@ -15,6 +16,7 @@ public:
     NominalWeight=1<<0,
     SystematicWeight=1<<1,
     PDFWeight=1<<2,
+    EfficiencyWeight=1<<3,
   };
 
   class Parameter{
@@ -38,7 +40,7 @@ public:
     int weightbit=NominalWeight;
     TString option;
     struct Key{
-      TString electronIDSF,muonIDSF,muonISOSF;
+      TString electronRECOSF,electronIDSF,muonIDSF,muonISOSF;
       vector<TString> triggerSF;
     };
     struct Weight{
@@ -47,10 +49,16 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
-      double RECOSF=1,RECOSF_up=1,RECOSF_down=1;
-      double IDSF=1,IDSF_up=1,IDSF_down=1;
-      double ISOSF=1,ISOSF_up=1,ISOSF_down=1;
+      double electronRECOSF=1;
+      vector<vector<double>> electronRECOSF_sys;
+      double electronIDSF=1;
+      vector<vector<double>> electronIDSF_sys;
+      double muonIDSF=1;
+      vector<vector<double>> muonIDSF_sys;
+      double muonISOSF=1;
+      vector<vector<double>> muonISOSF_sys;
       double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
+      vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
     };
     struct Cut{
@@ -98,16 +106,16 @@ public:
   void FillHist(TString histname,
                 Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
                 Double_t weight,
-                Int_t n_binx, Double_t *xbins,
-                Int_t n_biny, Double_t *ybins,
-                Int_t n_binz, Double_t *zbins,
-                Int_t n_binu, Double_t *ubins);
+                Int_t n_binx, const Double_t *xbins,
+                Int_t n_biny, const Double_t *ybins,
+                Int_t n_binz, const Double_t *zbins,
+                Int_t n_binu, const Double_t *ubins);
   void FillHist(TString histname,
                 Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
                 Double_t weight,
-                Int_t n_binx, Double_t *xbins,
-                Int_t n_biny, Double_t *ybins,
-                Int_t n_binz, Double_t *zbins,
+                Int_t n_binx, const Double_t *xbins,
+                Int_t n_biny, const Double_t *ybins,
+                Int_t n_binz, const Double_t *zbins,
                 Int_t n_binu, Double_t u_min, Double_t u_max);
   virtual void WriteHist();
 
@@ -163,7 +171,8 @@ public:
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
   static double GetPtThreshold(TString path);
   static bool IsExists(TString filepath);
-  void SetupZptWeight();
+  static vector<TString> Split(TString s,TString del);
+
   void SetupZ0Weight();
   void SetupRoccoR();
   double GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP wp, int JetFlavor, double JetPt, double JetEta);
@@ -174,7 +183,6 @@ public:
   double GetPUJetWeight(const vector<Jet>& jets, int sys);
   bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
   double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1.);
-  double GetZptWeight(double zpt,double zrap,Lepton::Flavour flavour);
   double GetZ0Weight(double z0);
 
   void SetupCFRate();
@@ -185,17 +193,18 @@ public:
   TH2* hcfrate_mc=NULL;
   TH2* hcfsf=NULL;
 
-  double Lepton_SF(TString histkey,const Lepton* lep,int sys);
-  double LeptonTrigger_SF(TString triggerSF_key,const vector<Lepton*>& leps,int sys);
-  double LeptonTriggerOR_SF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int sys);
-  double DileptonTrigger_SF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int sys);
+  EfficiencyTool* fEff=NULL;
+  void SetupEfficiency();
+  void DeleteEfficiency();
+  double GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem);
+  double GetLeptonTriggerORSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem);
+  double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int set,int mem);
+
   void PrintGens(const vector<Gen>& gens);
   void PrintLHEs(vector<LHE>& lhes);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
-  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1);
-  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
   void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
@@ -207,12 +216,15 @@ public:
     return a;
   }
   
-  static const int zptcor_nptbin=46;
-  const double zptcor_ptbin[zptcor_nptbin+1]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,24,26,28,30,32,34,36,38,40,44,48,52,56,60,70,80,90,100,120,140,160,180,200,250,400};
-  static const int zptcor_nybin=6;
-  const double zptcor_ybin[zptcor_nybin+1]={0,0.4,0.8,1.2,1.6,2.0,2.4};
-
-  map<TString,TH2D*> map_hist_zpt, map_hist_mcjet;
+  // ZptWeight
+  void SetupZptWeight();
+  double GetZptWeight(double mass,double rapidity,double pt,TString opt="GYM");
+  void DeleteZptWeight();
+  TF1* fZptWeightG=NULL;
+  vector<TF1*> fZptWeightY;
+  TAxis* fZptWeightYaxis=NULL;
+  vector<TF1*> fZptWeightM;
+  TAxis* fZptWeightMaxis=NULL;
 
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
@@ -223,14 +235,14 @@ public:
   double btagweight=1;
 
   vector<LHE> lhes;
-  LHE lhe_l0,lhe_l1,lhe_j0;
+  LHE lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0;
   vector<Gen> gens;
   Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_j0,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
   vector<Muon> softmus;
   vector<Electron> softels;
 
   RoccoR* roc=NULL;
-  RocelecoR* rocele=NULL;
+  Aepcor* rocele=NULL;
 
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);

@@ -255,7 +255,7 @@ for InputSample in InputSamples:
   tmpfilepath = SAMPLE_DATA_DIR+'/For'+SampleHOSTNAME+'/'+SkimString+InputSample+'.txt'
   if IsDATA:
     tmpfilepath = SAMPLE_DATA_DIR+'/For'+SampleHOSTNAME+'/'+SkimString+InputSample+'_'+DataPeriod+'.txt'
-  lines_files = open(tmpfilepath).readlines()
+  lines_files = os.popen("sed 's/#.*//' "+tmpfilepath+"|grep '.root'").readlines()
   os.system('cp '+tmpfilepath+' '+base_rundir+'/input_filelist.txt')
 
   NTotalFiles = len(lines_files)
@@ -872,6 +872,11 @@ try:
 
             else:
               if IsKISTI or IsTAMSA:
+                while True:
+                  nhadd=int(os.popen("pgrep -x hadd -u $USER |wc -l").read().strip())
+                  if nhadd<4: break
+                  os.system('echo "Too many hadd currently (nhadd='+str(nhadd)+'). Sleep 60s" >> JobStatus.log')
+                  time.sleep(60)                  
                 os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
                 os.system('rm output/*.root')
                 #os.system('condor_run -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root output/*.root 2>&1 >> JobStatus.log"')

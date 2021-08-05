@@ -15,7 +15,9 @@
 #pragma link C++ class GeneralizedEndpoint+;
 #pragma link C++ class GenFinderForDY+;
 #pragma link C++ class RoccoR+;
-#pragma link C++ class RocelecoR+;
+#pragma link C++ class Aepcor;
+#pragma link C++ class Efficiency;
+#pragma link C++ class EfficiencyTool;
 #pragma link C++ class TSCorrection+;
 #pragma link C++ class TKinFitterDriver+;
 
