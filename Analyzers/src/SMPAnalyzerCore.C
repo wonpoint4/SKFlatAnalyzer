@@ -1344,3 +1344,19 @@ vector<TString> SMPAnalyzerCore::Split(TString s,TString del){
   array->Delete();
   return out;
 }
+double SMPAnalyzerCore::GetPFMET_T1Smear() const {
+  if(isnan(pfMET_Type1_pt)) return pfMET_Type1_pt;
+  if(IsDATA) return pfMET_Type1_pt;
+  TLorentzVector out(pfMET_Type1_pt*cos(pfMET_Type1_phi),pfMET_Type1_pt*sin(pfMET_Type1_phi),0,0);
+  for(unsigned int i=0;i<jet_pt->size();i++){
+    if(jet_neutralEmEnergyFraction->at(i)+jet_chargedEmEnergyFraction->at(i)>0.9) continue;
+    if(fabs(jet_eta->at(i))>9.9) continue;
+    TLorentzVector jet;
+    jet.SetPtEtaPhiM(jet_pt->at(i), jet_eta->at(i), jet_phi->at(i), jet_m->at(i));
+    jet*=(1-jet_muonEnergyFraction->at(i));
+    if(jet.Pt()<15) continue;
+    TLorentzVector jet_smear=jet*jet_smearedRes->at(i);
+    out-=jet_smear-jet;
+  }
+  return out.Pt();
+}

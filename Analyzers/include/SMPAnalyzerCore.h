@@ -233,6 +233,8 @@ public:
   std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
+  double GetPFMET_T1Smear() const;
+
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();
 
