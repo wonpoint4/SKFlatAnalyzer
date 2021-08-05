@@ -61,6 +61,13 @@ public:
   inline bool isPOGTight() const {return PassSelector(CutBasedIdTight);}
   inline bool isPOGMedium() const {return PassSelector(CutBasedIdMedium);}
   inline bool isPOGLoose() const {return PassSelector(CutBasedIdLoose);}
+  inline bool isPOGSoft() const {return PassSelector(SoftCutBasedId);}
+  inline bool isPOGLooseMVA() const {return PassSelector(MvaLoose);}
+  inline bool isPOGSoftMVA() const {return PassSelector(SoftMvaId);}
+  inline bool isGlobalMuon() const {return IsType(GlobalMuon);}
+  inline bool isTrackerMuon() const {return IsType(TrackerMuon);}
+  inline bool isStandAloneMuon() const {return IsType(StandAloneMuon);}
+  inline bool isPFMuon() const {return IsType(PFMuon);}
 
   //==== TODO isOLDPOGHighPt returns values from bit, which is before the update
   //==== In UltraLegacy, this should be removed

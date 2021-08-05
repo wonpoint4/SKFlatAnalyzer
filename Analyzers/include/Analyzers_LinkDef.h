@@ -23,5 +23,6 @@
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
 //#pragma link C++ class GetZ0Weight+;
+#pragma link C++ class ExampleRun_kinFitter+;
 
 #endif

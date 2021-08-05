@@ -175,6 +175,14 @@ public:
 
   void SetupZ0Weight();
   void SetupRoccoR();
+  double GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP wp, int JetFlavor, double JetPt, double JetEta);
+  void SetupMCJetTagEff();
+  double GetBTaggingReweight_1a(const vector<Jet>& jets, JetTagging::Parameters jtp, string Syst="central");
+  double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+  void SetupPUJetWeight(TString ID="Medium");
+  double GetPUJetWeight(const vector<Jet>& jets, int sys);
+  bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
+  double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1.);
   double GetZ0Weight(double z0);
 
   void SetupCFRate();
@@ -193,10 +201,11 @@ public:
   double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int set,int mem);
 
   void PrintGens(const vector<Gen>& gens);
+  void PrintLHEs(vector<LHE>& lhes);
   double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -207,7 +216,6 @@ public:
     return a;
   }
   
-
   // ZptWeight
   void SetupZptWeight();
   double GetZptWeight(double mass,double rapidity,double pt,TString opt="GYM");
@@ -219,13 +227,19 @@ public:
   TAxis* fZptWeightMaxis=NULL;
 
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
+  TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
   bool IsDYSample=false;
   Event _event;
   double reductionweight=1;
+  double pujetweight=1;
+  double btagweight=1;
+
   vector<LHE> lhes;
   LHE lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0;
   vector<Gen> gens;
-  Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
+  Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_j0,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
+  vector<Muon> softmus;
+  vector<Electron> softels;
 
   RoccoR* roc=NULL;
   Aepcor* rocele=NULL;

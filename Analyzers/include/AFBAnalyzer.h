@@ -20,6 +20,7 @@ public:
   double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
   double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
   double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
+  double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
   void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHistsToy(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
@@ -44,7 +45,15 @@ public:
   double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
-  
+
+  std::vector<Muon> Muons;
+  std::vector<Electron> Electrons;
+  std::vector<Jet> jets, realjets, bjets;
+  int n_bjet=0;
+  int n_powerbjet=0;
+  double bjet_charge=-5.5;
+  TLorentzVector bjet;
+
   static const int afb_mbinnum=42;
   const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
   static const int afb_ybinnum=12;
