@@ -804,7 +804,6 @@ double MCCorrection::GetPileUpWeight(int N_pileup, int syst){
   int this_bin = N_pileup+1;
   if(this_bin>this_hist->GetNbinsX()) this_bin=this_hist->GetNbinsX();
 
-  //FIXME 
   double pu_weight=this_hist->GetBinContent(this_bin);
   if(pu_weight>5) pu_weight=5;
   return pu_weight;
