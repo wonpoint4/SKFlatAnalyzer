@@ -369,6 +369,7 @@ public :
    vector<double>  *PDFWeights_Scale;
    vector<double>  *PDFWeights_Error;
    vector<double>  *PDFWeights_AlphaS;
+   vector<double>  *PDFWeights_sthw2;
    vector<double>  *gen_phi;
    vector<double>  *gen_eta;
    vector<double>  *gen_pt;
@@ -730,6 +731,7 @@ public :
    TBranch        *b_PDFWeights_Scale;   //!
    TBranch        *b_PDFWeights_Error;   //!
    TBranch        *b_PDFWeights_AlphaS;   //!
+   TBranch        *b_PDFWeights_sthw2;   //!
    TBranch        *b_gen_phi;   //!
    TBranch        *b_gen_eta;   //!
    TBranch        *b_gen_pt;   //!

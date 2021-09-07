@@ -917,10 +917,10 @@ void MCCorrection::SetupJetTagging(){
       TString tstring_btagline = btagline;
       if(tstring_btagline.Contains("#")) continue;
 
-      int tmp_Year, tmp_Run_Start, tmp_Run_End;
-      string tmp_tagger, tmp_pd, tmp_filename;
+      int tmp_Run_Start, tmp_Run_End;
+      string tmp_Era, tmp_tagger, tmp_pd, tmp_filename;
 
-      is >> tmp_Year; // YEAR
+      is >> tmp_Era; // Era
       is >> tmp_tagger; // TAGGER
       is >> tmp_pd; // Period_dep
       is >> tmp_Run_Start; // Run_start

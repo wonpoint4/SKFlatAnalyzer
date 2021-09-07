@@ -37,7 +37,7 @@ public:
   void SetupCosThetaWeight();
   void DeleteCosThetaWeight();
   double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
-  
+
   TString hardprefix;
   vector<TRandom3*> toy_random;
   vector<double> toy_weight;
@@ -74,12 +74,10 @@ public:
   const double fine_mbin[fine_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,600,1000,2000,5000};
   static const int fine_ptbinnum=30;
   const double fine_ptbin[fine_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,500,1000};
-  
+
   static const int lptbinnum=56;
   const double lptbin[lptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,64,68,72,76,80,85,90,95,100,110,120,130,140,150,160,180,200,250,300,350,400,500,600,700,800,900,1000};
 };
-
-
 
 #endif
 

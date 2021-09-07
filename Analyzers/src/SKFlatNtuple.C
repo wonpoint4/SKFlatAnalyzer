@@ -372,6 +372,7 @@ void SKFlatNtuple::Init()
    PDFWeights_Scale = 0;
    PDFWeights_Error = 0;
    PDFWeights_AlphaS = 0;
+   PDFWeights_sthw2 = 0;
    gen_phi = 0;
    gen_eta = 0;
    gen_pt = 0;
@@ -717,6 +718,7 @@ void SKFlatNtuple::Init()
    fChain->SetBranchAddress("PDFWeights_Scale", &PDFWeights_Scale, &b_PDFWeights_Scale);
    fChain->SetBranchAddress("PDFWeights_Error", &PDFWeights_Error, &b_PDFWeights_Error);
    fChain->SetBranchAddress("PDFWeights_AlphaS", &PDFWeights_AlphaS, &b_PDFWeights_AlphaS);
+   if(fChain->FindBranch("PDFWeights_sthw2")) fChain->SetBranchAddress("PDFWeights_sthw2", &PDFWeights_sthw2, &b_PDFWeights_sthw2);
    fChain->SetBranchAddress("gen_phi", &gen_phi, &b_gen_phi);
    fChain->SetBranchAddress("gen_eta", &gen_eta, &b_gen_eta);
    fChain->SetBranchAddress("gen_pt", &gen_pt, &b_gen_pt);

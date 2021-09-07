@@ -98,45 +98,45 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
     for(const auto& electron:p.electrons){
       p.w.electronRECOSF*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,0,0);
       if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.electronRECOSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.electronRECOSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,s,m);
-	  }
-	}
+        int nset=p.w.electronRECOSF_sys.size();
+        for(int s=0;s<nset;s++){
+          int nmem=p.w.electronRECOSF_sys[s].size();
+          for(int m=0;m<nmem;m++){
+            p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,s,m);
+          }
+        }
       }
       p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,0,0);
       if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.electronIDSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.electronIDSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
-	  }
-	}
+        int nset=p.w.electronIDSF_sys.size();
+        for(int s=0;s<nset;s++){
+          int nmem=p.w.electronIDSF_sys[s].size();
+          for(int m=0;m<nmem;m++){
+            p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
+          }
+        }
       }
     }
     for(const auto& muon:p.muons){
       p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,0,0);
       if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonIDSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonIDSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,s,m);
-	  }
-	}
+        int nset=p.w.muonIDSF_sys.size();
+        for(int s=0;s<nset;s++){
+          int nmem=p.w.muonIDSF_sys[s].size();
+          for(int m=0;m<nmem;m++){
+            p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,s,m);
+          }
+        }
       }
       p.w.muonISOSF*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,0,0);
       if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonISOSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonISOSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,s,m);
-	  }
-	}
+        int nset=p.w.muonISOSF_sys.size();
+        for(int s=0;s<nset;s++){
+          int nmem=p.w.muonISOSF_sys[s].size();
+          for(int m=0;m<nmem;m++){
+            p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,s,m);
+          }
+        }
       }
     }
   }
@@ -149,7 +149,7 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
     vector<Lepton*> triggerables;
     if(p.k.triggerSF.size()){
       if(p.weightbit&EfficiencyWeight){
-	p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
+        p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
       }
       if(p.k.triggerSF.at(0).Contains("Mu")) triggerables=MakeLeptonPointerVector(p.muons);
       else if(p.k.triggerSF.at(0).Contains("Ele")) triggerables=MakeLeptonPointerVector(p.electrons);
@@ -157,37 +157,37 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
     if(p.k.triggerSF.size()==1){
       p.w.triggerSF*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,0,0);
       if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.triggerSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.triggerSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.triggerSF_sys[s][m]*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,s,m);
-	  }
-	}
+        int nset=p.w.triggerSF_sys.size();
+        for(int s=0;s<nset;s++){
+          int nmem=p.w.triggerSF_sys[s].size();
+          for(int m=0;m<nmem;m++){
+            p.w.triggerSF_sys[s][m]*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,s,m);
+          }
+        }
       }
     }else if(p.k.triggerSF.size()==2){
       if(GetPtThreshold(p.k.triggerSF[0])<GetPtThreshold(p.k.triggerSF[1])){
-	p.w.triggerSF*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
-	if(p.weightbit&EfficiencyWeight){
-	  int nset=p.w.triggerSF_sys.size();
-	  for(int s=0;s<nset;s++){
-	    int nmem=p.w.triggerSF_sys[s].size();
-	    for(int m=0;m<nmem;m++){
-	      p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
-	    }
-	  }
-	}
+        p.w.triggerSF*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
+        if(p.weightbit&EfficiencyWeight){
+          int nset=p.w.triggerSF_sys.size();
+          for(int s=0;s<nset;s++){
+            int nmem=p.w.triggerSF_sys[s].size();
+            for(int m=0;m<nmem;m++){
+              p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
+            }
+          }
+        }
       }else{
-	p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
-	if(p.weightbit&EfficiencyWeight){
-	  int nset=p.w.triggerSF_sys.size();
-	  for(int s=0;s<nset;s++){
-	    int nmem=p.w.triggerSF_sys[s].size();
-	    for(int m=0;m<nmem;m++){
-	      p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
-	    }
-	  }
-	}
+        p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
+        if(p.weightbit&EfficiencyWeight){
+          int nset=p.w.triggerSF_sys.size();
+          for(int s=0;s<nset;s++){
+            int nmem=p.w.triggerSF_sys[s].size();
+            for(int m=0;m<nmem;m++){
+              p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
+            }
+          }
+        }
       }
     }
   }
@@ -196,8 +196,8 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
   double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight;
 
   if(!PassMETFilter()) return false;
-  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"METfilter",weight);  
-  
+  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"METfilter",weight);
+
   if(!p.lepton0||!p.lepton1) return false;
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Dilepton",weight);
 
@@ -475,10 +475,10 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
     for(int j=0;j<nlep;j++){
       if(i==j){
 	data_oneleg1_noleg2[j]*=data_eff_leg1;
-	sim_oneleg1_noleg2[j]*=sim_eff_leg1;
+        sim_oneleg1_noleg2[j]*=sim_eff_leg1;
       }else{
-	data_oneleg1_noleg2[j]*=(1-data_eff_leg2);
-	sim_oneleg1_noleg2[j]*=(1-sim_eff_leg2);
+        data_oneleg1_noleg2[j]*=(1-data_eff_leg2);
+        sim_oneleg1_noleg2[j]*=(1-sim_eff_leg2);
       }
     }
   }
@@ -566,11 +566,11 @@ double SMPAnalyzerCore::GetZptWeight(double mass,double rapidity,double pt,TStri
     }else{
       int biny=fZptWeightYaxis->FindBin(y);
       if(y>=fZptWeightYaxis->GetBinCenter(biny)){
-	biny1=biny;
-	biny2=biny+1;
+        biny1=biny;
+        biny2=biny+1;
       }else{
-	biny1=biny-1;
-	biny2=biny;
+        biny1=biny-1;
+        biny2=biny;
       }
     }
     double y1=fZptWeightYaxis->GetBinCenter(biny1);
@@ -591,11 +591,11 @@ double SMPAnalyzerCore::GetZptWeight(double mass,double rapidity,double pt,TStri
     }else{
       int binm=fZptWeightMaxis->FindBin(m);
       if(m>=fZptWeightMaxis->GetBinCenter(binm)){
-	binm1=binm;
-	binm2=binm+1;
+        binm1=binm;
+        binm2=binm+1;
       }else{
-	binm1=binm-1;
-	binm2=binm;
+        binm1=binm-1;
+        binm2=binm;
       }
     }
     double m1=fZptWeightMaxis->GetBinCenter(binm1);
@@ -751,8 +751,8 @@ double SMPAnalyzerCore::GetBinContentUser(TH3* hist,double valx,double valy,doub
 }
 
 // This function used for DY+b analysis (in especially, qG or Gq collisions)
-void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& l0,LHE& l1,LHE& j0){
-   if(!IsDYSample){
+void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0){
+  if(!IsDYSample){
     cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
   }
@@ -829,8 +829,8 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     int genpid=gens.at(i).PID();
     if(gens.at(i).isHardProcess()){
       if(abs(genpid)<7||genpid==21){
-	if(parton0.IsEmpty()) parton0=gens[i];
-	else if(parton1.IsEmpty()) parton1=gens[i];
+        if(parton0.IsEmpty()) parton0=gens[i];
+        else if(parton1.IsEmpty()) parton1=gens[i];
       }
     }
     if(gens.at(i).Status()==1){
@@ -844,13 +844,13 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     for(int j=i+1;j<nlepton;j++){
       if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
       if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){
-	if(leptons[i]->Pt()>leptons[j]->Pt()){
-	  l0=*leptons[i];
-	  l1=*leptons[j];
-	}else{
-	  l0=*leptons[j];
-	  l1=*leptons[i];
-	}
+        if(leptons[i]->Pt()>leptons[j]->Pt()){
+          l0=*leptons[i];
+          l1=*leptons[j];
+        }else{
+          l0=*leptons[j];
+          l1=*leptons[i];
+        }
       }
     }
   }
@@ -863,7 +863,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     cout << "l0 index, l1 index, l0l1mass : "<<l0.Index()<<", "<<l1.Index()<<", "<<(l0+l1).M()<<endl;
     exit(EXIT_FAILURE);
   }
-  
+
   bool IsqG = false;
   if(parton0.PID() != parton1.PID() && max(parton0.PID(),parton1.PID()) == 21) IsqG = true;
 
@@ -878,17 +878,17 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
   if(mode>=3){
     if(nlepton>=4){
       for(int i=0;i<nlepton;i++){
-	if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
-	for(int j=i+1;j<nlepton;j++){
-	  if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
-	  if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
-	  vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
-	  vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
-	  if(history_i.at(1)==history_j.at(1)){
-	    photons.push_back(leptons[i]);
-	    photons.push_back(leptons[j]);
-	  }
-	}
+        if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+        for(int j=i+1;j<nlepton;j++){
+          if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+          if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+          vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+          vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+          if(history_i.at(1)==history_j.at(1)){
+            photons.push_back(leptons[i]);
+            photons.push_back(leptons[j]);
+          }
+        }
       }
     }	
     for(const auto& photon:photons){
@@ -896,8 +896,8 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
       else if(gens[history.at(1)].PID()==l1.PID()) l1+=*photon;
       else if(gens[history.at(1)].PID()==23){ // for minnlo+photos
-	if(photon->DeltaR(l0)<photon->DeltaR(l1)) l0+=*photon;
-	else l1+=*photon;
+        if(photon->DeltaR(l0)<photon->DeltaR(l1)) l0+=*photon;
+        else l1+=*photon;
       }
     }    
   }else if(mode>=1){
@@ -955,21 +955,21 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       if(!( el.Pt()>ptmin ))	continue;
       if(!( fabs(el.scEta())<fetamax )) continue;
       if( fabs(el.scEta()) <= 1.479 ){
-	if(! (el.Full5x5_sigmaIetaIeta() < 0.0106) ) continue;
-	if(! (fabs(el.dEtaSeed()) < 0.0032) ) continue;
-	if(! (fabs(el.dPhiIn()) < 0.0547) ) continue;
-	if( (el.HoverE() < 0.046 + 1.16/el.scE() + 0.0324*el.Rho()/el.scE()) && (el.RelIso() < 0.0478+0.506/el.UncorrPt()) ) continue;
-	if(! (fabs(el.InvEminusInvP()) < 0.184) ) continue;
-	if(! (el.NMissingHits() <= 1) ) continue;
-	if(! (el.PassConversionVeto()) ) continue;
+        if(! (el.Full5x5_sigmaIetaIeta() < 0.0106) ) continue;
+        if(! (fabs(el.dEtaSeed()) < 0.0032) ) continue;
+        if(! (fabs(el.dPhiIn()) < 0.0547) ) continue;
+        if( (el.HoverE() < 0.046 + 1.16/el.scE() + 0.0324*el.Rho()/el.scE()) && (el.RelIso() < 0.0478+0.506/el.UncorrPt()) ) continue;
+        if(! (fabs(el.InvEminusInvP()) < 0.184) ) continue;
+        if(! (el.NMissingHits() <= 1) ) continue;
+        if(! (el.PassConversionVeto()) ) continue;
       }else{
-	if(! (el.Full5x5_sigmaIetaIeta() < 0.0387) ) continue;
-	if(! (fabs(el.dEtaSeed()) < 0.00632) ) continue;
-	if(! (fabs(el.dPhiIn()) <  0.0394 ) ) continue;
-	if( (el.HoverE() < 0.0275 + 2.52/el.scE() + 0.183*el.Rho()/el.scE()) && (el.RelIso() < 0.0658+0.963/el.UncorrPt()) ) continue;
-	if(! (fabs(el.InvEminusInvP()) < 0.0721) ) continue;
-	if(! (el.NMissingHits() <= 1) ) continue;
-	if(! (el.PassConversionVeto()) ) continue;
+        if(! (el.Full5x5_sigmaIetaIeta() < 0.0387) ) continue;
+        if(! (fabs(el.dEtaSeed()) < 0.00632) ) continue;
+        if(! (fabs(el.dPhiIn()) <  0.0394 ) ) continue;
+        if( (el.HoverE() < 0.0275 + 2.52/el.scE() + 0.183*el.Rho()/el.scE()) && (el.RelIso() < 0.0658+0.963/el.UncorrPt()) ) continue;
+        if(! (fabs(el.InvEminusInvP()) < 0.0721) ) continue;
+        if(! (el.NMissingHits() <= 1) ) continue;
+        if(! (el.PassConversionVeto()) ) continue;
       }
       out.push_back(el);
     }
@@ -1035,18 +1035,18 @@ std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& mu
     double rcerr=0.;
     if(set>=0){
       if(IsDATA){
-	rc=roc->kScaleDT(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),set,member);
-	rcerr=roc->kScaleDTerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi());
+        rc=roc->kScaleDT(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),set,member);
+        rcerr=roc->kScaleDTerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi());
       }else{
-	Gen gen=GetGenMatchedLepton(muon,gens);
-	if(gen.IsEmpty()){
-	  double u=gRandom->Rndm();
-	  rc=roc->kSmearMC(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),muon.TrackerLayers(),u,set,member);
-	  rcerr=roc->kSmearMCerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),muon.TrackerLayers(),u);
-	}else{
-	  rc=roc->kSpreadMC(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),gen.Pt(),set,member);
-	  rcerr=roc->kSpreadMCerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),gen.Pt());
-	}
+        Gen gen=GetGenMatchedLepton(muon,gens);
+        if(gen.IsEmpty()){
+          double u=gRandom->Rndm();
+          rc=roc->kSmearMC(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),muon.TrackerLayers(),u,set,member);
+          rcerr=roc->kSmearMCerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),muon.TrackerLayers(),u);
+        }else{
+          rc=roc->kSpreadMC(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),gen.Pt(),set,member);
+          rcerr=roc->kSpreadMCerror(muon.Charge(),muon.MiniAODPt(),muon.Eta(),muon.Phi(),gen.Pt());
+        }
       }      
     }
     muon.SetPtEtaPhiM(muon.MiniAODPt()*(rc+sys*rcerr),muon.Eta(),muon.Phi(),muon.M());
@@ -1070,19 +1070,19 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
       if(el_eta>=2.4) el_eta=2.39;
       if(el_eta<=-2.4) el_eta=-2.39;
       if(fabs(el_eta)<2.4){
-	if(IsDATA){
-	  rc=rocele->kScaleDT(electron.UncorrPt(),el_eta,el_phi,electron.R9(),run,set,member);
-	  electron*=rc*electron.UncorrE()/electron.E();
-	}else{	
-	  Gen gen=SMPGetGenMatchedLepton(electron,gens,1);
-	  if(!gen.IsEmpty()&&gen.Pt()/electron.Pt()>0.5){
-	    rc=rocele->kSpreadMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,gen.Pt(),set,member);
-	  }else{
-	    rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
-	  }
-	  if(TMath::IsNaN(rc)) rc=1.;
-	  electron*=rc*electron.UncorrE()/electron.E();
-	}      
+        if(IsDATA){
+          rc=rocele->kScaleDT(electron.UncorrPt(),el_eta,el_phi,electron.R9(),run,set,member);
+          electron*=rc*electron.UncorrE()/electron.E();
+        }else{
+          Gen gen=SMPGetGenMatchedLepton(electron,gens,1);
+          if(!gen.IsEmpty()&&gen.Pt()/electron.Pt()>0.5){
+            rc=rocele->kSpreadMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,gen.Pt(),set,member);
+          }else{
+            rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
+          }
+          if(TMath::IsNaN(rc)) rc=1.;
+          electron*=rc*electron.UncorrE()/electron.E();
+        }
       }
     }else if(set==-1){ //no energe cor
       electron*=electron.UncorrE()/electron.E();
@@ -1095,7 +1095,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
   std::sort(out.begin(),out.end(),PtComparing);
   return out;
 }
-  
+
 void SMPAnalyzerCore::FillCutflow(TString histname,TString label,double weight){
   TH1D* hist=NULL;
   auto it=maphist_TH1D.find(histname);
@@ -1120,7 +1120,7 @@ void SMPAnalyzerCore::FillCutflow(TString histname,TString label,double weight){
   }
   hist->Fill(ibin-0.5,weight);
 }
-    
+
 TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
   int extent;
   int start=str.Index(reg,&extent);
@@ -1162,8 +1162,11 @@ double SMPAnalyzerCore::GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP
     exit(EXIT_FAILURE);
   }
 
-  TString hnum="Jet_"+GetEra()+"_"+JetTagging::TaggerToString(tagger)+"_"+JetTagging::WPToString(wp)+"_eff_"+jf+"_num";
-  TString hden="Jet_"+GetEra()+"_eff_"+jf+"_denom";
+  //FIXME
+  //TString hnum="Jet_"+GetEra()+"_"+JetTagging::TaggerToString(tagger)+"_"+JetTagging::WPToString(wp)+"_eff_"+jf+"_num";
+  //TString hden="Jet_"+GetEra()+"_eff_"+jf+"_denom";
+  TString hnum="Jet_2017_"+JetTagging::TaggerToString(tagger)+"_"+JetTagging::WPToString(wp)+"_eff_"+jf+"_num";
+  TString hden="Jet_2017_eff_"+jf+"_denom";
 
   num = GetBinContentUser(map_hist_mcjet[hnum], JetEta, JetPt, 0);
   den = GetBinContentUser(map_hist_mcjet[hden], JetEta, JetPt, 0);
@@ -1184,6 +1187,8 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a(const vector<Jet>& jets, JetTaggi
                                              jets.at(i).Eta(),
                                              jets.at(i).GetTaggerResult(jtp.j_Tagger),
                                              Syst );
+    if(this_MC_Eff == 0) this_MC_Eff += 0.0001;
+    else if(this_MC_Eff == 1) this_MC_Eff -= 0.0001;
     double this_DATA_Eff = this_MC_Eff*this_SF;
 
     bool isTagged = jets.at(i).GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP);
@@ -1198,7 +1203,6 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a(const vector<Jet>& jets, JetTaggi
   }
 
   return Prob_DATA/Prob_MC;
-
 }
 double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst){
 
@@ -1209,17 +1213,21 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
     double this_MC_EffT = SMPAnalyzerCore::GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
     double this_MC_EffL = SMPAnalyzerCore::GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
     double this_SFT = mcCorr->GetJetTaggingSF(jtpT,
-					      jets.at(i).hadronFlavour(),
-					      jets.at(i).Pt(),
-					      jets.at(i).Eta(),
-					      jets.at(i).GetTaggerResult(jtpT.j_Tagger),
-					      Syst );
+                                              jets.at(i).hadronFlavour(),
+                                              jets.at(i).Pt(),
+                                              jets.at(i).Eta(),
+                                              jets.at(i).GetTaggerResult(jtpT.j_Tagger),
+                                              Syst );
     double this_SFL = mcCorr->GetJetTaggingSF(jtpL,
-					      jets.at(i).hadronFlavour(),
-					      jets.at(i).Pt(),
-					      jets.at(i).Eta(),
-					      jets.at(i).GetTaggerResult(jtpL.j_Tagger),
-					      Syst );
+                                              jets.at(i).hadronFlavour(),
+                                              jets.at(i).Pt(),
+                                              jets.at(i).Eta(),
+                                              jets.at(i).GetTaggerResult(jtpL.j_Tagger),
+                                              Syst );
+    if(this_MC_EffT == 0) this_MC_EffT += 0.0001;
+    else if(this_MC_EffT == 1) this_MC_EffT -= 0.0001;
+    if(this_MC_EffL == 0) this_MC_EffL += 0.0001;
+    else if(this_MC_EffL == 1) this_MC_EffL -= 0.0001;
     double this_DATA_EffT = this_MC_EffT*this_SFT;
     double this_DATA_EffL = this_MC_EffL*this_SFL;
 
@@ -1230,6 +1238,7 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
       Prob_DATA *= this_DATA_EffT;
     }
     else if(isTaggedL){
+      if(this_MC_EffL == this_MC_EffT) this_MC_EffL += 0.001;
       Prob_MC *= this_MC_EffL - this_MC_EffT;
       Prob_DATA *= this_DATA_EffL - this_DATA_EffT;
     }
@@ -1251,10 +1260,15 @@ void SMPAnalyzerCore::SetupPUJetWeight(TString ID){
   TFile feff(datapath+"/"+GetEra()+"/ID/PUJet/TH2D_PUID_eff_"+GetEra()+".root");
   TFile fmistag(datapath+"/"+GetEra()+"/ID/PUJet/TH2D_PUID_mistag_"+GetEra()+".root");
 
-  heff_data=(TH2F*)feff.Get("h2_eff_data"+GetEra()+"_"+WP);
-  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+GetEra()+"_"+WP);
-  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+GetEra()+"_"+WP);
-  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+GetEra()+"_"+WP);
+  //FIXME
+  //heff_data=(TH2F*)feff.Get("h2_eff_data"+GetEra()+"_"+WP);
+  //heff_mc=(TH2F*)feff.Get("h2_eff_mc"+GetEra()+"_"+WP);
+  //hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+GetEra()+"_"+WP);
+  //hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+GetEra()+"_"+WP);
+  heff_data=(TH2F*)feff.Get("h2_eff_data"+GetEra()(0,4)+"_"+WP);
+  heff_mc=(TH2F*)feff.Get("h2_eff_mc"+GetEra()(0,4)+"_"+WP);
+  hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+GetEra()(0,4)+"_"+WP);
+  hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+GetEra()(0,4)+"_"+WP);
 
   heff_data->SetDirectory(0);
   heff_mc->SetDirectory(0);
@@ -1307,11 +1321,13 @@ double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, int sys){
       //if(isRealJet) cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") real Jet failing ID"<<endl;
       //else cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") PU Jet failing ID"<<endl;
     }
-    
+
     if(isPassID){
+      if(this_MC_eff == 0) this_MC_eff += 0.0001;
       Prob_DATA *= this_DATA_eff;
       Prob_MC *= this_MC_eff;
     }else{
+      if(this_MC_mistag == 1) this_MC_mistag -= 0.0001;
       Prob_DATA *= 1.-this_DATA_mistag;
       Prob_MC *= 1.-this_MC_mistag;
       //Prob_DATA *= 1.-this_DATA_eff;
@@ -1510,23 +1526,23 @@ void SMPAnalyzerCore::Parameter::SetLeptons(){
     char c=channel[ic];
     if(c=='e'||c=='l'){
       if(electrons.size()>ie){
-	leptons.push_back(&electrons.at(ie));
-	ie++;
+        leptons.push_back(&electrons.at(ie));
+        ie++;
       }else leptons.push_back(NULL);
     }else if(c=='m'||c=='u'){
       if(muons.size()>im){
-	leptons.push_back(&muons.at(im));
-	im++;
+        leptons.push_back(&muons.at(im));
+        im++;
       }else leptons.push_back(NULL);
     }else if(c=='E'){
       if(aelectrons.size()>iae){
-	leptons.push_back(&aelectrons.at(iae));
-	iae++;
+        leptons.push_back(&aelectrons.at(iae));
+        iae++;
       }else leptons.push_back(NULL);
     }else if(c=='M'){
       if(amuons.size()>iam){
-	leptons.push_back(&amuons.at(iam));
-	iam++;
+        leptons.push_back(&amuons.at(iam));
+        iam++;
       }else leptons.push_back(NULL);
     }
   }
@@ -1581,46 +1597,46 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
     if(IsDYSample){
       if(abs(lhe_l0.ID())==11||abs(lhe_l0.ID())==13){
-	      TLorentzVector genZ=(gen_l0+gen_l1);
-	      p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
+        TLorentzVector genZ=(gen_l0+gen_l1);
+        p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
 
-	      // This test yields nothing as expected!
-	      if(lhes[0].ID()!=gen_p0.PID()||lhes[1].ID()!=gen_p1.PID()) p.hprefix+="Weird1_";
-	      if(lhes[0].Pz()<0||lhes[1].Pz()>0) p.hprefix+="Weird2_";
+        // This test yields nothing as expected!
+        if(lhes[0].ID()!=gen_p0.PID()||lhes[1].ID()!=gen_p1.PID()) p.hprefix+="Weird1_";
+        if(lhes[0].Pz()<0||lhes[1].Pz()>0) p.hprefix+="Weird2_";
 
-      	// Only qG, Gq collisions
-	      if((abs(gen_p0.PID())<=5&&gen_p1.PID()==21) || (gen_p0.PID()==21&&abs(gen_p1.PID())<=5)){
-	        //if((abs(gen_p0.PID())<=5&&gen_p1.PID()==21)) p.hprefix+="qG_";
-	        //else p.hprefix+="Gq_";
+        // Only qG, Gq collisions
+	if((abs(lhe_p0.ID())<=5&&lhe_p1.ID()==21) || (lhe_p0.ID()==21&&abs(lhe_p1.ID())<=5)){
+        //if((abs(gen_p0.PID())<=5&&gen_p1.PID()==21)) p.hprefix+="qG_";
+        //else p.hprefix+="Gq_";
 
-	        if(gen_p0.PID()==5||gen_p1.PID()==5)  p.hprefix+="Dyb_";
-	        else if(gen_p0.PID()==-5||gen_p1.PID()==-5)  p.hprefix+="Dybbar_";
-	        else if(gen_p0.PID()==4||gen_p1.PID()==4)  p.hprefix+="Dyc_";
-	        else if(gen_p0.PID()==-4||gen_p1.PID()==-4){
-	          p.hprefix+="Dycbar_";
-	          if(gen_j0.PID()!=-4){
-	            cout<<"Dyc but gen_j0 isn't cbar, ID is "<<gen_j0.PID()<<endl;
-	            PrintGens(gens);
-	          }
-	          if(lhe_j0.ID()!=-4){
-	            cout<<"Dyc but lhe_j0 isn't cbar, ID is "<<lhe_j0.ID()<<endl;
-	            PrintLHEs(lhes);
+          if(lhe_p0.ID()==5||lhe_p1.ID()==5) p.hprefix+="Dyb_";
+          else if(lhe_p0.ID()==-5||lhe_p1.ID()==-5) p.hprefix+="Dybbar_";
+          else if(lhe_p0.ID()==4||lhe_p1.ID()==4) p.hprefix+="Dyc_";
+          else if(lhe_p0.ID()==-4||lhe_p1.ID()==-4){
+            p.hprefix+="Dycbar_";
+            if(gen_j0.PID()!=-4){
+              cout<<"Dyc but gen_j0 isn't cbar, ID is "<<gen_j0.PID()<<endl;
+              PrintGens(gens);
+            }
+            if(lhe_j0.ID()!=-4){
+              cout<<"Dyc but lhe_j0 isn't cbar, ID is "<<lhe_j0.ID()<<endl;
+              PrintLHEs(lhes);
             }
           }
-	        else if(abs(gen_p0.PID())<4||abs(gen_p1.PID())<4) p.hprefix+="Dyudsg_";
-	        else p.hprefix+="Weird_"; //this should be empty
-	      }
-	      //qq qqbar GG collsions
-	      else{
-	      /*
-              if(gen_j0.PID()==5 && lhe_j0.ID()==5) p.hprefix+="bBkg2_";
-              else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) p.hprefix+="bBkg3_";
-              else if(gen_j0.PID()==4 && lhe_j0.ID()==4) p.hprefix+="cBkg2_";
-              else if(gen_j0.PID()==-4 && lhe_j0.ID()==-4) p.hprefix+="cBkg3_";
-              else if(abs(lhe_j0.ID())==5) p.hprefix+="bBkg4_";
-              else if(abs(gen_j0.PID())==5) p.hprefix+="bBkg5_";
-              else if(abs(lhe_j0.ID())==4) p.hprefix+="cBkg4_";
-              else if(abs(gen_j0.PID())==4) p.hprefix+="cBkg5_";
+          else if(abs(lhe_p0.ID())<4||abs(lhe_p1.ID())<4) p.hprefix+="Dyudsg_";
+          else p.hprefix+="Weird_"; //this should be empty
+        }
+        //qq qqbar GG collsions
+        else{
+        /*
+          if(gen_j0.PID()==5 && lhe_j0.ID()==5) p.hprefix+="bBkg2_";
+          else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) p.hprefix+="bBkg3_";
+          else if(gen_j0.PID()==4 && lhe_j0.ID()==4) p.hprefix+="cBkg2_";
+          else if(gen_j0.PID()==-4 && lhe_j0.ID()==-4) p.hprefix+="cBkg3_";
+          else if(abs(lhe_j0.ID())==5) p.hprefix+="bBkg4_";
+          else if(abs(gen_j0.PID())==5) p.hprefix+="bBkg5_";
+          else if(abs(lhe_j0.ID())==4) p.hprefix+="cBkg4_";
+          else if(abs(gen_j0.PID())==4) p.hprefix+="cBkg5_";
       	*/
         }
       }else p.hprefix+="tau_";

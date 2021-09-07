@@ -147,11 +147,11 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     //==== Example of applying Muon scale factors
     for(unsigned int i=0; i<muons.size(); i++){
       Lepton *l = (Lepton *)(&muons.at(i));
-      double this_idsf  = Lepton_SF(param.Muon_ID_SF_Key, l, 0);
+      double this_idsf  = 1.; //FixMe : Lepton_SF(param.Muon_ID_SF_Key, l, 0);
       double this_isosf = 1.;
       weight *= this_idsf*this_isosf;
     }
-    double this_trigsf = LeptonTrigger_SF(param.Muon_Trigger_SF_Key, MakeLeptonPointerVector(muons), 0);
+    double this_trigsf = 1.; //FixMe : LeptonTrigger_SF(param.Muon_Trigger_SF_Key, MakeLeptonPointerVector(muons), 0);
     weight *= this_trigsf;
 
     JetTagging::Parameters jtp = JetTagging::Parameters(btagger, btagWP, JetTagging::incl, JetTagging::comb);

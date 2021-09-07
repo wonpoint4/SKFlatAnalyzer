@@ -123,47 +123,47 @@ public:
   void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max);
   void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
   void FillHist(TString histname,
-		double value_x, double value_y,
-		map<TString,double> weights,
-		int n_binx, double x_min, double x_max,
-		int n_biny, double y_min, double y_max);
+                double value_x, double value_y,
+                map<TString,double> weights,
+                int n_binx, double x_min, double x_max,
+                int n_biny, double y_min, double y_max);
   void FillHist(TString histname,
-		double value_x, double value_y,
-		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins);
+                double value_x, double value_y,
+                map<TString,double> weights,
+                int n_binx, double *xbins,
+                int n_biny, double *ybins);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z,
-		map<TString,double> weights,
-		int n_binx, double x_min, double x_max,
-		int n_biny, double y_min, double y_max,
-		int n_binz, double z_min, double z_max);
+                double value_x, double value_y, double value_z,
+                map<TString,double> weights,
+                int n_binx, double x_min, double x_max,
+                int n_biny, double y_min, double y_max,
+                int n_binz, double z_min, double z_max);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z,
-		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins);
+                double value_x, double value_y, double value_z,
+                map<TString,double> weights,
+                int n_binx, double *xbins,
+                int n_biny, double *ybins,
+                int n_binz, double *zbins);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z, double value_u,
-		map<TString,double> weights,
-		int n_binx, double x_min, double x_max,
-		int n_biny, double y_min, double y_max,
-		int n_binz, double z_min, double z_max,
+                double value_x, double value_y, double value_z, double value_u,
+                map<TString,double> weights,
+                int n_binx, double x_min, double x_max,
+                int n_biny, double y_min, double y_max,
+                int n_binz, double z_min, double z_max,
                 int n_binu, double u_min, double u_max);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z, double value_u,
-		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
+                double value_x, double value_y, double value_z, double value_u,
+                map<TString,double> weights,
+                int n_binx, double *xbins,
+                int n_biny, double *ybins,
+                int n_binz, double *zbins,
                 int n_binu, double *ubins);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z, double value_u,
-		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
+                double value_x, double value_y, double value_z, double value_u,
+                map<TString,double> weights,
+                int n_binx, double *xbins,
+                int n_biny, double *ybins,
+                int n_binz, double *zbins,
                 int n_binu, double u_min, double u_max);
   virtual void FillHists(Parameter& p);
 
@@ -215,7 +215,7 @@ public:
     for(auto& iter:a) iter.second*=b;
     return a;
   }
-  
+
   // ZptWeight
   void SetupZptWeight();
   double GetZptWeight(double mass,double rapidity,double pt,TString opt="GYM");
@@ -225,6 +225,8 @@ public:
   TAxis* fZptWeightYaxis=NULL;
   vector<TF1*> fZptWeightM;
   TAxis* fZptWeightMaxis=NULL;
+
+  map<TString,TH2D*> map_hist_mcjet;
 
   TF1 *hz0_data=NULL, *hz0_mc=NULL;
   TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
