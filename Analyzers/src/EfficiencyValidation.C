@@ -31,8 +31,8 @@ void EfficiencyValidation::executeEvent(){
     if(!IsDATA||DataStream.Contains("DoubleEG")){
       Parameter p=MakeParameter("ee");
       p.suffix="_noL1";
-      p.k.triggerSF={"Ele23Leg1_MediumID_Q_v3_2","Ele12Leg2_MediumID_Q"};
-      //executeEventWithParameter(p);
+      p.k.triggerSF={"Ele23Leg1_MediumID_v3_2","Ele12Leg2_MediumID"};
+      executeEventWithParameter(p);
     }
   }else if(GetEra()=="2018"){
     if(!IsDATA||DataStream.Contains("DoubleMuon")){
@@ -67,7 +67,7 @@ void EfficiencyValidation::executeEvent(){
       p.c.lepton0pt=35;
       //executeEventWithParameter(p);
     }
-  }    
+  }
 }
 SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
@@ -84,36 +84,36 @@ void EfficiencyValidation::FillHists(Parameter& p){
     p.weightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     
     p.weightmap["_noelectronRECOSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=0;i<p.w.electronRECOSF_sys.size();i++){
-      for(int j=0;j<p.w.electronRECOSF_sys[i].size();j++){
+    for(int i=0,ni=p.w.electronRECOSF_sys.size();i<ni;i++){
+      for(int j=0,nj=p.w.electronRECOSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_electronRECOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF_sys[i][j]*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
       }
     }	
     
     p.weightmap["_noelectronIDSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=0;i<p.w.electronIDSF_sys.size();i++){
-      for(int j=0;j<p.w.electronIDSF_sys[i].size();j++){
+    for(int i=0,ni=p.w.electronIDSF_sys.size();i<ni;i++){
+      for(int j=0,nj=p.w.electronIDSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_electronIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF_sys[i][j]*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
       }
     }	
 
     p.weightmap["_nomuonIDSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=0;i<p.w.muonIDSF_sys.size();i++){
-      for(int j=0;j<p.w.muonIDSF_sys[i].size();j++){
+    for(int i=0,ni=p.w.muonIDSF_sys.size();i<ni;i++){
+      for(int j=0,nj=p.w.muonIDSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_muonIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF_sys[i][j]*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
       }
     }	
     
     p.weightmap["_noISOSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=0;i<p.w.muonISOSF_sys.size();i++){
-      for(int j=0;j<p.w.muonISOSF_sys[i].size();j++){
+    for(int i=0,ni=p.w.muonISOSF_sys.size();i<ni;i++){
+      for(int j=0,nj=p.w.muonISOSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_ISOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF_sys[i][j]*p.w.triggerSF*p.w.CFSF;
       }
     }	
     
     p.weightmap["_notriggerSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.CFSF;
-    for(int i=0;i<p.w.triggerSF_sys.size();i++){
-      for(int j=0;j<p.w.triggerSF_sys[i].size();j++){
+    for(int i=0,ni=p.w.triggerSF_sys.size();i<ni;i++){
+      for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_sys[i][j]*p.w.CFSF;
       }
     }	
@@ -152,6 +152,12 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
       
       FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,500,0,500);
       FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,120,-3,3);
+
+      if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::MUON){
+      }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
+	Electron* el=(Electron*)p.leptons.at(i);
+	FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
+      }
     }
 
     TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
@@ -186,7 +192,6 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
       }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
 	Electron* el=(Electron*)p.leptons.at(i);
 	FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
-	FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
       }
     }
       

@@ -1,6 +1,7 @@
 #ifndef AFBAnalyzer_h
 #define AFBAnalyzer_h
 
+#include "TKey.h"
 #include "SMPAnalyzerCore.h"
 
 class AFBAnalyzer : public SMPAnalyzerCore {

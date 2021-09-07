@@ -16,7 +16,6 @@
 #pragma link C++ class SkimTree_HNFake+;
 #pragma link C++ class MeasureJetTaggingEfficiency+;
 #pragma link C++ class SMPAnalyzerCore+;
-#pragma link C++ class SkimTree_Dilepton+;
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
 #pragma link C++ class EfficiencyValidation+;
