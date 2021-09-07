@@ -108,6 +108,7 @@ void SKFlatNtuple::Init()
     weight_norm_1invpb = xsec/sumW;
   }
 
+<<<<<<< HEAD
   // Set object pointer
   HLT_TriggerName = 0;
   jet_pt = 0;

@@ -1,4 +1,5 @@
-all: TH4D DataFormats AnalyzerTools GEScaleSyst Analyzers Archive
+all: TH4D DataFormats KinematicFitter AnalyzerTools GEScaleSyst Analyzers Archive
+#all: TH4D DataFormats AnalyzerTools GEScaleSyst Analyzers Archive
 
 TH4D::
 	(cd external/TH4D; make)
@@ -9,6 +10,11 @@ DataFormats::
 	(cd DataFormats; make)
 	(mvexist.sh DataFormats/src/DataFormats_Dict_rdict.pcm lib/)
 	(mvexist.sh DataFormats/libDataFormats.rootmap lib/)
+
+KinematicFitter::
+	(cd external/KinematicFitter; make)
+	(mvexist.sh external/KinematicFitter/src/KinematicFitter_Dict_rdict.pcm lib/)
+	(mvexist.sh external/KinematicFitter/libKinematicFitter.rootmap lib/)
 
 AnalyzerTools::
 	(cd AnalyzerTools; make)
@@ -30,6 +36,7 @@ Archive::
 	(tar -zcf lib/DataFormats.tar.gz DataFormats)
 	(tar -zcf lib/AnalyzerTools.tar.gz AnalyzerTools)
 	(tar -zcf lib/GEScaleSyst.tar.gz external/GEScaleSyst/GEScaleSyst.*)
+	(tar -zcf lib/KinematicFitter.tar.gz external/KinematicFitter)
 	(tar -zcf lib/Analyzers.tar.gz Analyzers)
 
 clean::
@@ -37,6 +44,7 @@ clean::
 	(cd DataFormats; make clean)
 	(cd AnalyzerTools; make clean)
 	(cd external/GEScaleSyst; make clean)
+	(cd external/KinematicFitter; make clean)
 	(cd Analyzers; make clean)
 
 distclean::
@@ -44,6 +52,7 @@ distclean::
 	(cd DataFormats; make distclean)
 	(cd AnalyzerTools; make distclean)
 	(cd external/GEScaleSyst; make distclean)
+	(cd external/KinematicFitter; make distclean)
 	(cd Analyzers; make distclean)
 
 LibTarFile = tar/lib.tar.gz
