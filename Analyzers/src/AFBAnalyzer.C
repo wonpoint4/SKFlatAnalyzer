@@ -2,7 +2,6 @@
 
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
-  //SetupToy(100);
   SetupCosThetaWeight();
   IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS");
   
@@ -28,7 +27,6 @@ void AFBAnalyzer::initializeAnalyzer(){
   }
 }
 void AFBAnalyzer::executeEvent(){
-  //GetToyWeight();
   costhetaweight=1.;
   costhetaweight_up=1.;
   costhetaweight_down=1.;
@@ -233,37 +231,33 @@ void AFBAnalyzer::FillHists(Parameter& p){
   }
   
   ///////////////////////fill hists///////////////////////
-  if(HasFlag("TOY")) FillHistsToy(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
-  else{
-    FillHistsAFB(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
-    if(IsDYSample&&p.hprefix==""&&IsNominalRun){
-      vector<Gen> gens=GetGens();
-      Gen truth_l0=GetGenMatchedLepton(*p.lepton0,gens);
-      Gen truth_l1=GetGenMatchedLepton(*p.lepton1,gens);
-      if(!truth_l0.IsEmpty()&&!truth_l1.IsEmpty()) 
-	FillHistsAFB(p.prefix,"truth_",p.suffix,(Particle*)&truth_l0,(Particle*)&truth_l1,map_weight);
-      //else cout<<"no matching"<<endl;
-    }
-    // pileup related variables
-    if(IsNominalRun){
-      TLorentzVector dilepton=*p.lepton0+*p.lepton1;
-      double dimass=dilepton.M();
-      double dirap=dilepton.Rapidity();
-      double dipt=dilepton.Pt();
-      map<TString,double> map_PUweight;
-      map_PUweight[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      map_PUweight["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      map_PUweight["_PUweight_up"]=p.w.lumiweight*p.w.PUweight_up*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      map_PUweight["_PUweight_down"]=p.w.lumiweight*p.w.PUweight_down*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      FillHist(p.prefix+p.hprefix+"nPV"+p.suffix,dimass,dirap,dipt,nPV,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
-      FillHist(p.prefix+p.hprefix+"rho"+p.suffix,dimass,dirap,dipt,Rho,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
-    }
+  FillHistsAFB(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(IsDYSample&&p.hprefix==""&&IsNominalRun){
+    vector<Gen> gens=GetGens();
+    Gen truth_l0=GetGenMatchedLepton(*p.lepton0,gens);
+    Gen truth_l1=GetGenMatchedLepton(*p.lepton1,gens);
+    if(!truth_l0.IsEmpty()&&!truth_l1.IsEmpty()) 
+      FillHistsAFB(p.prefix,"truth_",p.suffix,(Particle*)&truth_l0,(Particle*)&truth_l1,map_weight);
+    //else cout<<"no matching"<<endl;
+  }
+  // pileup related variables
+  if(IsNominalRun){
+    TLorentzVector dilepton=*p.lepton0+*p.lepton1;
+    double dimass=dilepton.M();
+    double dirap=dilepton.Rapidity();
+    double dipt=dilepton.Pt();
+    map<TString,double> map_PUweight;
+    map_PUweight[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    map_PUweight["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    map_PUweight["_PUweight_up"]=p.w.lumiweight*p.w.PUweight_up*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    map_PUweight["_PUweight_down"]=p.w.lumiweight*p.w.PUweight_down*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    FillHist(p.prefix+p.hprefix+"nPV"+p.suffix,dimass,dirap,dipt,nPV,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
+    FillHist(p.prefix+p.hprefix+"rho"+p.suffix,dimass,dirap,dipt,Rho,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
   }
 }
 
 AFBAnalyzer::AFBAnalyzer(){}
 AFBAnalyzer::~AFBAnalyzer(){
-  //DeleteToy();
   DeleteCosThetaWeight();
 }
 double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int direction){
@@ -401,10 +395,6 @@ double AFBAnalyzer::GetCosThetaT(const Particle *l0,const Particle *l1,const Par
   }
   return GetCosThetaCS(l0,l1,direction);
 }
-void AFBAnalyzer::FillHistsToy(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight){
-  int n_toy=toy_random.size();
-  for(int i=0;i<n_toy;i++) FillHistsAFB(pre,hpre,suf+Form("_toy%d",i),l0,l1,Multiply(map_weight,toy_weight[i]));
-}
 void AFBAnalyzer::FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight){
   TLorentzVector dilepton=(*l0)+(*l1);
   double dimass=dilepton.M();
@@ -493,50 +483,6 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
     FillHist(pre+"jeta_asym"+suf,genhardj0.Eta(),w/2,100,-5,5);
     FillHist(pre+"jeta_asym"+suf,-1.*genhardj0.Eta(),-w/2,100,-5,5);
   }
-}
-void AFBAnalyzer::SetupToy(int n_toy){
-  DeleteToy();
-  for(int i=0;i<n_toy;i++){
-    toy_random.push_back(new TRandom3);
-    toy_weight.push_back(-9999.);
-  } 
-}
-void AFBAnalyzer::DeleteToy(){
-  int n_toy=toy_random.size();
-  for(int i=0;i<n_toy;i++) delete toy_random.at(i);
-  toy_random.clear();
-  toy_weight.clear();
-}
-void AFBAnalyzer::GetToyWeight(){
-  int n_toy=toy_random.size();
-  if(fChain->GetTree()->GetReadEntry()==0){
-    TString filename=fChain->GetFile()->GetName();
-    for(int i=0;i<n_toy;i++) toy_random[i]->SetSeed((filename+Form("%d",i)).MD5().Hash());
-  }
-  for(int i=0;i<n_toy;i++)
-    toy_weight[i]=toy_random[i]->PoissonD(1.);
-}
-
-void AFBAnalyzer::FillHistToy(TString histname, double value, double weight, int n_bin, double x_min, double x_max){
-  int n_toy=toy_random.size();
-  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value,weight*toy_weight[i],n_bin,x_min,x_max);
-}
-void AFBAnalyzer::FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max){
-  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value,weight,n_bin,x_min,x_max);
-}
-void AFBAnalyzer::FillHistToy(TString histname, double value, double weight, int n_bin, double *xbins){ 
-  int n_toy=toy_random.size();
-  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value,weight*toy_weight[i],n_bin,xbins);
-}
-void AFBAnalyzer::FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins){ 
-  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value,weight,n_bin,xbins);
-}
-void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, double value_z, double weight, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
-  int n_toy=toy_random.size();
-  for(int i=0;i<n_toy;i++) FillHist(histname+Form("_toy%d",i),value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
-}
-void AFBAnalyzer::FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
-  for(const auto& [suffix,weight]:weights) FillHistToy(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
 }
 void AFBAnalyzer::SetupCosThetaWeight(){
   cout<<"[AFBAnalyzer::SetupCosThetaWeight] Setup"<<endl;
