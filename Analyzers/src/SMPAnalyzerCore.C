@@ -24,7 +24,6 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   if(MaxEvent>0) reductionweight=1.*fChain->GetEntries()/MaxEvent;
   else reductionweight=1.;
   SetupEfficiency();
-  SetupMCJetTagEff();
   SetupRoccoR();
   SetupZ0Weight();
   SetupPUJetWeight();
@@ -1128,90 +1127,14 @@ TString SMPAnalyzerCore::Replace(TString str,TRegexp reg,TString repl){
   else return str;
 }
 
-void SMPAnalyzerCore::SetupMCJetTagEff(){
-  //TODO : This will go to MCCorrection.C after optimization
-  cout<<"[SMPAnalyzerCore::SetupMCJetTagEff] setting MCJetTagEff"<<endl;
-  TString datapath=getenv("DATA_DIR");
-  if(!IsExists(datapath+"/"+GetEra()+"/ID/MeasureJetTaggingEfficiency_TTLJ_powheg.root")){
-    cout<<"[SMPAnalyzerCore::SetupMCJetTagEff] no MeasureJetTaggingEfficiency_TTLJ_powheg.root "<<endl;
-    return;
-  }
-  TFile fbeff(datapath+"/"+GetEra()+"/ID/MeasureJetTaggingEfficiency_TTLJ_powheg.root");
-  for(const auto&& key:*(fbeff.GetListOfKeys())){
-    TH2D* this_hist=(TH2D*)((TKey*)key)->ReadObj();
-    TString histname=this_hist->GetName();
-    map_hist_mcjet[histname]=this_hist;
-    this_hist->SetDirectory(0);
-    cout<<"[SMPAnalyzerCore::SetupMCJetTagEff] setting "<<histname<<endl;
-  }
-}
-double SMPAnalyzerCore::GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP wp, int JetFlavor, double JetPt, double JetEta){
-  //TODO : This will go to MCCorrection.C after optimization
-  if(IsDATA) return 1.;
-
-  if(JetPt<20) JetPt = 20.;
-  if(JetPt>=1000.) JetPt = 999.;
-
-  double num=1., den=1.;
-  TString jf = "";
-  if(JetFlavor == 5) jf = "B";
-  else if(JetFlavor == 4) jf = "C";
-  else if(JetFlavor == 0) jf = "Light";
-  else{
-    cout<<"[SMPAnalyzerCore::GetMCJetTagEff] no JetFlavor"<<endl;
-    exit(EXIT_FAILURE);
-  }
-
-  //FIXME
-  //TString hnum="Jet_"+GetEra()+"_"+JetTagging::TaggerToString(tagger)+"_"+JetTagging::WPToString(wp)+"_eff_"+jf+"_num";
-  //TString hden="Jet_"+GetEra()+"_eff_"+jf+"_denom";
-  TString hnum="Jet_2017_"+JetTagging::TaggerToString(tagger)+"_"+JetTagging::WPToString(wp)+"_eff_"+jf+"_num";
-  TString hden="Jet_2017_eff_"+jf+"_denom";
-
-  num = GetBinContentUser(map_hist_mcjet[hnum], JetEta, JetPt, 0);
-  den = GetBinContentUser(map_hist_mcjet[hden], JetEta, JetPt, 0);
-  if(num * den == 0) return 1.;
-  return num/den;
-}
-
-double SMPAnalyzerCore::GetBTaggingReweight_1a(const vector<Jet>& jets, JetTagging::Parameters jtp, string Syst){
-
-  if(IsDATA) return 1.;
-
-  double Prob_MC(1.), Prob_DATA(1.);
-  for(unsigned int i=0; i<jets.size(); i++){
-    double this_MC_Eff = SMPAnalyzerCore::GetMCJetTagEff(jtp.j_Tagger, jtp.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
-    double this_SF = mcCorr->GetJetTaggingSF(jtp,
-                                             jets.at(i).hadronFlavour(),
-                                             jets.at(i).Pt(),
-                                             jets.at(i).Eta(),
-                                             jets.at(i).GetTaggerResult(jtp.j_Tagger),
-                                             Syst );
-    if(this_MC_Eff == 0) this_MC_Eff += 0.0001;
-    else if(this_MC_Eff == 1) this_MC_Eff -= 0.0001;
-    double this_DATA_Eff = this_MC_Eff*this_SF;
-
-    bool isTagged = jets.at(i).GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP);
-    if(isTagged){
-      Prob_MC *= this_MC_Eff;
-      Prob_DATA *= this_DATA_Eff;
-    }
-    else{
-      Prob_MC *= 1.-this_MC_Eff;
-      Prob_DATA *= 1.-this_DATA_Eff;
-    }
-  }
-
-  return Prob_DATA/Prob_MC;
-}
 double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst){
 
   if(IsDATA) return 1.;
 
   double Prob_MC(1.), Prob_DATA(1.);
   for(unsigned int i=0; i<jets.size(); i++){
-    double this_MC_EffT = SMPAnalyzerCore::GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
-    double this_MC_EffL = SMPAnalyzerCore::GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_MC_EffT = mcCorr->GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_MC_EffL = mcCorr->GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
     double this_SFT = mcCorr->GetJetTaggingSF(jtpT,
                                               jets.at(i).hadronFlavour(),
                                               jets.at(i).Pt(),
@@ -1224,10 +1147,6 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
                                               jets.at(i).Eta(),
                                               jets.at(i).GetTaggerResult(jtpL.j_Tagger),
                                               Syst );
-    if(this_MC_EffT == 0) this_MC_EffT += 0.0001;
-    else if(this_MC_EffT == 1) this_MC_EffT -= 0.0001;
-    if(this_MC_EffL == 0) this_MC_EffL += 0.0001;
-    else if(this_MC_EffL == 1) this_MC_EffL -= 0.0001;
     double this_DATA_EffT = this_MC_EffT*this_SFT;
     double this_DATA_EffL = this_MC_EffL*this_SFL;
 
@@ -1247,7 +1166,7 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
       Prob_DATA *= 1.-this_DATA_EffL;
     }
   }
-  return Prob_DATA/Prob_MC;
+  return (Prob_DATA/Prob_MC)>5.? 5.: (Prob_DATA/Prob_MC);
 }
 
 void SMPAnalyzerCore::SetupPUJetWeight(TString ID){

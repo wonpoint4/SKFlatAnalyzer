@@ -28,7 +28,10 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2016postV
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2016postVFP
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2016postVFP
 
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 60 -e 2017 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2017 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2017 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 10 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2017 --memory 8000
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2017 --memory 8000
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 10 -e 2017
@@ -40,7 +43,10 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 60 -e 2018 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2018 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2018 --memory 8000
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 10 -e 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2018 --memory 8000
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2018 --memory 8000
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i EGamma -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 10 -e 2018

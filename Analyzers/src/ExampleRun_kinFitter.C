@@ -23,7 +23,6 @@ void ExampleRun_kinFitter::initializeAnalyzer(){
   cout << "[ExampleRun_kinFitter::initializeAnalyzer TriggerSafePtCut = " << TriggerSafePtCut << endl;
 
   //==== B-Tagging
-  SetupMCJetTagEff();
   //==== add taggers and WP that you want to use in analysis
   std::vector<JetTagging::Parameters> jtps;
   //==== If you want to use 1a or 2a method,
@@ -155,7 +154,7 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     weight *= this_trigsf;
 
     JetTagging::Parameters jtp = JetTagging::Parameters(btagger, btagWP, JetTagging::incl, JetTagging::comb);
-    btagweight = SMPAnalyzerCore::GetBTaggingReweight_1a(basic_jets, jtp);
+    btagweight = mcCorr->GetBTaggingReweight_1a(basic_jets, jtp);
     weight *= btagweight;
     FillHist(prefix+"btagweight", btagweight, 1, 100, 0, 10);
   }

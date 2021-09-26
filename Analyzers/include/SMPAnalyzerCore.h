@@ -175,9 +175,6 @@ public:
 
   void SetupZ0Weight();
   void SetupRoccoR();
-  double GetMCJetTagEff(JetTagging::Tagger tagger, JetTagging::WP wp, int JetFlavor, double JetPt, double JetEta);
-  void SetupMCJetTagEff();
-  double GetBTaggingReweight_1a(const vector<Jet>& jets, JetTagging::Parameters jtp, string Syst="central");
   double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
   void SetupPUJetWeight(TString ID="Medium");
   double GetPUJetWeight(const vector<Jet>& jets, int sys);

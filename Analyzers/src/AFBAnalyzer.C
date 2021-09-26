@@ -375,8 +375,8 @@ void AFBAnalyzer::FillHists(Parameter& p){
     map_weight["_nopujet"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*btagweight;
     map_weight["_nobtag"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*pujetweight;
     if(MCSample.Contains("MiNNLO")){
-      for(unsigned int i=0;i<PDFWeights_sthw2->size();i++){
-        map_weight[Form("_sthw%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*pujetweight*btagweight*PDFWeights_sthw2->at(i);
+      for(unsigned int i=0;i<weight_sthw2->size();i++){
+        map_weight[Form("_sthw%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*pujetweight*btagweight*weight_sthw2->at(i);
       }
     }
   }
