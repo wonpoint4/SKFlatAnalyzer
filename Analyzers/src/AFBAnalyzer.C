@@ -6,10 +6,10 @@ void AFBAnalyzer::initializeAnalyzer(){
   SetupCosThetaWeight();
   IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS");
 
-  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets),
-                                       JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets),
-                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets),
-                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets)};
+  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb)};
   mcCorr->SetJetTaggingParameters(jtps);
 
   if(fChain->GetListOfFiles()->GetEntries()){
@@ -57,27 +57,12 @@ void AFBAnalyzer::executeEvent(){
     n_bjet=0;
     n_powerbjet=0;
     bjets.clear();
-    JetTagging::Parameters jtpT = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
-    JetTagging::Parameters jtpL = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
+    JetTagging::Parameters jtpT = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+    JetTagging::Parameters jtpL = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
     if(btag.at(b)=="DeepCSV"){
-      jtpT = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::mujets,JetTagging::mujets);
-      jtpL = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::mujets,JetTagging::mujets);
+      jtpT = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      jtpL = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
     }
-
-    /*
-      for(const auto& jet:realjets){
-      // For leading b, ID:Tight, pT>30
-      if(mcCorr->IsBTagged_2a(jtp,jet) && jet.Pt()>30){
-      //n_bjet++;
-      bjets.push_back(jet);
-      }
-      // For 2nd b-veto, ID:Loose, pT>20
-      else if(mcCorr->IsBTagged_2a(jtp2,jet)){
-      n_bjet++;
-      if(jet.Pt()>30) n_powerbjet++;
-      }
-      }
-    */
 
     for(const auto& jet:realjets){
       // For leading b, ID:Tight, pT>30
@@ -447,6 +432,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+"OneTightb_bef"+p.suffix,bjets.size(),eventweight,5,0,5);
   FillHist(p.prefix+p.hprefix+"OneTightb_bef_jet"+p.suffix,realjets.size(),eventweight,10,0,10);
   FillHist(p.prefix+p.hprefix+"OneTightb_bef_normjet"+p.suffix,jets.size(),eventweight,10,0,10);
+  FillHist(p.prefix+p.hprefix+"OneTightb_bef_nobSF"+p.suffix,bjets.size(),eventweight/btagweight,5,0,5);
   FillHist(p.prefix+p.hprefix+"OneTightb_bef_jet_nobSF"+p.suffix,realjets.size(),eventweight/btagweight,10,0,10);
   FillHist(p.prefix+p.hprefix+"OneTightb_bef_normjet_nobSF"+p.suffix,jets.size(),eventweight/btagweight,10,0,10);
   if(bjets.size() !=1) return;

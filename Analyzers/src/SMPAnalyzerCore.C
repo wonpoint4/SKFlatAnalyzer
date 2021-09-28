@@ -1149,23 +1149,30 @@ double SMPAnalyzerCore::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetT
                                               Syst );
     double this_DATA_EffT = this_MC_EffT*this_SFT;
     double this_DATA_EffL = this_MC_EffL*this_SFL;
+    //cout<<i<<"th jet : (hadron Flavor, pT, eta ) = ("<<jets.at(i).hadronFlavour()<<", "<<jets.at(i).Pt()<<", "<<jets.at(i).Eta()<<")"<<endl;
+    //cout<<i<<"th jet : MC eff(T,L)=("<<this_MC_EffT<<","<<this_MC_EffL<<"), SF(T,L)=("<<this_SFT<<","<<this_SFL<<"), Data eff(T,L)=("<<this_DATA_EffT<<","<<this_DATA_EffL<<")"<<endl;
+    //cout<<i<<"th jet : Score="<<jets.at(i).GetTaggerResult(jtpT.j_Tagger)<<", T cut="<<mcCorr->GetJetTaggingCutValue(jtpT.j_Tagger, jtpT.j_WP)<<", L cut="<<mcCorr->GetJetTaggingCutValue(jtpL.j_Tagger, jtpL.j_WP)<<endl;
 
     bool isTaggedT = jets.at(i).GetTaggerResult(jtpT.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpT.j_Tagger, jtpT.j_WP);
     bool isTaggedL = jets.at(i).GetTaggerResult(jtpL.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpL.j_Tagger, jtpL.j_WP);
     if(isTaggedT){
       Prob_MC *= this_MC_EffT;
       Prob_DATA *= this_DATA_EffT;
+      //cout<<i<<"th jet Tagged T, (Prob_MC,Prob_DATA)=("<<Prob_MC<<","<<Prob_DATA<<")"<<endl;
     }
     else if(isTaggedL){
       if(this_MC_EffL == this_MC_EffT) this_MC_EffL += 0.001;
       Prob_MC *= this_MC_EffL - this_MC_EffT;
       Prob_DATA *= this_DATA_EffL - this_DATA_EffT;
+      //cout<<i<<"th jet Tagged L, (Prob_MC,Prob_DATA)=("<<Prob_MC<<","<<Prob_DATA<<")"<<endl;
     }
     else{
       Prob_MC *= 1.-this_MC_EffL;
       Prob_DATA *= 1.-this_DATA_EffL;
+      //cout<<i<<"th jet Untagged, (Prob_MC,Prob_DATA)=("<<Prob_MC<<","<<Prob_DATA<<")"<<endl;
     }
   }
+  //cout<<"SF output = "<<(Prob_DATA/Prob_MC)<<endl;
   return (Prob_DATA/Prob_MC)>5.? 5.: (Prob_DATA/Prob_MC);
 }
 
@@ -1547,6 +1554,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
         }
         //qq qqbar GG collsions
         else{
+          if(lhe_p0.ID()==21&&lhe_p1.ID()==21) p.hprefix+="Dygg_";
+          else if(lhe_p0.ID()+lhe_p1.ID()==0) p.hprefix+="Dyqqbar_";
         /*
           if(gen_j0.PID()==5 && lhe_j0.ID()==5) p.hprefix+="bBkg2_";
           else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) p.hprefix+="bBkg3_";
