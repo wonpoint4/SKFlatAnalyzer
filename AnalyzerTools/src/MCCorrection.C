@@ -1006,6 +1006,14 @@ double MCCorrection::GetJetTaggingSF(JetTagging::Parameters jtp, int JetFlavor, 
     exit(ENODATA);
   }
 
+  if(Syst.substr(0,2)=="H:"){
+    if(jf==BTagEntry::FLAV_B||jf==BTagEntry::FLAV_C) Syst=Syst.substr(2);
+    else Syst="central";
+  }else if(Syst.substr(0,2)=="L:"){
+    if(jf==BTagEntry::FLAV_UDSG) Syst=Syst.substr(2);
+    else Syst="central";
+  }
+
   double this_SF = it->second->eval_auto_bounds(Syst, jf, fabs(JetEta), JetPt, Jetdiscr);
   //cout << "[MCCorrection::GetJetTaggingSF] key = " << it->first << endl;
   //cout << "[MCCorrection::GetJetTaggingSF] Jet tagging parameter : ";jtp.Print();

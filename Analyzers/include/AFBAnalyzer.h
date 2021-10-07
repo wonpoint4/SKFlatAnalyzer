@@ -10,6 +10,7 @@ public:
   void test();
   void initializeAnalyzer();
   void executeEvent();
+  void executeEventGen();
   Parameter MakeParameter(TString key);
   bool PassSelection(Parameter& p);
   void FillHists(Parameter& p);

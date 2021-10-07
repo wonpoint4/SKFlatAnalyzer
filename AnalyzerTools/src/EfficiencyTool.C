@@ -288,7 +288,6 @@ void EfficiencyTool::Auto(TString key,TString path){
   int charge=0;
   if(IsPlus(path)) charge=+1;
   else if(IsMinus(path)) charge=-1;
-  int nreplica=20;
   if(Efficiency::HasKey(path,"EGamma_EffData2D")){
     if(Efficiency::HasKey(path,"EGamma_EffData2D_stat")){
       eff->AddDataSetReplica(path+":EGamma_EffData2D",path+":EGamma_EffData2D_stat",nreplica,charge);

@@ -201,7 +201,8 @@ public:
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);
-  TString Replace(TString str,TRegexp reg,TString repl);
+  static TString Replace(TString str,TRegexp reg,TString repl);
+  static map<TString,double> SelectWeights(map<TString,double> origin,vector<TString> keys);
   inline map<TString,double> Multiply(map<TString,double> a,double b){
     for(auto& iter:a) iter.second*=b;
     return a;
