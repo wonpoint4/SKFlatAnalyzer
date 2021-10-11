@@ -193,7 +193,6 @@ void AFBAnalyzer::FillHists(Parameter& p){
   map<TString,double> map_weight;
   if(p.weightbit&NominalWeight){
     map_weight[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["btagSF"];
-    }
   }
   if(p.weightbit&SystematicWeight){
     if(!IsDATA){

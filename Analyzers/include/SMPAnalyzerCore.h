@@ -185,6 +185,12 @@ public:
   TH2* hcfrate_mc=NULL;
   TH2* hcfsf=NULL;
 
+  void SetupMuonTrackingSF();
+  double GetMuonTrackingSF(double eta,int sys=0);
+  void DeleteMuonTrackingSF();
+  TH1* fMuonTrackingSF=NULL;
+  bool jSetupMuonTrackingSF=false;
+
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
   void DeleteEfficiency();
@@ -193,8 +199,9 @@ public:
   double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int set,int mem);
 
   void PrintGens(const vector<Gen>& gens);
-  double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
-  double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
+  static double GetBinContentUser(TH1* hist,double valx,int sys);
+  static double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
+  static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
   void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);

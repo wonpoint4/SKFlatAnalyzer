@@ -73,6 +73,7 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
   FillHists(p);
 }
 void SMPAnalyzerCore::EvalIDSF(Parameter& p){
+  p.doublemap["muontrackingSF"]=1.;
   if(!IsDATA){
     if(p.weightbit&EfficiencyWeight){
       p.w.electronRECOSF_sys=fEff->GetStructure(p.k.electronRECOSF);
@@ -103,6 +104,7 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
       }
     }
     for(const auto& muon:p.muons){
+      p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
       p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,0,0);
       if(p.weightbit&EfficiencyWeight){
 	int nset=p.w.muonIDSF_sys.size();
@@ -690,6 +692,44 @@ void SMPAnalyzerCore::DeleteCFRate(){
   if(hcfrate_mc) delete hcfrate_mc;
   if(hcfsf) delete hcfsf;
 }
+void SMPAnalyzerCore::SetupMuonTrackingSF(){
+  jSetupMuonTrackingSF=true;
+  cout<<"[SMPAnalyzerCore::SetupMuonTrackingSF] setup"<<endl;
+  TString datapath=getenv("DATA_DIR");
+  TString era=GetEra();
+  if(IsExists(datapath+"/"+era+"/SMP/muonPOGtrackingSF.root")){
+    TFile f(datapath+"/"+era+"/SMP/muonPOGtrackingSF.root");
+    if(GetEra()=="2016preVFP"){
+      fMuonTrackingSF=(TH1*)f.Get("muonPOGtrackingSF_preVFP");
+      if(fMuonTrackingSF){
+	cout<<"[SMPAnalyzerCore::SetupMuonTrackingSF] load muonPOGtrackingSF_preVFP"<<endl;
+	fMuonTrackingSF->SetDirectory(NULL);
+      }
+    }else if(GetEra()=="2016postVFP"){
+      fMuonTrackingSF=(TH1*)f.Get("muonPOGtrackingSF_postVFP");
+      if(fMuonTrackingSF){
+	cout<<"[SMPAnalyzerCore::SetupMuonTrackingSF] load muonPOGtrackingSF_postVFP"<<endl;
+	fMuonTrackingSF->SetDirectory(NULL);
+      }
+    }
+  }
+}
+double SMPAnalyzerCore::GetMuonTrackingSF(double eta,int sys){
+  double sf=1.;
+  if(IsDATA) return sf;
+  if(!jSetupMuonTrackingSF) SetupMuonTrackingSF();
+  if(fMuonTrackingSF){
+    sf=GetBinContentUser(fMuonTrackingSF,eta,sys);
+  }
+  return sf;
+}
+void SMPAnalyzerCore::DeleteMuonTrackingSF(){
+  if(fMuonTrackingSF){
+    delete fMuonTrackingSF;
+  }
+  fMuonTrackingSF=NULL;
+  jSetupMuonTrackingSF=false;
+}
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
   for(int i=0;i<(int)gens.size();i++){
@@ -698,6 +738,14 @@ void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   }
 }
 
+double SMPAnalyzerCore::GetBinContentUser(TH1* hist,double valx,int sys){
+  double xmin=hist->GetXaxis()->GetXmin();
+  double xmax=hist->GetXaxis()->GetXmax();
+  if(xmin>=0) valx=fabs(valx);
+  if(valx<xmin) valx=xmin+0.001;
+  if(valx>=xmax) valx=xmax-0.001;
+  return hist->GetBinContent(hist->FindBin(valx))+sys*hist->GetBinError(hist->FindBin(valx));
+}
 double SMPAnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int sys){
   double xmin=hist->GetXaxis()->GetXmin();
   double xmax=hist->GetXaxis()->GetXmax();
@@ -711,7 +759,6 @@ double SMPAnalyzerCore::GetBinContentUser(TH2* hist,double valx,double valy,int 
   if(valy>=ymax) valy=ymax-0.001;
   return hist->GetBinContent(hist->FindBin(valx,valy))+sys*hist->GetBinError(hist->FindBin(valx,valy));
 }
-
 double SMPAnalyzerCore::GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys){
   double xmin=hist->GetXaxis()->GetXmin();
   double xmax=hist->GetXaxis()->GetXmax();
