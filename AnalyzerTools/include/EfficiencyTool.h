@@ -50,6 +50,7 @@ class Efficiency{
 class EfficiencyTool{
  public:
   map<TString,Efficiency*> fEfficiencies;
+  int nreplica=20;
 
   EfficiencyTool(TString path="");
   ~EfficiencyTool();
