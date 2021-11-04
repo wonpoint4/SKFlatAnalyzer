@@ -38,6 +38,12 @@ elif [[ $HOSTNAME == *"tamsa2"* ]]; then
   export SKFlatRunlogDir="/data6/Users/$USER/SKFlatRunlog/"
   export SKFlatOutputDir="/data6/Users/$USER/SKFlatOutput/"
 
+elif [[ $HOSTNAME == *"cms2"* ]]; then
+
+  echo "@@@@ Working on cms2"
+  export SKFlatRunlogDir="/data6/Users/$USER/SKFlatRunlog/"
+  export SKFlatOutputDir="/data6/Users/$USER/SKFlatOutput/"
+
 elif [[ $HOSTNAME == *"knu"* ]]; then
 
   echo "@@@@ Working on KNU"
