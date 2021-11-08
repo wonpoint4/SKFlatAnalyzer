@@ -315,6 +315,24 @@ void EfficiencyTool::Auto(TString key,TString path){
       eff->AddDataSet({path+":EGamma_EffData2D"},charge);
       eff->AddSimSet({path+":EGamma_EffMC2D"},charge);
     } 
+  }else if(Efficiency::HasKey(path,"muonEffi_data_probe_eta_probe_pt")){
+    if(Efficiency::HasKey(path,"Systematics_data")){
+      eff->AddDataSetReplica(path+":muonEffi_data_probe_eta_probe_pt",path+":muonEffi_data_probe_eta_probe_pt",nreplica,charge);
+      eff->AddDataSet({path+":Systematics_data_massnarrow",path+":Systematics_data_massbroad"},charge);
+      eff->AddDataSet({path+":Systematics_data_tagiso010",path+":Systematics_data_tagiso020"},charge);
+      eff->AddDataSet({path+":Systematics_data_altsig"},charge);
+      eff->AddSimSetReplica(path+":muonEffi_mc_probe_eta_probe_pt",path+":muonEffi_mc_probe_eta_probe_pt",nreplica,charge);
+      eff->AddSimSet({path+":Systematics_mc_massnarrow",path+":Systematics_mc_massbroad"},charge);
+      eff->AddSimSet({path+":Systematics_mc_tagiso010",path+":Systematics_mc_tagiso020"},charge);
+      eff->AddSimSet({path+":Systematics_mc_altsig"},charge);
+      if(Efficiency::HasKey(path,"Systematics_data_massbin50")){
+	eff->AddDataSet({path+":Systematics_data_massbin50",path+":Systematics_data_massbin75"},charge);
+	eff->AddSimSet({path+":Systematics_mc_massbin50",path+":Systematics_mc_massbin75"},charge);
+      }
+    }else{
+      eff->AddDataSet({path+":muonEffi_data_probe_eta_probe_pt"},charge);
+      eff->AddSimSet({path+":muonEffi_mc_probe_eta_probe_pt"},charge);
+    } 
   }else if(Efficiency::HasKey(path,"muonEffi_data_eta_pt")){
     if(Efficiency::HasKey(path,"Systematics_data")){
       eff->AddDataSetReplica(path+":muonEffi_data_eta_pt",path+":muonEffi_data_eta_pt",nreplica,charge);
@@ -323,7 +341,7 @@ void EfficiencyTool::Auto(TString key,TString path){
       eff->AddSimSetReplica(path+":muonEffi_mc_eta_pt",path+":muonEffi_mc_eta_pt",nreplica,charge);
       eff->AddSimSet({path+":Systematics_mc_massnarrow",path+":Systematics_mc_massbroad"},charge);
       eff->AddSimSet({path+":Systematics_mc_tagiso010",path+":Systematics_mc_tagiso020"},charge);
-      if(Efficiency::HasKey(path,"Systematics_data_altsig")){
+      if(Efficiency::HasKey(path,"Systematics_data_massbin50")){
 	eff->AddDataSet({path+":Systematics_data_massbin50",path+":Systematics_data_massbin75"},charge);
 	eff->AddDataSet({path+":Systematics_data_altsig"},charge);
 	eff->AddSimSet({path+":Systematics_mc_massbin50",path+":Systematics_mc_massbin75"},charge);
@@ -333,6 +351,21 @@ void EfficiencyTool::Auto(TString key,TString path){
       eff->AddDataSet({path+":muonEffi_data_eta_pt"},charge);
       eff->AddSimSet({path+":muonEffi_mc_eta_pt"},charge);
     } 
+  }else if(Efficiency::HasKey(path,"data")&&Efficiency::HasKey(path,"sim")&&Efficiency::HasKey(path,"sf")){
+    eff->AddDataSetReplica(path+":data",path+":data_s0m0",nreplica,charge);
+    eff->AddDataSet({path+":data_s1m0"},charge);
+    eff->AddDataSet({path+":data_s2m0"},charge);
+    eff->AddDataSet({path+":data_s3m0"},charge);
+    eff->AddDataSet({path+":data_s4m0"},charge);
+    eff->AddDataSet({path+":data_s5m0"},charge);
+    eff->AddDataSet({path+":data_s6m0"},charge);
+    eff->AddSimSetReplica(path+":sim",path+":sim_s0m0",nreplica,charge);
+    eff->AddSimSet({path+":sim_s1m0"},charge);
+    eff->AddSimSet({path+":sim_s2m0"},charge);
+    eff->AddSimSet({path+":sim_s3m0"},charge);
+    eff->AddSimSet({path+":sim_s4m0"},charge);
+    eff->AddSimSet({path+":sim_s5m0"},charge);
+    eff->AddSimSet({path+":sim_s6m0"},charge);
   }
 }
 void EfficiencyTool::Auto(TString key,TString path1,TString path2){
