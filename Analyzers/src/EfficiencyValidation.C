@@ -189,6 +189,7 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
       }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
 	Electron* el=(Electron*)p.leptons.at(i);
 	FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
+	if(el->Pt()<20) FillHist(Form("%slsceta20%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
       }
     }
 
@@ -231,4 +232,34 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
     if(!IsDATA) FillHist(Form("%snPileUp%s",pre.Data(),suf.Data()),nPileUp,w,100,0,100);
 
   }
+}
+
+bool EfficiencyValidation::PassSelection(Parameter& p){
+  if(p.triggers.size()==2){
+    if(GetEra()=="2017"&&p.triggers[0]=="HLT_Ele27_WPTight_Gsf_v"&&p.triggers[1]=="HLT_Ele32_WPTight_Gsf_v"){
+      //if(!_event.PassTrigger("HLT_Ele27_WPTight_Gsf_v")) p.c.lepton0pt=35;
+      if(p.lepton0&&p.lepton0->Pt()<35){
+	p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
+	p.k.triggerSF={"Ele27_MediumID"};
+	if(!IsDATA) p.w.lumiweight*=31.72/41.54;
+      }
+    }
+    if(GetEra()=="2018"&&p.triggers[0]=="HLT_Ele28_WPTight_Gsf_v"&&p.triggers[1]=="HLT_Ele32_WPTight_Gsf_v"){
+      //if(!_event.PassTrigger("HLT_Ele28_WPTight_Gsf_v")) p.c.lepton0pt=35;
+      if(p.lepton0&&p.lepton0->Pt()<35){
+	p.triggers={"HLT_Ele28_WPTight_Gsf_v"};
+	p.k.triggerSF={"Ele28_MediumID"};
+	if(!IsDATA) p.w.lumiweight*=23687.253/59827.879;
+      }
+    }
+    if(GetEra()=="2017"&&p.triggers[0]=="HLT_IsoMu24_v"&&p.triggers[1]=="HLT_IsoMu27_v"){
+      //if(!_event.PassTrigger("HLT_IsoMu24_v")) p.c.lepton0pt=30;
+      if(p.lepton0&&p.lepton0->Pt()<30){
+	p.triggers={"HLT_IsoMu24_v"};
+	p.k.triggerSF={"IsoMu24_MediumID_trkIsoLoose"};
+	if(!IsDATA) p.w.lumiweight*=37997.005/41477.878;
+      }
+    }
+  }
+  return SMPAnalyzerCore::PassSelection(p);
 }
