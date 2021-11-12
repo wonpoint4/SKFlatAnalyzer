@@ -416,7 +416,7 @@ double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Le
 double SMPAnalyzerCore::GetLeptonTriggerORSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
   if(IsDATA) return 1;
 
-  double lumi0=1.; //only trigger0 on
+  double lumi0=1.; //trigger0 on
   double lumi1=0.; //only trigger1 on
   double lumi2=0.; //both off
   if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){

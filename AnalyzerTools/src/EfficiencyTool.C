@@ -353,19 +353,15 @@ void EfficiencyTool::Auto(TString key,TString path){
     } 
   }else if(Efficiency::HasKey(path,"data")&&Efficiency::HasKey(path,"sim")&&Efficiency::HasKey(path,"sf")){
     eff->AddDataSetReplica(path+":data",path+":data_s0m0",nreplica,charge);
-    eff->AddDataSet({path+":data_s1m0"},charge);
-    eff->AddDataSet({path+":data_s2m0"},charge);
-    eff->AddDataSet({path+":data_s3m0"},charge);
-    eff->AddDataSet({path+":data_s4m0"},charge);
-    eff->AddDataSet({path+":data_s5m0"},charge);
-    eff->AddDataSet({path+":data_s6m0"},charge);
     eff->AddSimSetReplica(path+":sim",path+":sim_s0m0",nreplica,charge);
-    eff->AddSimSet({path+":sim_s1m0"},charge);
-    eff->AddSimSet({path+":sim_s2m0"},charge);
-    eff->AddSimSet({path+":sim_s3m0"},charge);
-    eff->AddSimSet({path+":sim_s4m0"},charge);
-    eff->AddSimSet({path+":sim_s5m0"},charge);
-    eff->AddSimSet({path+":sim_s6m0"},charge);
+    for(int i=1;i<100;i++){
+      if(!Efficiency::HasKey(path,Form("data_s%dm0",i))) break;
+      for(int j=0;j<100;j++){
+	if(!Efficiency::HasKey(path,Form("data_s%dm%d",i,j))) break;
+	eff->AddDataSet({path+Form(":data_s%dm%d",i,j)},charge);
+	eff->AddSimSet({path+Form(":sim_s%dm%d",i,j)},charge);
+      }
+    }
   }
 }
 void EfficiencyTool::Auto(TString key,TString path1,TString path2){
