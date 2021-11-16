@@ -4,8 +4,8 @@ DEPDIR = $(OBJDIR)/dep
 SRCDIR = src
 INCDIR = include
 #ADDITIONAL_ROOTMAPLIBRARY = -rml libAnalyzerTools.so -rml libGEScaleSyst.so -rml libDataFormats.so -rml libTH4D.so -rml libTree.so -rml libKinematicFitter.so
-ADDITIONAL_ROOTMAPLIBRARY = -rml libAnalyzerTools.so -rml libGEScaleSyst.so -rml libDataFormats.so -rml libTH4D.so -rml libTree.so
-
+#ADDITIONAL_ROOTMAPLIBRARY = -rml libAnalyzerTools.so -rml libGEScaleSyst.so -rml libDataFormats.so -rml libTH4D.so -rml libTree.so
+ADDITIONAL_ROOTMAPLIBRARY = -rml libAnalyzerTools.so -rml libGEScaleSyst.so -rml libDataFormats.so -rml libTH4D.so -rml libTree.so -rml libKinematicFitter.so -rml libPhysicsToolsKinFitter.so
 include $(SKFlat_WD)/makefile.common
 
 INCLUDES += -I$(SKFlat_WD)/DataFormats/include/

@@ -58,10 +58,13 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2018
 
-SKFlat.py -a ExampleRun_kinFitter --skim SkimTree_Dilepton -i TTLJ_powheg -n 100 -e 2017 --memory 9000
+SKFlat.py -a ExampleRun_kinFitter -i TTLJ_powheg -n 40 -e 2017 --memory 8000
 SKFlat.py -a ExampleRun_kinFitter -i SingleMuon -n 20 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i WJets_MG -n 30 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i DYJets -n 20 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i DYJetsToMuMu_MiNNLO -n 40 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i DYJetsToEE_MiNNLO -n 40 -e 2017
+SKFlat.py -a ExampleRun_kinFitter -i DYJetsToTauTau_MiNNLO -n 40 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i WW_pythia -n 10 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i WZ_pythia -n 10 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i ZZ_pythia -n 10 -e 2017

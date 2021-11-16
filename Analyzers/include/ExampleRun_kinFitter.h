@@ -10,6 +10,8 @@ public:
 
   void initializeAnalyzer();
   void GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& b0,Gen& b1,Gen& j0,Gen& j1, int mode);
+  double Lepton_SF(TString histkey,const Lepton* lep,int sys);
+  double LeptonTrigger_SF(TString triggerSF_key,const vector<Lepton*>& leps,int sys);
   void executeEventFromParameter(AnalyzerParameter param);
   void executeEvent();
 

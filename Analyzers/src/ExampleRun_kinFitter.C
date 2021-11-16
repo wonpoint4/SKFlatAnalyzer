@@ -6,15 +6,13 @@ ExampleRun_kinFitter::ExampleRun_kinFitter(){
 
 void ExampleRun_kinFitter::initializeAnalyzer(){
 
-  MuonIDs = { "DeepCSV", "DeepJet", "DeepCSV_Tight", "DeepJet_Tight" };
-  MuonIDSFKeys = { "IDISO_SF_MediumID_trkIsoLoose_Q", "IDISO_SF_MediumID_trkIsoLoose_Q", "IDISO_SF_MediumID_trkIsoLoose_Q", "IDISO_SF_MediumID_trkIsoLoose_Q" };
-  MuonTrigSFKeys = { "IsoMu27_MediumID_trkIsoLoose_Q", "IsoMu27_MediumID_trkIsoLoose_Q", "IsoMu27_MediumID_trkIsoLoose_Q", "IsoMu27_MediumID_trkIsoLoose_Q" };
+  MuonIDs = { "DeepJetM", "DeepJetT" };
 
-  if(DataYear==2016){
+  if(DataEra=="2018"){
     IsoMuTriggerName = "HLT_IsoMu24_v";
     TriggerSafePtCut = 26.;
   }
-  else if(DataYear==2017){
+  else if(DataEra=="2017"){
     IsoMuTriggerName = "HLT_IsoMu27_v";
     TriggerSafePtCut = 29.;
   }
@@ -26,9 +24,7 @@ void ExampleRun_kinFitter::initializeAnalyzer(){
   //==== add taggers and WP that you want to use in analysis
   std::vector<JetTagging::Parameters> jtps;
   //==== If you want to use 1a or 2a method,
-  jtps.push_back( JetTagging::Parameters(JetTagging::DeepCSV, JetTagging::Medium, JetTagging::incl, JetTagging::comb) );
   jtps.push_back( JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Medium, JetTagging::incl, JetTagging::comb) );
-  jtps.push_back( JetTagging::Parameters(JetTagging::DeepCSV, JetTagging::Tight, JetTagging::incl, JetTagging::comb) );
   jtps.push_back( JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb) );
   //==== set
   mcCorr->SetJetTaggingParameters(jtps);
@@ -51,14 +47,14 @@ void ExampleRun_kinFitter::executeEvent(){
   for(unsigned int it_MuonID=0; it_MuonID<MuonIDs.size(); it_MuonID++){
 
     TString MuonID = "POGMediumWithLooseTrkIso";
-    TString MuonIDSFKey = MuonIDSFKeys.at(it_MuonID);
-    TString MuonTrigSFKey = MuonTrigSFKeys.at(it_MuonID);
+    TString MuonIDSFKey = "ID_SF_MediumID_trkIsoLoose_Q";
+    TString MuonTrigSFKey = DataEra=="2017"? "IsoMu27_MediumID_trkIsoLoose_Q": "IsoMu24_MediumID_trkIsoLoose_Q";
 
     //==== clear parameter set
     param.Clear();
 
     param.syst_ = AnalyzerParameter::Central;
-    param.Name = MuonIDs.at(it_MuonID);
+    param.Name = MuonIDs.at(it_MuonID)+GetEra();
     //==== You can define lepton ID string here
     param.Muon_Tight_ID = MuonID;
     param.Muon_ID_SF_Key = MuonIDSFKey;
@@ -102,28 +98,30 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== Then, apply ID selections using this_AllXXX
   //==================================================
 
-  JetTagging::Tagger btagger = JetTagging::DeepCSV;
+  JetTagging::Tagger btagger = JetTagging::DeepJet;
   JetTagging::WP btagWP = JetTagging::Medium;
-  if(param.Name.Contains("DeepJet")) btagger = JetTagging::DeepJet;
-  if(param.Name.Contains("Tight")) btagWP = JetTagging::Tight;
+  if(param.Name.Contains("T")) btagWP = JetTagging::Tight;
 
   vector<Muon> this_AllMuons = AllMuons;
   vector<Muon> muons = SMPGetMuons(param.Muon_Tight_ID, 20., 2.4);
   vector<Jet> basic_jets = GetJets(param.Jet_ID, 30., 2.4);
-  //vector<Jet> jets = GetJets(param.Jet_ID, 30., 2.4);
+
   std::sort(muons.begin(), muons.end(), PtComparing);
   std::sort(basic_jets.begin(), basic_jets.end(), PtComparing);
-  //std::sort(jets.begin(), jets.end(), PtComparing);
 
   vector<Jet> jets;
   jets.clear();
   unsigned int nmax_bjets = 15, nmax_jets = 15, nbjets=0, njets=0;
   for(unsigned int i=0; i<basic_jets.size(); i++){
     double this_discr = basic_jets.at(i).GetTaggerResult(btagger);
-    if( this_discr > mcCorr->GetJetTaggingCutValue(btagger, btagWP)) nbjets++;
-    else njets++;
-    if( this_discr > mcCorr->GetJetTaggingCutValue(btagger, btagWP) && nbjets < nmax_bjets+1) jets.push_back(basic_jets.at(i));
-    else if(this_discr < mcCorr->GetJetTaggingCutValue(btagger, btagWP) && njets < nmax_jets+1) jets.push_back(basic_jets.at(i));
+    if(this_discr > mcCorr->GetJetTaggingCutValue(btagger, btagWP)){
+      nbjets++;
+      if(nbjets < nmax_bjets+1) jets.push_back(basic_jets.at(i));
+    }
+    else{
+      njets++;
+      if(njets < nmax_jets+1) jets.push_back(basic_jets.at(i));
+    }
   }
   // this jets set is the input of Kinematic fitter
   std::sort(jets.begin(), jets.end(), PtComparing);
@@ -146,11 +144,11 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     //==== Example of applying Muon scale factors
     for(unsigned int i=0; i<muons.size(); i++){
       Lepton *l = (Lepton *)(&muons.at(i));
-      double this_idsf  = 1.; //FixMe : Lepton_SF(param.Muon_ID_SF_Key, l, 0);
+      double this_idsf  = Lepton_SF(param.Muon_ID_SF_Key, l, 0);
       double this_isosf = 1.;
       weight *= this_idsf*this_isosf;
     }
-    double this_trigsf = 1.; //FixMe : LeptonTrigger_SF(param.Muon_Trigger_SF_Key, MakeLeptonPointerVector(muons), 0);
+    double this_trigsf = LeptonTrigger_SF(param.Muon_Trigger_SF_Key, MakeLeptonPointerVector(muons), 0);
     weight *= this_trigsf;
 
     JetTagging::Parameters jtp = JetTagging::Parameters(btagger, btagWP, JetTagging::incl, JetTagging::comb);
@@ -168,7 +166,7 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   std::vector<bool> btag_vector{};
   for(unsigned int ij = 0 ; ij < jets.size(); ij++){
     double this_discr = jets.at(ij).GetTaggerResult(btagger);
-    if( this_discr > mcCorr->GetJetTaggingCutValue(btagger, btagWP)) btag_vector.push_back(true);
+    if(this_discr > mcCorr->GetJetTaggingCutValue(btagger, btagWP)) btag_vector.push_back(true);
     else btag_vector.push_back(false);
   }
 
@@ -509,4 +507,88 @@ void ExampleRun_kinFitter::GetTTLJGenParticles(const vector<Gen>& gens,Gen& part
       else l1+=*photon;
     }
   }
+}
+
+double ExampleRun_kinFitter::Lepton_SF(TString histkey,const Lepton* lep,int sys){
+  if(IsDATA) return 1.;
+  if(histkey=="") return 1.;
+  if(histkey=="Default") return 1.;
+  double this_pt,this_eta;
+  TH2* this_hist=NULL;
+  if(histkey.Contains(TRegexp("_Q$"))){
+    if(lep->Charge()>0) histkey+="Plus";
+    else histkey+="Minus";
+  }else if(histkey.Contains("_Q_")){
+    if(lep->Charge()>0) histkey.ReplaceAll("_Q_","_QPlus_");
+    else histkey.ReplaceAll("_Q_","_QMinus_");;
+  }
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    this_pt=((Muon*)lep)->MiniAODPt();
+    this_eta=lep->Eta();
+    this_hist=mcCorr->map_hist_Muon[histkey];
+    if(!this_hist && DataYear==2016 && !histkey.Contains("_BCDEF$") && !histkey.Contains("_GH$")){
+      double lumi_periodB = 5750.490644035;
+      double lumi_periodC = 2572.903488748;
+      double lumi_periodD = 4242.291556970;
+      double lumi_periodE = 4025.228136967;
+      double lumi_periodF = 3104.509131800;
+      double lumi_periodG = 7575.824256098;
+      double lumi_periodH = 8650.628380028;
+      double total_lumi = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF+lumi_periodG+lumi_periodH);
+
+      double WeightBtoF = (lumi_periodB+lumi_periodC+lumi_periodD+lumi_periodE+lumi_periodF)/total_lumi;
+      double WeightGtoH = (lumi_periodG+lumi_periodH)/total_lumi;
+
+      if(histkey.Contains("_SF_")){
+	TString histkey_data=histkey;
+	histkey_data.ReplaceAll("_SF_","_Eff_DATA_");
+	TString histkey_mc=histkey;
+	histkey_mc.ReplaceAll("_SF_","_Eff_MC_");
+	double data_eff=WeightBtoF*Lepton_SF(histkey_data+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey_data+"_GH",lep,sys);
+	double mc_eff=WeightBtoF*Lepton_SF(histkey_mc+"_BCDEF",lep,-sys)+WeightGtoH*Lepton_SF(histkey_mc+"_GH",lep,-sys);
+	if(mc_eff==0) return 1;
+	else return data_eff/mc_eff;
+      }else if(histkey.Contains("_Eff_")){
+	return WeightBtoF*Lepton_SF(histkey+"_BCDEF",lep,sys)+WeightGtoH*Lepton_SF(histkey+"_GH",lep,sys);
+      }
+    }
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    this_pt=((Electron*)lep)->UncorrPt();
+    this_eta=((Electron*)lep)->scEta();
+    this_hist=mcCorr->map_hist_Electron[histkey];
+  }else{
+    cout <<"[ExampleRun_kinFitter::Lepton_SF] It is not lepton"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(!this_hist){
+    cout <<"[ExampleRun_kinFitter::Lepton_SF] no hist "<<histkey<<endl;
+    exit(EXIT_FAILURE);
+  }
+  double this_x,this_y;
+  if(this_hist->GetXaxis()->GetXmax()>this_hist->GetYaxis()->GetXmax()){
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetXaxis()->GetXmin()) return 0;
+    this_x=this_pt;
+    this_y=this_eta;
+  }else{
+    if(histkey.Contains("_Eff_") && this_pt<this_hist->GetYaxis()->GetXmin()) return 0;
+    this_x=this_eta;
+    this_y=this_pt;
+  }
+  return GetBinContentUser(this_hist,this_x,this_y,sys);
+}
+
+double ExampleRun_kinFitter::LeptonTrigger_SF(TString triggerSF_key,const vector<Lepton*>& leps,int sys){
+  if(IsDATA) return 1;
+  if(triggerSF_key=="") return 1;
+  if(triggerSF_key=="Default") return 1;
+
+  double data_eff=1.,mc_eff=1.;
+  for(const auto& lep:leps){
+    data_eff*=1-Lepton_SF("Trigger_Eff_DATA_"+triggerSF_key,lep,sys);
+    mc_eff*=1-Lepton_SF("Trigger_Eff_MC_"+triggerSF_key,lep,-sys);
+  }
+  data_eff=1-data_eff;
+  mc_eff=1-mc_eff;
+  if(mc_eff==0) return 1.;
+  else return data_eff/mc_eff;
 }

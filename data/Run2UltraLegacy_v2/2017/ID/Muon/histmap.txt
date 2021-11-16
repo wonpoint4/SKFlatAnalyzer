@@ -10,3 +10,9 @@ Trigger  Eff_DATA  IsoMu27_POGTight                        Efficiencies_muon_gen
 Trigger  Eff_MC    IsoMu27_POGTight                        Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers.root  NUM_IsoMu27_DEN_CutBasedIdTight_and_PFIsoTight_abseta_pt_efficiencyMC
 Trigger  Eff_DATA  Mu50_POGHighPtLooseTrkIso               Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers.root  NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose_abseta_pt_efficiencyData
 Trigger  Eff_MC    Mu50_POGHighPtLooseTrkIso               Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers.root  NUM_Mu50_or_OldMu100_or_TkMu100_DEN_CutBasedIdGlobalHighPt_and_TkIsoLoose_abseta_pt_efficiencyMC
+ID      SF        MediumID_trkIsoLoose_QPlus              UL2017_ID_Plus.root          SF_eta_pt
+ID      SF        MediumID_trkIsoLoose_QMinus             UL2017_ID_Minus.root         SF_eta_pt
+Trigger Eff_MC    IsoMu27_MediumID_trkIsoLoose_QPlus      UL2017_IsoMu27_Plus.root     muonEffi_mc_eta_pt
+Trigger Eff_MC    IsoMu27_MediumID_trkIsoLoose_QMinus     UL2017_IsoMu27_Minus.root    muonEffi_mc_eta_pt
+Trigger Eff_DATA  IsoMu27_MediumID_trkIsoLoose_QPlus      UL2017_IsoMu27_Plus.root     muonEffi_data_eta_pt
+Trigger Eff_DATA  IsoMu27_MediumID_trkIsoLoose_QMinus     UL2017_IsoMu27_Minus.root    muonEffi_data_eta_pt

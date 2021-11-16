@@ -907,6 +907,39 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
       else l1+=*photon;
     }
   }
+  /*
+  int idx=gen_l0.Index();
+  int n=0;
+  bool IsZ=false;
+  if(IsqG) cout<<"Incoming : qG, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+  else if(parton0.PID()==21 && parton0.PID()==parton1.PID()){
+    cout<<"Incoming : GG, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+    for(int i=0;i<ngen;i++){
+      gens.at(i).Print();
+    }
+  }
+  else if(parton0.PID()==parton1.PID()){
+    cout<<"Incoming : qq, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+    for(int i=0;i<ngen;i++){
+      gens.at(i).Print();
+    }
+  }
+  else if(parton0.PID()*parton1.PID()>0) cout<<"Incoming : qqdot, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+  else if(parton0.PID()+parton1.PID()==0) cout<<"Incoming : qqbar, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+  else if(parton0.PID()*parton1.PID()<0) cout<<"Incoming : qqbardot, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+  else cout<<"Incoming : What, and "<<parton0.PID()<<", "<<parton1.PID()<<endl;
+  cout<<"idx,  ID,  Status,  E,  Px,  Py,  Pz,  Eta,  M"<<endl;
+  for(int i=0;i<(int)lhes.size();i++){
+    cout<<lhes[i].Index()<<"\t"<<lhes[i].ID()<<"\t"<<lhes[i].Status()<<"\t"<<lhes[i].E()<<"\t"<<lhes[i].Px()<<"\t"<<lhes[i].Py()<<"\t"<<lhes[i].Pz()<<"\t"<<lhes[i].Eta()<<"\t"<<lhes[i].M()<<"\t"<<endl;
+  }
+  while(idx>=0){
+    cout<<"gen_l0's "<<n<<"'s mother: Index,PID,status = "<<idx<<", "<<gens.at(idx).PID()<<", "<<gens.at(idx).Status()<<endl;
+    if(gens.at(idx).PID()==23) IsZ=true;
+    idx=gens.at(idx).MotherIndex();
+    n++;
+  }
+  if(!IsZ) cout<<"No Z in history, gen_l0,1 dimass : "<<(gen_l0+gen_l1).M()<<endl;
+  */
 }
 
 Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
@@ -1305,6 +1338,7 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
     if(abs(softmus.at(l).IP3D())/softmus.at(l).IP3Derr() <2.) continue; // original, 2.5
     if(jet.DeltaR(softmus.at(l))<0.4) bmuon.push_back(softmus.at(l));
   }
+  /*
   //bmuon Study
   if(prefix!="" && bmuon.size() >0){
     for(unsigned int l=0; l<bmuon.size(); l++){
@@ -1341,7 +1375,7 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
       FillHist(prefix+"bmuon"+Form("%d",l)+charge+"_p_rest",bmuon.at(l).P(),eventweight,100,0,10);
       if(l==0) FillHist(prefix+"bmuon"+Form("%d",l)+charge+"_bjetCharge",jet.Charge(),eventweight,200,-2,2);
     }
-  }
+  }*/
 
   //belectron Trial
   for(unsigned int l=0; l<softels.size(); l++){
@@ -1351,6 +1385,7 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
     if(!softels.at(l).IsGsfCtfScPixChargeConsistent()) continue;
     if(jet.DeltaR(softels.at(l))<0.4) belectron.push_back(softels.at(l));
   }
+  /*
   //belectron Study
   if(prefix!="" && belectron.size() >0){
     for(unsigned int l=0; l<belectron.size(); l++){
@@ -1387,7 +1422,7 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
       FillHist(prefix+"belectron"+Form("%d",l)+charge+"_p_rest",belectron.at(l).P(),eventweight,100,0,10);
       if(l==0) FillHist(prefix+"belectron"+Form("%d",l)+charge+"_bjetCharge",jet.Charge(),eventweight,200,-2,2);
     }
-  }
+  }*/
   //The jet has soft muon inside, and its charge will determine the jet charge
   if(prefix!="") FillHist(prefix+"bjetCharge_raw",jetCharge,eventweight,200, -2, 2);
   if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
@@ -1526,46 +1561,67 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
         TLorentzVector genZ=(gen_l0+gen_l1);
         p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
 
-        // This test yields nothing as expected!
-        if(lhes[0].ID()!=gen_p0.PID()||lhes[1].ID()!=gen_p1.PID()) p.hprefix+="Weird1_";
-        if(lhes[0].Pz()<0||lhes[1].Pz()>0) p.hprefix+="Weird2_";
-
-        // Only qG, Gq collisions
-	if((abs(lhe_p0.ID())<=5&&lhe_p1.ID()==21) || (lhe_p0.ID()==21&&abs(lhe_p1.ID())<=5)){
-        //if((abs(gen_p0.PID())<=5&&gen_p1.PID()==21)) p.hprefix+="qG_";
-        //else p.hprefix+="Gq_";
-
+        // Only qqbar collisions (LO DY)
+        if(lhe_p0.ID()+lhe_p1.ID()==0) p.hprefix+="";
+        // Only qG collisions (NLO DY)
+        else if((abs(lhe_p0.ID())<=5&&lhe_p1.ID()==21) || (lhe_p0.ID()==21&&abs(lhe_p1.ID())<=5)){
+          //if((abs(gen_p0.PID())<=5&&gen_p1.PID()==21)) p.hprefix+="qG_";
+          //else p.hprefix+="Gq_";
           if(lhe_p0.ID()==5||lhe_p1.ID()==5) p.hprefix+="Dyb_";
           else if(lhe_p0.ID()==-5||lhe_p1.ID()==-5) p.hprefix+="Dybbar_";
           else if(lhe_p0.ID()==4||lhe_p1.ID()==4) p.hprefix+="Dyc_";
-          else if(lhe_p0.ID()==-4||lhe_p1.ID()==-4){
-            p.hprefix+="Dycbar_";
-            if(gen_j0.PID()!=-4){
-              cout<<"Dyc but gen_j0 isn't cbar, ID is "<<gen_j0.PID()<<endl;
-              PrintGens(gens);
+          else if(lhe_p0.ID()==-4||lhe_p1.ID()==-4) p.hprefix+="Dycbar_";
+          else p.hprefix+="Dyudsg_";
+        } // Only GG collisions (NNLO DY)
+        else if(lhe_p0.ID()==21 && lhe_p1.ID()==21){
+          Gen heavyparton = gens.at(0);
+          int nheavyparton = 0;
+          for(unsigned int i=0; i<gens.size(); i++){
+            if(!gens.at(i).isHardProcess()) continue;
+            if(abs(gens.at(i).PID())>=11 && abs(gens.at(i).PID())<=16) continue; // No Lepton
+            if(gens.at(i).PID()==22 || gens.at(i).PID()==23) continue; // No gamma, Z
+            if(gens.at(i).Pt() < 30 || abs(gens.at(i).Eta())>2.4) continue; // In the acceptance
+
+            if(nheavyparton==0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
+              heavyparton=gens.at(i);
+              nheavyparton++;
+              continue;
             }
-            if(lhe_j0.ID()!=-4){
-              cout<<"Dyc but lhe_j0 isn't cbar, ID is "<<lhe_j0.ID()<<endl;
-              PrintLHEs(lhes);
+            else if(nheavyparton>0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
+              heavyparton=(heavyparton.Pt()>gens.at(i).Pt()?heavyparton:gens.at(i));
+              break;
             }
           }
-          else if(abs(lhe_p0.ID())<4||abs(lhe_p1.ID())<4) p.hprefix+="Dyudsg_";
-          else p.hprefix+="Weird_"; //this should be empty
-        }
-        //qq qqbar GG collsions
-        else{
-          if(lhe_p0.ID()==21&&lhe_p1.ID()==21) p.hprefix+="Dygg_";
-          else if(lhe_p0.ID()+lhe_p1.ID()==0) p.hprefix+="Dyqqbar_";
-        /*
-          if(gen_j0.PID()==5 && lhe_j0.ID()==5) p.hprefix+="bBkg2_";
-          else if(gen_j0.PID()==-5 && lhe_j0.ID()==-5) p.hprefix+="bBkg3_";
-          else if(gen_j0.PID()==4 && lhe_j0.ID()==4) p.hprefix+="cBkg2_";
-          else if(gen_j0.PID()==-4 && lhe_j0.ID()==-4) p.hprefix+="cBkg3_";
-          else if(abs(lhe_j0.ID())==5) p.hprefix+="bBkg4_";
-          else if(abs(gen_j0.PID())==5) p.hprefix+="bBkg5_";
-          else if(abs(lhe_j0.ID())==4) p.hprefix+="cBkg4_";
-          else if(abs(gen_j0.PID())==4) p.hprefix+="cBkg5_";
-      	*/
+          if(nheavyparton>0 && heavyparton.PID()==5) p.hprefix+="Dyb_";//"Dyggb_";
+          else if(nheavyparton>0 && heavyparton.PID()==-5) p.hprefix+="Dybbar_";//"Dyggbbar_";
+          else if(nheavyparton>0 && heavyparton.PID()==4) p.hprefix+="Dyc_";//"Dyggc_";
+          else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyggcbar_";
+          else p.hprefix+="";//"Dygg_";
+        } // Only bq or cq collisions (NNLO DY)
+        else if(abs(lhe_p0.ID())==4 || abs(lhe_p0.ID())==5 || abs(lhe_p1.ID())==4 || abs(lhe_p1.ID())==5){
+          Gen heavyparton = gens.at(0);
+          int nheavyparton = 0;
+          for(unsigned int i=0; i<gens.size(); i++){
+            if(!gens.at(i).isHardProcess()) continue;
+            if(abs(gens.at(i).PID())>=11 && abs(gens.at(i).PID())<=16) continue; // No Lepton
+            if(gens.at(i).PID()==22 || gens.at(i).PID()==23) continue; // No gamma, Z
+            if(gens.at(i).Pt() < 30 || abs(gens.at(i).Eta())>2.4) continue; // In the acceptance
+
+            if(nheavyparton==0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
+              heavyparton=gens.at(i);
+              nheavyparton++;
+              continue;
+            }
+            else if(nheavyparton>0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
+              heavyparton=(heavyparton.Pt()>gens.at(i).Pt()?heavyparton:gens.at(i));
+              break;
+            }
+          }
+          if(nheavyparton>0 && heavyparton.PID()==5) p.hprefix+="Dyb_";//"Dyqqb_";
+          else if(nheavyparton>0 && heavyparton.PID()==-5) p.hprefix+="Dybbar_";//"Dyqqbbar_";
+          else if(nheavyparton>0 && heavyparton.PID()==4) p.hprefix+="Dyc_";//"Dyqqc_";
+          else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyqqcbar_";
+          else p.hprefix+="";//"Dyqq_";
         }
       }else p.hprefix+="tau_";
     }
