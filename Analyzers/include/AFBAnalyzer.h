@@ -10,6 +10,7 @@ public:
   void test();
   void initializeAnalyzer();
   void executeEvent();
+  void executeEventGen();
   Parameter MakeParameter(TString key);
   bool PassSelection(Parameter& p);
   void FillHists(Parameter& p);
@@ -23,25 +24,13 @@ public:
   double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
   double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
   void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
-  void FillHistsToy(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
   void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
-  void SetupToy(int n_toy);
-  void DeleteToy();
-  void GetToyWeight();
-  void FillHistToy(TString histname, double value, double weight, int n_bin, double x_min, double x_max);
-  void FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max);
-  void FillHistToy(TString histname, double value, double weight, int n_bin, double *xbins);
-  void FillHistToy(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
-  void FillHistToy(TString histname, double value_x, double value_y, double value_z, double weight, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
-  void FillHistToy(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins);
   void SetupCosThetaWeight();
   void DeleteCosThetaWeight();
   double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
 
   TString hardprefix;
-  vector<TRandom3*> toy_random;
-  vector<double> toy_weight;
   map<TString,TH3D*> map_hist_cost;
   double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;

@@ -567,7 +567,14 @@ root -l -b -q run.C 1>stdout.log 2>stderr.log
       condorOptions = ''
       if args.BatchName!="":
         condorOptions = ' -batch-name '+args.BatchName
-      os.system('condor_submit submit.jds '+condorOptions)
+      for i in range(2):
+        exitcode=os.system('condor_submit submit.jds '+condorOptions)
+        if exitcode:
+          print "ERROR: condor_submit failed with errno={}".format(exitcode)
+          print "       Retry after 60s ({})".format(i)
+          time.sleep(60)
+        else:
+          break;
     os.chdir(cwd)
 
   else:

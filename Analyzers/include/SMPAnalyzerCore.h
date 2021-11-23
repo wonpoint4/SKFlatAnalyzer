@@ -190,6 +190,12 @@ public:
   TH2* hcfrate_mc=NULL;
   TH2* hcfsf=NULL;
 
+  void SetupMuonTrackingSF();
+  double GetMuonTrackingSF(double eta,int sys=0);
+  void DeleteMuonTrackingSF();
+  TH1* fMuonTrackingSF=NULL;
+  bool jSetupMuonTrackingSF=false;
+
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
   void DeleteEfficiency();
@@ -199,15 +205,17 @@ public:
 
   void PrintGens(const vector<Gen>& gens);
   void PrintLHEs(vector<LHE>& lhes);
-  double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
-  double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
+  static double GetBinContentUser(TH1* hist,double valx,int sys);
+  static double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
+  static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
   void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);
-  TString Replace(TString str,TRegexp reg,TString repl);
+  static TString Replace(TString str,TRegexp reg,TString repl);
+  static map<TString,double> SelectWeights(map<TString,double> origin,vector<TString> keys);
   inline map<TString,double> Multiply(map<TString,double> a,double b){
     for(auto& iter:a) iter.second*=b;
     return a;

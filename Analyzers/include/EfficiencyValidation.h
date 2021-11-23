@@ -12,6 +12,7 @@ public:
   Parameter MakeParameter(TString key,TString option="");
   void FillHists(Parameter& p);
   void FillHistsEfficiency(Parameter& p,TString region);
+  virtual bool PassSelection(Parameter& p);
 
   EfficiencyValidation();
   ~EfficiencyValidation();

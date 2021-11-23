@@ -1,11 +1,7 @@
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer -i DYJets_Summer20 -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016a
+#SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016a
+#SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016a
+#SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_Summer20 -n 40 -e 2016a
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 40 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 40 -e 2016a
@@ -21,12 +17,10 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2016a
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2016a
 
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016b
-SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2016b
-SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016b
-SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016b
+#SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2016b
+#SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2016b
+#SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2016b
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 40 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 40 -e 2016b
@@ -42,10 +36,13 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2016b
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2016b
 
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2017
-SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2017
+#SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2017
+#SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2017
+#SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2017
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 40 -e 2017
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 40 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 20 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 20 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleElectron -n 20 -e 2017
@@ -58,10 +55,13 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 
-SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2018
-SKFlat.py -a AFBAnalyzer -i DYJets_MG -n 40 -e 2018
+#SKFlat.py -a AFBAnalyzer -i DYJets -n 40 -e 2018
+#SKFlat.py -a AFBAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2018
+#SKFlat.py -a AFBAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets -n 40 -e 2018
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJets_MG -n 40 -e 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 40 -e 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 40 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i EGamma -n 30 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 20 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleMuon -n 20 -e 2018
