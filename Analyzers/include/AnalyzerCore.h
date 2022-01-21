@@ -203,7 +203,7 @@ public:
   TH3D* GetHist3D(TString histname);
 
   void FillHist(TString histname, double value, double weight, int n_bin, double x_min, double x_max);
-  void FillHist(TString histname, double value, double weight, int n_bin, double *xbins);
+  void FillHist(TString histname, double value, double weight, int n_bin, const double *xbins);
   void FillHist(TString histname,
                 double value_x, double value_y,
                 double weight,
@@ -212,8 +212,8 @@ public:
   void FillHist(TString histname,
                 double value_x, double value_y,
                 double weight,
-                int n_binx, double *xbins,
-                int n_biny, double *ybins);
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		double weight,

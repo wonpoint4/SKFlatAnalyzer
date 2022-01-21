@@ -47,4 +47,14 @@ void ZptWeight::FillHists(Parameter& p){
     TString suf=p.suffix+wname;    
     FillHist(pre+"myptgpt"+suf,dimass,dirap,dipt,genZ.Pt(),w,massbinnum,massbin,ybinnum,ybin,ptbinnum,ptbin,ptbinnum,ptbin);
   }
+
+  if(dimass>76&&dimass<106){
+    FillHist(p.prefix+p.hprefix+"pt_nozptweight",dipt,weightmap["_nozptweight"],ptbinnum,ptbin);
+    if(IsDYSample){
+      for(unsigned int i=0;i<weight_Scale->size();i++){
+	double scale=isnormal(weight_Scale->at(i)) ? weight_Scale->at(i) : 1.;
+	FillHist(p.prefix+p.hprefix+"pt_nozptweight"+Form("_scalevariation%d",i),dipt,weightmap["_nozptweight"]*scale,ptbinnum,ptbin);
+      }
+    }
+  }
 }
