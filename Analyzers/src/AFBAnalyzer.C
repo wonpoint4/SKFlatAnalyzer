@@ -99,16 +99,16 @@ void AFBAnalyzer::executeEventGen(){
   costhetaweight=1.;
   costhetaweight_up=1.;
   costhetaweight_down=1.;
-  if(IsDYSample){
+  if(IsDYSample||MCSample.Contains("GamGamToLL")){
     //////////////////////// Check LHE /////////////////////////
     if(abs(lhe_l0.ID())!=15){
       Parameter p;
       double letacut=2.4;
-      if(abs(lhe_l0.ID())==11){
+      if(abs(lhe_l0.ID())==11 || (!lhes.size()&&abs(gen_l0.PID())==11) ){
 	p=MakeParameter("ee");
 	p.c.lepton0pt=25;
 	p.c.lepton1pt=15;
-      }else if(abs(lhe_l0.ID())==13){
+      }else if(abs(lhe_l0.ID())==13 || (!lhes.size()&&abs(gen_l0.PID())==13) ){
 	p=MakeParameter("mm");
 	p.c.lepton0pt=20;
 	p.c.lepton1pt=10;
@@ -125,21 +125,21 @@ void AFBAnalyzer::executeEventGen(){
       double gen_Zrap=gen_Z.Rapidity();
       double gen_Zpt=gen_Z.Pt();
       double gen_cost_correct=-999;
-      if(gen_p0.PID()==21){
-	if(gen_p1.PID()==21) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,0);
+      if(gen_p0.PID()==21||gen_p0.PID()==22){
+	if(gen_p1.PID()==21||gen_p1.PID()==22) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,0);
 	else if(gen_p1.PID()>0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,-1);
 	else if(gen_p1.PID()<0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,1);
       }else if(gen_p0.PID()>0){
-	if(gen_p1.PID()==21) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,1);
+	if(gen_p1.PID()==21||gen_p1.PID()==22) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,1);
 	else if(gen_p1.PID()>0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,0);
 	else if(gen_p1.PID()<0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,1);
       }else if(gen_p0.PID()<0){
-	if(gen_p1.PID()==21) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,-1);
+	if(gen_p1.PID()==21||gen_p1.PID()==22) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,-1);
 	else if(gen_p1.PID()>0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,-1);
 	else if(gen_p1.PID()<0) gen_cost_correct=GetCosThetaCS(&gen_l0,&gen_l1,0);
       }
       if(gen_cost_correct==-999){
-	cout<<"wrong pid for parton"<<endl;
+	cout<<"wrong pid for parton: "<<gen_p0.PID()<<" "<<gen_p1.PID()<<endl;
 	exit(EXIT_FAILURE);
       }
       //costhetaweight=GetCosThetaWeight(gen_Zmass,gen_Zpt,gen_cost_correct,"_pdg");

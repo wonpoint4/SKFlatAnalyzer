@@ -31,7 +31,7 @@ void SMPAnalyzerCore::beginEvent(){
   if(!IsDATA){
     lhes=GetLHEs();
     gens=GetGens();
-    if(IsDYSample){
+    if(IsDYSample||MCSample.Contains("GamGamToLL")){
       GetDYLHEParticles(lhes,lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0);
       GetDYGenParticles(gens,gen_p0,gen_p1,gen_l0,gen_l1,3);
       GetDYGenParticles(gens,gen_p0,gen_p1,gen_l0_dressed,gen_l1_dressed,1);
@@ -779,7 +779,7 @@ double SMPAnalyzerCore::GetBinContentUser(TH3* hist,double valx,double valy,doub
   return hist->GetBinContent(hist->FindBin(valx,valy,valz))+sys*hist->GetBinError(hist->FindBin(valx,valy,valz));
 }
 void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0){
-  if(!IsDYSample){
+  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")){
     cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
   }
@@ -788,6 +788,7 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,
   l0=LHE();
   l1=LHE();
   j0=LHE();
+  if(!lhes.size()) return;
   for(int i=0;i<(int)lhes.size();i++){
     if(p0.ID()==0&&lhes[i].Status()==-1&&lhes[i].Eta()>0) p0=lhes[i];
     if(p1.ID()==0&&lhes[i].Status()==-1&&lhes[i].Eta()<0) p1=lhes[i];
@@ -811,7 +812,7 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,
 
 void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
   //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
-  if(!IsDYSample){
+  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")){
     cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
     exit(EXIT_FAILURE);
   }
@@ -826,7 +827,7 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     if(!gens.at(i).isPrompt()) continue;
     int genpid=gens.at(i).PID();
     if(gens.at(i).isHardProcess()){
-      if(abs(genpid)<7||genpid==21){
+      if(abs(genpid)<7||genpid==21||genpid==22){
 	if(parton0.IsEmpty()) parton0=gens[i];
 	else if(parton1.IsEmpty()) parton1=gens[i];
       }
@@ -1049,7 +1050,6 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
       if(fabs(el_eta)<2.4){
 	if(IsDATA){
 	  rc=rocele->kScaleDT(electron.UncorrPt(),el_eta,el_phi,electron.R9(),run,set,member);
-	  electron*=rc*electron.UncorrE()/electron.E();
 	}else{	
 	  Gen gen=SMPGetGenMatchedLepton(electron,gens,1);
 	  gRandom->SetSeed((run<<15)+(lumi<<10)+(event<<5)+electron.Eta()*100);
@@ -1059,9 +1059,10 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
 	  }else{
 	    rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
 	  }
-	  if(TMath::IsNaN(rc)) rc=1.;
-	  electron*=rc*electron.UncorrE()/electron.E();
 	}      
+	//if(electron.Pt()>100) rc=1.;
+	if(TMath::IsNaN(rc)) rc=1.;
+	electron*=rc*electron.UncorrE()/electron.E();
       }
     }else if(set==-1){ //no energe cor
       electron*=electron.UncorrE()/electron.E();
