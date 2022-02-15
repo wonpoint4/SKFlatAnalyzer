@@ -173,7 +173,6 @@ public:
   static bool IsExists(TString filepath);
   static vector<TString> Split(TString s,TString del);
 
-  void SetupZ0Weight();
   void SetupRoccoR();
   double GetZ0Weight(double z0);
 
@@ -226,7 +225,6 @@ public:
   vector<TF1*> fZptWeightM;
   TAxis* fZptWeightMaxis=NULL;
 
-  TF1 *hz0_data=NULL, *hz0_mc=NULL;
   bool IsDYSample=false;
   Event _event;
   double reductionweight=1;

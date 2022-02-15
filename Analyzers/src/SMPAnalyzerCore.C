@@ -4,8 +4,6 @@ SMPAnalyzerCore::SMPAnalyzerCore(){}
 SMPAnalyzerCore::~SMPAnalyzerCore(){
   if(roc) delete roc;
   if(rocele) delete rocele;
-  if(hz0_data) delete hz0_data;
-  if(hz0_mc) delete hz0_mc;
   for(std::map< TString, TH4D* >::iterator mapit = maphist_TH4D.begin(); mapit!=maphist_TH4D.end(); mapit++){
     delete mapit->second;
   }
@@ -20,7 +18,6 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   else reductionweight=1.;
   SetupEfficiency();
   SetupRoccoR();
-  SetupZ0Weight();
   SetupCFRate();
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
@@ -628,18 +625,6 @@ void SMPAnalyzerCore::SetupRoccoR(){
   if(IsExists(rocelepath)) rocele=new Aepcor(rocelepath.Data());
   else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocelepath<<endl;  
 }
-void SMPAnalyzerCore::SetupZ0Weight(){
-  cout<<"[SMPAnalyzerCore::SetupZ0Weight] setting Z0Weight"<<endl;
-  TString datapath=getenv("DATA_DIR");
-  if(!IsExists(datapath+"/"+GetEra()+"/SMP/Z0Weight.root")){
-    cout<<"[SMPAnalyzerCore::SetupZ0Weight] no Z0Weight.root"<<endl;
-    return;
-  }
-  TFile fz0(datapath+"/"+GetEra()+"/SMP/Z0Weight.root");
-  hz0_data=(TF1*)fz0.Get("data_fit");
-  hz0_mc=(TF1*)fz0.Get("mc_fit");
-  fz0.Close();
-}
 double SMPAnalyzerCore::GetZ0Weight(double valx){
   if(IsDATA) return 1.;
   double rt=1.;
@@ -667,7 +652,7 @@ void SMPAnalyzerCore::SetupCFRate(){
   cout<<"[SMPAnalyzerCore::SetupCFRate] setting CFRate"<<endl;
   TString datapath=getenv("DATA_DIR");
   if(!IsExists(datapath+"/"+GetEra()+"/SMP/CFRate.root")){
-    cout<<"[SMPAnalyzerCore::SetupZ0Weight] no CFRate.root"<<endl;
+    cout<<"[SMPAnalyzerCore::SetupCFRate] no CFRate.root"<<endl;
     return;
   }
   TFile f(datapath+"/"+GetEra()+"/SMP/CFRate.root");

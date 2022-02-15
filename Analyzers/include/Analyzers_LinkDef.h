@@ -21,6 +21,5 @@
 #pragma link C++ class EfficiencyValidation+;
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
-//#pragma link C++ class GetZ0Weight+;
 
 #endif
