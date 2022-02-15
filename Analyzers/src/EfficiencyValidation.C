@@ -16,7 +16,7 @@ void EfficiencyValidation::executeEvent(){
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("DoubleMuon")) 
     executeEventWithParameter(MakeParameter("mm"));
-  if(!IsDATA||DataStream.Contains("SingleMuon")) 
+  if(!IsDATA||DataStream.Contains("SingleMuon"))
     executeEventWithParameter(MakeParameter("mu"));
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")) 
     executeEventWithParameter(MakeParameter("ee"));
@@ -115,6 +115,7 @@ void EfficiencyValidation::FillHists(Parameter& p){
     p.weightmap["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     p.weightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     p.weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     
     for(int j=0,nj=fEff->nreplica;j<nj;j++){
       double electronRECOSF=p.w.electronRECOSF_sys.size() ? p.w.electronRECOSF_sys[0][j] : 1.;
@@ -159,6 +160,7 @@ void EfficiencyValidation::FillHists(Parameter& p){
 
   TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
   double dimass=dilepton.M();
+  FillHist(p.prefix+"m52to3000/"+p.hprefix+"dimass"+p.suffix,dimass,p.weightmap,mbinnum,mbin);
   if(dimass>=52&&dimass<150){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m52to150",p.weightmap[""]);
     FillHistsEfficiency(p,"m52to150/");
@@ -199,6 +201,8 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
     double dirap=dilepton.Rapidity();
     FillHist(pre+"dimass"+suf,dimass,w,196,52,150);
     FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
+    FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
+    FillHist(pre+"z0"+suf,vertex_Z,w,100,-20,20);
 
     if(wname!="") continue;
 
@@ -225,7 +229,6 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
       }
     }
       
-    FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
     FillHist(pre+"nlepton"+suf,p.muons.size()+p.electrons.size(),w,10,0,10);
     FillHist(pre+"met"+suf,pfMET_Type1_pt,w,100,0,200);
     FillHist(Form("%snPV%s",pre.Data(),suf.Data()),nPV,w,100,0,100);

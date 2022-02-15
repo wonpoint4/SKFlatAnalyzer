@@ -335,28 +335,28 @@ void SMPAnalyzerCore::WriteHist(){
 void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value,weight,n_bin,x_min,x_max);
 }
-void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins){
+void SMPAnalyzerCore::FillHist(TString histname, double value, map<TString,double> weights, int n_bin, const double *xbins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value,weight,n_bin,xbins);
 }
 void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,weight,n_binx,x_min,x_max,n_biny,y_min,y_max);
 }
-void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins){
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, map<TString,double> weights, int n_binx, const double *xbins, int n_biny, const double *ybins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,weight,n_binx,xbins,n_biny,ybins);
 }
 void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max, int n_binz, double z_min, double z_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,weight,n_binx,x_min,x_max,n_biny,y_min,y_max,n_binz,z_min,z_max);
 }
-void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins){
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, map<TString,double> weights, int n_binx, const double *xbins, int n_biny, const double *ybins, int n_binz, const double *zbins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins);
 }
 void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double x_min, double x_max, int n_biny, double y_min, double y_max, int n_binz, double z_min, double z_max, int n_binu, double u_min, double u_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,x_min,x_max,n_biny,y_min,y_max,n_binz,z_min,z_max,n_binu,u_min,u_max);
 }
-void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins, int n_binu, double *ubins){
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, const double *xbins, int n_biny, const double *ybins, int n_binz, const double *zbins, int n_binu, const double *ubins){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins,n_binu,ubins);
 }
-void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, double *xbins, int n_biny, double *ybins, int n_binz, double *zbins, int n_binu, double u_min, double u_max){
+void SMPAnalyzerCore::FillHist(TString histname, double value_x, double value_y, double value_z, double value_u, map<TString,double> weights, int n_binx, const double *xbins, int n_biny, const double *ybins, int n_binz, const double *zbins, int n_binu, double u_min, double u_max){
   for(const auto& [suffix,weight]:weights) FillHist(histname+suffix,value_x,value_y,value_z,value_u,weight,n_binx,xbins,n_biny,ybins,n_binz,zbins,n_binu,u_min,u_max);
 }
 
@@ -641,11 +641,27 @@ void SMPAnalyzerCore::SetupZ0Weight(){
   fz0.Close();
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
-  return 1.; /// FIXME: no Z0 weight for UL
-  double data_val = hz0_data->Eval(valx);
-  double mc_val = hz0_mc->Eval(valx);
-  double norm = hz0_mc->Integral(-100,100)/hz0_data->Integral(-100,100);
-  return norm*data_val/mc_val;
+  if(IsDATA) return 1.;
+  double rt=1.;
+  if(GetEra()=="2016preVFP"){
+    double data_val=TMath::Gaus(valx,2.46312e-01,3.50458e+00,true);
+    double mc_val=TMath::Gaus(valx,9.28612e-01,3.65203e+00,true);
+    rt=data_val/mc_val;
+  }else if(GetEra()=="2016postVFP"){
+    double data_val=TMath::Gaus(valx,2.41640e-01,3.63717e+00,true);
+    double mc_val=TMath::Gaus(valx,9.30108e-01,3.65454e+00,true);
+    rt=data_val/mc_val;
+  }else if(GetEra()=="2017"){
+    double data_val=TMath::Gaus(valx,3.81830e-01,3.67614e+00,true);
+    double mc_val=TMath::Gaus(valx,8.19642e-01,3.50992e+00,true);
+    rt=data_val/mc_val;
+  }else if(GetEra()=="2018"){
+    double data_val=TMath::Gaus(valx,-1.36030e-01,3.41464e+00,true);
+    double mc_val=TMath::Gaus(valx,3.58575e-02,3.50953e+00,true);
+    rt=data_val/mc_val;
+  } 
+  if(rt>2) rt=2;
+  return rt;
 }
 void SMPAnalyzerCore::SetupCFRate(){
   cout<<"[SMPAnalyzerCore::SetupCFRate] setting CFRate"<<endl;

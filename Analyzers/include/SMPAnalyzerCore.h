@@ -121,7 +121,7 @@ public:
 
   using AnalyzerCore::FillHist;
   void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max);
-  void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
+  void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, const double *xbins);
   void FillHist(TString histname,
 		double value_x, double value_y,
 		map<TString,double> weights,
@@ -130,8 +130,8 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		map<TString,double> weights,
@@ -141,9 +141,9 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
@@ -154,16 +154,16 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
-                int n_binu, double *ubins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins,
+                int n_binu, const double *ubins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins,
                 int n_binu, double u_min, double u_max);
   virtual void FillHists(Parameter& p);
 
