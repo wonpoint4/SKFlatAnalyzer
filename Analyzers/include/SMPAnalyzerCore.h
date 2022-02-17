@@ -49,6 +49,7 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
+      double weakweight=1;
       double electronRECOSF=1;
       vector<vector<double>> electronRECOSF_sys;
       double electronIDSF=1;
@@ -189,6 +190,8 @@ public:
   void DeleteMuonTrackingSF();
   TH1* fMuonTrackingSF=NULL;
   bool jSetupMuonTrackingSF=false;
+
+  double GetDYWeakWeight(double mass);
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();

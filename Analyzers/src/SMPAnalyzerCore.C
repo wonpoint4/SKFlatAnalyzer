@@ -48,9 +48,10 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"prefire",p.w.lumiweight*p.w.PUweight*p.w.prefireweight);
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"zpt",p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight);
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"z0",p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight);
+    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"weak",p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight);
   }
 
-  double eventweight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight;
+  double eventweight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
   if(p.weightbit&NominalWeight) FillHist(p.prefix+p.hprefix+"nlepton"+p.suffix,p.muons.size()+p.electrons.size(),eventweight,10,0,10);
 
   /////////////////////// selection ///////////////////////
@@ -178,7 +179,7 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   }
 }
 bool SMPAnalyzerCore::PassSelection(Parameter& p){
-  double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight;
+  double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
 
   if(!PassMETFilter()) return false;
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"METfilter",weight);  
@@ -299,7 +300,7 @@ void SMPAnalyzerCore::FillHist(TString histname,
 
 }
 void SMPAnalyzerCore::FillHists(Parameter& p){
-  double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
   TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
   double dimass=dilepton.M();
   if(dimass>=60&&dimass<120){
@@ -731,6 +732,39 @@ void SMPAnalyzerCore::DeleteMuonTrackingSF(){
   }
   fMuonTrackingSF=NULL;
   jSetupMuonTrackingSF=false;
+}
+double SMPAnalyzerCore::GetDYWeakWeight(double mass){
+  if(IsDATA) return 1.;
+  if(!IsDYSample) return 1.;
+  if(mass<55) return 0.988939;
+  else if(mass<60) return 0.992556;
+  else if(mass<65) return 0.996362;
+  else if(mass<70) return 1.00086;
+  else if(mass<75) return 1.00593;
+  else if(mass<80) return 1.00989;
+  else if(mass<85) return 1.01263;
+  else if(mass<90) return 1.01373;
+  else if(mass<95) return 1.01338;
+  else if(mass<100) return 1.01242;
+  else if(mass<110) return 1.01078;
+  else if(mass<120) return 1.00839;
+  else if(mass<130) return 1.00628;
+  else if(mass<140) return 1.00461;
+  else if(mass<150) return 1.0033;
+  else if(mass<170) return 1.00201;
+  else if(mass<200) return 0.999256;
+  else if(mass<250) return 0.995825;
+  else if(mass<300) return 0.992451;
+  else if(mass<400) return 0.986289;
+  else if(mass<500) return 0.979024;
+  else if(mass<600) return 0.972292;
+  else if(mass<700) return 0.967596;
+  else if(mass<800) return 0.959725;
+  else if(mass<1000) return 0.953025;
+  else if(mass<1500) return 0.935142;
+  else if(mass<2000) return 0.909548;
+  else if(mass<3000) return 0.8895;
+  else return 0.900657;
 }
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
   cout<<"index\tpid\tmother\tstatus\tpropt\thard\n";
@@ -1214,6 +1248,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.prefireweight=1;  p.w.prefireweight_up=1;  p.w.prefireweight_down=1;
   p.w.z0weight=1;
   p.w.zptweight=1;
+  p.w.weakweight=1;
   if(!IsDATA){
     p.w.lumiweight*=weight_norm_1invpb*_event.MCweight()*_event.GetTriggerLumi("Full");
     p.w.PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -1227,6 +1262,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       if(abs(lhe_l0.ID())==11||abs(lhe_l0.ID())==13){
 	TLorentzVector genZ=(gen_l0+gen_l1);
 	p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
+	p.w.weakweight=GetDYWeakWeight(genZ.M());
       }else p.hprefix+="tau_";
     }
   }
