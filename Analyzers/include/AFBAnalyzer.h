@@ -36,11 +36,9 @@ public:
   bool IsNominalRun=true;
   bool IsSkimmed=false;
 
-  std::vector<Muon> Muons;
-  std::vector<Electron> Electrons;
   std::vector<Jet> jets, realjets, bjets;
-  int n_bjet=0;
-  int n_powerbjet=0;
+  int n_loosebjet=0;
+  int n_loose30bjet=0;
   double bjet_charge=-5.5;
   TLorentzVector bjet;
 

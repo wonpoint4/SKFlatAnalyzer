@@ -176,8 +176,9 @@ public:
   void SetupZ0Weight();
   void SetupRoccoR();
   double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
-  void SetupPUJetWeight(TString ID="Medium");
-  double GetPUJetWeight(const vector<Jet>& jets, int sys);
+  bool PUJetIDPass(const Jet jet, TString ID="Loose");
+  void SetupPUJetWeight();
+  double GetPUJetWeight(const vector<Jet>& jets, TString ID="Loose", int sys=0);
   bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
   double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1.);
   double GetZ0Weight(double z0);
@@ -238,8 +239,6 @@ public:
   bool IsDYSample=false;
   Event _event;
   double reductionweight=1;
-  double pujetweight=1;
-  double btagweight=1;
 
   vector<LHE> lhes;
   LHE lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0;

@@ -8,13 +8,13 @@ void ExampleRun_kinFitter::initializeAnalyzer(){
 
   MuonIDs = { "DeepJetM", "DeepJetT" };
 
-  if(DataEra=="2018"){
-    IsoMuTriggerName = "HLT_IsoMu24_v";
-    TriggerSafePtCut = 26.;
-  }
-  else if(DataEra=="2017"){
+  if(DataEra=="2017"){
     IsoMuTriggerName = "HLT_IsoMu27_v";
     TriggerSafePtCut = 29.;
+  }
+  else{
+    IsoMuTriggerName = "HLT_IsoMu24_v";
+    TriggerSafePtCut = 26.;
   }
 
   cout << "[ExampleRun_kinFitter::initializeAnalyzer] IsoMuTriggerName = " << IsoMuTriggerName << endl;

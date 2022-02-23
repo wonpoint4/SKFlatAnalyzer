@@ -1127,7 +1127,7 @@ void MCCorrection::SetupMCJetTagEff(){
   cout<<"[MCCorrection::SetupMCJetTagEff] setting MCJetTagEff"<<endl;
 
   TString datapath=getenv("DATA_DIR");
-  TString mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_TTLL_TTLJ_hadded.root";
+  TString mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_TTLL_TTLJ_QCD_Pt170toInf_hadded.root";
   ifstream fcheck(mcjetpath);
   if(!fcheck.good()){
     cout<<"[MCCorrection::SetupMCJetTagEff] no "+mcjetpath<<endl;

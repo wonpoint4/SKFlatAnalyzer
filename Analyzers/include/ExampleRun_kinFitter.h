@@ -27,6 +27,7 @@ public:
   vector<Jet> AllJets;
 
   double weight_Prefire;
+  double btagweight;
 
   ExampleRun_kinFitter();
   ~ExampleRun_kinFitter();
