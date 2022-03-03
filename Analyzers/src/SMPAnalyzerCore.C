@@ -1463,7 +1463,7 @@ bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
 }
 
 //double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode){
-double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, double eventweight){
+double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, double eventweight, bool doFillHists){
   //In mode0, output is jet charge (Sum of pt weighted charge of tracks)
   double jetCharge = jet.Charge();
   if(mode == 0) return jetCharge;
@@ -1488,22 +1488,26 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
     if(jet.DeltaR(softels.at(l))<0.4) belectron.push_back(softels.at(l));
   }
 
+  if(doFillHists){
+    if(prefix!="") FillHist(prefix+"bjetCharge_raw",jetCharge,eventweight,200, -2, 2);
+  }
   //The jet has soft muon inside, and its charge will determine the jet charge
-  if(prefix!="") FillHist(prefix+"bjetCharge_raw",jetCharge,eventweight,200, -2, 2);
   if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
   else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
-  if(prefix!="") FillHist(prefix+"bjetCharge_rawwide",jetCharge,eventweight,1000, -10, 10);
-  if(prefix!="" && jetCharge > 0.) FillHist(prefix+"bjetCharge_rawwide_plus",jetCharge,eventweight,500, 0, 10);
-  if(prefix!="" && jetCharge > 0.1) FillHist(prefix+"bjetCharge_rawwide_plus01",jetCharge,eventweight,500, 0, 10);
-  if(prefix!="" && jetCharge > 0.2) FillHist(prefix+"bjetCharge_rawwide_plus02",jetCharge,eventweight,500, 0, 10);
-  if(prefix!="" && jetCharge > 0.3) FillHist(prefix+"bjetCharge_rawwide_plus03",jetCharge,eventweight,500, 0, 10);
-  if(prefix!="" && jetCharge > 0.4) FillHist(prefix+"bjetCharge_rawwide_plus04",jetCharge,eventweight,500, 0, 10);
-  if(prefix!="" && jetCharge < 0.) FillHist(prefix+"bjetCharge_rawwide_minus",jetCharge,eventweight,500, -10, 0);
-  if(prefix!="" && jetCharge < -0.1) FillHist(prefix+"bjetCharge_rawwide_minus01",jetCharge,eventweight,500, -10, 0);
-  if(prefix!="" && jetCharge < -0.2) FillHist(prefix+"bjetCharge_rawwide_minus02",jetCharge,eventweight,500, -10, 0);
-  if(prefix!="" && jetCharge < -0.3) FillHist(prefix+"bjetCharge_rawwide_minus03",jetCharge,eventweight,500, -10, 0);
-  if(prefix!="" && jetCharge < -0.4) FillHist(prefix+"bjetCharge_rawwide_minus04",jetCharge,eventweight,500, -10, 0);
 
+  if(doFillHists){
+    if(prefix!="") FillHist(prefix+"bjetCharge_rawwide",jetCharge,eventweight,1000, -10, 10);
+    if(prefix!="" && jetCharge > 0.) FillHist(prefix+"bjetCharge_rawwide_plus",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.1) FillHist(prefix+"bjetCharge_rawwide_plus01",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.2) FillHist(prefix+"bjetCharge_rawwide_plus02",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.3) FillHist(prefix+"bjetCharge_rawwide_plus03",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.4) FillHist(prefix+"bjetCharge_rawwide_plus04",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge < 0.) FillHist(prefix+"bjetCharge_rawwide_minus",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.1) FillHist(prefix+"bjetCharge_rawwide_minus01",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.2) FillHist(prefix+"bjetCharge_rawwide_minus02",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.3) FillHist(prefix+"bjetCharge_rawwide_minus03",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.4) FillHist(prefix+"bjetCharge_rawwide_minus04",jetCharge,eventweight,500, -10, 0);
+  }
   return jetCharge;
 }
 

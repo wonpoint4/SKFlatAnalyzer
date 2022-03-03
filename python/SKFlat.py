@@ -191,12 +191,13 @@ if args.Skim!="":
 
 ## Define MasterJobDir
 
-MasterJobDir = SKFlatRunlogDir+'/'+timestamp+'__'+str_RandomNumber+"__"+args.Analyzer+'__'+'Era'+args.Era
+MasterJobDir = SKFlatRunlogDir+'/'+timestamp
 if args.Skim!="":
   MasterJobDir += "__"+args.Skim
+MasterJobDir += '__'+args.InputSample+'__'+'Era'+args.Era+"__"+args.Analyzer
 for flag in Userflags:
   MasterJobDir += '__'+flag
-MasterJobDir += '__'+HOSTNAME+'/'
+MasterJobDir += '__'+str_RandomNumber+'__'+HOSTNAME+'/'
 
 ## Copy libray
 
@@ -238,7 +239,7 @@ for InputSample in InputSamples:
   os.system('mkdir -p '+base_rundir+'/output/')
 
   ## Create webdir
-  ## cf) base_rundir = $SKFlatRunlogDir/2019_02_26_222038__GetEffLumi__Era2016__KISTI/WW_pythia/
+  ## cf) base_rundir = $SKFlatRunlogDir/2022_03_04_022050__SkimTree_Dilepton__ZZ_pythia__Era2017__AFBAnalyzer__530714__TAMSA1/ZZ_pythia/
 
   this_webdir = webdirpathbase+'/'+base_rundir.replace(SKFlatRunlogDir,'').replace(HOSTNAME+'/',HOSTNAME+'__')
   os.system('mkdir -p '+this_webdir)
@@ -885,10 +886,13 @@ try:
                   nhadd=int(os.popen("pgrep -x hadd -u $USER |wc -l").read().strip())
                   if nhadd<4: break
                   os.system('echo "Too many hadd currently (nhadd='+str(nhadd)+'). Sleep 60s" >> JobStatus.log')
-                  time.sleep(60)                  
-                os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
-                os.system('rm output/*.root')
-                #os.system('condor_run -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root output/*.root 2>&1 >> JobStatus.log"')
+                  time.sleep(60)
+                if NJobs<35:
+                  os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
+                  os.system('rm output/*.root')
+                else:
+                  os.system('condor_run -a request_memory=6000 -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root '+base_rundir+'/output/*.root 2>&1 >> JobStatus.log"')
+                  os.system('rm output/*.root')
               else:
                 os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')
                 os.system('rm job_*/*.root')

@@ -180,7 +180,7 @@ public:
   void SetupPUJetWeight();
   double GetPUJetWeight(const vector<Jet>& jets, TString ID="Loose", int sys=0);
   bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
-  double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1.);
+  double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1., bool doFillHist=true);
   double GetZ0Weight(double z0);
 
   void SetupCFRate();
