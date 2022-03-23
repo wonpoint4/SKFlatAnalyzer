@@ -68,6 +68,10 @@ source $SKFlat_WD/bin/BashColorSets.sh
 ## submodules ##
 #source bin/CheckSubmodules.sh
 
+if [ "$1" = "-q" ];then
+    return
+fi
+
 ## Todo list ##
 python python/PrintToDoLists.py
 source $SKFlat_WD/tmp/ToDoLists.sh

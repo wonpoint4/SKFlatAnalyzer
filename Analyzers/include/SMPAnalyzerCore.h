@@ -68,6 +68,7 @@ public:
       double electron0pt=-1,electron1pt=-1;
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
+      int nelectronmax=-1,nmuonmax=-1;
     };
     Key k;
     Weight w;
@@ -192,6 +193,13 @@ public:
   bool jSetupMuonTrackingSF=false;
 
   double GetDYWeakWeight(double mass);
+
+  void SetupFakeRate();
+  double GetFakeRate(const Lepton *lep);
+  double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
+  void DeleteFakeRate();
+  TH2* fFakeRate_electron=NULL;
+  TH2* fFakeRate_muon=NULL;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();

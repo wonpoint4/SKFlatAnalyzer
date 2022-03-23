@@ -36,20 +36,20 @@ void AFBAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("me"));
-    executeEventWithParameter(MakeParameter("mM"));
     executeEventWithParameter(MakeParameter("mu"));
   }
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
+    executeEventWithParameter(MakeParameter("mM"));
     executeEventWithParameter(MakeParameter("MM"));
   }
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("em"));
-    executeEventWithParameter(MakeParameter("eE"));
     executeEventWithParameter(MakeParameter("el"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
+    executeEventWithParameter(MakeParameter("eE"));
     executeEventWithParameter(MakeParameter("EE"));
   }
 }
@@ -303,6 +303,81 @@ void AFBAnalyzer::FillHists(Parameter& p){
     if(!truth_l0.IsEmpty()&&!truth_l1.IsEmpty()) 
       FillHistsAFB(p.prefix,"truth_",p.suffix,(Particle*)&truth_l0,(Particle*)&truth_l1,map_weight);
     //else cout<<"no matching"<<endl;
+  }
+  // fill fake hists
+  /*
+  if(p.channel=="EE"&&p.prefix.Contains("EE")){
+    for(int i=0,n=p.aelectrons.size();i<n;i++){
+      for(int j=i+1,n=p.aelectrons.size();j<n;j++){
+	Parameter this_p=p;
+	this_p.prefix.ReplaceAll("EE","ee");
+	this_p.hprefix="fake_";
+	this_p.lepton0=&this_p.aelectrons.at(i);
+	this_p.lepton1=&this_p.aelectrons.at(j);
+	this_p.w.lumiweight*=GetFakeRate(&this_p.aelectrons.at(i))*GetFakeRate(&this_p.aelectrons.at(j));
+	for(int k=j+1,n=p.aelectrons.size();k<n;k++) this_p.w.lumiweight*=1+GetFakeRate(&this_p.aelectrons.at(k));
+	{
+	  double pt=this_p.aelectrons.at(i).Pt();
+	  double riso=this_p.aelectrons.at(i).RelIso();
+	  double f=TMath::Max(0.,TMath::Min(1.,(pt-30)/30));
+	  //if(fabs(this_p.aelectrons.at(i).Eta())<1.479) this_p.aelectrons.at(i)*=(1+f*riso-f*0.506/pt)/(1+f*0.0478);
+	  //else this_p.aelectrons.at(i)*=(1+f*riso-f*0.963/pt)/(1+f*0.0658);
+	}
+	{
+	  double pt=this_p.aelectrons.at(j).Pt();
+	  double riso=this_p.aelectrons.at(j).RelIso();
+	  double f=TMath::Max(0.,TMath::Min(1.,(pt-30)/30));
+	  //if(fabs(this_p.aelectrons.at(j).Eta())<1.479) this_p.aelectrons.at(j)*=(1+f*riso-f*0.506/pt)/(1+f*0.0478);
+	  //else this_p.aelectrons.at(j)*=(1+f*riso-f*0.963/pt)/(1+f*0.0658);
+	}
+	if(PassSelection(this_p)) FillHists(this_p);
+      }
+    }
+  }
+  if(p.channel=="MM"&&p.prefix.Contains("MM")){
+    for(int i=0,n=p.amuons.size();i<n;i++){
+      for(int j=i+1,n=p.amuons.size();j<n;j++){
+	Parameter this_p=p;
+	this_p.prefix.ReplaceAll("MM","mm");
+	this_p.hprefix="fake_";
+	this_p.lepton0=&this_p.amuons.at(i);
+	this_p.lepton1=&this_p.amuons.at(j);
+	this_p.w.lumiweight*=GetFakeRate(&this_p.amuons.at(i))*GetFakeRate(&this_p.amuons.at(j));
+	for(int k=j+1,n=p.amuons.size();k<n;k++) this_p.w.lumiweight*=1+GetFakeRate(&this_p.amuons.at(k));
+	{
+	  double pt=this_p.amuons.at(i).Pt();
+	  double riso=this_p.amuons.at(i).RelIso();
+	  double f=TMath::Max(0.,TMath::Min(1.,(pt-30)/30));
+	  //this_p.amuons.at(i)*=(1+f*riso)/(1+f*0.1);
+	}
+	{
+	  double pt=this_p.amuons.at(j).Pt();
+	  double riso=this_p.amuons.at(j).RelIso();
+	  double f=TMath::Max(0.,TMath::Min(1.,(pt-30)/30));
+	  //this_p.amuons.at(j)*=(1+f*riso)/(1+f*0.1);
+	}
+	if(PassSelection(this_p)) FillHists(this_p);
+      }
+    }
+  }
+  */
+  if(p.channel=="EE"&&p.prefix.Contains("EE")){
+    Parameter this_p=p;
+    this_p.prefix.ReplaceAll("EE","ee");
+    this_p.hprefix="fake_"+this_p.hprefix;
+    this_p.lepton0=&this_p.aelectrons.at(0);
+    this_p.lepton1=&this_p.aelectrons.at(1);
+    this_p.w.lumiweight*=GetFakeRate(this_p.lepton0)*GetFakeRate(this_p.lepton1);
+    FillHists(this_p);
+  }
+  if(p.channel=="MM"&&p.prefix.Contains("MM")){
+    Parameter this_p=p;
+    this_p.prefix.ReplaceAll("MM","mm");
+    this_p.hprefix="fake_"+this_p.hprefix;
+    this_p.lepton0=&this_p.amuons.at(0);
+    this_p.lepton1=&this_p.amuons.at(1);
+    this_p.w.lumiweight*=GetFakeRate(this_p.lepton0)*GetFakeRate(this_p.lepton1);
+    FillHists(this_p);
   }
 }
 

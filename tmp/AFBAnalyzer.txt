@@ -72,7 +72,7 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WW_pythia -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WZ_pythia -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2018
-SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2018
+SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 40 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i GamGamToLL -n 10 -e 2018

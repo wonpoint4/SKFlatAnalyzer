@@ -191,7 +191,12 @@ bool Muon::PassFilter(TString filter) const{
   }
   return false;
 }
-
+bool Muon::PassFilterOR(const vector<TString>& filters) const{
+  for(const auto& filter:filters)
+    if(PassFilter(filter))
+      return true;
+  return false;
+}
 bool Muon::PassPath(TString path) const{
   if( path=="HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_v" ) return j_pathbits&(ULong64_t(1)<<0);
   else if( path=="HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v" ) return j_pathbits&(ULong64_t(1)<<1);

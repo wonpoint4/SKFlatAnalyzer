@@ -110,6 +110,7 @@ public:
   void SetFilterBits(ULong64_t filterbits){ j_filterbits=filterbits; }
   void SetPathBits(ULong64_t pathbits){ j_pathbits=pathbits; }
   bool PassFilter(TString filter) const;
+  bool PassFilterOR(const vector<TString>& filters) const;
   bool PassPath(TString path) const;
 
 

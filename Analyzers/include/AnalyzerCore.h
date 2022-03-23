@@ -58,7 +58,7 @@ public:
   // std::sort(muons.begin(), muons.end(), PtComparing);
   //==== ** Recommend you to do the same for other objects (Electron, Jet, FatJet, ...) **
   inline static bool PtComparing(const Particle& p1, const Particle& p2){ return (p1.Pt() > p2.Pt()); }
-  inline static bool PtComparingPtr(Particle* p1, Particle* p2){ return (p1->Pt() > p2->Pt()); }
+  inline static bool PtComparingPtr(Particle* p1, Particle* p2){ return ((p1?p1->Pt():-1.) > (p2?p2->Pt():-1.)); }
 
   Event GetEvent();
 
