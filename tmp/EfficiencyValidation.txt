@@ -15,6 +15,7 @@ SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 
 SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 30 -e 2016a
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016a
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016a
+SKFlat.py -a EfficiencyValidation -i GamGamToLL --skim SkimTree_Dilepton -n 5 -e 2016a
 
 SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -n 10 -e 2016b
 SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -n 10 -e 2016b
@@ -32,6 +33,7 @@ SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 
 SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 30 -e 2016b
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016b
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2016b
+SKFlat.py -a EfficiencyValidation -i GamGamToLL --skim SkimTree_Dilepton -n 5 -e 2016b
 
 SKFlat.py -a EfficiencyValidation -i DoubleEG --skim SkimTree_Dilepton -n 10 -e 2017
 SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -n 10 -e 2017
@@ -49,6 +51,7 @@ SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 
 SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 30 -e 2017
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2017
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2017
+SKFlat.py -a EfficiencyValidation -i GamGamToLL --skim SkimTree_Dilepton -n 5 -e 2017
 
 SKFlat.py -a EfficiencyValidation -i EGamma --skim SkimTree_Dilepton -n 20 -e 2018
 SKFlat.py -a EfficiencyValidation -i DoubleMuon --skim SkimTree_Dilepton -n 20 -e 2018
@@ -65,4 +68,5 @@ SKFlat.py -a EfficiencyValidation -i WJets_MG --skim SkimTree_Dilepton -n 10 -e 
 SKFlat.py -a EfficiencyValidation -i TTLL_powheg --skim SkimTree_Dilepton -n 30 -e 2018
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_top_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2018
 SKFlat.py -a EfficiencyValidation -i SingleTop_tW_antitop_NoFullyHad --skim SkimTree_Dilepton -n 5 -e 2018
+SKFlat.py -a EfficiencyValidation -i GamGamToLL --skim SkimTree_Dilepton -n 5 -e 2018
 

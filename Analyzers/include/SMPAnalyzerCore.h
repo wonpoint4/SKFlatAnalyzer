@@ -49,6 +49,7 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
+      double weakweight=1;
       double electronRECOSF=1;
       vector<vector<double>> electronRECOSF_sys;
       double electronIDSF=1;
@@ -67,6 +68,7 @@ public:
       double electron0pt=-1,electron1pt=-1;
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
+      int nelectronmax=-1,nmuonmax=-1;
     };
     Key k;
     Weight w;
@@ -121,7 +123,7 @@ public:
 
   using AnalyzerCore::FillHist;
   void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double x_min, double x_max);
-  void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, double *xbins);
+  void FillHist(TString histname, double value, map<TString,double> weights, int n_bin, const double *xbins);
   void FillHist(TString histname,
 		double value_x, double value_y,
 		map<TString,double> weights,
@@ -130,8 +132,8 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		map<TString,double> weights,
@@ -141,9 +143,9 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
@@ -154,16 +156,16 @@ public:
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
-                int n_binu, double *ubins);
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins,
+                int n_binu, const double *ubins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z, double value_u,
 		map<TString,double> weights,
-		int n_binx, double *xbins,
-		int n_biny, double *ybins,
-		int n_binz, double *zbins,
+		int n_binx, const double *xbins,
+		int n_biny, const double *ybins,
+		int n_binz, const double *zbins,
                 int n_binu, double u_min, double u_max);
   virtual void FillHists(Parameter& p);
 
@@ -173,7 +175,6 @@ public:
   static bool IsExists(TString filepath);
   static vector<TString> Split(TString s,TString del);
 
-  void SetupZ0Weight();
   void SetupRoccoR();
   double GetZ0Weight(double z0);
 
@@ -190,6 +191,15 @@ public:
   void DeleteMuonTrackingSF();
   TH1* fMuonTrackingSF=NULL;
   bool jSetupMuonTrackingSF=false;
+
+  double GetDYWeakWeight(double mass);
+
+  void SetupFakeRate();
+  double GetFakeRate(const Lepton *lep);
+  double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
+  void DeleteFakeRate();
+  TH2* fFakeRate_electron=NULL;
+  TH2* fFakeRate_muon=NULL;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
@@ -226,7 +236,6 @@ public:
   vector<TF1*> fZptWeightM;
   TAxis* fZptWeightMaxis=NULL;
 
-  TF1 *hz0_data=NULL, *hz0_mc=NULL;
   bool IsDYSample=false;
   Event _event;
   double reductionweight=1;
