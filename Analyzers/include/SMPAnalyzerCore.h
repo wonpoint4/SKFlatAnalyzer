@@ -93,6 +93,7 @@ public:
   virtual void executeEventWithParameter(Parameter p);
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
+  virtual void EvalWeights(Parameter& p);
   virtual bool PassSelection(Parameter& p);
   virtual Parameter MakeParameter(TString channel,TString option="");
 

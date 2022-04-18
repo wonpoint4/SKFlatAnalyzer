@@ -29,6 +29,13 @@ void ZptWeight::executeEvent(){
     executeEventWithParameter(MakeParameter("ee"));
 }
 
+void ZptWeight::EvalWeights(Parameter& p){
+  TLorentzVector genZ=(gen_l0+gen_l1);
+  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  p.weightmap["_zptg"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt(),"G")*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  p.weightmap["_zptgy"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt(),"GY")*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  p.weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+}
 void ZptWeight::FillHists(Parameter& p){
   TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
   double dimass=dilepton.M();
@@ -36,24 +43,18 @@ void ZptWeight::FillHists(Parameter& p){
   double dirap=fabs(dilepton.Rapidity());
   TLorentzVector genZ=(gen_l0+gen_l1);
 
-  map<TString,double> weightmap;
-  weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-  weightmap["_zptg"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt(),"G")*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-  weightmap["_zptgy"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt(),"GY")*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-  weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-
-  for(const auto& [wname,w]:weightmap){
+  for(const auto& [wname,w]:p.weightmap){
     TString pre=p.prefix+p.hprefix;
     TString suf=p.suffix+wname;    
     FillHist(pre+"myptgpt"+suf,dimass,dirap,dipt,genZ.Pt(),w,massbinnum,massbin,ybinnum,ybin,ptbinnum,ptbin,ptbinnum,ptbin);
   }
 
   if(dimass>76&&dimass<106){
-    FillHist(p.prefix+p.hprefix+"pt_nozptweight",dipt,weightmap["_nozptweight"],ptbinnum,ptbin);
+    FillHist(p.prefix+p.hprefix+"pt_nozptweight",dipt,p.weightmap["_nozptweight"],ptbinnum,ptbin);
     if(IsDYSample){
       for(unsigned int i=0;i<weight_Scale->size();i++){
 	double scale=isnormal(weight_Scale->at(i)) ? weight_Scale->at(i) : 1.;
-	FillHist(p.prefix+p.hprefix+"pt_nozptweight"+Form("_scalevariation%d",i),dipt,weightmap["_nozptweight"]*scale,ptbinnum,ptbin);
+	FillHist(p.prefix+p.hprefix+"pt_nozptweight"+Form("_scalevariation%d",i),dipt,p.weightmap["_nozptweight"]*scale,ptbinnum,ptbin);
       }
     }
   }

@@ -13,6 +13,7 @@ public:
   void executeEventGen();
   Parameter MakeParameter(TString key);
   bool PassSelection(Parameter& p);
+  void EvalWeights(Parameter& p);
   void FillHists(Parameter& p);
 
   AFBAnalyzer();

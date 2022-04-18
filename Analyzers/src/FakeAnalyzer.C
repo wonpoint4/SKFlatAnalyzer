@@ -24,10 +24,7 @@ void FakeAnalyzer::executeEvent(){
 }
 
 void FakeAnalyzer::FillHists(Parameter& p){
-  map<TString,double> weightmap;
-  weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-
-  for(auto [suf,weight]:weightmap){
+  for(auto [suf,weight]:p.weightmap){
     TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
     double dimass=dilepton.M();
     if(dimass>52){

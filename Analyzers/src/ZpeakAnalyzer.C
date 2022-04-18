@@ -23,12 +23,12 @@ void ZpeakAnalyzer::executeEvent(){
   }
 }
 
+void ZpeakAnalyzer::EvalWeights(Parameter& p){
+  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+  p.weightmap["_noCFSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+}
 void ZpeakAnalyzer::FillHists(Parameter& p){
-  map<TString,double> weightmap;
-  weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-  weightmap["_noCFSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-
-  for(auto [suf,weight]:weightmap){
+  for(auto [suf,weight]:p.weightmap){
     TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
     double dimass=dilepton.M();
     FillHist(p.prefix+p.hprefix+"dimass"+p.suffix+suf,p.lepton0->Pt(),p.lepton0->Eta(),dimass,weight,nptbin,ptbins,netabin,etabins,nmassbin,massbins);

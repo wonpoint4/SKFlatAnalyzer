@@ -70,6 +70,9 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"CFSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF);
   }
 
+  ///////////// calculate weights ///////////////
+  EvalWeights(p);
+
   ////// Fill histograms //////////
   FillHists(p);
 }
@@ -179,6 +182,9 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
       }
     }
   }
+}
+void SMPAnalyzerCore::EvalWeights(Parameter& p){
+  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
 }
 bool SMPAnalyzerCore::PassSelection(Parameter& p){
   double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
@@ -358,15 +364,16 @@ void SMPAnalyzerCore::FillHist(TString histname,
 
 }
 void SMPAnalyzerCore::FillHists(Parameter& p){
-  double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-  TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
-  double dimass=dilepton.M();
-  if(dimass>=60&&dimass<120){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m60to120",weight);
-    FillHist(p.prefix+"m60to120/"+p.hprefix+"dimass"+p.suffix,dimass,weight,60,60,120);
-    if(dimass>=80&&dimass<100){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m80to100",weight);
-      FillHist(p.prefix+"m80to100/"+p.hprefix+"dimass"+p.suffix,dimass,weight,40,80,100);
+  for(auto [suf,weight]:p.weightmap){
+    TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
+    double dimass=dilepton.M();
+    if(dimass>=60&&dimass<120){
+      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix+suf,"m60to120",weight);
+      FillHist(p.prefix+"m60to120/"+p.hprefix+"dimass"+p.suffix+suf,dimass,weight,60,60,120);
+      if(dimass>=80&&dimass<100){
+	FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix+suf,"m80to100",weight);
+	FillHist(p.prefix+"m80to100/"+p.hprefix+"dimass"+p.suffix+suf,dimass,weight,40,80,100);
+      }
     }
   }
 }
