@@ -262,6 +262,12 @@ void AFBAnalyzer::FillHists(Parameter& p){
     map_weight["_nopujetSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["btagSF"];
   }
 
+  if(MCSample.Contains("MiNNLO")){
+    for(unsigned int i=0;i<weight_sthw2->size();i++){
+      map_weight[Form("_sthw2_%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_sthw2->at(i);
+    }
+  }
+
   // Syst (SYS)
   if(p.weightbit&SystematicWeight){
     if(!IsDATA){
@@ -336,8 +342,9 @@ void AFBAnalyzer::FillHists(Parameter& p){
     }
 
     if(MCSample.Contains("MiNNLO")){
-      map_weight["_sthw2_down"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_sthw2->at(0);
-      map_weight["_sthw2_up"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_sthw2->at(2);
+      for(unsigned int i=0;i<weight_sthw2->size();i++){
+        map_weight[Form("_sthw2_%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_sthw2->at(i);
+      }
       map_weight["_largeptscales"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_largeptscales->at(0);
       map_weight["_q0_up"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_q0->at(0);
       map_weight["_q0_down"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*costhetaweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.doublemap["PUJetSF"]*p.doublemap["btagSF"]*weight_q0->at(2);
@@ -510,6 +517,9 @@ void AFBAnalyzer::FillHists(Parameter& p){
     else FillHist(p.prefix+p.hprefix+"bjetCharge_raw_noSL",bjet_charge,eventweight,600,-6,6);
   }
 
+  FillHistsAFB(p.prefix,p.hprefix,"_bCh00"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 0.1) FillHistsAFB(p.prefix,p.hprefix,"_bCh01"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+
   if(fabs(bjet_charge) < 0.2) return;
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"bjetcharge0p2",eventweight);
 
@@ -552,6 +562,14 @@ void AFBAnalyzer::FillHists(Parameter& p){
     if(!truth_l0.IsEmpty()&&!truth_l1.IsEmpty())  FillHistsAFB(p.prefix,"truth_",p.suffix,(Particle*)&truth_l0,(Particle*)&truth_l1,map_weight);
     //else cout<<"no matching"<<endl;
   }
+
+  if(fabs(bjet_charge) > 0.3) FillHistsAFB(p.prefix,p.hprefix,"_bCh03"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 0.4) FillHistsAFB(p.prefix,p.hprefix,"_bCh04"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 0.5) FillHistsAFB(p.prefix,p.hprefix,"_bCh05"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 0.6) FillHistsAFB(p.prefix,p.hprefix,"_bCh06"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 1.0) FillHistsAFB(p.prefix,p.hprefix,"_bCh10"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+  if(fabs(bjet_charge) > 3.0) FillHistsAFB(p.prefix,p.hprefix,"_bCh30"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,map_weight);
+
 }
 
 AFBAnalyzer::AFBAnalyzer(){}
