@@ -1367,7 +1367,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.zptweight=1;
   p.w.weakweight=1;
   if(!IsDATA){
-    p.w.lumiweight*=weight_norm_1invpb*_event.MCweight()*_event.GetTriggerLumi("Full");
+    p.w.lumiweight*=MCweight()*_event.GetTriggerLumi("Full");
     p.w.PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
     p.w.PUweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
     p.w.PUweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
