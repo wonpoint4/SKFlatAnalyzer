@@ -94,12 +94,14 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
 	}
       }
       p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,0,0);
+      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
       if(p.weightbit&EfficiencyWeight){
 	int nset=p.w.electronIDSF_sys.size();
 	for(int s=0;s<nset;s++){
 	  int nmem=p.w.electronIDSF_sys[s].size();
 	  for(int m=0;m<nmem;m++){
 	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
+	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
 	  }
 	}
       }
@@ -1282,6 +1284,13 @@ void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
 void SMPAnalyzerCore::Parameter::SetElectronKeys(TString elID,vector<TString> trig){
   k.electronRECOSF="Electron_RECO";
   k.electronIDSF=elID;
+  k.electronIDSF2="";
+  k.triggerSF=trig;
+}
+void SMPAnalyzerCore::Parameter::SetElectronKeys(TString elID,TString elID2,vector<TString> trig){
+  k.electronRECOSF="Electron_RECO";
+  k.electronIDSF=elID;
+  k.electronIDSF2=elID2;
   k.triggerSF=trig;
 }
 void SMPAnalyzerCore::Parameter::SetMuonKeys(TString muID,TString muISO,vector<TString> trig){
@@ -1412,10 +1421,10 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
-  }else if(p.option.Contains("TightID_SelQ")&&p.channel=="el"){
-    p.prefix="tight/"+p.prefix;
-    p.SetElectronKeys("Electron_TightID_SelQ",{"Ele27_TightID_SelQ"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passTightID_SelQ",0.0,2.5),0,0));
+  }else if(p.option.Contains("SelQ")&&p.channel=="el"){
+    p.prefix="selq/"+p.prefix;
+    p.SetElectronKeys("Electron_MediumID","Electron_SelQ_MediumID",{"Ele27_SelQ_MediumID"});
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ",0.0,2.5),0,0));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -1423,10 +1432,10 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
     }else if(GetEraShort()=="2017"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
-      p.k.triggerSF={"Ele27_TightID_SelQ","Ele32_TightID_SelQ"};
+      p.k.triggerSF={"Ele27_SelQ_MediumID","Ele32_SelQ_MediumID"};
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Ele28_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
-      p.k.triggerSF={"Ele28_TightID_SelQ","Ele32_TightID_SelQ"};
+      p.k.triggerSF={"Ele28_SelQ_MediumID","Ele32_SelQ_MediumID"};
     }
   }else if(p.channel=="el"){
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
