@@ -22,5 +22,6 @@
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
 #pragma link C++ class FakeAnalyzer+;
+#pragma link C++ class SkimTree_EgammaTnP+;
 
 #endif

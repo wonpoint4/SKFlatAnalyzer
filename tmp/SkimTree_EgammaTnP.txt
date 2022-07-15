@@ -1,0 +1,15 @@
+SKFlat.py -a SkimTree_EgammaTnP -i SingleElectron -e 2016a -n 100 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJetsToEE_MiNNLO -e 2016a -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJets_MG -e 2016a -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+
+SKFlat.py -a SkimTree_EgammaTnP -i SingleElectron -e 2016b -n 100 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJetsToEE_MiNNLO -e 2016b -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJets_MG -e 2016b -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+
+SKFlat.py -a SkimTree_EgammaTnP -i SingleElectron -e 2017 -n 100 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJetsToEE_MiNNLO -e 2017 -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJets_MG -e 2017 -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+
+SKFlat.py -a SkimTree_EgammaTnP -i EGamma -e 2018 -n 100 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJetsToEE_MiNNLO -e 2018 -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
+SKFlat.py -a SkimTree_EgammaTnP -i DYJets_MG -e 2018 -n 300 -o /gv0/Users/hsseo/EgammaTnP/SKFlat
