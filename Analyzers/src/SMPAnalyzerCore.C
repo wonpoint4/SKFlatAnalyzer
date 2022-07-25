@@ -97,12 +97,14 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
 	}
       }
       p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,0,0);
+      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
       if(p.weightbit&EfficiencyWeight){
 	int nset=p.w.electronIDSF_sys.size();
 	for(int s=0;s<nset;s++){
 	  int nmem=p.w.electronIDSF_sys[s].size();
 	  for(int m=0;m<nmem;m++){
 	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
+	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
 	  }
 	}
       }
@@ -485,7 +487,7 @@ double SMPAnalyzerCore::GetLeptonTriggerORSF(TString triggerSF_key0,TString trig
   if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){
     lumi0=37997.005;    lumi1=3480.873;    lumi2=0.;
   }else if(DataYear==2017&&triggerSF_key0.Contains("Ele27")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=31661.026;    lumi1=9522.208;    lumi2=0.295;
+    lumi0=31661.026;    lumi1=9522.208;    lumi2=295.;
   }else if(DataYear==2018&&triggerSF_key0.Contains("Ele28")&&triggerSF_key1.Contains("Ele32")){
     lumi0=23687.253;    lumi1=36140.626;   lumi2=0.;
   }else{
@@ -1139,12 +1141,12 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
@@ -1289,6 +1291,13 @@ void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
 void SMPAnalyzerCore::Parameter::SetElectronKeys(TString elID,vector<TString> trig){
   k.electronRECOSF="Electron_RECO";
   k.electronIDSF=elID;
+  k.electronIDSF2="";
+  k.triggerSF=trig;
+}
+void SMPAnalyzerCore::Parameter::SetElectronKeys(TString elID,TString elID2,vector<TString> trig){
+  k.electronRECOSF="Electron_RECO";
+  k.electronIDSF=elID;
+  k.electronIDSF2=elID2;
   k.triggerSF=trig;
 }
 void SMPAnalyzerCore::Parameter::SetMuonKeys(TString muID,TString muISO,vector<TString> trig){
@@ -1374,7 +1383,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.zptweight=1;
   p.w.weakweight=1;
   if(!IsDATA){
-    p.w.lumiweight*=weight_norm_1invpb*_event.MCweight()*_event.GetTriggerLumi("Full");
+    p.w.lumiweight*=MCweight()*_event.GetTriggerLumi("Full");
     p.w.PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
     p.w.PUweight_up=mcCorr->GetPileUpWeight(nPileUp,1);
     p.w.PUweight_down=mcCorr->GetPileUpWeight(nPileUp,-1);
@@ -1419,10 +1428,10 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
-  }else if(p.option.Contains("TightID_SelQ")&&p.channel=="el"){
-    p.prefix="tight/"+p.prefix;
-    p.SetElectronKeys("Electron_TightID_SelQ",{"Ele27_TightID_SelQ"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passTightID_SelQ",0.0,2.5),0,0));
+  }else if(p.option.Contains("SelQ")&&p.channel=="el"){
+    p.prefix="selq/"+p.prefix;
+    p.SetElectronKeys("Electron_MediumID","Electron_SelQ_MediumID",{"Ele27_SelQ_MediumID"});
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ",0.0,2.5),0,0));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -1430,10 +1439,10 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
     }else if(GetEraShort()=="2017"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
-      p.k.triggerSF={"Ele27_TightID_SelQ","Ele32_TightID_SelQ"};
+      p.k.triggerSF={"Ele27_SelQ_MediumID","Ele32_SelQ_MediumID"};
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Ele28_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
-      p.k.triggerSF={"Ele28_TightID_SelQ","Ele32_TightID_SelQ"};
+      p.k.triggerSF={"Ele28_SelQ_MediumID","Ele32_SelQ_MediumID"};
     }
   }else if(p.channel=="el"){
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});

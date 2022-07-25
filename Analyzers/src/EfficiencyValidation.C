@@ -22,7 +22,7 @@ void EfficiencyValidation::executeEvent(){
     executeEventWithParameter(MakeParameter("ee"));
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("el"));
-    executeEventWithParameter(MakeParameter("el","TightID_SelQ"));
+    executeEventWithParameter(MakeParameter("el","SelQ"));
   }
 
   //////// testing channels //////////
