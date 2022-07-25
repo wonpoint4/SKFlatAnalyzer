@@ -480,7 +480,7 @@ double SMPAnalyzerCore::GetLeptonTriggerORSF(TString triggerSF_key0,TString trig
   if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){
     lumi0=37997.005;    lumi1=3480.873;    lumi2=0.;
   }else if(DataYear==2017&&triggerSF_key0.Contains("Ele27")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=31661.026;    lumi1=9522.208;    lumi2=0.295;
+    lumi0=31661.026;    lumi1=9522.208;    lumi2=295.;
   }else if(DataYear==2018&&triggerSF_key0.Contains("Ele28")&&triggerSF_key1.Contains("Ele32")){
     lumi0=23687.253;    lumi1=36140.626;   lumi2=0.;
   }else{
@@ -1134,12 +1134,12 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium",ptmin,fetamax);
+    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);

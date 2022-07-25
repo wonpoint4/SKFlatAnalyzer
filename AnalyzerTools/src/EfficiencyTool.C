@@ -356,11 +356,15 @@ void EfficiencyTool::Auto(TString key,TString path){
     eff->AddSimSetReplica(path+":sim",path+":sim_s0m0",nreplica,charge);
     for(int i=1;i<100;i++){
       if(!Efficiency::HasKey(path,Form("data_s%dm0",i))) break;
+      vector<TString> data_members;
+      vector<TString> sim_members;
       for(int j=0;j<100;j++){
 	if(!Efficiency::HasKey(path,Form("data_s%dm%d",i,j))) break;
-	eff->AddDataSet({path+Form(":data_s%dm%d",i,j)},charge);
-	eff->AddSimSet({path+Form(":sim_s%dm%d",i,j)},charge);
+	data_members.push_back(path+Form(":data_s%dm%d",i,j));
+	sim_members.push_back(path+Form(":sim_s%dm%d",i,j));
       }
+      eff->AddDataSet(data_members,charge);
+      eff->AddSimSet(sim_members,charge);
     }
   }
 }
