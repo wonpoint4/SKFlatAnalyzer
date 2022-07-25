@@ -15,6 +15,7 @@
 #include "Lepton.h"
 #include "Muon.h"
 #include "Electron.h"
+#include "Tau.h"
 #include "Photon.h"
 #include "JetTaggingParameters.h"
 #include "Jet.h"
@@ -64,10 +65,13 @@ public:
 
 
   std::vector<Electron> GetAllElectrons();
-  std::vector<Electron> GetElectrons(TString id, double ptmin, double fetamax);
+  std::vector<Electron> GetElectrons(TString id, double ptmin, double fetamax, bool vetoHEM = false);
 
   std::vector<Muon> GetAllMuons();
   std::vector<Muon> GetMuons(TString id, double ptmin, double fetamax);
+
+  std::vector<Tau> GetAllTaus();
+  std::vector<Tau> GetTaus(TString id, double ptmin, double fetamax);
 
   std::vector<Photon> GetAllPhotons();
   std::vector<Photon> GetPhotons(TString id, double ptmin, double fetamax);
@@ -91,10 +95,13 @@ public:
   //==== Get AllObject in the begining, and apply cut
   //==================================================+
 
-  std::vector<Electron> SelectElectrons(const std::vector<Electron>& electrons, TString id, double ptmin, double fetamax);
+  std::vector<Electron> SelectElectrons(const std::vector<Electron>& electrons, TString id, double ptmin, double fetamax, bool vetoHEM = false);
 
   std::vector<Muon> UseTunePMuon(const std::vector<Muon>& muons);
   std::vector<Muon> SelectMuons(const std::vector<Muon>& muons, TString id, double ptmin, double fetamax);
+
+  std::vector<Tau> SelectTaus(const std::vector<Tau>& taus, TString id, double ptmin, double fetamax);
+
 
   std::vector<Jet> SelectJets(const std::vector<Jet>& jets, TString id, double ptmin, double fetamax);
 
@@ -134,6 +141,9 @@ public:
   FakeBackgroundEstimator *fakeEst=NULL;
   CFBackgroundEstimator *cfEst=NULL;
   void initializeAnalyzerTools();
+
+  //==== MCweight
+  double MCweight(bool usesign=true, bool norm_1invpb=true) const;
 
   //==== Prefire
   double GetPrefireWeight(int sys);
@@ -191,6 +201,7 @@ public:
   static bool IsFinalPhotonSt23_Public(const std::vector<Gen>& TruthColl);
   int  GetPrElType_InSameSCRange_Public(int TruthIdx, const std::vector<Gen>& TruthColl);
   bool IsSignalPID(int pid);
+  bool FindHEMElectron(Electron electron);
 
   //==== Plotting
 

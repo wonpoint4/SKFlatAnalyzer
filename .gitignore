@@ -1,8 +1,9 @@
+*~
 *.pyc
 *.pcm
 *.d
 *.so
 *_Dict.cxx
 lib/*.tar.gz
+lib/*.rootmap
 */obj
-*~
