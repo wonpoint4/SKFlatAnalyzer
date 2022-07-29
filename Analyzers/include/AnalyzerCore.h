@@ -58,7 +58,7 @@ public:
   // std::sort(muons.begin(), muons.end(), PtComparing);
   //==== ** Recommend you to do the same for other objects (Electron, Jet, FatJet, ...) **
   inline static bool PtComparing(const Particle& p1, const Particle& p2){ return (p1.Pt() > p2.Pt()); }
-  inline static bool PtComparingPtr(Particle* p1, Particle* p2){ return (p1->Pt() > p2->Pt()); }
+  inline static bool PtComparingPtr(Particle* p1, Particle* p2){ return ((p1?p1->Pt():-1.) > (p2?p2->Pt():-1.)); }
 
   Event GetEvent();
 
@@ -203,7 +203,7 @@ public:
   TH3D* GetHist3D(TString histname);
 
   void FillHist(TString histname, double value, double weight, int n_bin, double x_min, double x_max);
-  void FillHist(TString histname, double value, double weight, int n_bin, double *xbins);
+  void FillHist(TString histname, double value, double weight, int n_bin, const double *xbins);
   void FillHist(TString histname,
                 double value_x, double value_y,
                 double weight,
@@ -212,8 +212,8 @@ public:
   void FillHist(TString histname,
                 double value_x, double value_y,
                 double weight,
-                int n_binx, double *xbins,
-                int n_biny, double *ybins);
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins);
   void FillHist(TString histname,
 		double value_x, double value_y, double value_z,
 		double weight,

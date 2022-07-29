@@ -42,8 +42,8 @@ public:
   double bjet_charge=-5.5;
   TLorentzVector bjet;
 
-  static const int afb_mbinnum=30;//42;
-  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200};//,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
+  static const int afb_mbinnum=30;//40;
+  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200};//,240,280,340,400,500,600,700,800,1000,3000};
   static const int afb_ybinnum=12;
   const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
   static const int afb_ptbinnum=26;//30;
@@ -52,7 +52,7 @@ public:
   const double afb_costbin[afb_costbinnum+1]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
 
   static const int grid_mbinnum=5;//6;
-  const double grid_mbin[grid_mbinnum+1]={52,60,80,100,120,400};//,3000};
+  const double grid_mbin[grid_mbinnum+1]={52,60,80,100,150,400};//,3000};
   static const int grid_ybinnum=4;
   const double grid_ybin[grid_ybinnum+1]={-2.4,-1.2,0,1.2,2.4};
   static const int grid_ptbinnum=3;//4;

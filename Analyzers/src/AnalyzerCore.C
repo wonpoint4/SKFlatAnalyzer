@@ -1823,7 +1823,7 @@ void AnalyzerCore::FillHist(TString histname, double value, double weight, int n
 
 }
 
-void AnalyzerCore::FillHist(TString histname, double value, double weight, int n_bin, double *xbins){
+void AnalyzerCore::FillHist(TString histname, double value, double weight, int n_bin, const double *xbins){
 
   TH1D *this_hist = GetHist1D(histname);
   if( !this_hist ){
@@ -1856,8 +1856,8 @@ void AnalyzerCore::FillHist(TString histname,
 void AnalyzerCore::FillHist(TString histname,
                 double value_x, double value_y,
                 double weight,
-                int n_binx, double *xbins,
-                int n_biny, double *ybins){
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins){
 
   TH2D *this_hist = GetHist2D(histname);
   if( !this_hist ){

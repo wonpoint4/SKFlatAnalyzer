@@ -526,6 +526,7 @@ def run(args):
     cmd=""
     skim=" --skim SkimTree_Dilepton"
     cmdtemp="SKFlat.py -a ZptWeight -i {} -n {} -e {} --nmax 150 "
+    #cmdtemp="SKFlat.py -a ZptWeight -i {} -n {} -e {} --nmax 150 --reduction 10 "
     runlist=[]
     for era in args.era:
         if "bg" in args.run:
@@ -536,8 +537,9 @@ def run(args):
             runlist+=[["TTLL_powheg"+skim,30,era]]
             runlist+=[["SingleTop_tW_top_NoFullyHad"+skim,10,era]]
             runlist+=[["SingleTop_tW_antitop_NoFullyHad"+skim,10,era]]
+            runlist+=[["GamGamToLL"+skim,5,era]]
         if "dy" in args.run:
-            if args.dy=="MiNNLO":
+            if args.dy=="DYJets_MiNNLO":
                 if "e" in ",".join(args.channel):
                     runlist+=[["DYJetsToEE_MiNNLO",50,era]]
                 if "m" in ",".join(args.channel):
@@ -570,10 +572,10 @@ if __name__=="__main__":
     import argparse
     parser=argparse.ArgumentParser()
     parser.add_argument("action",help="run, test")
-    parser.add_argument("--dy",default="DYJets",help="DYJets, DYJets_MG, MiNNLO")
+    parser.add_argument("--dy",default="DYJets_MiNNLO",help="DYJets, DYJets_MG, DYJets_MiNNLO")
     parser.add_argument("--era",default="all",help="eras separated by commas. Available: 2016preVFP(2016a), 2016postVFP(2016b), 2017, 2018")
     parser.add_argument("--channel",default="mm,ee",help="channels separated by commas. Available: ee, el, mm, mu")
-    parser.add_argument("--run",default="data,dy,bg",help="run list separated by commas. Available: data, dy,bg")
+    parser.add_argument("--run",default="data,dy,bg",help="run list separated by commas. Available: data, dy, bg")
     parser.add_argument("--in",dest="input",default=None,help="input file path")
     parser.add_argument("--out",default="zptout.root",help="out file path")
     parser.add_argument("--dry",default=False,action="store_true")
@@ -582,8 +584,6 @@ if __name__=="__main__":
     
     if args.era.lower() in ["all"]: 
         args.era="2016preVFP,2016postVFP,2017,2018"
-        #args.era="2017"
-        if args.dy=="MiNNLO": args.era="2016preVFP,2016postVFP"
     args.era=args.era.replace("2016a","2016preVFP").replace("2016b","2016postVFP").split(",")
     args.channel=args.channel.split(",")
     args.run=args.run.split(",")
@@ -593,20 +593,19 @@ if __name__=="__main__":
         exit(1)
     args.out=rt.TFile(args.out,"recreate")
 
-    rt.Verbosity=1
-    if args.dy=="DYJets":
-        args.mPlotter=rt.AFBPlotter("data-tau_amc-vv-wjets-tttw-1.7*ss_amc amc","ZptWeight")
-        args.ePlotter=rt.AFBPlotter("data-tau_amc-vv-wjets-tttw-ss_amc amc","ZptWeight")
-    elif args.dy=="DYJets_MG":
-        args.mPlotter=rt.AFBPlotter("data-tau_mg-vv-wjets-tttw-1.7*ss_mg mg","ZptWeight")
-        args.ePlotter=rt.AFBPlotter("data-tau_mg-vv-wjets-tttw-ss_mg mg","ZptWeight")
-    elif args.dy=="MiNNLO":
-        args.mPlotter=rt.AFBPlotter("data-tau_mi-vv-wjets-tttw-1.7*ss_mi mi","ZptWeight")
-        args.ePlotter=rt.AFBPlotter("data-tau_mi-vv-wjets-tttw-ss_mi mi","ZptWeight")
-
     if args.action in ["run"]:
         run(args)
     elif args.action in ["test"]:
+        rt.Verbosity=1
+        if args.dy=="DYJets":
+            args.mPlotter=rt.AFBPlotter("data-tau_amc-vv-wjets-tttw-1.7*ss_amc amc","ZptWeight")
+            args.ePlotter=rt.AFBPlotter("data-tau_amc-vv-wjets-tttw-ss_amc amc","ZptWeight")
+        elif args.dy=="DYJets_MG":
+            args.mPlotter=rt.AFBPlotter("data-tau_mg-vv-wjets-tttw-1.7*ss_mg mg","ZptWeight")
+            args.ePlotter=rt.AFBPlotter("data-tau_mg-vv-wjets-tttw-ss_mg mg","ZptWeight")
+        elif args.dy=="DYJets_MiNNLO":
+            args.mPlotter=rt.AFBPlotter("data-tau_mi-vv-wjets-tttw-1.7*ss_mi mi","ZptWeight")
+            args.ePlotter=rt.AFBPlotter("data-tau_mi-vv-wjets-tttw-ss_mi mi","ZptWeight")
         test(args)
     else:
         print "unavailable action",args.action
