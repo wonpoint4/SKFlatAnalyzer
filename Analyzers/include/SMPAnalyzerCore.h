@@ -40,7 +40,7 @@ public:
     int weightbit=NominalWeight;
     TString option;
     struct Key{
-      TString electronRECOSF,electronIDSF,muonIDSF,muonISOSF;
+      TString electronRECOSF,electronIDSF,electronIDSF2,muonIDSF,muonISOSF;
       vector<TString> triggerSF;
     };
     struct Weight{
@@ -78,6 +78,7 @@ public:
     ~Parameter();
     void SetChannel(TString ch);
     void SetElectronKeys(TString elID,vector<TString> trig);
+    void SetElectronKeys(TString elID,TString elID2,vector<TString> trig);
     void SetMuonKeys(TString muID,TString muISO,vector<TString> trig);
     void SetLeptonPtCut(double l0pt,double l1pt);
     void SetLeptons();

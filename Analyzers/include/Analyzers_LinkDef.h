@@ -14,6 +14,8 @@
 #pragma link C++ class SkimTree_LRSMHighPt+;
 #pragma link C++ class SkimTree_Dilepton+;
 #pragma link C++ class SkimTree_HNFake+;
+#pragma link C++ class SkimTree_HighPt1LJets+;
+#pragma link C++ class SkimTree_HNMultiLep+;
 #pragma link C++ class MeasureJetTaggingEfficiency+;
 #pragma link C++ class SMPAnalyzerCore+;
 #pragma link C++ class SkimTree_GEN+;
@@ -23,5 +25,6 @@
 #pragma link C++ class ZpeakAnalyzer+;
 #pragma link C++ class ExampleRun_kinFitter+;
 #pragma link C++ class FakeAnalyzer+;
+#pragma link C++ class SkimTree_EgammaTnP+;
 
 #endif

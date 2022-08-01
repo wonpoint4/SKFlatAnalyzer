@@ -77,8 +77,8 @@ void tWAnalyzer::executeEventFromParameter(AnalyzerParameter param){
   TLorentzVector met = GetEvent().GetMETVector();
   double weight = 1.;
   if(!IsDATA){
-    weight *= weight_norm_1invpb*ev.GetTriggerLumi("Full");
-    weight *= ev.MCweight();
+    weight *= ev.GetTriggerLumi("Full");
+    weight *= MCweight();
   }
   if(param.syst_ == AnalyzerParameter::Central){
   }

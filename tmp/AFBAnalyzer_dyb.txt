@@ -12,7 +12,6 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
-SKFlat.py -a AFBAnalyzer -i GamGamToLL -n 10 -e 2017
 
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2018 --memory 12000
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2018 --memory 12000
@@ -28,7 +27,6 @@ SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 10 -e 2018
 SKFlat.py -a AFBAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2018
-SKFlat.py -a AFBAnalyzer -i GamGamToLL -n 10 -e 2018
 
 SKFlat.py -a ExampleRun_kinFitter -i TTLJ_powheg -n 40 -e 2017 --memory 12000
 SKFlat.py -a ExampleRun_kinFitter -i SingleMuon -n 20 -e 2017
@@ -44,15 +42,30 @@ SKFlat.py -a ExampleRun_kinFitter -i TTLL_powheg -n 20 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 
-#SKFlat.py -a MeasureJetTaggingEfficiency -i TTLJ_powheg -n 50 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i TTLL_powheg -n 30 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_170to300 -n 20 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_300to470 -n 30 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_470to600 -n 30 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_600to800 -n 30 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_800to1000 -n 20 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1000to1400 -n 15 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1400to1800 -n 10 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1800to2400 -n 5 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_2400to3200 -n 5 -e 2016preVFP
-#SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_3200toInf -n 5 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i TTLJ_powheg -n 50 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i TTLL_powheg -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i TTJJ_powheg -n 30 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i SingleTop_sch_Lep -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i SingleTop_tch_antitop_Incl -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i SingleTop_tch_top_Incl -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i SingleTop_tW_top_NoFullyHad -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_170to300 -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_300to470 -n 30 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_470to600 -n 30 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_600to800 -n 30 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_800to1000 -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1000to1400 -n 15 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1400to1800 -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_1800to2400 -n 5 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_2400to3200 -n 5 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt_3200toInf -n 5 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-80To120_MuEnriched -n 15 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-120To170_MuEnriched -n 15 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-170To300_MuEnriched -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-300To470_MuEnriched -n 15 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-470To600_MuEnriched -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-600To800_MuEnriched -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-800To1000_MuEnriched -n 20 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-1000_MuEnriched -n 10 -e 2016preVFP
+SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-300toInf_EMEnriched -n 10 -e 2016preVFP

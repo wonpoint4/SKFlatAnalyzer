@@ -35,6 +35,11 @@ void Muon::SetisPOGHighPt(bool b){
   j_isPOGHighPt = b;
 }
 
+void Muon::SetPOGMediumHIP(bool ismedium_hip, bool ismedium_nohip){
+  j_ismedium_hip = ismedium_hip;
+  j_ismedium_nohip = ismedium_nohip;
+}
+
 void Muon::SetIso(double ch04, double nh04, double ph04, double pu04, double trkiso){
   j_PFCH04 = ch04;
   j_PFNH04 = nh04;
@@ -48,15 +53,17 @@ void Muon::SetChi2(double chi2){
   j_chi2 = chi2;
 }
 
-void Muon::CalcPFRelIso(){
+void Muon::CalcPFRelIso(bool use_corrected_pt){
   double absiso = j_PFCH04+std::max( 0., j_PFNH04 + j_PFPH04 - 0.5*j_PU04 );
   //cout << "[Muon::CalcPFRelIso] j_PFCH04 = " << j_PFCH04 << endl;
   //cout << "[Muon::CalcPFRelIso] j_PFNH04 = " << j_PFNH04 << endl;
   //cout << "[Muon::CalcPFRelIso] j_PFPH04 = " << j_PFPH04 << endl;
   //cout << "[Muon::CalcPFRelIso] j_PU04 = " << j_PU04 << endl;
   //cout << "[Muon::CalcPFRelIso] --> absiso = " << absiso << endl;
-  this->SetRelIso(absiso/this->Pt());
-  //this->SetRelIso(absiso/this->MiniAODPt()); //TODO This is same as IDBit
+
+  if(use_corrected_pt)this->SetRelIso(absiso/this->Pt());
+  else this->SetRelIso(absiso/this->MiniAODPt()); 
+
 }
 
 double Muon::EA(){
@@ -101,6 +108,7 @@ bool Muon::PassID(TString ID) const {
   if(ID=="POGTight") return isPOGTight();
   if(ID=="POGHighPt") return isPOGHighPt();
   if(ID=="POGMedium") return isPOGMedium();
+  if(ID=="POGMedium_nohip") return isPOGMedium_nohip();
   if(ID=="POGLoose") return isPOGLoose();
   if(ID=="POGTightWithTightIso") return Pass_POGTightWithTightIso();
   if(ID=="POGHighPtWithLooseTrkIso") return Pass_POGHighPtWithLooseTrkIso();
@@ -117,6 +125,11 @@ bool Muon::PassID(TString ID) const {
   //==== No cut
   if(ID=="NOCUT") return true;
 
+
+  if(ID=="HNLoosest") return Pass_HNVeto();
+
+
+
   cout << "[Muon::PassID] No id : " << ID << endl;
   exit(ENODATA);
 
@@ -131,6 +144,14 @@ bool Muon::Pass_POGTightWithTightIso() const {
 bool Muon::Pass_POGHighPtWithLooseTrkIso() const {
   if(!( isPOGHighPt() )) return false;
   if(!( TrkIso()/TuneP4().Pt()<0.1 )) return false;
+  return true;
+}
+
+bool Muon::Pass_HNVeto() const {
+  if(!( isPOGLoose() )) return false;
+  if(!( fabs(dXY())<0.2 && fabs(dZ())<0.5) ) return false;
+  if(!( RelIso()<0.6 ))  return false;
+  if(!( Chi2()<50. )) return false;
   return true;
 }
 

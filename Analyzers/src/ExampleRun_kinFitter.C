@@ -137,8 +137,8 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   //==== If MC
   if(!IsDATA){
 
-    weight *= weight_norm_1invpb*ev.GetTriggerLumi("Full");
-    weight *= ev.MCweight();
+    weight *= ev.GetTriggerLumi("Full");
+    weight *= MCweight();
     weight *= weight_Prefire;
 
     //==== Example of applying Muon scale factors

@@ -250,16 +250,13 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
   double value = 1.;
   double error = 0.;
 
-  if(DataYear!=2016){
-    eta = fabs(eta);
-  }
+  eta = fabs(eta);
 
-  if(ID=="NUM_TightID_DEN_genTracks" || ID=="NUM_HighPtID_DEN_genTracks"){
+  if(ID=="NUM_TightID_DEN_TrackerMuons" || ID=="NUM_MediumID_DEN_TrackerMuons" || ID=="NUM_HighPtID_DEN_TrackerMuons"){
     //==== boundaries
-    if(pt<20.) pt = 20.;
-    if(pt>=120.) pt = 119.;
+    if(pt<15.) pt = 15.1;
+    if(pt>=120.) pt = 119.9;
     if(eta>=2.4) eta = 2.39;
-    if(eta<-2.4) eta = -2.4;
   }
 
   TH2F *this_hist = map_hist_Muon["ID_SF_"+ID];
@@ -273,12 +270,7 @@ double MCCorrection::MuonID_SF(TString ID, double eta, double pt, int sys){
 
   int this_bin(-999);
 
-  if(DataYear==2016){
-    this_bin = this_hist->FindBin(eta,pt);
-  }
-  else{
-    this_bin = this_hist->FindBin(pt,eta);
-  }
+  this_bin = this_hist->FindBin(eta,pt);
 
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
@@ -298,16 +290,13 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
   double value = 1.;
   double error = 0.;
 
-  if(DataYear!=2016){
-    eta = fabs(eta);
-  }
+  eta = fabs(eta);
 
-  if(ID=="NUM_TightRelIso_DEN_TightIDandIPCut" || ID=="NUM_LooseRelTkIso_DEN_HighPtIDandIPCut"){
+  if(ID=="NUM_TightRelIso_DEN_TightIDandIPCut" || ID=="NUM_TightRelIso_DEN_MediumID" || ID=="NUM_LooseRelTkIso_DEN_HighPtIDandIPCut"){
     //==== boundaries
-    if(pt<20.) pt = 20.;
-    if(pt>=120.) pt = 119.;
+    if(pt<15.) pt = 15.1;
+    if(pt>=120.) pt = 119.9;
     if(eta>=2.4) eta = 2.39;
-    if(eta<-2.4) eta = -2.4;
   }
 
   TH2F *this_hist = map_hist_Muon["ISO_SF_"+ID];
@@ -321,12 +310,7 @@ double MCCorrection::MuonISO_SF(TString ID, double eta, double pt, int sys){
 
   int this_bin(-999);
 
-  if(DataYear==2016){
-    this_bin = this_hist->FindBin(eta,pt);
-  }
-  else{
-    this_bin = this_hist->FindBin(pt,eta);
-  }
+  this_bin = this_hist->FindBin(eta,pt);
 
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
@@ -360,7 +344,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<26.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>500.) pt = 499.;
+      if(pt>200.) pt = 199.;
     }
     else if(trig=="Mu50"){
       if(pt<52.) return 1.; //FIXME
@@ -381,7 +365,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<29.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>200.) pt = 199.;
     }
     else if(trig=="Mu50"){
       if(pt<52.) return 1.; //FIXME
@@ -398,7 +382,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
       if(pt<26.) return 1.; //FIXME
       if(eta>=2.4) eta = 2.39;
 
-      if(pt>1200.) pt = 1199.;
+      if(pt>200.) pt = 199.;
     }
     else if(trig=="Mu50"){
       if(pt<52.) return 1.; //FIXME
@@ -427,7 +411,7 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
     }
   }
 
-  int this_bin = this_hist->FindBin(pt,eta);
+  int this_bin = this_hist->FindBin(eta,pt);
 
   value = this_hist->GetBinContent(this_bin);
   error = this_hist->GetBinError(this_bin);
@@ -440,6 +424,8 @@ double MCCorrection::MuonTrigger_Eff(TString ID, TString trig, int DataOrMC, dou
 }
 
 double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon>& muons, int sys){
+
+  if(muons.size() == 0) return 1.;
 
   if(ID=="Default") return 1.;
   if(trig=="Default") return 1.;
@@ -478,6 +464,8 @@ double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<
 
 double MCCorrection::MuonTrigger_SF(TString ID, TString trig, const std::vector<Muon *>& muons, int sys){
 
+  if(muons.size() == 0) return 1.;
+
   std::vector<Muon> muvec;
   for(unsigned int i=0; i<muons.size(); i++){
     Muon this_muon = *(muons.at(i));
@@ -495,10 +483,10 @@ double MCCorrection::ElectronID_SF(TString ID, double sceta, double pt, int sys)
   double value = 1.;
   double error = 0.;
 
-  if(pt<10.) pt = 10.;
-  if(pt>=500.) pt = 499.;
+  if(pt<10.) pt = 10.1;
+  if(pt>=500.) pt = 499.9;
   if(sceta>=2.5) sceta = 2.49;
-  if(sceta<-2.5) sceta = -2.5;
+  if(sceta<-2.5) sceta = -2.49;
 
   if( ID.Contains("HEEP") ){
 
@@ -875,7 +863,6 @@ void MCCorrection::SetupJetTagging(){
   TString btagpath = datapath+"/"+GetEra()+"/BTag/";
 
   std::map< string, BTagCalibration > tmp_map_BTagCalibration; //==== key = tagger+"_"+method
-
   for(unsigned int i=0; i<jetTaggingPars.size(); i++){
     //==== (DeepCSV,Medium,incl,comb
 
@@ -1030,20 +1017,30 @@ double MCCorrection::GetJetTaggingCutValue(JetTagging::Tagger tagger, JetTagging
       if(wp==JetTagging::Medium) return 0.6001;
       if(wp==JetTagging::Tight)  return 0.8819;
     }
+    if(tagger==JetTagging::DeepCSV_CvsL){
+      if(wp==JetTagging::Loose) return 0.088;
+      if(wp==JetTagging::Medium) return 0.181;
+      if(wp==JetTagging::Tight) return 0.417;
+    }
+    if(tagger==JetTagging::DeepCSV_CvsB){
+      if(wp==JetTagging::Loose) return 0.214;
+      if(wp==JetTagging::Medium) return 0.228;
+      if(wp==JetTagging::Tight) return 0.138;
+    }
     if(tagger==JetTagging::DeepJet){
       if(wp==JetTagging::Loose)  return 0.0508;
       if(wp==JetTagging::Medium) return 0.2598;
       if(wp==JetTagging::Tight)  return 0.6502;
     }
-    if(tagger==JetTagging::DeepCvsB){
-      if(wp==JetTagging::Loose) return 0.327;
-      if(wp==JetTagging::Medium) return 0.370;
-      if(wp==JetTagging::Tight) return 0.256;
-    }
-    if(tagger==JetTagging::DeepCvsL){
+    if(tagger==JetTagging::DeepJet_CvsL){
       if(wp==JetTagging::Loose) return 0.039;
       if(wp==JetTagging::Medium) return 0.098;
       if(wp==JetTagging::Tight) return 0.270;
+    }
+    if(tagger==JetTagging::DeepJet_CvsB){
+      if(wp==JetTagging::Loose) return 0.327;
+      if(wp==JetTagging::Medium) return 0.370;
+      if(wp==JetTagging::Tight) return 0.256;
     }
   }
   if(DataEra=="2016postVFP"){
@@ -1052,20 +1049,30 @@ double MCCorrection::GetJetTaggingCutValue(JetTagging::Tagger tagger, JetTagging
       if(wp==JetTagging::Medium) return 0.5847;
       if(wp==JetTagging::Tight)  return 0.8767;
     }
+    if(tagger==JetTagging::DeepCSV_CvsL){
+      if(wp==JetTagging::Loose) return 0.088;
+      if(wp==JetTagging::Medium) return 0.180;
+      if(wp==JetTagging::Tight) return 0.407;
+    }
+    if(tagger==JetTagging::DeepCSV_CvsB){
+      if(wp==JetTagging::Loose) return 0.204;
+      if(wp==JetTagging::Medium) return 0.221;
+      if(wp==JetTagging::Tight) return 0.136;
+    }
     if(tagger==JetTagging::DeepJet){
       if(wp==JetTagging::Loose)  return 0.0480;
       if(wp==JetTagging::Medium) return 0.2489;
       if(wp==JetTagging::Tight)  return 0.6377;
     }
-    if(tagger==JetTagging::DeepCvsB){
-      if(wp==JetTagging::Loose) return 0.305;
-      if(wp==JetTagging::Medium) return 0.353;
-      if(wp==JetTagging::Tight) return 0.247;
-    }
-    if(tagger==JetTagging::DeepCvsL){
+    if(tagger==JetTagging::DeepJet_CvsL){
       if(wp==JetTagging::Loose) return 0.039;
       if(wp==JetTagging::Medium) return 0.099;
       if(wp==JetTagging::Tight) return 0.269;
+    }
+    if(tagger==JetTagging::DeepJet_CvsB){
+      if(wp==JetTagging::Loose) return 0.305;
+      if(wp==JetTagging::Medium) return 0.353;
+      if(wp==JetTagging::Tight) return 0.247;
     }
   }
   if(DataEra=="2017"){
@@ -1074,20 +1081,30 @@ double MCCorrection::GetJetTaggingCutValue(JetTagging::Tagger tagger, JetTagging
       if(wp==JetTagging::Medium) return 0.4506;
       if(wp==JetTagging::Tight)  return 0.7738;
     }
+    if(tagger==JetTagging::DeepCSV_CvsL){
+      if(wp==JetTagging::Loose) return 0.04;
+      if(wp==JetTagging::Medium) return 0.144;
+      if(wp==JetTagging::Tight) return 0.73;
+    }
+    if(tagger==JetTagging::DeepCSV_CvsB){
+      if(wp==JetTagging::Loose) return 0.345;
+      if(wp==JetTagging::Medium) return 0.29;
+      if(wp==JetTagging::Tight) return 0.10;
+    }
     if(tagger==JetTagging::DeepJet){
       if(wp==JetTagging::Loose)  return 0.0532;
       if(wp==JetTagging::Medium) return 0.3040;
       if(wp==JetTagging::Tight)  return 0.7476;
     }
-    if(tagger==JetTagging::DeepCvsB){
-      if(wp==JetTagging::Loose) return 0.4;
-      if(wp==JetTagging::Medium) return 0.34;
-      if(wp==JetTagging::Tight) return 0.05;
-    }
-    if(tagger==JetTagging::DeepCvsL){
+    if(tagger==JetTagging::DeepJet_CvsL){
       if(wp==JetTagging::Loose) return 0.03;
       if(wp==JetTagging::Medium) return 0.085;
       if(wp==JetTagging::Tight) return 0.52;
+    }
+    if(tagger==JetTagging::DeepJet_CvsB){
+      if(wp==JetTagging::Loose) return 0.4;
+      if(wp==JetTagging::Medium) return 0.34;
+      if(wp==JetTagging::Tight) return 0.05;
     }
   }
   if(DataEra=="2018"){
@@ -1096,20 +1113,30 @@ double MCCorrection::GetJetTaggingCutValue(JetTagging::Tagger tagger, JetTagging
       if(wp==JetTagging::Medium) return 0.4168;
       if(wp==JetTagging::Tight)  return 0.7665;
     }
+    if(tagger==JetTagging::DeepCSV_CvsL){
+      if(wp==JetTagging::Loose) return 0.064;
+      if(wp==JetTagging::Medium) return 0.153;
+      if(wp==JetTagging::Tight) return 0.405;
+    }
+    if(tagger==JetTagging::DeepCSV_CvsB){
+      if(wp==JetTagging::Loose) return 0.313;
+      if(wp==JetTagging::Medium) return 0.363;
+      if(wp==JetTagging::Tight) return 0.288;
+    }
     if(tagger==JetTagging::DeepJet){
       if(wp==JetTagging::Loose)  return 0.0490;
       if(wp==JetTagging::Medium) return 0.2783;
       if(wp==JetTagging::Tight)  return 0.7100;
     }
-    if(tagger==JetTagging::DeepCvsB){
-      if(wp==JetTagging::Loose) return 0.246;
-      if(wp==JetTagging::Medium) return 0.325;
-      if(wp==JetTagging::Tight) return 0.267;
-    }
-    if(tagger==JetTagging::DeepCvsL){
+    if(tagger==JetTagging::DeepJet_CvsL){
       if(wp==JetTagging::Loose) return 0.038;
       if(wp==JetTagging::Medium) return 0.099;
       if(wp==JetTagging::Tight) return 0.282;
+    }
+    if(tagger==JetTagging::DeepJet_CvsB){
+      if(wp==JetTagging::Loose) return 0.246;
+      if(wp==JetTagging::Medium) return 0.325;
+      if(wp==JetTagging::Tight) return 0.267;
     }
   }
 
@@ -1127,7 +1154,7 @@ void MCCorrection::SetupMCJetTagEff(){
   cout<<"[MCCorrection::SetupMCJetTagEff] setting MCJetTagEff"<<endl;
 
   TString datapath=getenv("DATA_DIR");
-  TString mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_TTLL_TTLJ_QCD_Pt170toInf_hadded.root";
+  TString mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_TT_SingleTop_QCD_27outputs_hadded.root";
   ifstream fcheck(mcjetpath);
   if(!fcheck.good()){
     cout<<"[MCCorrection::SetupMCJetTagEff] no "+mcjetpath<<endl;

@@ -42,12 +42,12 @@ while read line <&3; do
 	test "${#array[@]}" -eq "$(($VI+4))" || continue
 	## get info for MC
 	SAMPLE="${array[$(($VI+3))]}"
-	ALIAS=$(cat $SKFlat_WD/data/$SKFlatV/$YEAR/Sample/SampleSummary_MC.txt|grep -P "[ \t]${SAMPLE}[ \t]"|awk '{print $1}'|head -n1)
+	ALIAS=$(grep $SAMPLE $SKFlat_WD/data/$SKFlatV/$YEAR/Sample/SampleSummary_MC.txt|awk '{print $1}'|head -n1)
 	if [ "$ALIAS" = "" ]; then
-	    ALIAS=$(cat $SKFlat_WD/data/$SKFlatV/*/Sample/SampleSummary_MC.txt|grep -P "[ \t]${SAMPLE}[ \t]"|awk '{print $1}'|head -n1)
+	    ALIAS=$(cat $SKFlat_WD/data/$SKFlatV/*/Sample/SampleSummary_MC.txt|grep $SAMPLE|awk '{print $1}'|head -n1)
 	fi  
 	if [ "$ALIAS" = "" ]; then
-	    ALIAS=$(cat $SKFlat_WD/data/$SKFlatV/*/*/SampleSummary_MC.txt|grep -P "[ \t]${SAMPLE}[ \t]"|awk '{print $1}'|head -n1)
+	    ALIAS=$(cat $SKFlat_WD/data/*/*/Sample/SampleSummary_MC.txt|grep $SAMPLE|awk '{print $1}'|head -n1)
 	fi  
 	if [ "$ALIAS" = "" ]; then
 	    read -p "cannot find alias for $SAMPLE. exit or insert alias: " ALIAS
@@ -95,3 +95,4 @@ while read line <&3; do
 	fi
     fi
 done 3< <(find $SEARCHDIR -type d|grep $SKFlatV|sort -V)
+#done 3< <(find $SEARCHDIR -type d|grep $SKFlatV|sort -V|egrep -v "TypeI|private|sherpa")

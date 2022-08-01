@@ -25,6 +25,7 @@ parser.add_argument('--skim', dest='Skim', default="", help="ex) SkimTree_Dilept
 parser.add_argument('--no_exec', action='store_true')
 parser.add_argument('--FastSim', action='store_true')
 parser.add_argument('--userflags', dest='Userflags', default="")
+parser.add_argument('--tagoutput', dest='TagOutput', default="")
 parser.add_argument('--nmax', dest='NMax', default=0, type=int, help="maximum running jobs")
 parser.add_argument('--reduction', dest='Reduction', default=1, type=float)
 parser.add_argument('--memory', dest='Memory', default=0, type=float)
@@ -117,6 +118,8 @@ if IsKNU:
 
 IsSkimTree = "SkimTree" in args.Analyzer
 if IsSkimTree:
+  if args.NMax==0: args.NMax=100 ## Preventing from too heavy IO
+  if args.NJobs==1: args.NJobs=0 ## NJobs=0 means NJobs->NFiles
   if not IsTAMSA:
     print "Skimming only possible in SNU"
     exit()
@@ -302,6 +305,7 @@ for InputSample in InputSamples:
 
   this_dasname = ""
   this_xsec = -1
+  this_sumsign = -1
   this_sumw = -1
   if not IsDATA and args.Analyzer!="GetEffLumi":
     if not os.path.exists(SAMPLE_DATA_DIR+'/CommonSampleInfo/'+InputSample+'.txt'):
@@ -315,7 +319,8 @@ for InputSample in InputSamples:
       if InputSample==words[0]:
         this_dasname = words[1]
         this_xsec = words[2]
-        this_sumw = words[4]
+        this_sumsign = words[4]
+        this_sumw = words[5]
         break
 
   XsecForEachSample.append(this_xsec)
@@ -481,6 +486,7 @@ void {2}(){{
       out.write('  m.MCSample = "'+InputSample+'";\n');
       out.write('  m.IsDATA = false;\n')
       out.write('  m.xsec = '+str(this_xsec)+';\n')
+      out.write('  m.sumSign = '+str(this_sumsign)+';\n')
       out.write('  m.sumW = '+str(this_sumw)+';\n')
 
       if args.FastSim:
@@ -863,6 +869,9 @@ try:
           outputname = args.Analyzer+'_'+SkimString+InputSample
           if IsDATA:
             outputname += '_'+DataPeriod
+
+          if args.TagOutput != '':
+            outputname += '_' + args.TagOutput
 
           if not GotError:
             cwd = os.getcwd()
