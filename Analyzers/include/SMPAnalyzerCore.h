@@ -91,7 +91,8 @@ public:
 
   virtual void initializeAnalyzer();
   virtual void beginEvent();
-  virtual void executeEventWithParameter(Parameter p);
+  virtual void executeEventWithParameter(Parameter& p);
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
   virtual void EvalWeights(Parameter& p);

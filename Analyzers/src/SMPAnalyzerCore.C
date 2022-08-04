@@ -38,7 +38,7 @@ void SMPAnalyzerCore::beginEvent(){
     }
   }
 }
-void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
+void SMPAnalyzerCore::executeEventWithParameter(Parameter& p){
   p.SetLeptons();
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"lumi",p.w.lumiweight);
   
@@ -1342,7 +1342,8 @@ void SMPAnalyzerCore::Parameter::SetLeptons(){
       }else leptons.push_back(NULL);
     }
   }
-  std::sort(leptons.begin(),leptons.end(),PtComparingPtr);
+  //should not sort for em or me channel
+  //std::sort(leptons.begin(),leptons.end(),PtComparingPtr);
   if(leptons.size()>0) lepton0=leptons.at(0);
   if(leptons.size()>1) lepton1=leptons.at(1);
   if(lepton0) truth_lepton0=SMPGetGenMatchedLepton(*lepton0,gens);

@@ -11,6 +11,9 @@ public:
   void initializeAnalyzer();
   void executeEvent();
   void executeEventGen();
+  virtual void executeEventWithParameter(Parameter& p);
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
+  int GetUnfoldBin(double mass,double cost);
   Parameter MakeParameter(TString key);
   bool PassSelection(Parameter& p);
   void EvalWeights(Parameter& p);

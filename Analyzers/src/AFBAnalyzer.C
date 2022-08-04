@@ -3,7 +3,6 @@
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
   //SetupCosThetaWeight();
-  IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS");
   
   vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb)};
   mcCorr->SetJetTaggingParameters(jtps);
@@ -16,14 +15,7 @@ void AFBAnalyzer::initializeAnalyzer(){
     cout<<"[AFBAnalyzer::initializeAnalyzer] no input file"<<endl;
     exit(EXIT_FAILURE);
   }
-  if(!IsSkimmed&&!HasFlag("ALL")){
-    fChain->SetBranchStatus("pfMET_*",false);
-    fChain->SetBranchStatus("jet_*",false);
-    fChain->SetBranchStatus("fatjet_*",false);
-    fChain->SetBranchStatus("electron_*",false);
-    fChain->SetBranchStatus("muon_*",false);
-    fChain->SetBranchStatus("photon_*",false);
-  }
+  IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS")&&IsSkimmed;
 }
 void AFBAnalyzer::executeEvent(){
   //// FIXME some events of DYJets has nan PDF weights. I don't know why...
@@ -31,7 +23,6 @@ void AFBAnalyzer::executeEvent(){
 
   ///////////////// GEN level /////////////////////
   executeEventGen();
-  if(!IsSkimmed&&!HasFlag("ALL")) return;
 
   ///////////////// RECO level /////////////////////
   if(!IsDATA||DataStream.Contains("SingleMuon")){
@@ -57,9 +48,11 @@ SMPAnalyzerCore::Parameter AFBAnalyzer::MakeParameter(TString key){
   Parameter p=SMPAnalyzerCore::MakeParameter(key);
 
   p.weightbit=0;
-  if(IsNominalRun) p.weightbit|=NominalWeight;
-  if(HasFlag("SYS")&&!IsDATA&&(p.channel=="ee"||p.channel=="mm")) p.weightbit|=SystematicWeight|EfficiencyWeight;
-  if(HasFlag("PDFSYS")&&!IsDATA&&(p.channel=="ee"||p.channel=="mm")) p.weightbit|=PDFWeight;
+  if(IsSkimmed){
+    if(IsNominalRun) p.weightbit|=NominalWeight;
+    if(HasFlag("SYS")&&!IsDATA&&(p.channel=="ee"||p.channel=="mm")) p.weightbit|=SystematicWeight|EfficiencyWeight;
+    if(HasFlag("PDFSYS")&&!IsDATA&&(p.channel=="ee"||p.channel=="mm")) p.weightbit|=PDFWeight;
+  }else p.weightbit|=NominalWeight|SystematicWeight|EfficiencyWeight|PDFWeight;
 
   if(HasFlag("nbjet")) p.prefix+="nbjet/";
   else if(HasFlag("0bjet")) p.prefix+="0bjet/";
@@ -110,8 +103,8 @@ void AFBAnalyzer::executeEventGen(){
 	p.c.lepton1pt=15;
       }else if(abs(lhe_l0.ID())==13 || (!lhes.size()&&abs(gen_l0.PID())==13) ){
 	p=MakeParameter("mm");
-	p.c.lepton0pt=20;
-	p.c.lepton1pt=10;
+	p.c.lepton0pt=25; //sync with electron
+	p.c.lepton1pt=15; //sync with electron
       }else{
 	cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
 	vector<LHE> lhes=GetLHEs();
@@ -153,13 +146,12 @@ void AFBAnalyzer::executeEventGen(){
       map_weight["_nocosthetaweight"]=p.w.lumiweight*p.w.zptweight;
 
       //////////////// Fill LHE,Gen hists //////////////////////
-      if(IsNominalRun&&!IsSkimmed&&!HasFlag("ALL")){
+      if(!IsSkimmed){
 	TLorentzVector lhe_Z=lhe_l0+lhe_l1;
 	double lhe_Zmass=lhe_Z.M();
 	double lhe_Zrap=lhe_Z.Rapidity();
 	double lhe_Zpt=lhe_Z.Pt();
 	FillHistsAFB(p.prefix,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
-	FillHist(p.prefix+"lhe_costhetaCS",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaCS(&lhe_l0,&lhe_l1,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 	if(lhe_j0.Pt()){
 	  FillHist(p.prefix+"lhe_costhetaR",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaR(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 	  FillHist(p.prefix+"lhe_costhetaT",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaT(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
@@ -186,6 +178,118 @@ void AFBAnalyzer::executeEventGen(){
 	FillHist(p.prefix+"gen_nPU_PUweight_down",gen_Zmass,gen_Zrap,gen_Zpt,nPileUp,p.w.lumiweight*p.w.PUweight_down,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
       }
     }
+  }
+}
+int AFBAnalyzer::GetUnfoldBin(double mass,double cost){
+  int i;
+  int forward=cost>0?1:0;
+  if(mass<afb_mbin[0]) return 0;
+  mass=TMath::Min(mass,afb_mbin[afb_mbinnum])-0.1;
+  i=TMath::BinarySearch(afb_mbinnum+1,afb_mbin,mass);
+  return forward*afb_mbinnum+i+1;
+}
+void AFBAnalyzer::executeEventWithParameter(Parameter& p){
+  SMPAnalyzerCore::executeEventWithParameter(p);
+  if(p.channel!="ee"&&p.channel!="mm") return;
+  if(IsSkimmed) return; //for unfold
+  TLorentzVector gen_ll_dressed=gen_l0_dressed+gen_l1_dressed;
+  double genmass=-1;
+  if(gen_l0_dressed.Pt()>25||gen_l1_dressed.Pt()>25){
+    if(gen_l0_dressed.Pt()>15&&gen_l1_dressed.Pt()>15){
+      if(fabs(gen_l0_dressed.Eta())<2.4&&fabs(gen_l1_dressed.Eta())<2.4){
+	if( (p.channel=="ee"&&abs(lhe_l0.ID())==11) || (p.channel=="mm"&&abs(lhe_l0.ID())==13) )
+	  genmass=gen_ll_dressed.M();
+      }
+    }
+  }
+  map<TString,double> genweightmap;
+  if(p.weightbit&NominalWeight){
+    genweightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+  }
+  if(p.weightbit&SystematicWeight){
+    if(!IsDATA){
+      genweightmap["_PUweight_up"]=p.w.lumiweight*p.w.PUweight_up*p.w.zptweight*p.w.weakweight;
+      genweightmap["_PUweight_down"]=p.w.lumiweight*p.w.PUweight_down*p.w.zptweight*p.w.weakweight;      
+      genweightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_prefireweight_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_prefireweight_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      
+      genweightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.weakweight;
+      genweightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight;
+      
+      genweightmap["_nobtagSF"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_btagSF_hup"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_btagSF_hdown"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_btagSF_lup"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_btagSF_ldown"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+
+      for(int j=0,nj=fEff->nreplica;j<nj;j++){
+	genweightmap[Form("_efficiencySF_stat%d",j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      }
+
+      for(int i=1,ni=p.w.electronRECOSF_sys.size();i<ni;i++){
+	for(int j=0,nj=p.w.electronRECOSF_sys[i].size();j<nj;j++){
+	  genweightmap[Form("_electronRECOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+	}
+      }
+
+      for(int i=1,ni=p.w.electronIDSF_sys.size();i<ni;i++){
+	for(int j=0,nj=p.w.electronIDSF_sys[i].size();j<nj;j++){
+	  genweightmap[Form("_electronIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+	}
+      }
+
+      for(int i=1,ni=p.w.muonIDSF_sys.size();i<ni;i++){
+	for(int j=0,nj=p.w.muonIDSF_sys[i].size();j<nj;j++){
+	  genweightmap[Form("_muonIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+	}
+      }
+
+      for(int i=1,ni=p.w.triggerSF_sys.size();i<ni;i++){
+	for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
+	  genweightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+	}
+      }
+      
+      genweightmap["_CFSF_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+      genweightmap["_CFSF_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
+
+    }
+  }
+  if(p.weightbit&PDFWeight){
+    for(unsigned int i=0;i<weight_Scale->size();i++){
+      genweightmap[Form("_scalevariation%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_Scale->at(i);
+    }
+    for(unsigned int i=0;i<weight_PDF->size();i++){
+      genweightmap[Form("_pdf%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_PDF->at(i);
+    }
+    if(weight_AlphaS->size()==2){
+      genweightmap["_alphaS_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_AlphaS->at(0);
+      genweightmap["_alphaS_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_AlphaS->at(1);
+    }
+
+    if(MCSample.Contains("MiNNLO")){
+      genweightmap["_sthw2_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_sthw2->at(0);
+      genweightmap["_sthw2_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_sthw2->at(2);
+      genweightmap["_largeptscales"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_largeptscales->at(0);
+      genweightmap["_q0_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_q0->at(0);
+      genweightmap["_q0_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_q0->at(2);
+    }
+  }
+
+  for(auto [wname,genweight]:genweightmap){
+    double recoweight=0;
+    double recomass=-1;
+    if(p.weightmap.find(wname)!=p.weightmap.end()){
+      recoweight=p.weightmap[wname];
+      recomass=(*p.lepton0+*p.lepton1).M();
+    }
+    //cout<<"wname:"<<wname<<" genweight:"<<genweight<<" recoweight:"<<recoweight<<" recomass:"<<recomass<<endl;
+    int ibin=GetUnfoldBin(genmass,GetCosThetaCS(&gen_l0_dressed,&gen_l1_dressed));
+    int jbin=GetUnfoldBin(recomass,GetCosThetaCS(p.lepton0,p.lepton1));
+    FillHist(p.prefix+p.hprefix+"response_AFB(m)"+p.suffix+wname,ibin,jbin,recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_AFB(m)"+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
   }
 }
 void AFBAnalyzer::EvalWeights(Parameter& p){
@@ -284,7 +388,7 @@ void AFBAnalyzer::EvalWeights(Parameter& p){
   return;
 }  
 void AFBAnalyzer::FillHists(Parameter& p){
-  ///////////////////////fill hists///////////////////////
+  if(!IsSkimmed) return;
   TLorentzVector dilepton=*p.lepton0+*p.lepton1;
   double dimass=dilepton.M();
   double dirap=dilepton.Rapidity();
@@ -386,6 +490,7 @@ AFBAnalyzer::~AFBAnalyzer(){
   //DeleteCosThetaWeight();
 }
 double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int direction){
+  if(!p0||!p1) return 0.;
   const TLorentzVector *l0,*l1;
   if(p0->Charge()<0&&p1->Charge()>0){
     l0=p0;
