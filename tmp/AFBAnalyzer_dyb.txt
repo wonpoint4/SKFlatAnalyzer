@@ -69,3 +69,13 @@ SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-600To800_MuEnriched -n 10 -e 
 SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-800To1000_MuEnriched -n 20 -e 2016preVFP
 SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-1000_MuEnriched -n 10 -e 2016preVFP
 SKFlat.py -a MeasureJetTaggingEfficiency -i QCD_Pt-300toInf_EMEnriched -n 10 -e 2016preVFP
+
+SKFlat.py -a ExampleRun_Higgs -i DoubleEG -n 35 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i DoubleMuon -n 35 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i MuonEG -n 35 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i DYJetsToMuMu_MiNNLO -n 35 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i DYJetsToEE_MiNNLO -n 35 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i ZZ_pythia -n 10 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i ZZTo4L_m_1toInf_powheg -n 10 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i ZZTo4L_powheg -n 10 -e 2016a
+SKFlat.py -a ExampleRun_Higgs -i GluGluHToZZTo4L -n 5 -e 2016a
