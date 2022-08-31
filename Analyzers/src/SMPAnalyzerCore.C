@@ -1497,21 +1497,19 @@ bool SMPAnalyzerCore::PUJetIDPass(Jet jet, TString ID){
 
 void SMPAnalyzerCore::SetupPUJetWeight(){
   TString datapath = getenv("DATA_DIR");
-  TFile feff(datapath+"/"+GetEra()+"/ID/PUJet/TH2D_PUID_eff_"+GetEra()+".root");
-  TFile fmistag(datapath+"/"+GetEra()+"/ID/PUJet/TH2D_PUID_mistag_"+GetEra()+".root");
+  TFile fPUID(datapath+"/"+GetEra()+"/ID/PUJet/PUID.root");
   vector<TString> IDs = {"T", "M", "L"};
   for(unsigned int i=0; i<IDs.size(); i++){
     cout<<"[SMPAnalyzerCore::SetupPUJetWeight] setting PUJetWeight with ID : "+IDs.at(i)<<endl;
 
-    //FIXME
-    //heff_data=(TH2F*)feff.Get("h2_eff_data"+GetEra()+"_"+IDs.at(i));
-    //heff_mc=(TH2F*)feff.Get("h2_eff_mc"+GetEra()+"_"+IDs.at(i));
-    //hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+GetEra()+"_"+IDs.at(i));
-    //hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+GetEra()+"_"+IDs.at(i));
-    heff_data=(TH2F*)feff.Get("h2_eff_data"+GetEra()(0,4)+"_"+IDs.at(i));
-    heff_mc=(TH2F*)feff.Get("h2_eff_mc"+GetEra()(0,4)+"_"+IDs.at(i));
-    hmistag_data=(TH2F*)fmistag.Get("h2_mistag_data"+GetEra()(0,4)+"_"+IDs.at(i));
-    hmistag_mc=(TH2F*)fmistag.Get("h2_mistag_mc"+GetEra()(0,4)+"_"+IDs.at(i));
+    TString era = GetEra();
+    if(era == "2016postVFP") era = "2016";
+    else if(era == "2016preVFP") era = "2016APV";
+
+    heff_data = (TH2F*)fPUID.Get("h2_eff_dataUL"+era+"_"+IDs.at(i));
+    heff_mc   = (TH2F*)fPUID.Get("h2_eff_mcUL"+era+"_"+IDs.at(i));
+    hmistag_data = (TH2F*)fPUID.Get("h2_mistag_dataUL"+era+"_"+IDs.at(i));
+    hmistag_mc   = (TH2F*)fPUID.Get("h2_mistag_mcUL"+era+"_"+IDs.at(i));
 
     heff_data->SetDirectory(0);
     heff_mc->SetDirectory(0);
@@ -1519,8 +1517,7 @@ void SMPAnalyzerCore::SetupPUJetWeight(){
     hmistag_mc->SetDirectory(0);
   }
 
-  feff.Close();
-  fmistag.Close();
+  fPUID.Close();
 }
 
 double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys){
@@ -1535,7 +1532,7 @@ double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, TString ID, int 
     double jeteta = jets.at(i).Eta();
     if(jets.at(i).Pt() < 20) cout<<"jet pt < 20GeV, something wrong"<<endl;;
     if(jets.at(i).Pt() > 50) continue;
-    if(abs(jets.at(i).Eta()) > 2.5) jeteta = 2.4999;
+    if(abs(jets.at(i).Eta()) > 2.5) continue;
 
     double this_DATA_eff = heff_data->GetBinContent(heff_data->FindBin(jetpt, jeteta));
     double this_MC_eff = heff_mc->GetBinContent(heff_mc->FindBin(jetpt, jeteta));
@@ -1544,40 +1541,32 @@ double SMPAnalyzerCore::GetPUJetWeight(const vector<Jet>& jets, TString ID, int 
     if(this_DATA_eff * this_MC_eff * this_DATA_mistag * this_MC_mistag == 0.) continue;
 
     bool isRealJet = false;
-    // Since partonFlavour==0 means not matched to Gen parton, assume it means jet is not true jet, and it's a PU jet
-    // See also comments of https://github.com/cms-sw/cmssw/blob/277cb56baa2e8187367f1897cdc3405c998ec2de/PhysicsTools/JetMCAlgos/plugins/JetFlavourClustering.cc
-    //if(jets.at(i).partonFlavour() !=0) isRealJet = true;
-    //if(jets.at(i).partonPdgId() !=0) isRealJet = true;
-    // ### Not Working Properly, It is using dR=0.3 to determine partonFlavour for gen,jet matching. I think it is too small.
-
-    //isRealJet = isGenMatchedJet(jets.at(i), gens);
-    if(!isRealJet){
-      //this_DATA_eff = this_DATA_mistag;
-      //this_MC_eff = this_MC_mistag;
-    }
-
-    // Default set is Medium ID cut
+    isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
     bool isPassID = PUJetIDPass(jets.at(i), ID);
-    if(isPassID){
-      //if(isRealJet) cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") real Jet passing ID"<<endl;
-      //else cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") PU Jet passing ID"<<endl;
-    }else{
-      //if(isRealJet) cout<<"Bad id! jets.at("+TString::Itoa(i,10)+") real Jet failing ID"<<endl;
-      //else cout<<"Good coin! jets.at("+TString::Itoa(i,10)+") PU Jet failing ID"<<endl;
-    }
 
-    if(isPassID){
-      if(this_MC_eff == 0) this_MC_eff += 1E-10;
-      Prob_DATA *= this_DATA_eff;
-      Prob_MC *= this_MC_eff;
+    if(isRealJet){
+      if(isPassID){
+        if(this_MC_eff == 0) this_MC_eff += 1E-4;
+        Prob_DATA *= this_DATA_eff;
+        Prob_MC *= this_MC_eff;
+      }else{
+        if(this_MC_eff == 1) this_MC_eff -= 1E-4;
+        Prob_DATA *= 1.-this_DATA_eff;
+        Prob_MC *= 1.-this_MC_eff;
+      }
     }else{
-      if(this_MC_mistag == 1) this_MC_mistag -= 1E-10;
-      Prob_DATA *= 1.-this_DATA_mistag;
-      Prob_MC *= 1.-this_MC_mistag;
-      //Prob_DATA *= 1.-this_DATA_eff;
-      //Prob_MC *= 1.-this_MC_eff;
+      if(isPassID){
+        if(this_MC_mistag == 0) this_MC_mistag += 1E-4;
+        Prob_DATA *= this_DATA_mistag;
+        Prob_MC *= this_MC_mistag;
+      }else{
+        if(this_MC_mistag == 1) this_MC_mistag -= 1E-4;
+        Prob_DATA *= 1.-this_DATA_mistag;
+        Prob_MC *= 1.-this_MC_mistag;
+      }
     }
   }
+
   return Prob_DATA/Prob_MC;
 }
 

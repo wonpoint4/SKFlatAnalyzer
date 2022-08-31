@@ -428,7 +428,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   if(p.weightbit&NominalWeight){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Mass52",eventweight);
 
-    FillHist(p.prefix+p.hprefix+"Mass52_mll"+p.suffix,                 (*l0+*l1).M(),eventweight,100,50,150);
+    FillHist(p.prefix+p.hprefix+"Mass52_mll"+p.suffix,                 (*l0+*l1).M(),eventweight,250,50,300);
     FillHist(p.prefix+p.hprefix+"Mass52_yll"+p.suffix,                 (*l0+*l1).Rapidity(),eventweight,60,-3,3);
     FillHist(p.prefix+p.hprefix+"Mass52_pTll"+p.suffix,                (*l0+*l1).Pt(),eventweight,100,0,100);
     FillHist(p.prefix+p.hprefix+"Mass52_bjet"+p.suffix,                bjets.size()+n_loosebjet,eventweight,5,0,5);
@@ -446,16 +446,13 @@ void AFBAnalyzer::FillHists(Parameter& p){
     FillHist(p.prefix+p.hprefix+"Mass52_normjet_noPUJetSF"+p.suffix,   jets.size(),nopujetweight,10,0,10);
   }
 
-  if((*l0+*l1).M() >200) return;
-  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Mass200",eventweight);
-
   if(bjets.size() !=1) return;
   bjet = bjets.at(0);
   bjet_charge = bjetCharge(bjets.at(0),0,p.prefix+p.hprefix);
   if(p.weightbit&NominalWeight){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"OneTightb",eventweight);
 
-    FillHist(p.prefix+p.hprefix+"OneTightb_mll"+p.suffix,        (*l0+*l1).M(),eventweight,100,50,150);
+    FillHist(p.prefix+p.hprefix+"OneTightb_mll"+p.suffix,        (*l0+*l1).M(),eventweight,250,50,300);
     FillHist(p.prefix+p.hprefix+"OneTightb_yll"+p.suffix,        (*l0+*l1).Rapidity(),eventweight,60,-3,3);
     FillHist(p.prefix+p.hprefix+"OneTightb_pTll"+p.suffix,       (*l0+*l1).Pt(),eventweight,100,0,100);
     FillHist(p.prefix+p.hprefix+"OneTightb_loosebjet"+p.suffix,  n_loosebjet,eventweight,5,0,5);
@@ -479,7 +476,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   if(p.weightbit&NominalWeight){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"2bveto",eventweight);
 
-    FillHist(p.prefix+p.hprefix+"2bveto_mll"+p.suffix,     (*l0+*l1).M(),eventweight,100,50,150);
+    FillHist(p.prefix+p.hprefix+"2bveto_mll"+p.suffix,     (*l0+*l1).M(),eventweight,250,50,300);
     FillHist(p.prefix+p.hprefix+"2bveto_yll"+p.suffix,     (*l0+*l1).Rapidity(),eventweight,60,-3,3);
     FillHist(p.prefix+p.hprefix+"2bveto_pTll"+p.suffix,    (*l0+*l1).Pt(),eventweight,100,0,100);
     FillHist(p.prefix+p.hprefix+"2bveto_jet"+p.suffix,     realjets.size(),eventweight,10,0,10);
@@ -498,13 +495,15 @@ void AFBAnalyzer::FillHists(Parameter& p){
   if(p.weightbit&NominalWeight){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"2jveto",eventweight);
 
-    FillHist(p.prefix+p.hprefix+"2jveto_mll"+p.suffix,  (*l0+*l1).M(),eventweight,100,50,150);
+    FillHist(p.prefix+p.hprefix+"2jveto_mll"+p.suffix,  (*l0+*l1).M(),eventweight,250,50,300);
     FillHist(p.prefix+p.hprefix+"2jveto_yll"+p.suffix,  (*l0+*l1).Rapidity(),eventweight,60,-3,3);
     FillHist(p.prefix+p.hprefix+"2jveto_pTll"+p.suffix, (*l0+*l1).Pt(),eventweight,100,0,100);
     FillHist(p.prefix+p.hprefix+"2jveto_MET"+p.suffix,  pfMET_Type1_pt,eventweight,150,0,150);
+    FillHist(p.prefix+p.hprefix+"2jveto_puppiMET"+p.suffix, PuppiMET_Type1_pt,eventweight,150,0,150);
+    FillHist(p.prefix+p.hprefix+"2jveto_MET-puppiMET"+p.suffix, pfMET_Type1_pt-PuppiMET_Type1_pt,eventweight,200,-100,100);
   }
 
-  if(pfMET_Type1_pt >75) return;
+  if(PuppiMET_Type1_pt >75) return;
   if(p.weightbit&NominalWeight){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"MET75",eventweight);
 
@@ -556,12 +555,17 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+"Zb_dphi",(*l0+*l1).DeltaPhi(bjets.at(0)),map_weight,100,-5,5);
   FillHist(p.prefix+p.hprefix+"Zb_y2D",(*l0+*l1).Rapidity(),bjets.at(0).Rapidity(),map_weight,30,-3,3,30,-3,3);
 
-  FillHist(p.prefix+p.hprefix+"mll",(*l0+*l1).M(),map_weight,100,50,150);
+  FillHist(p.prefix+p.hprefix+"mll",(*l0+*l1).M(),map_weight,250,50,300);
   FillHist(p.prefix+p.hprefix+"yll",(*l0+*l1).Rapidity(),map_weight,60,-3,3);
   FillHist(p.prefix+p.hprefix+"pTll",(*l0+*l1).Pt(),map_weight,100,0,100);
 
   FillHist(p.prefix+p.hprefix+"MET"+p.suffix,pfMET_Type1_pt,map_weight,150,0,150);
+  FillHist(p.prefix+p.hprefix+"puppiMET"+p.suffix,PuppiMET_Type1_pt,map_weight,150,0,150);
 
+  if((*l0+*l1).M() >200) return;
+  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Mass200",eventweight);
+
+  ///////////////////////fill TH4D hists///////////////////////
   TLorentzVector dilepton=*p.lepton0+*p.lepton1;
   double dimass=dilepton.M();
   double dirap=dilepton.Rapidity();
@@ -573,6 +577,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+"nPV"+p.suffix,dimass,dirap,dipt,nPV,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
   FillHist(p.prefix+p.hprefix+"rho"+p.suffix,dimass,dirap,dipt,Rho,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
   FillHist(p.prefix+p.hprefix+"met"+p.suffix,dimass,dirap,dipt,pfMET_Type1_pt,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+  FillHist(p.prefix+p.hprefix+"puppimet"+p.suffix,dimass,dirap,dipt,PuppiMET_Type1_pt,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
   if(IsDYSample&&p.hprefix==""&&IsNominalRun){
     vector<Gen> gens=GetGens();
     Gen truth_l0=GetGenMatchedLepton(*p.lepton0,gens);
@@ -883,6 +888,7 @@ void AFBAnalyzer::FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0
   if(!hpre.Contains("gen")&&!hpre.Contains("lhe")&&!hpre.Contains("truth")){
     FillHist(pre+hpre+"z0"+suf,dimass,dirap,dipt,vertex_Z,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
     FillHist(pre+hpre+"met"+suf,dimass,dirap,dipt,pfMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
+    FillHist(pre+hpre+"puppimet"+suf,dimass,dirap,dipt,PuppiMET_Type1_pt,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);  
     FillHist(pre+hpre+"bjetCh"+suf,dimass,dirap,dipt,bjet_charge,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,20,-5,5);
   }
 }
