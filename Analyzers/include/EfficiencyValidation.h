@@ -7,12 +7,12 @@ class EfficiencyValidation : public SMPAnalyzerCore {
 
 public:
 
-  void initializeAnalyzer();
-  void executeEvent();
-  Parameter MakeParameter(TString key,TString option="");
-  void EvalWeights(Parameter& p);
-  void FillHists(Parameter& p);
-  void FillHistsEfficiency(Parameter& p,TString region);
+  virtual void initializeAnalyzer();
+  virtual void executeEvent();
+  virtual Parameter MakeParameter(TString key,TString option="");
+  virtual void EvalWeights(Parameter& p);
+  virtual void FillHists(Parameter& p);
+  virtual void FillHistsEfficiency(Parameter& p,TString region);
   virtual bool PassSelection(Parameter& p);
 
   EfficiencyValidation();

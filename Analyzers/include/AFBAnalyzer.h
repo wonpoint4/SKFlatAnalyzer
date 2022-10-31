@@ -7,31 +7,32 @@
 class AFBAnalyzer : public SMPAnalyzerCore {
 
 public:
-  void test();
-  void initializeAnalyzer();
-  void executeEvent();
-  void executeEventGen();
+  virtual void test();
+  virtual void initializeAnalyzer();
+  virtual void executeEvent();
+  virtual void executeEventGen();
   virtual void executeEventWithParameter(Parameter& p);
   virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
-  int GetUnfoldBin(double mass,double cost);
-  Parameter MakeParameter(TString key);
-  bool PassSelection(Parameter& p);
-  void EvalWeights(Parameter& p);
-  void FillHists(Parameter& p);
+  static int GetUnfoldBin(int nbin,const double* bins,double mass,double cost);
+  virtual Parameter MakeParameter(TString key);
+  virtual bool PassSelection(Parameter& p);
+  virtual void EvalWeights(Parameter& p);
+  virtual void ResetRecoWeights(Parameter& p);
+  virtual void FillHists(Parameter& p);
 
   AFBAnalyzer();
   ~AFBAnalyzer();
 
   //double GetCosThetaCS(const vector<Lepton*>& leps);
-  double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
-  double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
-  double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
-  void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
-  void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
-  void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
-  void SetupCosThetaWeight();
-  void DeleteCosThetaWeight();
-  double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
+  virtual double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
+  virtual double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
+  virtual double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
+  virtual void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
+  virtual void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
+  //void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
+  virtual void SetupCosThetaWeight();
+  virtual void DeleteCosThetaWeight();
+  virtual double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
   
   TString hardprefix;
   map<TString,TH3D*> map_hist_cost;
@@ -40,11 +41,11 @@ public:
   bool IsSkimmed=false;
   
   static const int afb_mbinnum=40;
-  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};
+  static constexpr const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};
   static const int afb_ybinnum=12;
-  const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
+  static constexpr const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
   static const int afb_ptbinnum=30;
-  const double afb_ptbin[afb_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
+  static constexpr const double afb_ptbin[afb_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
   static const int afb_costbinnum=20;
   const double afb_costbin[afb_costbinnum+1]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
 

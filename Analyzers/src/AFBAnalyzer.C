@@ -92,24 +92,28 @@ void AFBAnalyzer::executeEventGen(){
   costhetaweight=1.;
   costhetaweight_up=1.;
   costhetaweight_down=1.;
-  if(IsDYSample||MCSample.Contains("GamGamToLL")){
+  if(IsDYSample||MCSample.Contains("GamGamToLL")||MCSample.Contains("TTLL")){
     //////////////////////// Check LHE /////////////////////////
-    if(abs(lhe_l0.ID())!=15){
+    if(abs(lhe_l0.ID())!=15&&abs(lhe_l1.ID())!=15){
       Parameter p;
       double letacut=2.4;
-      if(abs(lhe_l0.ID())==11 || (!lhes.size()&&abs(gen_l0.PID())==11) ){
+      if( (abs(lhe_l0.ID())==11&&abs(lhe_l1.ID())==11) || (!lhes.size()&&abs(gen_l0.PID())==11&&abs(gen_l1.PID())==11) ){
 	p=MakeParameter("ee");
 	p.c.lepton0pt=25;
 	p.c.lepton1pt=15;
-      }else if(abs(lhe_l0.ID())==13 || (!lhes.size()&&abs(gen_l0.PID())==13) ){
+      }else if( (abs(lhe_l0.ID())==13&&abs(lhe_l1.ID())==13) || (!lhes.size()&&abs(gen_l0.PID())==13&&abs(gen_l1.PID())==13) ){
 	p=MakeParameter("mm");
 	p.c.lepton0pt=25; //sync with electron
 	p.c.lepton1pt=15; //sync with electron
       }else{
-	cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
-	vector<LHE> lhes=GetLHEs();
-	for(auto& lhe:lhes) lhe.Print();
-	exit(EXIT_FAILURE);
+	if(IsDYSample||MCSample.Contains("GamGamToLL")){
+	  cout<<"[AFBAnalyzer::executeEvent()] something is wrong l0.ID="<<abs(lhe_l0.ID())<<endl;
+	  vector<LHE> lhes=GetLHEs();
+	  for(auto& lhe:lhes) lhe.Print();
+	  exit(EXIT_FAILURE);
+	}else if(MCSample.Contains("TTLL")){
+	  return;
+	}
       }
       
       //////////////////////// GEN /////////////////////////
@@ -180,116 +184,82 @@ void AFBAnalyzer::executeEventGen(){
     }
   }
 }
-int AFBAnalyzer::GetUnfoldBin(double mass,double cost){
+int AFBAnalyzer::GetUnfoldBin(int nbin,const double* bins,double value,double cost){
   int i;
   int forward=cost>0?1:0;
-  if(mass<afb_mbin[0]) return 0;
-  mass=TMath::Min(mass,afb_mbin[afb_mbinnum])-0.1;
-  i=TMath::BinarySearch(afb_mbinnum+1,afb_mbin,mass);
-  return forward*afb_mbinnum+i+1;
+  if(value<bins[0]) return 0;
+  value=TMath::Min(value,bins[nbin]-0.1);
+  i=TMath::BinarySearch(nbin+1,bins,value);
+  return forward*nbin+i+1;
 }
 void AFBAnalyzer::executeEventWithParameter(Parameter& p){
   SMPAnalyzerCore::executeEventWithParameter(p);
-  if(p.channel!="ee"&&p.channel!="mm") return;
-  if(IsSkimmed) return; //for unfold
+  // response matrix for unfolding
+  if(IsSkimmed) return;
+  if(p.channel=="ee"){
+    if(abs(lhe_l0.ID())!=11||abs(lhe_l1.ID())!=11) return;
+  }else if(p.channel=="mm"){
+    if(abs(lhe_l0.ID())!=13||abs(lhe_l1.ID())!=13) return;
+  }else return;
   TLorentzVector gen_ll_dressed=gen_l0_dressed+gen_l1_dressed;
-  double genmass=-1;
+  double genm=-1;
+  double geny=-100;
+  double genpt=-1;
+  double gencost=0;
   if(gen_l0_dressed.Pt()>25||gen_l1_dressed.Pt()>25){
     if(gen_l0_dressed.Pt()>15&&gen_l1_dressed.Pt()>15){
       if(fabs(gen_l0_dressed.Eta())<2.4&&fabs(gen_l1_dressed.Eta())<2.4){
-	if( (p.channel=="ee"&&abs(lhe_l0.ID())==11) || (p.channel=="mm"&&abs(lhe_l0.ID())==13) )
-	  genmass=gen_ll_dressed.M();
+	if(gen_ll_dressed.M()>52){
+	  genm=gen_ll_dressed.M();
+	  geny=gen_ll_dressed.Rapidity();
+	  genpt=gen_ll_dressed.Pt();
+	  gencost=GetCosThetaCS(&gen_l0_dressed,&gen_l1_dressed);
+	}
       }
     }
   }
-  map<TString,double> genweightmap;
-  if(p.weightbit&NominalWeight){
-    genweightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-  }
-  if(p.weightbit&SystematicWeight){
-    if(!IsDATA){
-      genweightmap["_PUweight_up"]=p.w.lumiweight*p.w.PUweight_up*p.w.zptweight*p.w.weakweight;
-      genweightmap["_PUweight_down"]=p.w.lumiweight*p.w.PUweight_down*p.w.zptweight*p.w.weakweight;      
-      genweightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_prefireweight_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_prefireweight_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      
-      genweightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.weakweight;
-      genweightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight;
-      
-      genweightmap["_nobtagSF"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_btagSF_hup"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_btagSF_hdown"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_btagSF_lup"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_btagSF_ldown"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-
-      for(int j=0,nj=fEff->nreplica;j<nj;j++){
-	genweightmap[Form("_efficiencySF_stat%d",j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      }
-
-      for(int i=1,ni=p.w.electronRECOSF_sys.size();i<ni;i++){
-	for(int j=0,nj=p.w.electronRECOSF_sys[i].size();j<nj;j++){
-	  genweightmap[Form("_electronRECOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-	}
-      }
-
-      for(int i=1,ni=p.w.electronIDSF_sys.size();i<ni;i++){
-	for(int j=0,nj=p.w.electronIDSF_sys[i].size();j<nj;j++){
-	  genweightmap[Form("_electronIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-	}
-      }
-
-      for(int i=1,ni=p.w.muonIDSF_sys.size();i<ni;i++){
-	for(int j=0,nj=p.w.muonIDSF_sys[i].size();j<nj;j++){
-	  genweightmap[Form("_muonIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-	}
-      }
-
-      for(int i=1,ni=p.w.triggerSF_sys.size();i<ni;i++){
-	for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
-	  genweightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-	}
-      }
-      
-      genweightmap["_CFSF_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-      genweightmap["_CFSF_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight;
-
-    }
-  }
-  if(p.weightbit&PDFWeight){
-    for(unsigned int i=0;i<weight_Scale->size();i++){
-      genweightmap[Form("_scalevariation%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_Scale->at(i);
-    }
-    for(unsigned int i=0;i<weight_PDF->size();i++){
-      genweightmap[Form("_pdf%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_PDF->at(i);
-    }
-    if(weight_AlphaS->size()==2){
-      genweightmap["_alphaS_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_AlphaS->at(0);
-      genweightmap["_alphaS_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_AlphaS->at(1);
-    }
-
-    if(MCSample.Contains("MiNNLO")){
-      genweightmap["_sthw2_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_sthw2->at(0);
-      genweightmap["_sthw2_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_sthw2->at(2);
-      genweightmap["_largeptscales"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_largeptscales->at(0);
-      genweightmap["_q0_up"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_q0->at(0);
-      genweightmap["_q0_down"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*weight_q0->at(2);
-    }
-  }
-
-  for(auto [wname,genweight]:genweightmap){
+  Parameter pgen=p;
+  ResetRecoWeights(pgen);
+  EvalWeights(pgen);
+  for(auto [wname,genweight]:pgen.weightmap){
     double recoweight=0;
-    double recomass=-1;
+    double recom=-1;
+    double recoy=-100;
+    double recopt=-1;
+    double recocost=0;
     if(p.weightmap.find(wname)!=p.weightmap.end()){
       recoweight=p.weightmap[wname];
-      recomass=(*p.lepton0+*p.lepton1).M();
+      recom=(*p.lepton0+*p.lepton1).M();
+      recoy=(*p.lepton0+*p.lepton1).Rapidity();
+      recopt=(*p.lepton0+*p.lepton1).Pt();
+      recocost=GetCosThetaCS(p.lepton0,p.lepton1);
     }
-    //cout<<"wname:"<<wname<<" genweight:"<<genweight<<" recoweight:"<<recoweight<<" recomass:"<<recomass<<endl;
-    int ibin=GetUnfoldBin(genmass,GetCosThetaCS(&gen_l0_dressed,&gen_l1_dressed));
-    int jbin=GetUnfoldBin(recomass,GetCosThetaCS(p.lepton0,p.lepton1));
-    FillHist(p.prefix+p.hprefix+"response_AFB(m)"+p.suffix+wname,ibin,jbin,recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
-    FillHist(p.prefix+p.hprefix+"response_AFB(m)"+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
+    //cout<<"wname:"<<wname<<" genweight:"<<genweight<<" recoweight:"<<recoweight<<" recom:"<<recom<<endl;
+    int imbin=GetUnfoldBin(afb_mbinnum,afb_mbin,genm,gencost);
+    int jmbin=GetUnfoldBin(afb_mbinnum,afb_mbin,recom,recocost);
+    int iybin=GetUnfoldBin(afb_ybinnum,afb_ybin,geny,gencost);
+    int jybin=GetUnfoldBin(afb_ybinnum,afb_ybin,recoy,recocost);
+    int iptbin=GetUnfoldBin(afb_ptbinnum,afb_ptbin,genpt,gencost);
+    int jptbin=GetUnfoldBin(afb_ptbinnum,afb_ptbin,recopt,recocost);
+
+    FillHist(p.prefix+p.hprefix+"response_afbm"+p.suffix+wname,imbin,jmbin,recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_afbm"+p.suffix+wname,imbin,0,genweight-recoweight,2*afb_mbinnum,1,2*afb_mbinnum+1,2*afb_mbinnum,1,2*afb_mbinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_afby"+p.suffix+wname,iybin,jybin,recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_afby"+p.suffix+wname,iybin,0,genweight-recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_afbpt"+p.suffix+wname,iptbin,jptbin,recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
+    FillHist(p.prefix+p.hprefix+"response_afbpt"+p.suffix+wname,iptbin,0,genweight-recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
+    double massregion[]={52,77,106,280,3000};
+    for(int k=0;k<4;k++){
+      int ibin=(genm>=massregion[k]&&genm<massregion[k+1]) ? iybin : 0;
+      int jbin=(recom>=massregion[k]&&recom<massregion[k+1]) ? jybin : 0;
+      FillHist(p.prefix+p.hprefix+Form("response_afby_m%d",k)+p.suffix+wname,ibin,jbin,recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
+      FillHist(p.prefix+p.hprefix+Form("response_afby_m%d",k)+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
+
+      ibin=(genm>=massregion[k]&&genm<massregion[k+1]) ? iptbin : 0;
+      jbin=(recom>=massregion[k]&&recom<massregion[k+1]) ? jptbin : 0;
+      FillHist(p.prefix+p.hprefix+Form("response_afbpt_m%d",k)+p.suffix+wname,ibin,jbin,recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
+      FillHist(p.prefix+p.hprefix+Form("response_afbpt_m%d",k)+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
+    }
   }
 }
 void AFBAnalyzer::EvalWeights(Parameter& p){
@@ -386,7 +356,22 @@ void AFBAnalyzer::EvalWeights(Parameter& p){
     }
   }
   return;
-}  
+}
+void AFBAnalyzer::ResetRecoWeights(Parameter& p){
+  p.w.prefireweight=1.; p.w.prefireweight_up=1.; p.w.prefireweight_down=1.;
+  p.w.z0weight=1.;
+  p.w.electronRECOSF=1.;
+  p.w.electronRECOSF_sys=fEff->GetStructure(p.k.electronRECOSF);
+  p.w.electronIDSF=1.;
+  p.w.electronIDSF_sys=fEff->GetStructure(p.k.electronIDSF);
+  p.w.muonIDSF=1.;
+  p.w.muonIDSF_sys=fEff->GetStructure(p.k.muonIDSF);
+  p.w.muonISOSF=1.;
+  p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
+  p.w.triggerSF=1.;
+  p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
+  p.doublemap["btagSF"]=1.;
+}
 void AFBAnalyzer::FillHists(Parameter& p){
   if(!IsSkimmed) return;
   TLorentzVector dilepton=*p.lepton0+*p.lepton1;

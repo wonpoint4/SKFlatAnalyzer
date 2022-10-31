@@ -30,11 +30,11 @@ void SMPAnalyzerCore::beginEvent(){
   if(!IsDATA){
     lhes=GetLHEs();
     gens=GetGens();
-    if(IsDYSample||MCSample.Contains("GamGamToLL")){
-      GetDYLHEParticles(lhes,lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0);
-      GetDYGenParticles(gens,gen_p0,gen_p1,gen_l0,gen_l1,3);
-      GetDYGenParticles(gens,gen_p0,gen_p1,gen_l0_dressed,gen_l1_dressed,1);
-      GetDYGenParticles(gens,gen_p0,gen_p1,gen_l0_bare,gen_l1_bare,0);
+    if(IsDYSample||MCSample.Contains("GamGamToLL")||MCSample.Contains("TTLL")){
+      GetAFBLHEParticles(lhes,lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0);
+      GetAFBGenParticles(gens,gen_p0,gen_p1,gen_l0,gen_l1,3);
+      GetAFBGenParticles(gens,gen_p0,gen_p1,gen_l0_dressed,gen_l1_dressed,1);
+      GetAFBGenParticles(gens,gen_p0,gen_p1,gen_l0_bare,gen_l1_bare,0);
     }
   }
 }
@@ -197,7 +197,11 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
   if(p.c.nelectronmax>=0&&(int)p.electrons.size()>p.c.nelectronmax) return false;
   if(p.c.nmuonmax>=0&&(int)p.muons.size()>p.c.nmuonmax) return false;
     
-  if(!p.lepton0||!p.lepton1) return false;
+  if(p.c.nleptonmin>=2)
+    if(!p.lepton0||!p.lepton1) return false;
+  if(p.c.nleptonmin==1)
+    if(!p.lepton0) return false;
+    
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Dilepton",weight);
 
   if(p.c.lepton0pt>0){
@@ -240,7 +244,8 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
   }
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"LepPtCut",weight);
 
-  if(p.lepton0->Charge()*p.lepton1->Charge()>0) p.hprefix+="ss_";
+  if(p.c.nleptonmin>=2) 
+    if(p.lepton0->Charge()*p.lepton1->Charge()>0) p.hprefix+="ss_";
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"charge",weight);
 
   if(p.option.Contains("triggermatching")){
@@ -934,9 +939,9 @@ double SMPAnalyzerCore::GetBinContentUser(TH3* hist,double valx,double valy,doub
   if(valz>zmax) valz=zmax-0.001;
   return hist->GetBinContent(hist->FindBin(valx,valy,valz))+sys*hist->GetBinError(hist->FindBin(valx,valy,valz));
 }
-void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0){
-  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")){
-    cout <<"[AFBAnalyzer::GetDYLHEParticles] this is for DY event"<<endl;
+void SMPAnalyzerCore::GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0){
+  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")&&!MCSample.Contains("TTLL")){
+    cout <<"[AFBAnalyzer::GetAFBLHEParticles] this is only for dilepton event"<<endl;
     exit(EXIT_FAILURE);
   }
   p0=LHE();
@@ -949,7 +954,7 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,
     if(p0.ID()==0&&lhes[i].Status()==-1&&lhes[i].Eta()>0) p0=lhes[i];
     if(p1.ID()==0&&lhes[i].Status()==-1&&lhes[i].Eta()<0) p1=lhes[i];
     if(l0.ID()==0&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l0=lhes[i];
-    if(l0.ID()&&lhes[i].ID()==-l0.ID()) l1=lhes[i];
+    if(l0.ID()&&(abs(lhes[i].ID())==11||abs(lhes[i].ID())==13||abs(lhes[i].ID())==15)) l1=lhes[i];
     if(lhes[i].Status()==1)
       if(abs(lhes[i].ID())<=6||lhes[i].ID()==21)
 	if(lhes[i].Pt()>j0.Pt()) j0=lhes[i];
@@ -966,10 +971,10 @@ void SMPAnalyzerCore::GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,
 }
 
 
-void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
+void SMPAnalyzerCore::GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode){
   //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
-  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")){
-    cout <<"[SMPAnalyzerCore::GetDYGenParticles] this is for DY event"<<endl;
+  if(!IsDYSample&&!MCSample.Contains("GamGamToLL")&&!MCSample.Contains("TTLL")){
+    cout <<"[SMPAnalyzerCore::GetAFBGenParticles] this is only for dilepton event"<<endl;
     exit(EXIT_FAILURE);
   }
   parton0=Gen();
@@ -994,19 +999,41 @@ void SMPAnalyzerCore::GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen
     }
   }
   int nlepton=leptons.size();
+  const double maxdr=0.4;
   for(int i=0;i<nlepton;i++){
-    for(int j=i+1;j<nlepton;j++){
-      if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
-      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){
-	if(leptons[i]->Pt()>leptons[j]->Pt()){
-	  l0=*leptons[i];
-	  l1=*leptons[j];
-	}else{
-	  l0=*leptons[j];
-	  l1=*leptons[i];
-	}
+    if(leptons[i]->PID()!=lhe_l0.ID()) continue;
+    if(leptons[i]->DeltaR(lhe_l0)>maxdr) continue;
+    if( fabs(leptons[i]->E()-lhe_l0.E()) < fabs(l0.E()-lhe_l0.E()) ){
+      l0=*leptons[i];
+    }
+  }
+  if(l0.PID()==0){
+    for(int i=0;i<nlepton;i++){
+      if(leptons[i]->PID()!=lhe_l0.ID()) continue;
+      if(l0.PID()==0 || leptons[i]->DeltaR(lhe_l0)<l0.DeltaR(lhe_l0)){
+	l0=*leptons[i];
       }
     }
+  }
+  for(int i=0;i<nlepton;i++){
+    if(leptons[i]->PID()!=lhe_l1.ID()) continue;
+    if(leptons[i]->DeltaR(lhe_l1)>maxdr) continue;
+    if( fabs(leptons[i]->E()-lhe_l1.E()) < fabs(l1.E()-lhe_l1.E()) ){
+      l1=*leptons[i];
+    }
+  }
+  if(l1.PID()==0){
+    for(int i=0;i<nlepton;i++){
+      if(leptons[i]->PID()!=lhe_l1.ID()) continue;
+      if(l1.PID()==0 || leptons[i]->DeltaR(lhe_l1)<l1.DeltaR(lhe_l1)){
+	l1=*leptons[i];
+      }
+    }
+  }
+  if(l0.Pt()<l1.Pt()){
+    Gen tmp=l0;
+    l0=l1;
+    l1=tmp;
   }
   if(mode>=3){
     if(nlepton>=4){
@@ -1277,7 +1304,7 @@ SMPAnalyzerCore::Parameter::Parameter(){
 SMPAnalyzerCore::Parameter::~Parameter(){
 }
 void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
-  vector<TString> availables={"el","ee","eE","EE","mu","mm","mM","MM","em","me"};
+  vector<TString> availables={"el","ee","eE","EE","mu","mm","mM","MM","em","me","en","mn"};
   bool pass=false;
   for(const TString& avail:availables)
     if(ch==avail) pass=true;
@@ -1340,6 +1367,8 @@ void SMPAnalyzerCore::Parameter::SetLeptons(){
 	leptons.push_back(&amuons.at(iam));
 	iam++;
       }else leptons.push_back(NULL);
+    }else if (c=='n'){
+      //neutrino
     }
   }
   //should not sort for em or me channel
@@ -1588,6 +1617,37 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2016b") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
     else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
+  }else if(p.channel=="mn"){
+    p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetLeptonPtCut(27,-1);
+    p.c.nleptonmin=1;
+    if(GetEraShort()=="2016a"){
+      p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
+    }else if(GetEraShort()=="2016b"){
+      p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
+    }else if(GetEraShort()=="2017"){
+      p.triggers={"HLT_IsoMu24_v","HLT_IsoMu27_v"};
+      p.k.triggerSF={"IsoMu24_MediumID_trkIsoLoose","IsoMu27_MediumID_trkIsoLoose"};
+    }else if(GetEraShort()=="2018"){
+      p.triggers={"HLT_IsoMu24_v"};
+    }
+  }else if(p.channel=="en"){
+    p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0));
+    p.SetLeptonPtCut(30,-1);
+    p.c.nleptonmin=1;
+    if(GetEraShort()=="2016a"){
+      p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
+    }else if(GetEraShort()=="2016b"){
+      p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
+    }else if(GetEraShort()=="2017"){
+      p.triggers={"HLT_Ele27_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele27_MediumID","Ele32_MediumID"};
+    }else if(GetEraShort()=="2018"){
+      p.triggers={"HLT_Ele28_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele28_MediumID","Ele32_MediumID"};
+    }
   }
   return p;
 }
