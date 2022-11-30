@@ -25,5 +25,6 @@
 #pragma link C++ class ZpeakAnalyzer+;
 #pragma link C++ class FakeAnalyzer+;
 #pragma link C++ class SkimTree_EgammaTnP+;
+#pragma link C++ class DZAnalyzer+;
 
 #endif

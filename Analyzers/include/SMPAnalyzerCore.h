@@ -69,6 +69,7 @@ public:
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
       int nelectronmax=-1,nmuonmax=-1;
+      int nleptonmin=2;
     };
     Key k;
     Weight w;
@@ -91,9 +92,11 @@ public:
 
   virtual void initializeAnalyzer();
   virtual void beginEvent();
-  virtual void executeEventWithParameter(Parameter p);
+  virtual void executeEventWithParameter(Parameter& p);
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
+  virtual void EvalWeights(Parameter& p);
   virtual bool PassSelection(Parameter& p);
   virtual Parameter MakeParameter(TString channel,TString option="");
 
@@ -213,8 +216,8 @@ public:
   static double GetBinContentUser(TH1* hist,double valx,int sys);
   static double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
-  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
+  void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
