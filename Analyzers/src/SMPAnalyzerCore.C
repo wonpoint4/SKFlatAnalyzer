@@ -25,14 +25,31 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   IsDYSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
   if(IsDYSample) SetupZptWeight();
+
+  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
+
+                                       JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepCSV_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepCSV_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepCSV_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+                                       JetTagging::Parameters(JetTagging::DeepCSV_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm)};
+  mcCorr->SetJetTaggingParameters(jtps);
 }
 void SMPAnalyzerCore::beginEvent(){
   _event=GetEvent();
-  //softmus=SMPGetMuons("POGLoose",0,2.4);
-  softmus=GetAllMuons();
-  std::sort(softmus.begin(),softmus.end(),PtComparing);
-  softels=GetAllElectrons();
-  std::sort(softels.begin(),softels.end(),PtComparing);
+  allmus=GetAllMuons();
+  std::sort(allmus.begin(),allmus.end(),PtComparing);
+  allels=GetAllElectrons();
+  std::sort(allels.begin(),allels.end(),PtComparing);
+  alljets=GetJets("tightLepVeto",20,2.4); // These part shows ERROR only in data when EfficiencyValidation
+  std::sort(alljets.begin(),alljets.end(),PtComparing);
+
   if(!IsDATA){
     lhes=GetLHEs();
     gens=GetGens();
@@ -48,6 +65,7 @@ void SMPAnalyzerCore::beginEvent(){
 }
 void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
   p.SetLeptons();
+  if(p.channel.Length() > 2) p.SetJets();
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"lumi",p.w.lumiweight);
   
   if(!_event.PassTrigger(p.triggers)) return;
@@ -64,8 +82,8 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
   double eventweight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
   if(p.weightbit&NominalWeight) FillHist(p.prefix+p.hprefix+"nlepton"+p.suffix,p.muons.size()+p.electrons.size(),eventweight,10,0,10);
 
-  /////////////////////// selection ///////////////////////
-  if(!PassSelection(p)) return;
+  /////////////////////// lepton selection ///////////////////////
+  if(!SMPAnalyzerCore::PassSelection(p)) return;
   ///////////////// efficiency scale factors ///////////////////
   EvalIDSF(p);
   EvalTriggerSF(p);
@@ -75,10 +93,10 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter p){
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ISOSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF);
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"triggerSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF);
     FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"CFSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF);
-    //FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"CFSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.pujetweight);
-    //FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"CFSF",eventweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.pujetweight*p.w.btagweight);
   }
 
+  /////////////////////// jet selection ///////////////////////
+  if(p.channel.Length() > 2){ if(!PassSelection(p)) return;}
   ////// Fill histograms //////////
   FillHists(p);
 }
@@ -245,6 +263,9 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
 
   if(p.lepton0->Charge()*p.lepton1->Charge()>0) p.hprefix+="ss_";
   if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"charge",weight);
+
+  if((*p.lepton0+*p.lepton1).M()<52) return false;
+  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Mass52",weight);
 
   if(p.option.Contains("triggermatching")){
     if(p.triggers.size()){
@@ -1116,8 +1137,8 @@ Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<
 }
 std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin, double fetamax){
   std::vector<Electron> out;
+  std::vector<Electron> electrons = allels;
   if(id=="passMediumID_SelQ"){
-    std::vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron this_electron= electrons.at(i);
       if(!( this_electron.Pt()>ptmin ))	continue;
@@ -1127,7 +1148,6 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       out.push_back(this_electron);
     }
   }else if(id=="passTightID_SelQ"){
-    std::vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron this_electron= electrons.at(i);
       if(!( this_electron.Pt()>ptmin ))	continue;
@@ -1137,7 +1157,6 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       out.push_back(this_electron);
     }
   }else if(id=="passMediumIDWithAntiIso"){
-    vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron el= electrons.at(i);
       if(!( el.Pt()>ptmin ))	continue;
@@ -1163,7 +1182,6 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       out.push_back(el);
     }
   }else if(id=="passAntiMediumID"){
-    vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron el= electrons.at(i);
       if(!( el.Pt()>ptmin ))	continue;
@@ -1173,7 +1191,6 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       out.push_back(el);
     }
   }else if(id=="passAntiLooseID"){
-    vector<Electron> electrons = GetAllElectrons();
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron el= electrons.at(i);
       if(!( el.Pt()>ptmin ))	continue;
@@ -1182,40 +1199,42 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       if( el.PassID("passLooseID") ) continue;
       out.push_back(el);
     }
-  }else out=GetElectrons(id,ptmin,fetamax);
+  }else out=SelectElectrons(allels,id,ptmin,fetamax);
   std::sort(out.begin(),out.end(),PtComparing);
   return out;
 }    
 std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fetamax){
   vector<Muon> out;
   if(id=="POGTightWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
+    vector<Muon> muons=SelectMuons(allmus,"POGTight",ptmin,fetamax);
     for(auto const& muon: muons){
       //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    TString IDhip = GetEraShort()=="2016a"? "POGMedium" : "POGMedium_nohip";
+    vector<Muon> muons=SelectMuons(allmus,IDhip,ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    TString IDhip = GetEraShort()=="2016a"? "POGMedium": "POGMedium_nohip";
+    vector<Muon> muons=SelectMuons(allmus,IDhip,ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
-    vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
+    vector<Muon> muons=SelectMuons(allmus,"POGTight",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.RelIso()>0.3) out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiMediumIso"){
-    vector<Muon> muons=GetMuons("POGTight",ptmin,fetamax);
+    vector<Muon> muons=SelectMuons(allmus,"POGTight",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.RelIso()>0.2) out.push_back(muon);
     }
-  }else out=GetMuons(id,ptmin,fetamax);
+  }else out=SelectMuons(allmus,id,ptmin,fetamax);
   return out;
 }
 
@@ -1597,7 +1616,7 @@ bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
 }
 
 //double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode){
-double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, double eventweight, bool doFillHists){
+double SMPAnalyzerCore::jetCharge(const Jet& jet, int mode, TString prefix, double eventweight, bool doFillHists){
   //In mode0, output is jet charge (Sum of pt weighted charge of tracks)
   double jetCharge = jet.Charge();
   if(mode == 0) return jetCharge;
@@ -1606,41 +1625,41 @@ double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode, TString prefix, dou
   vector<Electron> belectron;
   belectron.clear();
 
-  for(unsigned int l=0; l<softmus.size(); l++){
-    if(softmus.at(l).P()*sin(softmus.at(l).Angle(jet.Vect())) <0.6) continue; // original, 1GeV
-    if(softmus.at(l).TrkIso()/softmus.at(l).Pt() <0.05) continue; // original, 0.1
-    if(abs(softmus.at(l).IP3D())/softmus.at(l).IP3Derr() <2.) continue; // original, 2.5
-    if(jet.DeltaR(softmus.at(l))<0.4) bmuon.push_back(softmus.at(l));
+  for(unsigned int l=0; l<allmus.size(); l++){
+    if(allmus.at(l).P()*sin(allmus.at(l).Angle(jet.Vect())) <0.6) continue; // original, 1GeV
+    if(allmus.at(l).TrkIso()/allmus.at(l).Pt() <0.05) continue; // original, 0.1
+    if(abs(allmus.at(l).IP3D())/allmus.at(l).IP3Derr() <2.) continue; // original, 2.5
+    if(jet.DeltaR(allmus.at(l))<0.4) bmuon.push_back(allmus.at(l));
   }
 
   //belectron Trial
-  for(unsigned int l=0; l<softels.size(); l++){
-    if(softels.at(l).P()*sin(softels.at(l).Angle(jet.Vect())) <0.6) continue;
-    if(softels.at(l).ecalPFClusterIso()/softels.at(l).Pt() == 0.) continue;
-    if(abs(softels.at(l).IP3D())/softels.at(l).IP3Derr() <2.0) continue;
-    if(!softels.at(l).IsGsfCtfScPixChargeConsistent()) continue;
-    if(jet.DeltaR(softels.at(l))<0.4) belectron.push_back(softels.at(l));
+  for(unsigned int l=0; l<allels.size(); l++){
+    if(allels.at(l).P()*sin(allels.at(l).Angle(jet.Vect())) <0.6) continue;
+    if(allels.at(l).ecalPFClusterIso()/allels.at(l).Pt() == 0.) continue;
+    if(abs(allels.at(l).IP3D())/allels.at(l).IP3Derr() <2.0) continue;
+    if(!allels.at(l).IsGsfCtfScPixChargeConsistent()) continue;
+    if(jet.DeltaR(allels.at(l))<0.4) belectron.push_back(allels.at(l));
   }
 
   if(doFillHists){
-    if(prefix!="") FillHist(prefix+"bjetCharge_raw",jetCharge,eventweight,200, -2, 2);
+    if(prefix!="") FillHist(prefix+"jetCharge_raw",jetCharge,eventweight,200, -2, 2);
   }
   //The jet has soft muon inside, and its charge will determine the jet charge
   if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
   else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
 
   if(doFillHists){
-    if(prefix!="") FillHist(prefix+"bjetCharge_rawwide",jetCharge,eventweight,1000, -10, 10);
-    if(prefix!="" && jetCharge > 0.) FillHist(prefix+"bjetCharge_rawwide_plus",jetCharge,eventweight,500, 0, 10);
-    if(prefix!="" && jetCharge > 0.1) FillHist(prefix+"bjetCharge_rawwide_plus01",jetCharge,eventweight,500, 0, 10);
-    if(prefix!="" && jetCharge > 0.2) FillHist(prefix+"bjetCharge_rawwide_plus02",jetCharge,eventweight,500, 0, 10);
-    if(prefix!="" && jetCharge > 0.3) FillHist(prefix+"bjetCharge_rawwide_plus03",jetCharge,eventweight,500, 0, 10);
-    if(prefix!="" && jetCharge > 0.4) FillHist(prefix+"bjetCharge_rawwide_plus04",jetCharge,eventweight,500, 0, 10);
-    if(prefix!="" && jetCharge < 0.) FillHist(prefix+"bjetCharge_rawwide_minus",jetCharge,eventweight,500, -10, 0);
-    if(prefix!="" && jetCharge < -0.1) FillHist(prefix+"bjetCharge_rawwide_minus01",jetCharge,eventweight,500, -10, 0);
-    if(prefix!="" && jetCharge < -0.2) FillHist(prefix+"bjetCharge_rawwide_minus02",jetCharge,eventweight,500, -10, 0);
-    if(prefix!="" && jetCharge < -0.3) FillHist(prefix+"bjetCharge_rawwide_minus03",jetCharge,eventweight,500, -10, 0);
-    if(prefix!="" && jetCharge < -0.4) FillHist(prefix+"bjetCharge_rawwide_minus04",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="") FillHist(prefix+"jetCharge_rawwide",jetCharge,eventweight,1000, -10, 10);
+    if(prefix!="" && jetCharge > 0.) FillHist(prefix+"jetCharge_rawwide_plus",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.1) FillHist(prefix+"jetCharge_rawwide_plus01",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.2) FillHist(prefix+"jetCharge_rawwide_plus02",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.3) FillHist(prefix+"jetCharge_rawwide_plus03",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge > 0.4) FillHist(prefix+"jetCharge_rawwide_plus04",jetCharge,eventweight,500, 0, 10);
+    if(prefix!="" && jetCharge < 0.) FillHist(prefix+"jetCharge_rawwide_minus",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.1) FillHist(prefix+"jetCharge_rawwide_minus01",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.2) FillHist(prefix+"jetCharge_rawwide_minus02",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.3) FillHist(prefix+"jetCharge_rawwide_minus03",jetCharge,eventweight,500, -10, 0);
+    if(prefix!="" && jetCharge < -0.4) FillHist(prefix+"jetCharge_rawwide_minus04",jetCharge,eventweight,500, -10, 0);
   }
   return jetCharge;
 }
@@ -1653,7 +1672,6 @@ void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
   vector<TString> availables={"el","ee","eE","EE","mu","mm","mM","MM","em","me"};
   bool pass=false;
   for(const TString& avail:availables)
-    //if(ch==avail) pass=true;
     if(ch(0,2)==avail) pass=true;
   if(!pass){
     cout<<"[SMPAnalyzerCore::Parameter::SetChannel] not available channel "<<ch<<endl;
@@ -1661,6 +1679,7 @@ void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
   }
   channel=ch;
   SetLeptons();
+  if(channel.Length()>2) SetJets();
 }
 void SMPAnalyzerCore::Parameter::SetElectronKeys(TString elID,vector<TString> trig){
   k.electronRECOSF="Electron_RECO";
@@ -1683,6 +1702,10 @@ void SMPAnalyzerCore::Parameter::SetLeptonPtCut(double l0pt,double l1pt){
   c.lepton0pt=l0pt;
   c.lepton1pt=l1pt;
 }
+void SMPAnalyzerCore::Parameter::SetJetPtCut(double j0pt,double j1pt){
+  c.jet0pt=j0pt;
+  c.jet1pt=j1pt;
+}
 void SMPAnalyzerCore::Parameter::SetLeptons(){
   leptons={};
   lepton0=NULL;
@@ -1691,8 +1714,6 @@ void SMPAnalyzerCore::Parameter::SetLeptons(){
   truth_lepton1=Gen();
   if(channel=="") return;
   unsigned int ie=0,iae=0,im=0,iam=0;
-  int nc=channel.Length();
-  //for(int ic=0;ic<nc;ic++){
   for(int ic=0;ic<2;ic++){
     char c=channel[ic];
     if(c=='e'||c=='l'){
@@ -1723,6 +1744,47 @@ void SMPAnalyzerCore::Parameter::SetLeptons(){
   if(lepton0) truth_lepton0=SMPGetGenMatchedLepton(*lepton0,gens);
   if(lepton1) truth_lepton1=SMPGetGenMatchedLepton(*lepton1,gens);
 }
+void SMPAnalyzerCore::Parameter::SetJets(){
+  jets={};
+  jet0=NULL;
+  jet1=NULL;
+  truth_jet0=Gen();
+  truth_jet1=Gen();
+  if(channel=="") return;
+  unsigned int iB=0,iC=0,iL=0,iA=0;
+  int nc=channel.Length();
+  if(nc>2){
+    for(int ic=2;ic<nc;ic++){
+      char c=channel[ic];
+      if(c=='b'||c=='B'){
+        if(bjets.size()>iB){
+          jets.push_back(&bjets.at(iB));
+          iB++;
+        }else jets.push_back(NULL);
+      }if(c=='c'||c=='C'){
+        if(cjets.size()>iC){
+          jets.push_back(&cjets.at(iC));
+          iC++;
+        }else jets.push_back(NULL);
+      }if(c=='l'||c=='L'||c=='j'){
+        if(ljets.size()>iL){
+          jets.push_back(&ljets.at(iL));
+          iL++;
+        }else jets.push_back(NULL);
+      }if(c=='x'){
+        if(ajets.size()>iA){
+          jets.push_back(&ajets.at(iA));
+          iA++;
+        }else jets.push_back(NULL);
+      }
+    }
+  }
+  //std::sort(jets.begin(),jets.end(),PtComparingPtr);
+  if(jets.size()>0) jet0=jets.at(0);
+  if(jets.size()>1) jet1=jets.at(1);
+  //if(jet0) truth_jet0=SMPGetGenMatchedJet(*jet0,gens);
+  //if(jet1) truth_jet1=SMPGetGenMatchedJet(*jet1,gens);
+}
 void SMPAnalyzerCore::Parameter::SetGens(vector<Gen> gs){
   gens=gs;
   SetLeptons();
@@ -1730,19 +1792,35 @@ void SMPAnalyzerCore::Parameter::SetGens(vector<Gen> gs){
 void SMPAnalyzerCore::Parameter::SetElectrons(vector<Electron> els){
   electrons=els;
   SetLeptons();
-}    
+}
 void SMPAnalyzerCore::Parameter::SetMuons(vector<Muon> mus){
   muons=mus;
   SetLeptons();
-}    
+}
 void SMPAnalyzerCore::Parameter::SetAElectrons(vector<Electron> els){
   aelectrons=els;
   SetLeptons();
-}    
+}
 void SMPAnalyzerCore::Parameter::SetAMuons(vector<Muon> mus){
   amuons=mus;
   SetLeptons();
-}    
+}
+void SMPAnalyzerCore::Parameter::SetBJets(vector<Jet> bs){
+  bjets=bs;
+  SetJets();
+}
+void SMPAnalyzerCore::Parameter::SetCJets(vector<Jet> cs){
+  cjets=cs;
+  SetJets();
+}
+void SMPAnalyzerCore::Parameter::SetLJets(vector<Jet> ls){
+  ljets=ls;
+  SetJets();
+}
+void SMPAnalyzerCore::Parameter::SetAJets(vector<Jet> as){
+  ajets=as;
+  SetJets();
+}
 
 SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TString option){
   Parameter p;
@@ -1757,6 +1835,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.z0weight=1;
   p.w.zptweight=1;
   p.w.weakweight=1;
+  p.w.pujetSF=1;
+  p.w.tagjetSF=1;
   if(!IsDATA){
     p.w.lumiweight*=MCweight()*_event.GetTriggerLumi("Full");
     p.w.PUweight=mcCorr->GetPileUpWeight(nPileUp,0);
@@ -1772,6 +1852,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
 	p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
 	p.w.weakweight=GetDYWeakWeight(genZ.M());
 
+	/*
         // Only qqbar collisions (LO DY)
         if(lhe_p0.ID()+lhe_p1.ID()==0) p.hprefix+="";
         // Only qG collisions (NLO DY)
@@ -1803,6 +1884,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
               break;
             }
           }
+
           if(nheavyparton>0 && heavyparton.PID()==5) p.hprefix+="Dyb_";//"Dyggb_";
           else if(nheavyparton>0 && heavyparton.PID()==-5) p.hprefix+="Dybbar_";//"Dyggbbar_";
           else if(nheavyparton>0 && heavyparton.PID()==4) p.hprefix+="Dyc_";//"Dyggc_";
@@ -1834,6 +1916,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
           else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyqqcbar_";
           else p.hprefix+="";//"Dyqq_";
         }
+	  */
       }else p.hprefix+="tau_";
     }
   }
@@ -2026,6 +2109,214 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     cout<<"[SMPAnalyzerCore::MakeParameter] not available setting "<<p.channel<<endl;
     exit(EXIT_FAILURE);
   }
+
+  if(p.channel.Length()>2){
+    vector<Jet> lepvetojets = {};
+    realjets.clear();
+    for(unsigned int l=0; l<alljets.size();l++){
+      if(p.lepton0){if(p.lepton0->DeltaR(alljets.at(l)) <0.4) continue;}
+      if(p.lepton1){if(p.lepton1->DeltaR(alljets.at(l)) <0.4) continue;}
+      lepvetojets.push_back(alljets.at(l));
+    }
+    for(unsigned int l=0; l<lepvetojets.size();l++){
+      if(!PUJetIDPass(alljets.at(l), "Loose")) continue;
+      realjets.push_back(alljets.at(l));
+    }
+
+    p.w.pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
+
+    if(p.channel(2,2)=="bx"){
+      p.SetJetPtCut(30,20);
+      p.c.nbjetmax=1;
+
+      JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
+      p.bjets.clear();
+      p.ajets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) p.bjets.push_back(jet);
+        else if(jet.Pt() > p.c.jet1pt && jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) p.ajets.push_back(jet);
+      }
+      p.SetBJets(p.bjets);
+      p.SetAJets(p.ajets);
+
+      p.w.tagjetSF = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "central");
+      p.doublemap["btagSF_hup"] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst HTag Up Corr");
+      p.doublemap["btagSF_hdown"] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst HTag Down Corr");
+      p.doublemap["btagSF_lup"] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst LTag Up Corr");
+      p.doublemap["btagSF_ldown"] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst LTag Down Corr");
+      p.doublemap["btagSF_hup"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst HTag Up UnCorr");
+      p.doublemap["btagSF_hdown"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst HTag Down UnCorr");
+      p.doublemap["btagSF_lup"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst LTag Up UnCorr");
+      p.doublemap["btagSF_ldown"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "Syst LTag Down UnCorr");
+    }else if(p.channel(2,2)=="Bx"){
+      p.SetJetPtCut(30,20);
+      p.c.nbjetmax=1;
+
+      JetTagging::Parameters DeepCSV_Tight = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      JetTagging::Parameters DeepCSV_Loose = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
+      p.bjets.clear();
+      p.ajets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepCSV_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepCSV_Tight.j_Tagger, DeepCSV_Tight.j_WP)) p.bjets.push_back(jet);
+        else if(jet.Pt() > p.c.jet1pt && jet.GetTaggerResult(DeepCSV_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepCSV_Loose.j_Tagger, DeepCSV_Loose.j_WP)) p.ajets.push_back(jet);
+      }
+      p.SetBJets(p.bjets);
+      p.SetAJets(p.ajets);
+
+      p.w.tagjetSF = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "central");
+      p.doublemap["btagSF_hup"] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst HTag Up Corr");
+      p.doublemap["btagSF_hdown"] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst HTag Down Corr");
+      p.doublemap["btagSF_lup"] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst LTag Up Corr");
+      p.doublemap["btagSF_ldown"] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst LTag Down Corr");
+      p.doublemap["btagSF_hup"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst HTag Up UnCorr");
+      p.doublemap["btagSF_hdown"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst HTag Down UnCorr");
+      p.doublemap["btagSF_lup"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst LTag Up UnCorr");
+      p.doublemap["btagSF_ldown"+GetEra()] = GetBTaggingReweight_1a_2WP(realjets, DeepCSV_Tight, DeepCSV_Loose, "Syst LTag Down UnCorr");
+    }else if(p.channel(2,2)=="bb"){
+      p.SetJetPtCut(30,30);
+      p.c.nbjetmax=2;
+      p.c.nbjetmin=2;
+
+      JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      p.bjets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) p.bjets.push_back(jet);
+      }
+      p.SetBJets(p.bjets);
+
+      p.w.tagjetSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "central");
+      p.doublemap["btagSF_hup"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst HTag Up Corr");
+      p.doublemap["btagSF_hdown"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst HTag Down Corr");
+      p.doublemap["btagSF_lup"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst LTag Up Corr");
+      p.doublemap["btagSF_ldown"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst LTag Down Corr");
+      p.doublemap["btagSF_hup"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst HTag Up UnCorr");
+      p.doublemap["btagSF_hdown"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst HTag Down UnCorr");
+      p.doublemap["btagSF_lup"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst LTag Up UnCorr");
+      p.doublemap["btagSF_ldown"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "Syst LTag Down UnCorr");
+    }else if(p.channel(2,2)=="BB"){
+      p.SetJetPtCut(30,30);
+      p.c.nbjetmax=2;
+      p.c.nbjetmin=2;
+
+      JetTagging::Parameters DeepCSV_Tight = JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      p.bjets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepCSV_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepCSV_Tight.j_Tagger, DeepCSV_Tight.j_WP)) p.bjets.push_back(jet);
+      }
+      p.SetBJets(p.bjets);
+
+      p.w.tagjetSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "central");
+      p.doublemap["btagSF_hup"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst HTag Up Corr");
+      p.doublemap["btagSF_hdown"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst HTag Down Corr");
+      p.doublemap["btagSF_lup"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst LTag Up Corr");
+      p.doublemap["btagSF_ldown"] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst LTag Down Corr");
+      p.doublemap["btagSF_hup"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst HTag Up UnCorr");
+      p.doublemap["btagSF_hdown"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst HTag Down UnCorr");
+      p.doublemap["btagSF_lup"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst LTag Up UnCorr");
+      p.doublemap["btagSF_ldown"+GetEra()] = mcCorr->GetBTaggingReweight_1a(realjets, DeepCSV_Tight, "Syst LTag Down UnCorr");
+    }if(p.channel(2,2)=="cx"){
+      p.SetJetPtCut(30,20);
+      p.c.ncjetmax=1;
+
+      JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+
+      JetTagging::Parameters DeepJet_CvsB_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsL_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsB_Loose = JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsL_Loose = JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm);
+      p.cjets.clear();
+      p.ajets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_CvsB_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsB_Tight.j_Tagger, DeepJet_CvsB_Tight.j_WP) && jet.GetTaggerResult(DeepJet_CvsL_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsL_Tight.j_Tagger, DeepJet_CvsL_Tight.j_WP)) p.cjets.push_back(jet);
+        else if(jet.Pt() > p.c.jet1pt && jet.GetTaggerResult(DeepJet_CvsB_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsB_Loose.j_Tagger, DeepJet_CvsB_Loose.j_WP) && jet.GetTaggerResult(DeepJet_CvsL_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsL_Loose.j_Tagger, DeepJet_CvsL_Loose.j_WP)) p.ajets.push_back(jet);
+      }
+      for(const auto& jet:p.cjets){
+	if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) p.bjets.push_back(jet);
+      }
+      p.SetCJets(p.cjets);
+      p.SetAJets(p.ajets);
+
+      p.w.tagjetSF = 1.;
+      p.doublemap["ctagSF_hup"] = 1.;
+      p.doublemap["ctagSF_hdown"] = 1.;
+      p.doublemap["ctagSF_lup"] = 1.;
+      p.doublemap["ctagSF_ldown"] = 1.;
+      p.doublemap["ctagSF_hup"+GetEra()] = 1.;
+      p.doublemap["ctagSF_hdown"+GetEra()] = 1.;
+      p.doublemap["ctagSF_lup"+GetEra()] = 1.;
+      p.doublemap["ctagSF_ldown"+GetEra()] = 1.;
+    }if(p.channel(2,2)=="lx"){
+      p.SetJetPtCut(30,20);
+      p.c.nljetmax=1;
+
+      JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
+      JetTagging::Parameters DeepJet_CvsB_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsL_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsB_Loose = JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsL_Loose = JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm);
+      p.ljets.clear();
+      p.ajets.clear();
+
+      for(const auto& jet:realjets){
+	if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Loose.j_Tagger) < mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP) && jet.GetTaggerResult(DeepJet_CvsL_Loose.j_Tagger) < mcCorr->GetJetTaggingCutValue(DeepJet_CvsL_Loose.j_Tagger, DeepJet_CvsL_Loose.j_WP)) p.ljets.push_back(jet);
+        else if(jet.Pt() > p.c.jet1pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) < mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP) && jet.GetTaggerResult(DeepJet_CvsB_Tight.j_Tagger) < mcCorr->GetJetTaggingCutValue(DeepJet_CvsB_Tight.j_Tagger, DeepJet_CvsB_Tight.j_WP)) p.ajets.push_back(jet);
+      }
+      for(const auto& jet:p.ljets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) p.bjets.push_back(jet);
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_CvsB_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsB_Tight.j_Tagger, DeepJet_CvsB_Tight.j_WP) && jet.GetTaggerResult(DeepJet_CvsL_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsL_Tight.j_Tagger, DeepJet_CvsL_Tight.j_WP)) p.cjets.push_back(jet);
+      }
+      p.SetLJets(p.ljets);
+      p.SetAJets(p.ajets);
+
+      p.w.tagjetSF = 1.;
+      p.doublemap["ltagSF_hup"] = 1.;
+      p.doublemap["ltagSF_hdown"] = 1.;
+      p.doublemap["ltagSF_lup"] = 1.;
+      p.doublemap["ltagSF_ldown"] = 1.;
+      p.doublemap["ltagSF_hup"+GetEra()] = 1.;
+      p.doublemap["ltagSF_hdown"+GetEra()] = 1.;
+      p.doublemap["ltagSF_lup"+GetEra()] = 1.;
+      p.doublemap["ltagSF_ldown"+GetEra()] = 1.;
+    }if(p.channel(2,2)=="jx"){
+      p.SetJetPtCut(30,20);
+      p.c.nljetmax=1;
+
+      JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+      JetTagging::Parameters DeepJet_CvsB_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      JetTagging::Parameters DeepJet_CvsL_Tight = JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm);
+      p.ljets.clear();
+      p.ajets.clear();
+
+      for(const auto& jet:realjets){
+        if(jet.Pt() > p.c.jet0pt) p.ljets.push_back(jet);
+        else if(jet.Pt() > p.c.jet1pt) p.ajets.push_back(jet);
+      }
+      for(const auto& jet:p.ljets){
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) p.bjets.push_back(jet);
+        if(jet.Pt() > p.c.jet0pt && jet.GetTaggerResult(DeepJet_CvsB_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsB_Tight.j_Tagger, DeepJet_CvsB_Tight.j_WP) && jet.GetTaggerResult(DeepJet_CvsL_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_CvsL_Tight.j_Tagger, DeepJet_CvsL_Tight.j_WP)) p.cjets.push_back(jet);
+      }
+      p.SetLJets(p.ljets);
+      p.SetAJets(p.ajets);
+
+      p.w.tagjetSF = 1.;
+      p.doublemap["jtagSF_hup"] = 1.;
+      p.doublemap["jtagSF_hdown"] = 1.;
+      p.doublemap["jtagSF_lup"] = 1.;
+      p.doublemap["jtagSF_ldown"] = 1.;
+      p.doublemap["jtagSF_hup"+GetEra()] = 1.;
+      p.doublemap["jtagSF_hdown"+GetEra()] = 1.;
+      p.doublemap["jtagSF_lup"+GetEra()] = 1.;
+      p.doublemap["jtagSF_ldown"+GetEra()] = 1.;
+    }
+  }
+
   return p;
 }
 vector<TString> SMPAnalyzerCore::Split(TString s,TString del){

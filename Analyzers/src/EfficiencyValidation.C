@@ -29,6 +29,7 @@ void EfficiencyValidation::executeEvent(){
 
   if(GetEra()=="2016preVFP"){
     if(!IsDATA||DataStream.Contains("SingleMuon")){
+      /*
       {Parameter p=MakeParameter("mu");
       p.prefix="old0/mu2016a/";
       p.SetMuonKeys("Muon_MediumID_trkIsoLoose_old","",{"IsoMu24_MediumID_trkIsoLoose_old"});
@@ -41,7 +42,8 @@ void EfficiencyValidation::executeEvent(){
       p.prefix="old2/mu2016a/";
       p.SetMuonKeys("Muon_MediumID_trkIsoLoose_old","",{"IsoMu24_MediumID_trkIsoLoose"});
       executeEventWithParameter(p);}
-    }    
+      */
+    }
   }else if(GetEra()=="2017"){
     if(!IsDATA||DataStream.Contains("DoubleEG")){
       Parameter p=MakeParameter("ee");

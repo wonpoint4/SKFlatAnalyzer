@@ -27,5 +27,6 @@
 #pragma link C++ class ExampleRun_Higgs+;
 #pragma link C++ class FakeAnalyzer+;
 #pragma link C++ class SkimTree_EgammaTnP+;
+#pragma link C++ class DZfiltercheck;
 
 #endif

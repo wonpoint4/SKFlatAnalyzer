@@ -900,7 +900,7 @@ try:
                   os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
                   os.system('rm output/*.root')
                 else:
-                  os.system('condor_run -a request_memory=6000 -a request_cpus=10 "hadd -j 10 -f '+outputname+'.root '+base_rundir+'/output/*.root 2>&1 >> JobStatus.log"')
+                  os.system('condor_run -a request_memory=9000 -a request_cpus=15 "hadd -j 15 -f '+outputname+'.root '+base_rundir+'/output/*.root 2>&1 >> JobStatus.log"')
                   os.system('rm output/*.root')
               else:
                 os.system('hadd -f '+outputname+'.root job_*/*.root >> JobStatus.log')

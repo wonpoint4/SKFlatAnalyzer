@@ -36,11 +36,8 @@ public:
   bool IsNominalRun=true;
   bool IsSkimmed=false;
 
-  std::vector<Jet> jets, realjets, bjets;
-  int n_loosebjet=0;
-  int n_loose30bjet=0;
-  double bjet_charge=-5.5;
-  TLorentzVector bjet;
+  double jet_charge=-5.5;
+  TLorentzVector jet_vector;
 
   static const int afb_mbinnum=30;//40;
   const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200};//,240,280,340,400,500,600,700,800,1000,3000};

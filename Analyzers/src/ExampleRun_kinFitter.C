@@ -207,8 +207,8 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
   Jet W_down_jet = jets.at(W_down_jet_idx);
   Jet lept_b = jets.at(lept_b_idx);
   Jet hadt_b = jets.at(hadt_b_idx);
-  double lept_b_charge = bjetCharge(lept_b,1);
-  double hadt_b_charge = bjetCharge(hadt_b,1);
+  double lept_b_charge = jetCharge(lept_b,1);
+  double hadt_b_charge = jetCharge(hadt_b,1);
 
   double hadronic_W_M = (W_up_jet+W_down_jet).M();
   double leptonic_W_M = fitter_results->at(0).leptonic_W_M;
@@ -271,13 +271,13 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     //When lept_b is b, hadt_b is bbar
     if(gen_b0.DeltaR(lept_b) < match_dR && gen_b1.DeltaR(hadt_b) < match_dR){
       Gen_Fit_match_onlyb = true;
-      //lept_b_charge = bjetCharge(lept_b,1,prefix+"Matched_b_",weight);
-      //hadt_b_charge = bjetCharge(hadt_b,1,prefix+"Matched_bbar_",weight);
+      //lept_b_charge = jetCharge(lept_b,1,prefix+"Matched_b_",weight);
+      //hadt_b_charge = jetCharge(hadt_b,1,prefix+"Matched_bbar_",weight);
       if(muons.at(0).Charge() > 0) prefix += "Correct_";
       else prefix +="Wrong_";
 
-      lept_b_charge = bjetCharge(lept_b,1,prefix+"Matched_b_",weight);
-      hadt_b_charge = bjetCharge(hadt_b,1,prefix+"Matched_bbar_",weight);
+      lept_b_charge = jetCharge(lept_b,1,prefix+"Matched_b_",weight);
+      hadt_b_charge = jetCharge(hadt_b,1,prefix+"Matched_bbar_",weight);
       if(abs(lept_b_charge) > 0.2) FillHist(prefix+"lept_b_Charge_Matched_b", lept_b_charge, weight, 600, -6, 6);
       if(abs(lept_b_charge) > 0.2) FillHist(prefix+"Easy_lept_b_Charge_Matched_b", lept_b_charge<0?-1:1, weight, 8, -4., 4.);
       if(abs(hadt_b_charge) > 0.2) FillHist(prefix+"hadt_b_Charge_Matched_bbar", hadt_b_charge, weight, 600, -6, 6);
@@ -298,13 +298,13 @@ void ExampleRun_kinFitter::executeEventFromParameter(AnalyzerParameter param){
     //When lept_b is bbar, hadt_b is b
     else if(gen_b0.DeltaR(hadt_b) < match_dR && gen_b1.DeltaR(lept_b) < match_dR){
       Gen_Fit_match_onlyb = true;
-      //lept_b_charge = bjetCharge(lept_b,1,prefix+"Matched_bbar_",weight);
-      //hadt_b_charge = bjetCharge(hadt_b,1,prefix+"Matched_b_",weight);
+      //lept_b_charge = jetCharge(lept_b,1,prefix+"Matched_bbar_",weight);
+      //hadt_b_charge = jetCharge(hadt_b,1,prefix+"Matched_b_",weight);
       if(muons.at(0).Charge() < 0) prefix += "Correct_";
       else prefix +="Wrong_";
 
-      lept_b_charge = bjetCharge(lept_b,1,prefix+"Matched_bbar_",weight);
-      hadt_b_charge = bjetCharge(hadt_b,1,prefix+"Matched_b_",weight);
+      lept_b_charge = jetCharge(lept_b,1,prefix+"Matched_bbar_",weight);
+      hadt_b_charge = jetCharge(hadt_b,1,prefix+"Matched_b_",weight);
       if(abs(hadt_b_charge) > 0.2) FillHist(prefix+"hadt_b_Charge_Matched_b", hadt_b_charge, weight, 600, -6, 6);
       if(abs(hadt_b_charge) > 0.2) FillHist(prefix+"Easy_hadt_b_Charge_Matched_b", hadt_b_charge<0?-1:1, weight, 8, -4., 4.);
       if(abs(lept_b_charge) > 0.2) FillHist(prefix+"lept_b_Charge_Matched_bbar", lept_b_charge, weight, 600, -6, 6);

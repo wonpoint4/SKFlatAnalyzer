@@ -30,10 +30,19 @@ public:
     vector<Muon> amuons;
     vector<Electron> aelectrons;
     vector<Lepton*> leptons;
+    vector<Jet> bjets;
+    vector<Jet> cjets;
+    vector<Jet> ljets;
+    vector<Jet> ajets;
+    vector<Jet*> jets;
     Lepton* lepton0=NULL;
     Lepton* lepton1=NULL;
     Gen truth_lepton0;
     Gen truth_lepton1;
+    Jet* jet0=NULL;
+    Jet* jet1=NULL;
+    Gen truth_jet0;
+    Gen truth_jet1;
     std::map<TString,double> weightmap;
     std::map<TString,double> doublemap;
     std::map<TString,int> intmap;
@@ -61,6 +70,8 @@ public:
       double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
       vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
+      double pujetSF=1;
+      double tagjetSF=1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -69,6 +80,8 @@ public:
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
       int nelectronmax=-1,nmuonmax=-1;
+      double jet0pt=-1,jet1pt=-1;
+      int nbjetmax=-1,ncjetmax=-1,nljetmax=-1,nbjetmin=-1,ncjetmin=-1,nljetmin=-1;
     };
     Key k;
     Weight w;
@@ -81,12 +94,18 @@ public:
     void SetElectronKeys(TString elID,TString elID2,vector<TString> trig);
     void SetMuonKeys(TString muID,TString muISO,vector<TString> trig);
     void SetLeptonPtCut(double l0pt,double l1pt);
+    void SetJetPtCut(double j0pt,double j1pt);
     void SetLeptons();
+    void SetJets();
     void SetGens(vector<Gen> gs);
     void SetElectrons(vector<Electron> els);
     void SetMuons(vector<Muon> mus);
     void SetAElectrons(vector<Electron> els);
     void SetAMuons(vector<Muon> mus);
+    void SetBJets(vector<Jet> bs);
+    void SetCJets(vector<Jet> cs);
+    void SetLJets(vector<Jet> ls);
+    void SetAJets(vector<Jet> as);
   };
 
   virtual void initializeAnalyzer();
@@ -182,7 +201,7 @@ public:
   void SetupPUJetWeight();
   double GetPUJetWeight(const vector<Jet>& jets, TString ID="Loose", int sys=0);
   bool isGenMatchedJet(const Jet& jet, const vector<Gen>& gens);
-  double bjetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1., bool doFillHist=true);
+  double jetCharge(const Jet& jet, int mode=1, TString prefix="", double weight=1., bool doFillHist=true);
   double GetZ0Weight(double z0);
 
   void SetupCFRate();
@@ -252,8 +271,10 @@ public:
   LHE lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0;
   vector<Gen> gens;
   Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_j0,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
-  vector<Muon> softmus;
-  vector<Electron> softels;
+  vector<Muon> allmus;
+  vector<Electron> allels;
+  vector<Jet> alljets;
+  vector<Jet> realjets;
 
   RoccoR* roc=NULL;
   Aepcor* rocele=NULL;

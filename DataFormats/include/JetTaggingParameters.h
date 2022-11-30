@@ -79,7 +79,7 @@ namespace JetTagging{
   }
 
   enum MeasurmentType{
-    incl, mujets, comb, iterativefit
+    incl, mujets, comb, iterativefit, wcharm
   };
 
   inline string MeasurmentTypeToString(MeasurmentType mt){
@@ -87,6 +87,7 @@ namespace JetTagging{
     if(mt == mujets) return "mujets";
     if(mt == comb) return "comb";
     if(mt == iterativefit) return "iterativefit";
+    if(mt == wcharm) return "wcharm";
 
     cerr << "[JetTaggingParameters::MeasurmentTypeToString] Wrong MeasurmentType enum : " << mt << endl;
     exit(ENODATA);
