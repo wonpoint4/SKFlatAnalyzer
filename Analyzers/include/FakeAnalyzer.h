@@ -10,6 +10,7 @@ public:
   void initializeAnalyzer();
   void executeEvent();
   void FillHists(Parameter& p);
+  void FillFakeHists(Parameter& p,TString region);
 
   FakeAnalyzer();
   ~FakeAnalyzer();

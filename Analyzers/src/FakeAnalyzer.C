@@ -6,69 +6,84 @@ FakeAnalyzer::~FakeAnalyzer(){
 }
 void FakeAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0
-  fChain->SetBranchStatus("pfMET_*",false);
-  fChain->SetBranchStatus("pfMET_Type1_pt",true);
-  fChain->SetBranchStatus("jet_*",false);
-  fChain->SetBranchStatus("fatjet_*",false);
-  fChain->SetBranchStatus("photon_*",false);
+  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb)};
+  mcCorr->SetJetTaggingParameters(jtps);
 }
 void FakeAnalyzer::executeEvent(){
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mM"));
+    executeEventWithParameter(MakeParameter("Mm"));
     executeEventWithParameter(MakeParameter("MM"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("eE"));
+    executeEventWithParameter(MakeParameter("Ee"));
     executeEventWithParameter(MakeParameter("EE"));
   }
 }
 
 void FakeAnalyzer::FillHists(Parameter& p){
+  int n_bjet=0;
+  std::vector<Jet> jets=GetJets("tightLepVeto",40,2.4);
+  std::sort(jets.begin(),jets.end(),PtComparing);
+  JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  for(const auto& jet:jets)
+    if(jet.GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP))
+      n_bjet++;
+
+  if(n_bjet) FillFakeHists(p,"nbjet/");
+  else FillFakeHists(p,"0bjet/");
+  FillFakeHists(p,"");
+}
+void FakeAnalyzer::FillFakeHists(Parameter& p,TString region){
   for(auto [suf,weight]:p.weightmap){
     TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
     double dimass=dilepton.M();
     if(dimass>52){
-      if(p.channel.Contains(TRegexp("[eE]E"))){
+      FillHist(p.prefix+region+p.hprefix+"dimass"+p.suffix+suf,dimass,weight,98,52,150);
+      FillHist(p.prefix+region+p.hprefix+"dipt"+p.suffix+suf,dilepton.Pt(),weight,100,0,100);
+      FillHist(p.prefix+region+p.hprefix+"dirap"+p.suffix+suf,dilepton.Rapidity(),weight,60,-3,3);
+      if(p.channel.Contains(TRegexp("[eE][eE]"))){
 	for(int i=0,n=p.aelectrons.size();i<n;i++){
 	  double eta=fabs(p.aelectrons.at(i).Eta());
 	  double pt=p.aelectrons.at(i).Pt();
 	  double riso=p.aelectrons.at(i).RelIso();
 	  double energy=p.aelectrons.at(i).E();
-	  FillHist(p.prefix+p.hprefix+Form("al%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("al%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("al%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
-	  if(pt>15) FillHist(p.prefix+p.hprefix+Form("al%detae",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	  if(pt>15) FillHist(p.prefix+region+p.hprefix+Form("al%detae",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
 	}
 	for(int i=0,n=p.electrons.size();i<n;i++){
 	  double eta=fabs(p.electrons.at(i).Eta());
 	  double pt=p.electrons.at(i).Pt();
 	  double riso=p.electrons.at(i).RelIso();
 	  double energy=p.electrons.at(i).E();
-	  FillHist(p.prefix+p.hprefix+Form("l%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("l%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("l%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
-	  if(pt>15) FillHist(p.prefix+p.hprefix+Form("l%detae",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	  if(pt>15) FillHist(p.prefix+region+p.hprefix+Form("l%detae",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
 	}
-      }else if(p.channel.Contains(TRegexp("[mM]M"))){
+      }else if(p.channel.Contains(TRegexp("[mM][mM]"))){
 	for(int i=0,n=p.amuons.size();i<n;i++){
 	  double eta=fabs(p.amuons.at(i).Eta());
 	  double pt=p.amuons.at(i).Pt();
 	  double riso=p.amuons.at(i).RelIso();
-	  FillHist(p.prefix+p.hprefix+Form("al%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("al%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("al%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("al%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
 	}
 	for(int i=0,n=p.muons.size();i<n;i++){
 	  double eta=fabs(p.muons.at(i).Eta());
 	  double pt=p.muons.at(i).Pt();
 	  double riso=p.muons.at(i).RelIso();
-	  FillHist(p.prefix+p.hprefix+Form("l%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("l%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	  FillHist(p.prefix+p.hprefix+Form("l%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detajpt",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	  FillHist(p.prefix+region+p.hprefix+Form("l%detampt",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
 	}
       }
       if(p.channel=="EE"){
-	TString prefix=p.prefix;
+	TString prefix=p.prefix+region;
 	prefix.ReplaceAll("EE","ee");
 	for(int i=0,n=p.aelectrons.size();i<n;i++){
 	  for(int j=i+1;j<n;j++){
@@ -89,7 +104,7 @@ void FakeAnalyzer::FillHists(Parameter& p){
 	  }
 	}
       }else if(p.channel=="MM"){
-	TString prefix=p.prefix;
+	TString prefix=p.prefix+region;
 	prefix.ReplaceAll("MM","mm");
 	for(int i=0,n=p.amuons.size();i<n;i++){
 	  for(int j=i+1;j<n;j++){
@@ -111,43 +126,43 @@ void FakeAnalyzer::FillHists(Parameter& p){
 	}
       }
       if(dimass<76||dimass>106){
-	if(p.channel.Contains(TRegexp("[eE]E"))){
+	if(p.channel.Contains(TRegexp("[eE][eE]"))){
 	  for(int i=0,n=p.aelectrons.size();i<n;i++){
 	    double eta=fabs(p.aelectrons.at(i).Eta());
 	    double pt=p.aelectrons.at(i).Pt();
 	    double riso=p.aelectrons.at(i).RelIso();
 	    double energy=p.aelectrons.at(i).E();
-	    FillHist(p.prefix+p.hprefix+Form("al%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("al%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("al%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
-	    if(pt>15) FillHist(p.prefix+p.hprefix+Form("al%detae_noZ",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	    if(pt>15) FillHist(p.prefix+region+p.hprefix+Form("al%detae_noZ",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
 	  }
 	  for(int i=0,n=p.electrons.size();i<n;i++){
 	    double eta=fabs(p.electrons.at(i).Eta());
 	    double pt=p.electrons.at(i).Pt();
 	    double riso=p.electrons.at(i).RelIso();
 	    double energy=p.electrons.at(i).E();
-	    FillHist(p.prefix+p.hprefix+Form("l%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("l%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("l%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
-	    if(pt>15) FillHist(p.prefix+p.hprefix+Form("l%detae_noZ",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	    if(pt>15) FillHist(p.prefix+region+p.hprefix+Form("l%detae_noZ",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
 	  }
-	}else if(p.channel.Contains(TRegexp("[mM]M"))){
+	}else if(p.channel.Contains(TRegexp("[mM][mM]"))){
 	  for(int i=0,n=p.amuons.size();i<n;i++){
 	    double eta=fabs(p.amuons.at(i).Eta());
 	    double pt=p.amuons.at(i).Pt();
 	    double riso=p.amuons.at(i).RelIso();
-	    FillHist(p.prefix+p.hprefix+Form("al%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("al%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("al%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("al%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
 	  }
 	  for(int i=0,n=p.muons.size();i<n;i++){
 	    double eta=fabs(p.muons.at(i).Eta());
 	    double pt=p.muons.at(i).Pt();
 	    double riso=p.muons.at(i).RelIso();
-	    FillHist(p.prefix+p.hprefix+Form("l%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("l%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
-	    FillHist(p.prefix+p.hprefix+Form("l%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detapt_noZ",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detajpt_noZ",i)+p.suffix+suf,eta,pt*(1+riso),weight,netabin,etabins,nptbin,ptbins);
+	    FillHist(p.prefix+region+p.hprefix+Form("l%detampt_noZ",i)+p.suffix+suf,eta,pt*(1+riso*TMath::Max(0.,TMath::Min(1.,(pt-30)/30))),weight,netabin,etabins,nptbin,ptbins);
 	  }
 	}	
       }

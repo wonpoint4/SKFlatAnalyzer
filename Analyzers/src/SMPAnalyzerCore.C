@@ -1304,7 +1304,7 @@ SMPAnalyzerCore::Parameter::Parameter(){
 SMPAnalyzerCore::Parameter::~Parameter(){
 }
 void SMPAnalyzerCore::Parameter::SetChannel(TString ch){
-  vector<TString> availables={"el","ee","eE","EE","mu","mm","mM","MM","em","me","en","mn"};
+  vector<TString> availables={"el","ee","eE","Ee","EE","mu","mm","mM","Mm","MM","em","me","en","mn"};
   bool pass=false;
   for(const TString& avail:availables)
     if(ch==avail) pass=true;
@@ -1530,7 +1530,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_Ele28_WPTight_Gsf_v","HLT_Ele32_WPTight_Gsf_v"};
       p.k.triggerSF={"Ele28_MediumID","Ele32_MediumID"};
     }
-  }else if(p.channel=="mM"){
+  }else if(p.channel=="mM"||p.channel=="Mm"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
@@ -1578,7 +1578,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
-  }else if(p.channel=="eE"){
+  }else if(p.channel=="eE"||p.channel=="Ee"){
     p.k.electronIDSF="Electron_MediumID";
     p.SetElectrons(SMPGetElectrons("passMediumID",0.0,2.5));
     p.SetAElectrons(SMPGetElectrons("passAntiLooseID",0.0,2.5));
