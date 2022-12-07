@@ -4,6 +4,7 @@
 #include <tuple>
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
+#include "TPRegexp.h"
 #include "RoccoR.h"
 #include "Aepcor.h"
 #include "TH4D.h"
@@ -199,11 +200,24 @@ public:
   double GetDYWeakWeight(double mass);
 
   void SetupFakeRate();
+  double GetFakeTF(Parameter& p,TString option="");
   double GetFakeRate(const Lepton *lep);
   double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
   void DeleteFakeRate();
   TH2* fFakeRate_electron=NULL;
   TH2* fFakeRate_muon=NULL;
+  TH2* fFakeTF_electron_l0=NULL;
+  TH2* fFakeTF_electron_l1=NULL;
+  TH2* fFakeTF_muon_l0=NULL;
+  TH2* fFakeTF_muon_l1=NULL;
+  TH2* fFakeTF_electron_cpt_l0=NULL;
+  TH2* fFakeTF_electron_cpt_l1=NULL;
+  TH2* fFakeTF_muon_cpt_l0=NULL;
+  TH2* fFakeTF_muon_cpt_l1=NULL;
+  TH2* fFakeTF_electron_mpt_l0=NULL;
+  TH2* fFakeTF_electron_mpt_l1=NULL;
+  TH2* fFakeTF_muon_mpt_l0=NULL;
+  TH2* fFakeTF_muon_mpt_l1=NULL;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
@@ -255,6 +269,7 @@ public:
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
   double GetPFMET_T1Smear() const;
+  TString GetSkimName() const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

@@ -104,7 +104,13 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
 	  int nmem=p.w.electronIDSF_sys[s].size();
 	  for(int m=0;m<nmem;m++){
 	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
-	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
+	    // electronIDSF2 is for the selective charge ID
+	    if(fEff->Get(p.k.electronIDSF2)){
+	      if(s<(int)fEff->Get(p.k.electronIDSF2)->fDataPlus.size())
+		p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
+	      else
+		p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
+	    }
 	  }
 	}
       }
@@ -860,6 +866,106 @@ void SMPAnalyzerCore::SetupFakeRate(){
       fFakeRate_muon->SetDirectory(NULL);
     }
   }
+  if(IsExists(datapath+"/"+era+"/SMP/FakeTF.root")){
+    TFile f(datapath+"/"+era+"/SMP/FakeTF.root");
+
+    fFakeTF_electron_l0=(TH2*)f.Get("ee"+GetEra()+"_noZ_l0tf");
+    fFakeTF_electron_l1=(TH2*)f.Get("ee"+GetEra()+"_noZ_l1tf");
+    if(fFakeTF_electron_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_noZ_l0tf"<<endl;
+      fFakeTF_electron_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_electron_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_noZ_l1tf"<<endl;
+      fFakeTF_electron_l1->SetDirectory(NULL);
+    }
+    fFakeTF_muon_l0=(TH2*)f.Get("mm"+GetEra()+"_noZ_l0tf");
+    fFakeTF_muon_l1=(TH2*)f.Get("mm"+GetEra()+"_noZ_l1tf");
+    if(fFakeTF_muon_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_noZ_l0tf"<<endl;
+      fFakeTF_muon_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_muon_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_noZ_l1tf"<<endl;
+      fFakeTF_muon_l1->SetDirectory(NULL);
+    }
+
+    fFakeTF_electron_cpt_l0=(TH2*)f.Get("ee"+GetEra()+"_cpt_noZ_l0tf");
+    fFakeTF_electron_cpt_l1=(TH2*)f.Get("ee"+GetEra()+"_cpt_noZ_l1tf");
+    if(fFakeTF_electron_cpt_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_cpt_noZ_l0tf"<<endl;
+      fFakeTF_electron_cpt_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_electron_cpt_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_cpt_noZ_l1tf"<<endl;
+      fFakeTF_electron_cpt_l1->SetDirectory(NULL);
+    }
+    fFakeTF_muon_cpt_l0=(TH2*)f.Get("mm"+GetEra()+"_cpt_noZ_l0tf");
+    fFakeTF_muon_cpt_l1=(TH2*)f.Get("mm"+GetEra()+"_cpt_noZ_l1tf");
+    if(fFakeTF_muon_cpt_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_cpt_noZ_l0tf"<<endl;
+      fFakeTF_muon_cpt_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_muon_cpt_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_cpt_noZ_l1tf"<<endl;
+      fFakeTF_muon_cpt_l1->SetDirectory(NULL);
+    }
+
+    fFakeTF_electron_mpt_l0=(TH2*)f.Get("ee"+GetEra()+"_mpt_noZ_l0tf");
+    fFakeTF_electron_mpt_l1=(TH2*)f.Get("ee"+GetEra()+"_mpt_noZ_l1tf");
+    if(fFakeTF_electron_mpt_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_mpt_noZ_l0tf"<<endl;
+      fFakeTF_electron_mpt_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_electron_mpt_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load ee"+GetEra()+"_mpt_noZ_l1tf"<<endl;
+      fFakeTF_electron_mpt_l1->SetDirectory(NULL);
+    }
+    fFakeTF_muon_mpt_l0=(TH2*)f.Get("mm"+GetEra()+"_mpt_noZ_l0tf");
+    fFakeTF_muon_mpt_l1=(TH2*)f.Get("mm"+GetEra()+"_mpt_noZ_l1tf");
+    if(fFakeTF_muon_mpt_l0){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_mpt_noZ_l0tf"<<endl;
+      fFakeTF_muon_mpt_l0->SetDirectory(NULL);
+    }
+    if(fFakeTF_muon_mpt_l1){
+      cout<<"[SMPAnalyzerCore::SetupFakeTF] load mm"+GetEra()+"_mpt_noZ_l1tf"<<endl;
+      fFakeTF_muon_mpt_l1->SetDirectory(NULL);
+    }
+
+  }
+}
+double SMPAnalyzerCore::GetFakeTF(Parameter& p,TString option){
+  TH2* fFakeTF_l0=NULL;
+  TH2* fFakeTF_l1=NULL;
+  if(p.lepton0->InheritsFrom("Electron")){
+    if(option.Contains("cpt")){
+      fFakeTF_l0=fFakeTF_electron_cpt_l0;
+      fFakeTF_l1=fFakeTF_electron_cpt_l1;
+    }else if(option.Contains("mpt")){
+      fFakeTF_l0=fFakeTF_electron_mpt_l0;
+      fFakeTF_l1=fFakeTF_electron_mpt_l1;
+    }else{
+      fFakeTF_l0=fFakeTF_electron_l0;
+      fFakeTF_l1=fFakeTF_electron_l1;
+    }
+  }else if(p.lepton0->InheritsFrom("Muon")){
+    if(option.Contains("cpt")){
+      fFakeTF_l0=fFakeTF_muon_cpt_l0;
+      fFakeTF_l1=fFakeTF_muon_cpt_l1;
+    }else if(option.Contains("mpt")){
+      fFakeTF_l0=fFakeTF_muon_mpt_l0;
+      fFakeTF_l1=fFakeTF_muon_mpt_l1;
+    }else{
+      fFakeTF_l0=fFakeTF_muon_l0;
+      fFakeTF_l1=fFakeTF_muon_l1;
+    }
+  }    
+  if(!fFakeTF_l0||!fFakeTF_l1) return 0.;
+
+  double tf=1.;
+  tf*=GetBinContentUser(fFakeTF_l0,fabs(p.lepton0->Eta()),p.lepton0->Pt(),0);
+  tf*=GetBinContentUser(fFakeTF_l1,fabs(p.lepton1->Eta()),p.lepton1->Pt(),0);
+  return tf;
 }
 double SMPAnalyzerCore::GetFakeRate(const Lepton* lep){
   if(!lep) return 0.;
@@ -890,6 +996,22 @@ double SMPAnalyzerCore::GetFakeRate(Lepton::Flavour flavour,double eta,double pt
 void SMPAnalyzerCore::DeleteFakeRate(){
   if(fFakeRate_electron) delete fFakeRate_electron;
   if(fFakeRate_muon) delete fFakeRate_muon;
+
+  if(fFakeTF_electron_l0) delete fFakeTF_electron_l0;
+  if(fFakeTF_electron_l1) delete fFakeTF_electron_l1;
+  if(fFakeTF_muon_l0) delete fFakeTF_muon_l0;
+  if(fFakeTF_muon_l1) delete fFakeTF_muon_l1;
+
+  if(fFakeTF_electron_cpt_l0) delete fFakeTF_electron_cpt_l0;
+  if(fFakeTF_electron_cpt_l1) delete fFakeTF_electron_cpt_l1;
+  if(fFakeTF_muon_cpt_l0) delete fFakeTF_muon_cpt_l0;
+  if(fFakeTF_muon_cpt_l1) delete fFakeTF_muon_cpt_l1;
+
+  if(fFakeTF_electron_mpt_l0) delete fFakeTF_electron_mpt_l0;
+  if(fFakeTF_electron_mpt_l1) delete fFakeTF_electron_mpt_l1;
+  if(fFakeTF_muon_mpt_l0) delete fFakeTF_muon_mpt_l0;
+  if(fFakeTF_muon_mpt_l1) delete fFakeTF_muon_mpt_l1;
+
 }
 
 void SMPAnalyzerCore::PrintGens(const vector<Gen>& gens){
@@ -1176,6 +1298,12 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
     vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
+      out.push_back(muon);
+    }
+  }else if(id=="NotMediumWithLooseTrkIso"){
+    vector<Muon> muons=GetMuons("NOCUT",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.PassID("POGMedium_nohip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
@@ -1534,6 +1662,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=1;
     p.option+=" triggermatching strictorder";
@@ -1550,6 +1679,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -1566,6 +1696,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=0;
     p.option+=" triggermatching strictorder";
@@ -1675,4 +1806,17 @@ double SMPAnalyzerCore::GetPFMET_T1Smear() const {
     out-=jet_smear-jet;
   }
   return out.Pt();
+}
+TString SMPAnalyzerCore::GetSkimName() const {
+  TString skimname="";
+  if(fChain->GetListOfFiles()->GetEntries()){
+    TString filename=fChain->GetListOfFiles()->At(0)->GetTitle();
+    if(filename.Contains("SkimTree_")){
+      skimname=((TObjString*)TPRegexp("SkimTree_([^_]*)").MatchS(filename)->At(1))->GetString();
+    }
+  }else{
+    cout<<"[SMPAnalyzerCore::GetSkimName] no input file"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return skimname;
 }
