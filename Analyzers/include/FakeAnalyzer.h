@@ -9,13 +9,17 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
+  void executeDileptonEvent();
+  void executeLeptonEvent();
   void FillHists(Parameter& p);
-  void FillFakeHists(Parameter& p,TString region);
+  void FillLeptonHists(Parameter& p,TString region);
+  void FillDileptonHists(Parameter& p,TString region);
   vector<Muon> ToConePt(vector<Muon> muons);
   vector<Electron> ToConePt(vector<Electron> muons);
   vector<Muon> ToModifiedPt(vector<Muon> muons);
   vector<Electron> ToModifiedPt(vector<Electron> muons);
   void UseSelectiveCharge(Parameter& p);
+  virtual Parameter MakeParameter(TString channel,TString option="");
 
   FakeAnalyzer();
   ~FakeAnalyzer();

@@ -188,8 +188,8 @@ if __name__=="__main__":
     import argparse
     parser=argparse.ArgumentParser()
     parser.add_argument("-e","--era",default="2016a,2016b,2017,2018",type=str)
-    parser.add_argument("-c","--channel",default="ee,mm")
-    parser.add_argument("-r","--region",default="cpt/noZ/,noZ/,mpt/noZ/")
+    parser.add_argument("-c","--channel",default="ee,mm,ej,mj")
+    parser.add_argument("-r","--region",default=",noZ/,0bjet/noZ/,nbjet/noZ/,cpt/noZ/,cpt/0bjet/noZ/,cpt/nbjet/noZ/,mpt/noZ/,mpt/0bjet/noZ/,mpt/nbjet/noZ/")
     args_raw=parser.parse_args()
 
     args_raw.era=args_raw.era.split(",")
@@ -201,16 +201,13 @@ if __name__=="__main__":
         for channel in args_raw.channel:
             for region in args_raw.region:
                 args=copy.deepcopy(args_raw)
-                args.plotter=ROOT.SKFlatPlotter("FakeAnalyzer","data-mi-tau_mi-wjets-vv-tttw-aa")
+                args.plotter=ROOT.SKFlatPlotter("FakeAnalyzer","data-mi-tau_mi-wjets-vv-tttw-ttlj-aa")
                 args.era=GetEra(era)
                 args.erashort=GetEraShort(era)
                 if args.era not in ["2016preVFP","2016postVFP","2017","2018"]:
                     print "Unknown era {}".format(args.era)
                     continue
                 args.region=region
-                if args.region not in ["","noZ/","cpt/","cpt/noZ/","mpt/","mpt/noZ/"]:
-                    print "Unknown region {}".format(args.region)
-                    continue
                 args.channel=channel
                 if args.channel=="ee":
                     args.tfxbins=[0.,1.5,2.5]
@@ -232,7 +229,7 @@ if __name__=="__main__":
 
                 elif args.channel=="mm":
                     #args.tfxbins=[0,1.0,1.5,2.0,2.5]
-                    args.tfxbins=[0,1.5,2.5]
+                    args.tfxbins=[0.,1.5,2.5]
                     #args.tfybins=[10.,20.,40.,60.,100.,200.]
                     args.tfybins=[10,12.5,15,17.5,20,22.5,25,27.5,30,35,40,50,100,1000]
                     
@@ -246,6 +243,42 @@ if __name__=="__main__":
                     args.hl1den=args.plotter.GetHist(0,"MM{}/{}/ss_l1etapt".format(args.erashort,args.region),"noproject")
                     args.hl1tf=args.hl1num.Clone("{}{}_{}l1tf".format(args.channel,args.era,args.region.replace("/","_")))
                     args.hl1tf=Rebin2D(args.hl1tf,args.tfxbins,args.tfybins)
+
+                elif args.channel=="ej":
+                    args.tfxbins=[0.,1.5,2.5]
+                    #args.tfxbins=[0,1.0,1.5,2.0,2.5]
+                    #args.tfybins=[10.,20.,40.,60.,100.,200.]
+                    args.tfybins=[10,12.5,15,17.5,20,22.5,25,27.5,30,35,40,50,100,1000]
+                    #args.tfybins=[15.,25.,40.,60.,100.,200.,400.]
+                    
+                    args.hl0num=args.plotter.GetHist(0,"ej{}/{}/l0etapt".format(args.erashort,region),"noproject")
+                    if not args.hl0num: continue
+                    args.hl0den=args.plotter.GetHist(0,"Ej{}/{}/l0etapt".format(args.erashort,region),"noproject")
+                    args.hl0tf=args.hl0num.Clone("{}{}_{}l0tf".format(args.channel,args.era,args.region.replace("/","_")))
+                    args.hl0tf=Rebin2D(args.hl0tf,args.tfxbins,args.tfybins)
+
+                    args.hl1num=args.plotter.GetHist(0,"ej{}/{}/l0etapt".format(args.erashort,region),"noproject")
+                    args.hl1den=args.plotter.GetHist(0,"Ej{}/{}/l0etapt".format(args.erashort,region),"noproject")
+                    args.hl1tf=args.hl1num.Clone("{}{}_{}l1tf".format(args.channel,args.era,args.region.replace("/","_")))
+                    args.hl1tf=Rebin2D(args.hl1tf,args.tfxbins,args.tfybins)
+                    
+                elif args.channel=="mj":
+                    #args.tfxbins=[0,1.0,1.5,2.0,2.5]
+                    args.tfxbins=[0.,1.5,2.5]
+                    #args.tfybins=[10.,20.,40.,60.,100.,200.]
+                    args.tfybins=[10,12.5,15,17.5,20,22.5,25,27.5,30,35,40,50,100,1000]
+                    
+                    args.hl0num=args.plotter.GetHist(0,"mj{}/{}/l0etapt".format(args.erashort,args.region),"noproject")
+                    if not args.hl0num: continue
+                    args.hl0den=args.plotter.GetHist(0,"Mj{}/{}/l0etapt".format(args.erashort,args.region),"noproject")
+                    args.hl0tf=args.hl0num.Clone("{}{}_{}l0tf".format(args.channel,args.era,args.region.replace("/","_")))
+                    args.hl0tf=Rebin2D(args.hl0tf,args.tfxbins,args.tfybins)
+                    
+                    args.hl1num=args.plotter.GetHist(0,"mj{}/{}/l0etapt".format(args.erashort,args.region),"noproject")
+                    args.hl1den=args.plotter.GetHist(0,"Mj{}/{}/l0etapt".format(args.erashort,args.region),"noproject")
+                    args.hl1tf=args.hl1num.Clone("{}{}_{}l1tf".format(args.channel,args.era,args.region.replace("/","_")))
+                    args.hl1tf=Rebin2D(args.hl1tf,args.tfxbins,args.tfybins)
+
                 else:
                     print "Unknown channel {}".format(args.channel)
                     continue
@@ -277,5 +310,10 @@ if __name__=="__main__":
     
     f=ROOT.TFile("FakeTF.root","recreate")
     for h in save:
+        for i in range(h.GetNcells()):
+            val=h.GetBinContent(i)
+            if val<0:
+                h.SetBinContent(i,0.)
+                h.SetBinError(i,0.)
         h.Write()
     exit(0)

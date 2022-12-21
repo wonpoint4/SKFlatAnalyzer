@@ -206,18 +206,7 @@ public:
   void DeleteFakeRate();
   TH2* fFakeRate_electron=NULL;
   TH2* fFakeRate_muon=NULL;
-  TH2* fFakeTF_electron_l0=NULL;
-  TH2* fFakeTF_electron_l1=NULL;
-  TH2* fFakeTF_muon_l0=NULL;
-  TH2* fFakeTF_muon_l1=NULL;
-  TH2* fFakeTF_electron_cpt_l0=NULL;
-  TH2* fFakeTF_electron_cpt_l1=NULL;
-  TH2* fFakeTF_muon_cpt_l0=NULL;
-  TH2* fFakeTF_muon_cpt_l1=NULL;
-  TH2* fFakeTF_electron_mpt_l0=NULL;
-  TH2* fFakeTF_electron_mpt_l1=NULL;
-  TH2* fFakeTF_muon_mpt_l0=NULL;
-  TH2* fFakeTF_muon_mpt_l1=NULL;
+  map<TString,TH2*> fFakeTF;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
