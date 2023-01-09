@@ -10,6 +10,7 @@ public:
   void initializeAnalyzer();
   void executeEventFromParameter(AnalyzerParameter param);
   void executeEvent();
+  void FillHists(vector<Muon> muons, double weight, TString prefix, bool acceptance_EMTF);
 
   DZfiltercheck();
   ~DZfiltercheck();

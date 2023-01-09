@@ -13,7 +13,6 @@ void DZfiltercheck::executeEvent(){
   if(muons.size() < 2) return;
   if(muons.at(0).Charge() * muons.at(1).Charge() > 0) return;
   if(muons.at(0).Pt() < 20 || muons.at(1).Pt() < 10) return;
-  //if((muons.at(0)+muons.at(1)).M() < 81 || (muons.at(0)+muons.at(1)).M() > 101) return;
 
   executeEventFromParameter(param);
 
@@ -34,19 +33,10 @@ void DZfiltercheck::executeEventFromParameter(AnalyzerParameter param){
 
 
   if(DataYear==2016){
-    double acceptance_EMTF = 0.;
-    if(muons.at(0).Eta() * muons.at(1).Eta() > 0 && fabs(muons.at(0).Eta()) > 1.2 && fabs(muons.at(1).Eta()) > 1.2 && fabs(muons.at(0).DeltaPhi(muons.at(1))) < 3.14159/3) acceptance_EMTF = 1.;
-
-    FillHist("noTrig_acceptance_EMTF", acceptance_EMTF, weight, 2, 0., 2.);
-    if(acceptance_EMTF == 1.){
-      FillHist("noTrig_acceptance_EMTF_pt0", muons.at(0).Pt(), weight, 200, 0., 200.);
-      FillHist("noTrig_acceptance_EMTF_pt1", muons.at(1).Pt(), weight, 200, 0., 200.);
-      FillHist("noTrig_acceptance_EMTF_eta0", muons.at(0).Eta(), weight, 60, -3, 3.);
-      FillHist("noTrig_acceptance_EMTF_eta1", muons.at(1).Eta(), weight, 60, -3, 3.);
-      FillHist("noTrig_acceptance_EMTF_Zmass", (muons.at(0)+muons.at(1)).M(), weight, 200, 0., 200.);
-      FillHist("noTrig_acceptance_EMTF_Zpt", (muons.at(0)+muons.at(1)).Pt(), weight, 200, 0., 200.);
-      FillHist("noTrig_acceptance_EMTF_Zrap", (muons.at(0)+muons.at(1)).Rapidity(), weight, 100, -5., 5.);
-    }
+    bool acceptance_EMTF = false;
+    if(muons.at(0).Eta() * muons.at(1).Eta() > 0 && fabs(muons.at(0).Eta()) > 1.2 && fabs(muons.at(1).Eta()) > 1.2 && fabs(muons.at(0).DeltaPhi(muons.at(1))) < 3.14159/3) acceptance_EMTF = true;
+    bool weak_acceptance_EMTF = false;
+    if(muons.at(0).Eta() * muons.at(1).Eta() > 0 && fabs(muons.at(0).Eta()) > 1.2 && fabs(muons.at(1).Eta()) > 1.2) weak_acceptance_EMTF = true;
 
     vector<TString> double_trig = {
       "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v",
@@ -61,9 +51,37 @@ void DZfiltercheck::executeEventFromParameter(AnalyzerParameter param){
       "HLT_IsoTkMu24_v",
     };
 
-    if(ev.PassTrigger(single_trig)) FillHist("singleTrig_acceptance_EMTF", acceptance_EMTF, weight, 2, 0., 2.);
-    if(ev.PassTrigger(double_trig)) FillHist("doubleTrig_acceptance_EMTF", acceptance_EMTF, weight, 2, 0., 2.);
-    if(ev.PassTrigger(single_trig) || ev.PassTrigger(double_trig)) FillHist("allTrig_acceptance_EMTF", acceptance_EMTF, weight, 2, 0., 2.);
+    FillHists(muons, weight, "noT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig)) FillHists(muons, weight, "singleT_", acceptance_EMTF);
+    if(ev.PassTrigger(double_trig)) FillHists(muons, weight, "doubleT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) || ev.PassTrigger(double_trig)) FillHists(muons, weight, "allT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) && !ev.PassTrigger(double_trig)) FillHists(muons, weight, "onlyST_", acceptance_EMTF);
+    if(!ev.PassTrigger(single_trig) && ev.PassTrigger(double_trig)) FillHists(muons, weight, "onlyDT_", acceptance_EMTF);
+
+    if((muons.at(0)+muons.at(1)).M() < 52) return;
+
+    FillHists(muons, weight, "Mass52/noT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig)) FillHists(muons, weight, "Mass52/singleT_", acceptance_EMTF);
+    if(ev.PassTrigger(double_trig)) FillHists(muons, weight, "Mass52/doubleT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) || ev.PassTrigger(double_trig)) FillHists(muons, weight, "Mass52/allT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) && !ev.PassTrigger(double_trig)) FillHists(muons, weight, "Mass52/onlyST_", acceptance_EMTF);
+    if(!ev.PassTrigger(single_trig) && ev.PassTrigger(double_trig)) FillHists(muons, weight, "Mass52/onlyDT_", acceptance_EMTF);
+
+    if((muons.at(0)+muons.at(1)).M() < 81 || (muons.at(0)+muons.at(1)).M() > 101) return;
+
+    FillHists(muons, weight, "Zpeak/noT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig)) FillHists(muons, weight, "Zpeak/singleT_", acceptance_EMTF);
+    if(ev.PassTrigger(double_trig)) FillHists(muons, weight, "Zpeak/doubleT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) || ev.PassTrigger(double_trig)) FillHists(muons, weight, "Zpeak/allT_", acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) && !ev.PassTrigger(double_trig)) FillHists(muons, weight, "Zpeak/onlyST_", acceptance_EMTF);
+    if(!ev.PassTrigger(single_trig) && ev.PassTrigger(double_trig)) FillHists(muons, weight, "Zpeak/onlyDT_", acceptance_EMTF);
+
+    FillHists(muons, weight, "Weak_Zpeak/noT_", weak_acceptance_EMTF);
+    if(ev.PassTrigger(single_trig)) FillHists(muons, weight, "Weak_Zpeak/singleT_", weak_acceptance_EMTF);
+    if(ev.PassTrigger(double_trig)) FillHists(muons, weight, "Weak_Zpeak/doubleT_", weak_acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) || ev.PassTrigger(double_trig)) FillHists(muons, weight, "Weak_Zpeak/allT_", weak_acceptance_EMTF);
+    if(ev.PassTrigger(single_trig) && !ev.PassTrigger(double_trig)) FillHists(muons, weight, "Weak_Zpeak/onlyST_", weak_acceptance_EMTF);
+    if(!ev.PassTrigger(single_trig) && ev.PassTrigger(double_trig)) FillHists(muons, weight, "Weak_Zpeak/onlyDT_", weak_acceptance_EMTF);
 
   }else{
 
@@ -110,3 +128,24 @@ DZfiltercheck::~DZfiltercheck(){
 }
 
 
+void DZfiltercheck::FillHists(vector<Muon> muons, double weight, TString prefix, bool acceptance_EMTF){
+  FillHist((prefix+"acceptance_EMTF").ReplaceAll("/","_"), acceptance_EMTF, weight, 2, 0., 2.);
+    if(acceptance_EMTF){
+      FillHist("1D/"+prefix+"pt0", muons.at(0).Pt(), weight, 200, 0., 200.);
+      FillHist("1D/"+prefix+"pt1", muons.at(1).Pt(), weight, 200, 0., 200.);
+      FillHist("1D/"+prefix+"eta0", muons.at(0).Eta(), weight, 50, -2.5, 2.5);
+      FillHist("1D/"+prefix+"eta1", muons.at(1).Eta(), weight, 50, -2.5, 2.5);
+      FillHist("1D/"+prefix+"phi0", muons.at(0).Phi(), weight, 70, -3.5, 3.5);
+      FillHist("1D/"+prefix+"phi1", muons.at(1).Phi(), weight, 70, -3.5, 3.5);
+      FillHist("1D/"+prefix+"dimass", (muons.at(0)+muons.at(1)).M(), weight, 200, 0., 200.);
+      FillHist("1D/"+prefix+"dipt", (muons.at(0)+muons.at(1)).Pt(), weight, 200, 0., 200.);
+      FillHist("1D/"+prefix+"dirap", (muons.at(0)+muons.at(1)).Rapidity(), weight, 100, -5., 5.);
+      FillHist("2D/"+prefix+"pt", muons.at(0).Pt(), muons.at(1).Pt(), weight, 40, 0., 200., 40, 0., 200.);
+      FillHist("2D/"+prefix+"eta", muons.at(0).Eta(), muons.at(1).Eta(), weight, 50, -2.5, 2.5, 50, -2.5, 2.5);
+      FillHist("2D/"+prefix+"phi", muons.at(0).Phi(), muons.at(1).Phi(), weight, 70, -3.5, 3.5, 70, -3.5, 3.5);
+      FillHist("2D/"+prefix+"phifine", muons.at(0).Phi(), muons.at(1).Phi(), weight, 280, -3.5, 3.5, 280, -3.5, 3.5);
+      FillHist("2D/"+prefix+"phifine2", muons.at(0).Phi(), muons.at(1).Phi(), weight, 180, -3.14159, 3.14159, 180, -3.14159, 3.14159);
+      FillHist("2D/"+prefix+"phifine3", muons.at(0).Phi(), muons.at(1).Phi(), weight, 360, -3.14159, 3.14159, 360, -3.14159, 3.14159);
+      FillHist("2D/"+prefix+"phicoarse", muons.at(0).Phi(), muons.at(1).Phi(), weight, 35, -3.5, 3.5, 35, -3.5, 3.5);
+    }
+}
