@@ -200,7 +200,7 @@ public:
   double GetDYWeakWeight(double mass);
 
   void SetupFakeRate();
-  double GetFakeTF(Parameter& p,TString option="");
+  double GetFakeTF(Parameter& p,TString option="",int sys=0);
   double GetFakeRate(const Lepton *lep);
   double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
   void DeleteFakeRate();

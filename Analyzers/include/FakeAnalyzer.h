@@ -24,6 +24,8 @@ public:
   FakeAnalyzer();
   ~FakeAnalyzer();
 
+  JetTagging::Parameters jtp;
+
   static const int nptbin=24;
   double ptbins[nptbin+1]={10,12.5,15,17.5,20,22.5,25,27.5,30,35,40,50,60,70,80,90,100,120,150,200,300,400,500,700,1000};
   static const int netabin=25;

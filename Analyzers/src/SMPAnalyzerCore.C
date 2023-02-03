@@ -888,7 +888,7 @@ void SMPAnalyzerCore::SetupFakeRate(){
     }
   }
 }
-double SMPAnalyzerCore::GetFakeTF(Parameter& p,TString option){
+double SMPAnalyzerCore::GetFakeTF(Parameter& p,TString option,int sys){
   TH2* fFakeTF_l0=NULL;
   TH2* fFakeTF_l1=NULL;
   TString key="";
@@ -920,8 +920,10 @@ double SMPAnalyzerCore::GetFakeTF(Parameter& p,TString option){
   if(!fFakeTF_l0||!fFakeTF_l1) return 0.;
 
   double tf=1.;
-  tf*=GetBinContentUser(fFakeTF_l0,fabs(p.lepton0->Eta()),p.lepton0->Pt(),0);
-  tf*=GetBinContentUser(fFakeTF_l1,fabs(p.lepton1->Eta()),p.lepton1->Pt(),0);
+  tf*=GetBinContentUser(fFakeTF_l0,fabs(p.lepton0->Eta()),p.lepton0->Pt(),sys);
+  if(tf<0) tf=0.;
+  tf*=GetBinContentUser(fFakeTF_l1,fabs(p.lepton1->Eta()),p.lepton1->Pt(),sys);
+  if(tf<0) tf=0.;
   return tf;
 }
 double SMPAnalyzerCore::GetFakeRate(const Lepton* lep){
