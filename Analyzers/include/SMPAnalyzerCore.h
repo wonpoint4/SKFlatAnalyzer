@@ -26,6 +26,7 @@ public:
     TString prefix,hprefix,suffix;
     vector<TString> triggers;
     vector<Gen> gens;
+    vector<Jet> bjets;
     vector<Muon> muons;
     vector<Electron> electrons;
     vector<Muon> amuons;
@@ -50,6 +51,7 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
+      double topptweight=1;
       double weakweight=1;
       double electronRECOSF=1;
       vector<vector<double>> electronRECOSF_sys;
@@ -62,6 +64,7 @@ public:
       double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
       vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
+      double btagSF=1,btagSF_hup=1,btagSF_hdown=1,btagSF_lup=1,btagSF_ldown=1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -244,6 +247,7 @@ public:
   TAxis* fZptWeightMaxis=NULL;
 
   bool IsDYSample=false;
+  bool IsTTSample=false;
   Event _event;
   double reductionweight=1;
   vector<LHE> lhes;
