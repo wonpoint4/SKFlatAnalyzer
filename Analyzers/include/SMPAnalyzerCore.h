@@ -26,6 +26,7 @@ public:
     TString prefix,hprefix,suffix;
     vector<TString> triggers;
     vector<Gen> gens;
+    vector<Jet> jets;
     vector<Jet> bjets;
     vector<Muon> muons;
     vector<Electron> electrons;

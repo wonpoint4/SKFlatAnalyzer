@@ -1554,17 +1554,41 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.w.topptweight=mcCorr->GetTopPtReweight(gens);
     }
   }
-  std::vector<Jet> jets=GetJets("tightLepVeto",40,2.4);
-  std::sort(jets.begin(),jets.end(),PtComparing);
+
+  p.jets.clear();
+  if(p.option.Contains("jet_scale_up")){
+    p.suffix+="_jet_scale_up";
+    p.jets=SelectJets(ScaleJets(GetAllJets(),1),"tightLepVeto",40,2.4);
+  }else if(p.option.Contains("jet_scale_down")){
+    p.suffix+="_jet_scale_down";
+    p.jets=SelectJets(ScaleJets(GetAllJets(),-1),"tightLepVeto",40,2.4);
+  }else if(p.option.Contains("jet_smear_up")){
+    p.suffix+="_jet_smear_up";
+    p.jets=SelectJets(SmearJets(GetAllJets(),1),"tightLepVeto",40,2.4);
+  }else if(p.option.Contains("jet_smear_down")){
+    p.suffix+="_jet_smear_down";
+    p.jets=SelectJets(SmearJets(GetAllJets(),-1),"tightLepVeto",40,2.4);
+  }else{
+    p.jets=SelectJets(GetAllJets(),"tightLepVeto",40,2.4);
+  }    
+  std::sort(p.jets.begin(),p.jets.end(),PtComparing);
   JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
-  for(const auto& jet:jets)
+  p.bjets.clear();
+  for(const auto& jet:p.jets)
     if(jet.GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP))
       p.bjets.push_back(jet);
-  p.w.btagSF=mcCorr->GetBTaggingReweight_1a(jets,jtp);
-  p.w.btagSF_hup=mcCorr->GetBTaggingReweight_1a(jets,jtp,"SystUpHTag");
-  p.w.btagSF_hdown=mcCorr->GetBTaggingReweight_1a(jets,jtp,"SystDownHTag");
-  p.w.btagSF_lup=mcCorr->GetBTaggingReweight_1a(jets,jtp,"SystUpLTag");
-  p.w.btagSF_ldown=mcCorr->GetBTaggingReweight_1a(jets,jtp,"SystDownLTag");
+  p.w.btagSF=1.;
+  p.w.btagSF_hup=1.;
+  p.w.btagSF_hdown=1.;
+  p.w.btagSF_lup=1.;
+  p.w.btagSF_ldown=1.;
+  if(!IsDATA){
+    p.w.btagSF=mcCorr->GetBTaggingReweight_1a(p.jets,jtp);
+    p.w.btagSF_hup=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpHTag");
+    p.w.btagSF_hdown=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystDownHTag");
+    p.w.btagSF_lup=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTag");
+    p.w.btagSF_ldown=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystDownLTag");
+  }
 
   p.prefix=p.channel+GetEraShort()+"/";
   if(p.channel=="mu"){

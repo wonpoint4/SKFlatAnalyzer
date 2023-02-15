@@ -14,7 +14,7 @@ public:
   virtual void executeEventWithParameter(Parameter& p);
   virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   static int GetUnfoldBin(int nbin,const double* bins,double mass,double cost);
-  virtual Parameter MakeParameter(TString key);
+  virtual Parameter MakeParameter(TString key,TString option="");
   virtual bool PassSelection(Parameter& p);
   virtual void EvalWeights(Parameter& p);
   virtual void ResetRecoWeights(Parameter& p);
@@ -30,13 +30,8 @@ public:
   virtual void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
   virtual void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
   //void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
-  virtual void SetupCosThetaWeight();
-  virtual void DeleteCosThetaWeight();
-  virtual double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
   
   TString hardprefix;
-  map<TString,TH3D*> map_hist_cost;
-  double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
   
