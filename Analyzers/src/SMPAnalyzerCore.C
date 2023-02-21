@@ -26,7 +26,8 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
   if(IsDYSample) SetupZptWeight();
   if(MCSample.Contains(TRegexp("TT[LJ][LJ]"))) IsTTSample=true;
-  mcCorr->SetJetTaggingParameters({JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb)});
+  mcCorr->SetJetTaggingParameters({JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+	JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb)});
 }
 void SMPAnalyzerCore::beginEvent(){
   _event=GetEvent();
@@ -1572,7 +1573,12 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.jets=SelectJets(GetAllJets(),"tightLepVeto",40,2.4);
   }    
   std::sort(p.jets.begin(),p.jets.end(),PtComparing);
-  JetTagging::Parameters jtp = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  JetTagging::Parameters jtp;
+  if(p.option.Contains("DeepJet::Medium")){
+    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+  }else{
+    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  }
   p.bjets.clear();
   for(const auto& jet:p.jets)
     if(jet.GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP))

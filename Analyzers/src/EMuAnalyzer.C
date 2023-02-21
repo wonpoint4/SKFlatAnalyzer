@@ -8,16 +8,30 @@ void EMuAnalyzer::executeEvent(){
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("me"));
+    for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
+      executeEventWithParameter(MakeParameter("me",syst));
+    }
+    //executeEventWithParameter(MakeParameter("me","DeepJet::Medium"));
   }
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("em"));
+    for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
+      executeEventWithParameter(MakeParameter("em",syst));
+    }
+    //executeEventWithParameter(MakeParameter("em","DeepJet::Medium"));
   }
 }
 SMPAnalyzerCore::Parameter EMuAnalyzer::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
-  p.weightbit|=NominalWeight|SystematicWeight|EfficiencyWeight|PDFWeight;
-  if(IsTTSample){
-    p.weightbit|=PDFWeight;
+  if(p.suffix==""){
+    p.weightbit|=NominalWeight|SystematicWeight|EfficiencyWeight|PDFWeight;
+    if(IsTTSample){
+      p.weightbit|=PDFWeight;
+    }
+  }
+  if(option.Contains("DeepJet::Medium")){
+    p.weightbit=NominalWeight;
+    p.prefix="medium/"+p.prefix;
   }
   return p;
 }

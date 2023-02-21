@@ -39,7 +39,21 @@ void FakeAnalyzer::executeDileptonEvent(){
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
     p.option+=" triggermatching strictorder";
     executeEventWithParameter(p);}
-      
+ 
+    //temp
+    {Parameter p=MakeParameter("mm");
+    p.prefix=p.prefix+"nostrictorder/";
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
+    p.option+=" triggermatching";
+    executeEventWithParameter(p);}
+
+    //temp
+    {Parameter p=MakeParameter("mm");
+    p.prefix=p.prefix+"notriggermatching/";
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithAntiLooseTrkIso",0.0,2.4),0,0));
+    p.option+=" strictorder";
+    executeEventWithParameter(p);}
+     
     executeEventWithParameter(MakeParameter("mM"));
     executeEventWithParameter(MakeParameter("Mm"));
     executeEventWithParameter(MakeParameter("MM"));
