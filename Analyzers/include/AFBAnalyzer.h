@@ -3,6 +3,7 @@
 
 #include "TKey.h"
 #include "SMPAnalyzerCore.h"
+#include "LHAPDF/Reweighting.h"
 
 class AFBAnalyzer : public SMPAnalyzerCore {
 
@@ -34,6 +35,9 @@ public:
   TString hardprefix;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
+
+  LHAPDF::PDF* PDFbase=NULL;
+  LHAPDF::PDF* PDFnf4=NULL;
   
   static const int afb_mbinnum=40;
   static constexpr const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};

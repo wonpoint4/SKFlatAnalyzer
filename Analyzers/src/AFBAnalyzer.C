@@ -3,11 +3,12 @@
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
   
-  vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb)};
-  mcCorr->SetJetTaggingParameters(jtps);
-
   IsSkimmed= GetSkimName()!="" ? true : false;
   IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS")&&IsSkimmed;
+
+  PDFbase=LHAPDF::mkPDF(306000);
+  PDFnf4=LHAPDF::mkPDF(325500);
+
 }
 void AFBAnalyzer::executeEvent(){
   //// FIXME some events of DYJets has nan PDF weights. I don't know why...
@@ -22,6 +23,8 @@ void AFBAnalyzer::executeEvent(){
   }
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("mm","DeepCSV")); //temp 
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("mm","DeepJet::Tight::mujets")); //temp
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
 	executeEventWithParameter(MakeParameter("mm",syst));
@@ -35,6 +38,8 @@ void AFBAnalyzer::executeEvent(){
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("ee","DeepCSV")); //temp 
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("ee","DeepJet::Tight::mujets")); //temp
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
 	executeEventWithParameter(MakeParameter("ee",syst));
@@ -59,10 +64,18 @@ SMPAnalyzerCore::Parameter AFBAnalyzer::MakeParameter(TString key,TString option
     }
     if(HasFlag("PDFSYS")&&!IsDATA&&(p.channel=="ee"||p.channel=="mm")) p.weightbit|=PDFWeight;
   }else p.weightbit|=NominalWeight|SystematicWeight|EfficiencyWeight|PDFWeight;
+  if(p.option.Contains("DeepCSV")) p.prefix="DeepCSV/"+p.prefix;
+  else if(p.option.Contains("DeepJet::Tight::mujets")) p.prefix="mujets/"+p.prefix;
 
   if(HasFlag("nbjet")) p.prefix+="nbjet/";
   else if(HasFlag("0bjet")) p.prefix+="0bjet/";
   if(HasFlag("highmet")) p.prefix+="highmet/";
+
+  if(IsDYSample&&p.hprefix==""){
+    if(abs(genWeight_id1)==5||abs(genWeight_id2)==5){
+      p.hprefix="bx_";
+    }
+  }
 
   return p;
 }
@@ -334,6 +347,11 @@ void AFBAnalyzer::EvalWeights(Parameter& p){
       p.weightmap["_largeptscales"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*weight_largeptscales->at(0)*p.w.topptweight;
       p.weightmap["_q0_up"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*weight_q0->at(0)*p.w.topptweight;
       p.weightmap["_q0_down"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*weight_q0->at(2)*p.w.topptweight;      
+      double pdfreweight=LHAPDF::weightxxQ(genWeight_id1,genWeight_id2,genWeight_X1,genWeight_X2,genWeight_Q,PDFbase,PDFnf4,-1);
+      if(!isnormal(pdfreweight)&&pdfreweight!=0) pdfreweight=1.;
+      if(pdfreweight>5) pdfreweight=5;
+      if(pdfreweight<-5) pdfreweight=-5;
+      p.weightmap["_nf4"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*pdfreweight;
     }
   }
   return;

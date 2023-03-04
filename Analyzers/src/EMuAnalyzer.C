@@ -5,6 +5,16 @@ EMuAnalyzer::EMuAnalyzer(){
 EMuAnalyzer::~EMuAnalyzer(){
 }
 void EMuAnalyzer::executeEvent(){
+  //////// Gen level ////////
+  if(GetSkimName()==""){
+    if(MCSample.Contains("TTLL")){
+      FillHist("normcheck",0,reductionweight*MCweight()*_event.GetTriggerLumi("Full"),5,0,5);
+      FillHist("normcheck",1,reductionweight*MCweight()*_event.GetTriggerLumi("Full")*mcCorr->GetTopPtReweight(gens),5,0,5);
+      FillHist("normcheck",2,reductionweight*MCweight()*_event.GetTriggerLumi("Full")*GetTopPtReweight2(gens),5,0,5);
+    }
+    return;
+  }
+  
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("me"));
@@ -12,6 +22,9 @@ void EMuAnalyzer::executeEvent(){
       executeEventWithParameter(MakeParameter("me",syst));
     }
     //executeEventWithParameter(MakeParameter("me","DeepJet::Medium"));
+    //executeEventWithParameter(MakeParameter("me","DeepJet::Tight::mujets"));
+    //executeEventWithParameter(MakeParameter("me","DeepCSV::Medium"));
+    //executeEventWithParameter(MakeParameter("me","DeepCSV::Tight"));
   }
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("em"));
@@ -19,6 +32,9 @@ void EMuAnalyzer::executeEvent(){
       executeEventWithParameter(MakeParameter("em",syst));
     }
     //executeEventWithParameter(MakeParameter("em","DeepJet::Medium"));
+    //executeEventWithParameter(MakeParameter("em","DeepJet::Tight::mujets"));
+    //executeEventWithParameter(MakeParameter("em","DeepCSV::Medium"));
+    //executeEventWithParameter(MakeParameter("em","DeepCSV::Tight"));
   }
 }
 SMPAnalyzerCore::Parameter EMuAnalyzer::MakeParameter(TString key,TString option){
@@ -32,6 +48,15 @@ SMPAnalyzerCore::Parameter EMuAnalyzer::MakeParameter(TString key,TString option
   if(option.Contains("DeepJet::Medium")){
     p.weightbit=NominalWeight;
     p.prefix="medium/"+p.prefix;
+  }else if(option.Contains("DeepJet::Tight::mujets")){
+    p.weightbit=NominalWeight;
+    p.prefix="mujets/"+p.prefix;
+  }else if(option.Contains("DeepCSV::Medium")){
+    p.weightbit=NominalWeight;
+    p.prefix="csvmedium/"+p.prefix;
+  }else if(option.Contains("DeepCSV")){
+    p.weightbit=NominalWeight;
+    p.prefix="csv/"+p.prefix;
   }
   return p;
 }
@@ -49,6 +74,7 @@ void EMuAnalyzer::EvalWeights(Parameter& p){
     p.weightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
     p.weightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
     p.weightmap["_notopptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF;
+    p.weightmap["_topptweight2"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*GetTopPtReweight2(gens);
 
     p.weightmap["_btagSF_hup"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF_hup;
     p.weightmap["_btagSF_hdown"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF_hdown;

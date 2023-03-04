@@ -236,6 +236,8 @@ public:
     return a;
   }
   
+  // Top pt weight
+  double GetTopPtReweight2(const std::vector<Gen>& gens);
 
   // ZptWeight
   void SetupZptWeight();
