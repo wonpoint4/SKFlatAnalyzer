@@ -746,10 +746,12 @@ void SMPAnalyzerCore::SetupRoccoR(){
   if(IsExists(rocpath)) roc=new RoccoR(rocpath.Data());
   else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocpath<<endl;
   TString erashort=GetEraShort();
-  TString rocelepath=datapath+"/"+GetEra()+"/RoccoR/e_"+erashort(2,3)+"UL.txt";
-  if(DataYear==2016) rocelepath=datapath+"/"+GetEra()+"/RoccoR/e_"+erashort(2,3)+"UL_1.txt";
-  if(IsExists(rocelepath)) rocele=new Aepcor(rocelepath.Data());
-  else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocelepath<<endl;  
+  TString rocelepath=TString(getenv("SKFlat_WD"))+"/external/Aepcor/e_"+erashort(2,3)+"UL_1.txt";
+  if(IsExists(rocelepath)){
+    rocele=new Aepcor;
+    rocele->init(rocelepath.Data(),Aepres::CB);
+  }
+  else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocelepath<<endl;
 }
 double SMPAnalyzerCore::GetZ0Weight(double valx){
   if(IsDATA) return 1.;
@@ -1397,10 +1399,10 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
 	if(!gen.IsEmpty()&&fabs(electron.Pt()/gen.Pt()-1.)<0.5){
 	  rc=rocele->kSpreadMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,gen.Pt(),set,member);
 	}else{
-	  rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
+	  //rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
+	  rc=1.;
 	}
       }      
-      //if(electron.Pt()>100) rc=1.;
       if(TMath::IsNaN(rc)) rc=1.;
       electron*=rc*electron.UncorrE()/electron.E();
     }else if(set==-1){ //no energe cor
@@ -1596,7 +1598,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.prefix=p.channel+GetEraShort()+"/";
   if(p.channel=="mu"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -1610,7 +1612,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel=="mm"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"Mu17Leg1_MediumID_trkIsoLoose","Mu8Leg2_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(20,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",};
@@ -1663,7 +1665,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   }else if(p.channel=="me"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.k.electronIDSF="Electron_MediumID";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
@@ -1680,7 +1682,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
     p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -1695,9 +1697,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel=="mM"||p.channel=="Mm"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=1;
     p.option+=" triggermatching strictorder";
@@ -1712,9 +1714,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
     /*
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -1729,9 +1731,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     */
   }else if(p.channel=="MM"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=0;
     p.option+=" triggermatching strictorder";
@@ -1785,7 +1787,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
   }else if(p.channel=="mn"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(27,-1);
     p.c.nleptonmin=1;
     if(GetEraShort()=="2016a"){
@@ -1829,8 +1831,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v","HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v","HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v"};
   }else if(p.channel=="mj"||p.channel=="Mj"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(10,-1);
     p.c.nleptonmin=1;
     if(p.channel=="mj") p.c.nmuonmax=1;
