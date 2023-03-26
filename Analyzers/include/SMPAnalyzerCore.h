@@ -216,7 +216,7 @@ public:
   void SetupEfficiency();
   void DeleteEfficiency();
   double GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem);
-  double GetLeptonTriggerORSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem);
+  double GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem);
   double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int set,int mem);
 
   void PrintGens(const vector<Gen>& gens);

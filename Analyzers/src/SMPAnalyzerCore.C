@@ -173,13 +173,13 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
       }
     }else if(p.k.triggerSF.size()==2){
       if(GetPtThreshold(p.k.triggerSF[0])<GetPtThreshold(p.k.triggerSF[1])){
-	p.w.triggerSF*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
+	p.w.triggerSF*=GetLeptonTriggerORSF(p,triggerables,0,0);
 	if(p.weightbit&EfficiencyWeight){
 	  int nset=p.w.triggerSF_sys.size();
 	  for(int s=0;s<nset;s++){
 	    int nmem=p.w.triggerSF_sys[s].size();
 	    for(int m=0;m<nmem;m++){
-	      p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
+	      p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p,triggerables,s,m);
 	    }
 	  }
 	}
@@ -502,34 +502,90 @@ double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Le
   if(sim_eff==0) return 1.;
   else return data_eff/sim_eff;
 }
-double SMPAnalyzerCore::GetLeptonTriggerORSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem){
   if(IsDATA) return 1;
-
-  double lumi0=1.; //trigger0 on
-  double lumi1=0.; //only trigger1 on
-  double lumi2=0.; //both off
-  if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){
-    lumi0=37997.005;    lumi1=3480.873;    lumi2=0.;
-  }else if(DataYear==2017&&triggerSF_key0.Contains("Ele27")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=31661.026;    lumi1=9522.208;    lumi2=295.;
-  }else if(DataYear==2018&&triggerSF_key0.Contains("Ele28")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=23687.253;    lumi1=36140.626;   lumi2=0.;
+  if(p.triggers.size()!=2){
+    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] p.triggers.size()= "<<p.triggers.size()<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(p.k.triggerSF.size()!=2){
+    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] p.k.triggerSF.size()= "<<p.k.triggerSF.size()<<endl;
+    exit(EXIT_FAILURE);
+  }
+  double lumi=_event.GetTriggerLumi("Full");
+  double lumi0,lumi1,lumi01;
+  if(DataYear==2017&&p.k.triggerSF[0].Contains("IsoMu24")&&p.k.triggerSF[1].Contains("IsoMu27")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=lumi0;
+  }else if(DataYear==2017&&p.k.triggerSF[0].Contains("Ele27")&&p.k.triggerSF[1].Contains("Ele32")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=17599.732185;
+  }else if(DataYear==2018&&p.k.triggerSF[0].Contains("Ele28")&&p.k.triggerSF[1].Contains("Ele32")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=lumi0;
   }else{
-    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] not available combination "<<triggerSF_key0<<"||"<<triggerSF_key1<<" for "<<DataEra<<endl;
+    cout<<"[SMPAnalyzerCore::GetLeptonTriggerORSF] not available combination '"<<p.k.triggerSF[0]<<"'||'"<<p.k.triggerSF[1]<<"' for "<<DataEra<<endl;
     exit(EXIT_FAILURE);
   }
 
-  double data_eff_key0=1.,data_eff_key1=1.,sim_eff=1.;
+  bool newflag=set<0; //temp
+  if(newflag) set=0; //temp
+  double data_eff0=1.,sim_eff0=1.;
+  double data_eff1=1.,sim_eff1=1.;
   for(const auto& lep:leps){
-    data_eff_key0*=1-fEff->GetDataEfficiency(triggerSF_key0,lep,set,mem);
-    data_eff_key1*=1-fEff->GetDataEfficiency(triggerSF_key1,lep,set,mem);
-    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key0,lep,set,mem);
+    data_eff0*=1-fEff->GetDataEfficiency(p.k.triggerSF[0],lep,set,mem);
+    sim_eff0*=1-fEff->GetSimEfficiency(p.k.triggerSF[0],lep,set,mem);
+    data_eff1*=1-fEff->GetDataEfficiency(p.k.triggerSF[1],lep,set,mem);
+    sim_eff1*=1-fEff->GetSimEfficiency(p.k.triggerSF[1],lep,set,mem);
   }
-  data_eff_key0=1-data_eff_key0;
-  data_eff_key1=1-data_eff_key1;
-  sim_eff=1-sim_eff;
-  if(sim_eff==0) return 1.;
-  else return (lumi0*data_eff_key0+lumi1*data_eff_key1)/((lumi0+lumi1+lumi2)*sim_eff);
+  data_eff0=1-data_eff0;
+  sim_eff0=1-sim_eff0;
+  data_eff1=1-data_eff1;
+  sim_eff1=1-sim_eff1;
+  double sf=0.;
+  if(_event.PassTrigger(p.triggers[1])){
+    double this_sf=(lumi1-lumi01)/lumi;
+    if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+    sf+=this_sf;
+  }
+  if(_event.PassTrigger(p.triggers[0])){
+    double this_sf=(lumi0-lumi01)/lumi;
+    if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+    sf+=this_sf;
+  }
+  //overlap region
+  if(!newflag){
+    if(lumi0>lumi1){
+      if(_event.PassTrigger(p.triggers[0])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+	sf+=this_sf;
+      }
+    }else{
+      if(_event.PassTrigger(p.triggers[1])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+	sf+=this_sf;
+      }else if(_event.PassTrigger(p.triggers[0])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+	sf+=this_sf;
+      }
+    }    
+  }else{
+    if(_event.PassTrigger(p.triggers[0])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+      sf+=this_sf;
+    }
+    if(_event.PassTrigger(p.triggers[1])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+      sf+=this_sf;
+    }else if(_event.PassTrigger(p.triggers[0])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+      sf+=this_sf;
+    }    
+  }    
+  return sf;
 }
 double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
   if(IsDATA) return 1;

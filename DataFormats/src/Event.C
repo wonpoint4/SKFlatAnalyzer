@@ -130,6 +130,9 @@ double Event::GetTriggerLumi(TString trig){
     else if(trig=="HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 27.683553584;
     else if(trig=="HLT_Ele15_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 0.000600725;
     else if(trig=="HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 43.453223350;
+    else if(trig=="HLT_Ele27_WPTight_Gsf_v") return 31661.025604;
+    else if(trig=="HLT_Ele32_WPTight_Gsf_v") return 27121.940558;
+    else if(trig=="HLT_Ele35_WPTight_Gsf_v") return 41477.877400009;
     else if(trig=="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") return 7455.394595245;
     else if(trig=="HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") return 2613.476499000;
     else if(trig=="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") return 41477.877400009;
@@ -137,7 +140,7 @@ double Event::GetTriggerLumi(TString trig){
     else if(trig=="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v") return 36674.511073834;
     else if(trig=="HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_Mass3p8_v") return 27121.940558082;
   }else if(j_DataEra=="2018"){
-    if(trig=="Full") return 59827.879502925;
+    if(trig=="Full") return 59827.449480;
     else if(trig=="HLT_Mu3_PFJet40_v") return 2.704239929;
     else if(trig=="HLT_Mu8_v") return 8.566603827;
     else if(trig=="HLT_Mu8_TrkIsoVVL_v") return 8.58157*1.09757*0.91;
@@ -165,6 +168,8 @@ double Event::GetTriggerLumi(TString trig){
     else if(trig=="HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 38.917235485;
     else if(trig=="HLT_Ele15_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 0.001834965;
     else if(trig=="HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v") return 38.973910595;
+    else if(trig=="HLT_Ele28_WPTight_Gsf_v") return 23687.253262;
+    else if(trig=="HLT_Ele32_WPTight_Gsf_v") return 59827.449480;
     else if(trig=="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") return 3008.003592622;
     else if(trig=="HLT_Mu19_TrkIsoVVL_Mu9_TrkIsoVVL_DZ_v") return 3135.331113947;
     else if(trig=="HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v") return 59827.879502925;

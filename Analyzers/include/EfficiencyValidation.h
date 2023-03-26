@@ -15,6 +15,8 @@ public:
   virtual void FillHistsEfficiency(Parameter& p,TString region);
   virtual bool PassSelection(Parameter& p);
 
+  virtual double GetLeptonTriggerORSF_old(const Parameter& p,int iset=0,int imem=0);
+
   EfficiencyValidation();
   ~EfficiencyValidation();
 

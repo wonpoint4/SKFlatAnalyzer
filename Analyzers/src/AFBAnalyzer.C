@@ -73,7 +73,7 @@ SMPAnalyzerCore::Parameter AFBAnalyzer::MakeParameter(TString key,TString option
 
   if(IsDYSample&&p.hprefix==""){
     if(abs(genWeight_id1)==5||abs(genWeight_id2)==5){
-      p.hprefix="bx_";
+      //p.hprefix="bx_";
     }
   }
 
@@ -386,6 +386,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+"bjets"+p.suffix,dimass,dirap,dipt,p.bjets.size(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,10,0,10);
   if(p.bjets.size()){
     FillHist(p.prefix+p.hprefix+"b0pt"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+    FillHist(p.prefix+p.hprefix+"zb0dphi"+p.suffix,dilepton.DeltaPhi(p.bjets.at(0)),SelectWeights(p.weightmap,{""}),100,-5,5);
   }
   FillHist(p.prefix+p.hprefix+"z0"+p.suffix,dimass,dirap,dipt,vertex_Z,SelectWeights(p.weightmap,{"","_noz0weight"}),grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
   map<TString,double> map_PUweight=SelectWeights(p.weightmap,{"","_noPUweight","_PUweight_up","_PUweight_down"});

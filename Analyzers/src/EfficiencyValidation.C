@@ -14,15 +14,19 @@ void EfficiencyValidation::initializeAnalyzer(){
 }
 void EfficiencyValidation::executeEvent(){
   //////// nominal channels //////////
-  if(!IsDATA||DataStream.Contains("DoubleMuon")) 
+  if(!IsDATA||DataStream.Contains("DoubleMuon"))
     executeEventWithParameter(MakeParameter("mm"));
   if(!IsDATA||DataStream.Contains("SingleMuon"))
     executeEventWithParameter(MakeParameter("mu"));
-  if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")) 
+  if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
+    executeEventWithParameter(MakeParameter("ee","ev12"));
+  }    
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("el"));
+    executeEventWithParameter(MakeParameter("el","ev12"));
     executeEventWithParameter(MakeParameter("el","SelQ"));
+    executeEventWithParameter(MakeParameter("el","SelQ ev12"));
   }
 
   //////// testing channels //////////
@@ -56,15 +60,28 @@ void EfficiencyValidation::executeEvent(){
       p.prefix="el201727/";
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
       p.k.triggerSF={"Ele27_MediumID"};
-      if(!IsDATA) p.w.lumiweight*=31.72/41.54;
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
+      executeEventWithParameter(p);
+
+      p=MakeParameter("el");
+      p.prefix="v12/el201727/";
+      p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele27_MediumID_v12"};
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
       executeEventWithParameter(p);
 
       p=MakeParameter("el");
       p.prefix="el201732/";
       p.triggers={"HLT_Ele32_WPTight_Gsf_v"};
       p.k.triggerSF={"Ele32_MediumID"};
-      p.c.lepton0pt=35;
-      if(!IsDATA) p.w.lumiweight*=27.13/41.54;
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
+      executeEventWithParameter(p);
+
+      p=MakeParameter("el");
+      p.prefix="v12/el201732/";
+      p.triggers={"HLT_Ele32_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele32_MediumID_v12"};
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
       executeEventWithParameter(p);
     }
   }else if(GetEra()=="2018"){
@@ -90,21 +107,44 @@ void EfficiencyValidation::executeEvent(){
       p.prefix="el201828/";
       p.triggers={"HLT_Ele28_WPTight_Gsf_v"};
       p.k.triggerSF={"Ele28_MediumID"};
-      if(!IsDATA) p.w.lumiweight*=23687.253/59827.879;
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
+      executeEventWithParameter(p);
+
+      p=MakeParameter("el");
+      p.prefix="v12/el201828/";
+      p.triggers={"HLT_Ele28_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele28_MediumID_v12"};
+      p.k.electronIDSF+="_v12";
+      if(!IsDATA) p.w.lumiweight*=_event.GetTriggerLumi(p.triggers.at(0))/_event.GetTriggerLumi("Full");
       executeEventWithParameter(p);
 
       p=MakeParameter("el");
       p.prefix="el201832/";
       p.triggers={"HLT_Ele32_WPTight_Gsf_v"};
       p.k.triggerSF={"Ele32_MediumID"};
-      p.c.lepton0pt=35;
       executeEventWithParameter(p);
+
+      p=MakeParameter("el");
+      p.prefix="v12/el201832/";
+      p.triggers={"HLT_Ele32_WPTight_Gsf_v"};
+      p.k.triggerSF={"Ele32_MediumID_v12"};
+      p.k.electronIDSF+="_v12";
+      executeEventWithParameter(p);
+
     }
   }
 }
 SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
   p.weightbit|=EfficiencyWeight;
+  if(option.Contains("ev12")){
+    p.prefix="v12/"+p.prefix;
+    for(int i=0,n=p.k.triggerSF.size();i<n;i++){
+      p.k.triggerSF[i]+="_v12";
+    }
+    p.k.electronIDSF+="_v12";
+    p.option.ReplaceAll("ev12","");
+  }
   return p;
 }
 void EfficiencyValidation::EvalWeights(Parameter& p){
@@ -152,7 +192,16 @@ void EfficiencyValidation::EvalWeights(Parameter& p){
       for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
 	p.weightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_sys[i][j]*p.w.CFSF;
       }
-    }	
+    }
+    if(p.channel=="el"||p.channel=="mu"){
+      if(p.k.triggerSF.size()==2&&GetPtThreshold(p.k.triggerSF[0])<GetPtThreshold(p.k.triggerSF[1])){
+	p.weightmap["_oldtriggerSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.CFSF*GetLeptonTriggerORSF_old(p,0,0);
+	vector<Lepton*> leps;
+	if(p.channel=="el") leps=MakeLeptonPointerVector(p.electrons);
+	else if(p.channel=="mu") leps=MakeLeptonPointerVector(p.muons);
+	p.weightmap["_newtriggerSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.CFSF*GetLeptonTriggerORSF(p,leps,-1,0);
+      }
+    }
     
     p.weightmap["_noefficiencySF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.CFSF;
     
@@ -194,6 +243,9 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
 	Electron* el=(Electron*)p.leptons.at(i);
 	FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
 	if(el->Pt()<20) FillHist(Form("%slsceta20%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
+	if(i==0&&p.channel=="el"){
+	  if(!el->PassPath(p.triggers.at(0))&&!((Electron*)p.leptons.at(1))->PassPath(p.triggers.at(0))) FillHist(Form("%sl%dpt_hltfail%s",pre.Data(),i,suf.Data()),pt,w,500,0,500);
+	}
       }
     }
 
@@ -240,6 +292,7 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
 }
 
 bool EfficiencyValidation::PassSelection(Parameter& p){
+  /*
   if(p.triggers.size()==2){
     if(GetEra()=="2017"&&p.triggers[0]=="HLT_Ele27_WPTight_Gsf_v"&&p.triggers[1]=="HLT_Ele32_WPTight_Gsf_v"){
       //if(!_event.PassTrigger("HLT_Ele27_WPTight_Gsf_v")) p.c.lepton0pt=35;
@@ -252,12 +305,12 @@ bool EfficiencyValidation::PassSelection(Parameter& p){
     }
     if(GetEra()=="2018"&&p.triggers[0]=="HLT_Ele28_WPTight_Gsf_v"&&p.triggers[1]=="HLT_Ele32_WPTight_Gsf_v"){
       //if(!_event.PassTrigger("HLT_Ele28_WPTight_Gsf_v")) p.c.lepton0pt=35;
-      if(p.lepton0&&p.lepton0->Pt()<35){
-	p.triggers={"HLT_Ele28_WPTight_Gsf_v"};
-	if(!_event.PassTrigger(p.triggers)) return false;
-	p.k.triggerSF={"Ele28_MediumID"};
-	if(!IsDATA) p.w.lumiweight*=23687.253/59827.879;
-      }
+      //if(p.lepton0&&p.lepton0->Pt()<35){
+      //p.triggers={"HLT_Ele28_WPTight_Gsf_v"};
+      //if(!_event.PassTrigger(p.triggers)) return false;
+      //p.k.triggerSF={"Ele28_MediumID"};
+      //if(!IsDATA) p.w.lumiweight*=23687.253/59827.879;
+      //}
     }
     if(GetEra()=="2017"&&p.triggers[0]=="HLT_IsoMu24_v"&&p.triggers[1]=="HLT_IsoMu27_v"){
       //if(!_event.PassTrigger("HLT_IsoMu24_v")) p.c.lepton0pt=30;
@@ -269,5 +322,42 @@ bool EfficiencyValidation::PassSelection(Parameter& p){
       }
     }
   }
+  */
   return SMPAnalyzerCore::PassSelection(p);
+}
+
+double EfficiencyValidation::GetLeptonTriggerORSF_old(const Parameter& p,int set,int mem){
+  if(IsDATA) return 1;
+
+  vector<Lepton*> leps;
+  if(p.channel=="el") leps=MakeLeptonPointerVector(p.electrons);
+  else if(p.channel=="mu") leps=MakeLeptonPointerVector(p.muons);
+  TString triggerSF_key0=p.k.triggerSF[0];
+  TString triggerSF_key1=p.k.triggerSF[1];
+
+  double lumi0=1.; //trigger0 on
+  double lumi1=0.; //only trigger1 on
+  double lumi2=0.; //both off
+  if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){
+    lumi0=37997.005;    lumi1=3480.873;    lumi2=0.;
+  }else if(DataYear==2017&&triggerSF_key0.Contains("Ele27")&&triggerSF_key1.Contains("Ele32")){
+    lumi0=31661.026;    lumi1=9522.208;    lumi2=295.;
+  }else if(DataYear==2018&&triggerSF_key0.Contains("Ele28")&&triggerSF_key1.Contains("Ele32")){
+    lumi0=23687.253;    lumi1=36140.626;   lumi2=0.;
+  }else{
+    cout<<"[EfficiencyValidation::GetLeptonTriggerORSF_old] not available combination '"<<triggerSF_key0<<"'||'"<<triggerSF_key1<<"' for "<<DataEra<<endl;
+    exit(EXIT_FAILURE);
+  }
+  
+  double data_eff_key0=1.,data_eff_key1=1.,sim_eff=1.;
+  for(const auto& lep:leps){
+    data_eff_key0*=1-fEff->GetDataEfficiency(triggerSF_key0,lep,set,mem);
+    data_eff_key1*=1-fEff->GetDataEfficiency(triggerSF_key1,lep,set,mem);
+    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key0,lep,set,mem);
+  }
+  data_eff_key0=1-data_eff_key0;
+  data_eff_key1=1-data_eff_key1;
+  sim_eff=1-sim_eff;
+  if(sim_eff==0) return 1.;
+  else return (lumi0*data_eff_key0+lumi1*data_eff_key1)/((lumi0+lumi1+lumi2)*sim_eff);
 }

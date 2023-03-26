@@ -450,7 +450,8 @@ double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,i
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
@@ -477,7 +478,8 @@ double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,in
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
@@ -504,7 +506,8 @@ double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
