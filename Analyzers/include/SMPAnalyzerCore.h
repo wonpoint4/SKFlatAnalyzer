@@ -43,7 +43,7 @@ public:
     int weightbit=NominalWeight;
     TString option;
     struct Key{
-      TString electronRECOSF,electronIDSF,electronIDSF2,muonIDSF,muonISOSF;
+      TString electronRECOSF,electronIDSF,electronIDSF2,muonTrackingSF,muonRECOSF,muonIDSF,muonISOSF,DZSF;
       vector<TString> triggerSF;
     };
     struct Weight{
@@ -58,6 +58,10 @@ public:
       vector<vector<double>> electronRECOSF_sys;
       double electronIDSF=1;
       vector<vector<double>> electronIDSF_sys;
+      double muonTrackingSF=1;
+      vector<vector<double>> muonTrackingSF_sys;
+      double muonRECOSF=1;
+      vector<vector<double>> muonRECOSF_sys;
       double muonIDSF=1;
       vector<vector<double>> muonIDSF_sys;
       double muonISOSF=1;
@@ -217,7 +221,7 @@ public:
   void DeleteEfficiency();
   double GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem);
   double GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem);
-  double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,const vector<Lepton*>& leps,int set,int mem);
+  double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,TString DZSFhistkey,const vector<Lepton*>& leps,int set,int mem);
 
   void PrintGens(const vector<Gen>& gens);
   static double GetBinContentUser(TH1* hist,double valx,int sys);
@@ -251,6 +255,7 @@ public:
 
   bool IsDYSample=false;
   bool IsTTSample=false;
+  bool IsTTLLSample=false;
   Event _event;
   double reductionweight=1;
   vector<LHE> lhes;

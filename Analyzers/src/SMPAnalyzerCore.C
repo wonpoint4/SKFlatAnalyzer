@@ -23,9 +23,11 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupFakeRate();
   IsDYSample=false;
   IsTTSample=false;
+  IsTTLLSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
   if(IsDYSample) SetupZptWeight();
   if(MCSample.Contains(TRegexp("TT[LJ][LJ]"))) IsTTSample=true;
+  if(MCSample.Contains("TTLL")) IsTTLLSample=true;
   mcCorr->SetJetTaggingParameters({JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
 	JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
 	JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets),
@@ -84,11 +86,13 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter& p){
   FillHists(p);
 }
 void SMPAnalyzerCore::EvalIDSF(Parameter& p){
-  p.doublemap["muontrackingSF"]=1.;
+  //p.doublemap["muontrackingSF"]=1.;
   if(!IsDATA){
     if(p.weightbit&EfficiencyWeight){
       p.w.electronRECOSF_sys=fEff->GetStructure(p.k.electronRECOSF);
       p.w.electronIDSF_sys=fEff->GetStructure(p.k.electronIDSF);
+      p.w.muonTrackingSF_sys=fEff->GetStructure(p.k.muonTrackingSF);
+      p.w.muonRECOSF_sys=fEff->GetStructure(p.k.muonRECOSF);
       p.w.muonIDSF_sys=fEff->GetStructure(p.k.muonIDSF);
       p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
     }
@@ -123,7 +127,27 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
       }
     }
     for(const auto& muon:p.muons){
-      p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
+      //p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
+      p.w.muonTrackingSF*=fEff->GetEfficiencySF(p.k.muonTrackingSF,&muon,0,0);
+      if(p.weightbit&EfficiencyWeight){
+	int nset=p.w.muonTrackingSF_sys.size();
+	for(int s=0;s<nset;s++){
+	  int nmem=p.w.muonTrackingSF_sys[s].size();
+	  for(int m=0;m<nmem;m++){
+	    p.w.muonTrackingSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonTrackingSF,&muon,s,m);
+	  }
+	}
+      }
+      p.w.muonRECOSF*=fEff->GetEfficiencySF(p.k.muonRECOSF,&muon,0,0);
+      if(p.weightbit&EfficiencyWeight){
+	int nset=p.w.muonRECOSF_sys.size();
+	for(int s=0;s<nset;s++){
+	  int nmem=p.w.muonRECOSF_sys[s].size();
+	  for(int m=0;m<nmem;m++){
+	    p.w.muonRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonRECOSF,&muon,s,m);
+	  }
+	}
+      }
       p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,0,0);
       if(p.weightbit&EfficiencyWeight){
 	int nset=p.w.muonIDSF_sys.size();
@@ -184,13 +208,13 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
 	  }
 	}
       }else{
-	p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
+	p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables,0,0);
 	if(p.weightbit&EfficiencyWeight){
 	  int nset=p.w.triggerSF_sys.size();
 	  for(int s=0;s<nset;s++){
 	    int nmem=p.w.triggerSF_sys[s].size();
 	    for(int m=0;m<nmem;m++){
-	      p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
+	      p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables,s,m);
 	    }
 	  }
 	}
@@ -199,7 +223,7 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   }
 }
 void SMPAnalyzerCore::EvalWeights(Parameter& p){
-  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
+  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
 }
 bool SMPAnalyzerCore::PassSelection(Parameter& p){
   double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
@@ -587,7 +611,7 @@ double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lep
   }    
   return sf;
 }
-double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,TString DZSF,const vector<Lepton*>& leps,int set,int mem){
   if(IsDATA) return 1;
   if((triggerSF_key0==""||triggerSF_key0=="Default")&&(triggerSF_key1==""||triggerSF_key1=="Default")) return 1;
   int nlep=leps.size();
@@ -603,6 +627,14 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
     double data_eff_leg2=fEff->GetDataEfficiency(triggerSF_key1,leps.at(i),set,mem);
     double sim_eff_leg1=fEff->GetSimEfficiency(triggerSF_key0,leps.at(i),set,mem);
     double sim_eff_leg2=fEff->GetSimEfficiency(triggerSF_key1,leps.at(i),set,mem);
+    if(DZSF!=""){
+      double data_eff_dz=fEff->GetDataEfficiency(DZSF,leps.at(i),0,0);
+      double sim_eff_dz=fEff->GetSimEfficiency(DZSF,leps.at(i),0,0);
+      data_eff_leg1*=data_eff_dz;
+      data_eff_leg2*=data_eff_dz;
+      sim_eff_leg1*=sim_eff_dz;
+      sim_eff_leg2*=sim_eff_dz;
+    } 
     data_noleg1*=(1-data_eff_leg1);
     sim_noleg1*=(1-sim_eff_leg1);
     for(int j=0;j<nlep;j++){
@@ -621,8 +653,10 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
     data_eff-=data_oneleg1_noleg2[i];
     sim_eff-=sim_oneleg1_noleg2[i];
   }
-  if(sim_eff==0) return 1.;
-  else return data_eff/sim_eff;
+  double sf=1.;
+  if(sim_eff==0) return sf=1.;
+  else sf=data_eff/sim_eff;
+  return sf;
 }
 
 // ZptWeight
@@ -1370,19 +1404,25 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIsoSideBand"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       if(muon.TrkIso()/muon.Pt()>0.4) continue;
       out.push_back(muon);
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
@@ -1390,7 +1430,11 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
   }else if(id=="NotMediumWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("NOCUT",ptmin,fetamax);
     for(auto const& muon: muons){
-      if(muon.PassID("POGMedium_nohip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
+      if(DataEra=="2016preVFP"){
+	if(muon.PassID("POGMedium_hip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
+      }else{
+	if(muon.PassID("POGMedium")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;	
+      }
       out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
@@ -1653,6 +1697,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
 
   p.prefix=p.channel+GetEraShort()+"/";
   if(p.channel=="mu"){
+    p.k.muonTrackingSF="Muon_Tracking";
+    //p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(27,10);
@@ -1667,6 +1713,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_IsoMu24_v"};
     }
   }else if(p.channel=="mm"){
+    p.k.muonTrackingSF="Muon_Tracking";
+    //p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"Mu17Leg1_MediumID_trkIsoLoose","Mu8Leg2_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
     p.SetLeptonPtCut(20,10);
@@ -1674,10 +1722,13 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",};
     }else if(GetEraShort()=="2016b"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }else if(GetEraShort()=="2017"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }
   }else if(p.option.Contains("SelQ")&&p.channel=="el"){
     p.prefix="selq/"+p.prefix;
@@ -1714,9 +1765,13 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.SetElectronKeys("Electron_MediumID",{"Ele23Leg1_MediumID","Ele12Leg2_MediumID"});
     p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0));
     p.SetLeptonPtCut(25,15);
-    if(GetEraShort()=="2016a") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
-    else if(GetEraShort()=="2016b") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
-    else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
+    if(GetEraShort()=="2016a"){
+      p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
+      p.k.DZSF="DZ_MediumID";
+    }else if(GetEraShort()=="2016b"){
+      p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
+      p.k.DZSF="DZ_MediumID";
+    }else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
   }else if(p.channel=="me"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
