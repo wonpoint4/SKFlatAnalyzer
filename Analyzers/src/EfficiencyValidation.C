@@ -16,14 +16,14 @@ void EfficiencyValidation::executeEvent(){
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm")); 
-    executeEventWithParameter(MakeParameter("mm","mv11"));
-    executeEventWithParameter(MakeParameter("mm","mv13"));
+    //executeEventWithParameter(MakeParameter("mm","mv11"));
+    //executeEventWithParameter(MakeParameter("mm","mv13"));
     //executeEventWithParameter(MakeParameter("mm","noroccor"));
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("mu")); 
-    executeEventWithParameter(MakeParameter("mu","mv11"));
-    executeEventWithParameter(MakeParameter("mu","mv13"));
+    //executeEventWithParameter(MakeParameter("mu","mv11"));
+    //executeEventWithParameter(MakeParameter("mu","mv13"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
