@@ -12,6 +12,7 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   DeleteZptWeight();
   DeleteCFRate();
   DeleteFakeRate();
+  DeleteL1PrefiringWeight();
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
@@ -21,6 +22,7 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupRoccoR();
   SetupCFRate();
   SetupFakeRate();
+  SetupL1PrefiringWeight();
   IsDYSample=false;
   IsTTSample=false;
   IsTTLLSample=false;
@@ -352,6 +354,22 @@ TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
   std::map<TString, TH4D*>::iterator mapit = maphist_TH4D.find(histname);
   if(mapit != maphist_TH4D.end()) return mapit->second;
   return h;
+}
+
+void SMPAnalyzerCore::FillProfile(TString histname,
+				  Double_t value_x, Double_t value_y, Double_t weight,
+				  Int_t n_binx, Double_t x_min, Double_t x_max){
+  TProfile *this_hist = NULL;
+  std::map<TString, TH1D*>::iterator mapit = maphist_TH1D.find(histname);
+  if(mapit == maphist_TH1D.end()){
+    this_hist = new TProfile(histname, "", n_binx, x_min, x_max);
+    this_hist->SetDirectory(NULL);
+    maphist_TH1D[histname] = this_hist;
+  }else{
+    this_hist = (TProfile*)mapit->second;
+  }
+  this_hist->Fill(value_x, value_y, weight);
+
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
@@ -2074,3 +2092,280 @@ TString SMPAnalyzerCore::GetSkimName() const {
   }
   return skimname;
 }
+void SMPAnalyzerCore::SetupL1PrefiringWeight(){
+  TString datapath=(TString)getenv("DATA_DIR")+"/"+GetEra()+"/SMP/";
+  TString L1PrefiringMaps="L1PrefiringMaps.root";
+  TString L1MuonPrefiringParametriations="L1MuonPrefiringParametriations.root";
+  if(IsExists(datapath+L1PrefiringMaps)&&IsExists(datapath+L1MuonPrefiringParametriations)){
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+datapath+L1PrefiringMaps<<endl;
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+datapath+L1MuonPrefiringParametriations<<endl;
+  }else{
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no "+datapath+L1PrefiringMaps+" or "+datapath+L1MuonPrefiringParametriations<<endl;
+    return;
+  }
+  DeleteL1PrefiringWeight();
+  if(DataYear<2018){
+    TString era=DataEra;
+    if(era=="2017") era="2017BtoF";
+    TFile f(datapath+L1PrefiringMaps);
+    fL1Prefiring_photon=(TH2*)f.Get("L1prefiring_photonptvseta_UL"+era);
+    fL1Prefiring_jet=(TH2*)f.Get("L1prefiring_jetptvseta_UL"+era);
+    if(!fL1Prefiring_photon){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist L1prefiring_photonptvseta_UL"+era<<endl;
+      exit(ENODATA);
+    }
+    if(!fL1Prefiring_jet){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist L1prefiring_jetptvseta_UL"+era<<endl;
+      exit(ENODATA);
+    }
+    fL1Prefiring_photon->SetDirectory(0);
+    fL1Prefiring_jet->SetDirectory(0);
+  }
+  {
+    TString era=DataEra;
+    if(era=="2017"||era=="2018") era="20172018";
+    TFile f(datapath+L1MuonPrefiringParametriations);
+    fL1Prefiring_muon[0]=(TF1*)f.Get("L1prefiring_muonparam_0.0To0.2_"+era);
+    fL1Prefiring_muon[1]=(TF1*)f.Get("L1prefiring_muonparam_0.2To0.3_"+era);
+    fL1Prefiring_muon[2]=(TF1*)f.Get("L1prefiring_muonparam_0.3To0.55_"+era);
+    fL1Prefiring_muon[3]=(TF1*)f.Get("L1prefiring_muonparam_0.55To0.83_"+era);
+    fL1Prefiring_muon[4]=(TF1*)f.Get("L1prefiring_muonparam_0.83To1.24_"+era);
+    fL1Prefiring_muon[5]=(TF1*)f.Get("L1prefiring_muonparam_1.24To1.4_"+era);
+    fL1Prefiring_muon[6]=(TF1*)f.Get("L1prefiring_muonparam_1.4To1.6_"+era);
+    fL1Prefiring_muon[7]=(TF1*)f.Get("L1prefiring_muonparam_1.6To1.8_"+era);
+    fL1Prefiring_muon[8]=(TF1*)f.Get("L1prefiring_muonparam_1.8To2.1_"+era);
+    fL1Prefiring_muon[9]=(TF1*)f.Get("L1prefiring_muonparam_2.1To2.25_"+era);
+    fL1Prefiring_muon[10]=(TF1*)f.Get("L1prefiring_muonparam_2.25To2.4_"+era);
+    if(era.Contains("2016")){
+      fL1Prefiring_muon[11]=(TF1*)f.Get("L1prefiring_muonparam_HotSpot_"+era);
+    }
+    for(int i=0;i<11+era.Contains("2016")?1:0;i++){
+      if(!fL1Prefiring_muon[i]){
+	cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist for fL1Prefiring_muon["<<i<<"]"<<endl;
+	exit(ENODATA);
+      }
+    }
+  }
+  return;
+}
+void SMPAnalyzerCore::DeleteL1PrefiringWeight(){
+  if(fL1Prefiring_photon) delete fL1Prefiring_photon;
+  if(fL1Prefiring_jet) delete fL1Prefiring_jet;
+  for(int i=0;i<12;i++)
+    if(fL1Prefiring_muon[i]) delete fL1Prefiring_muon[i];
+  return;
+}
+double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys) const {
+  double prefiringRateSystUncEcal_=0.2;
+  //Check pt is not above map overflow
+  int nbinsy = h_prefmap->GetNbinsY();
+  double maxy = h_prefmap->GetYaxis()->GetBinLowEdge(nbinsy + 1);
+  if (pt >= maxy)
+    pt = maxy - 0.01;
+  int thebin = h_prefmap->FindBin(eta, pt);
+
+  double prefrate = h_prefmap->GetBinContent(thebin);
+
+  double statuncty = h_prefmap->GetBinError(thebin);
+  double systuncty = prefiringRateSystUncEcal_ * prefrate;
+
+  if (sys == 1)
+    prefrate = std::min(1., prefrate + sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  else if (sys == -1)
+    prefrate = std::max(0., prefrate - sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  if (prefrate > 1.) {
+    //edm::LogWarning("L1PrefireWeightProducer") << "Found a prefiring probability > 1. Setting to 1." << std::endl;
+    return 1.;
+  }
+  return prefrate;
+}
+double SMPAnalyzerCore::getPrefiringRateMuon(double eta, double phi, double pt, int sys) const {
+  double prefiringRateSystUncMuon_=0.2;
+  double prefrate;
+  double statuncty;
+  if ((DataYear==2016) && (eta > 1.24 && eta < 1.6) &&
+      (phi > 2.44346 && phi < 2.79253)) {
+    prefrate = fL1Prefiring_muon[11]->Eval(pt);
+    statuncty = fL1Prefiring_muon[11]->GetParError(2);
+  } else if (std::abs(eta) < 0.2) {
+    prefrate = fL1Prefiring_muon[0]->Eval(pt);
+    statuncty = fL1Prefiring_muon[0]->GetParError(2);
+  } else if (std::abs(eta) < 0.3) {
+    prefrate = fL1Prefiring_muon[1]->Eval(pt);
+    statuncty = fL1Prefiring_muon[1]->GetParError(2);
+  } else if (std::abs(eta) < 0.55) {
+    prefrate = fL1Prefiring_muon[2]->Eval(pt);
+    statuncty = fL1Prefiring_muon[2]->GetParError(2);
+  } else if (std::abs(eta) < 0.83) {
+    prefrate = fL1Prefiring_muon[3]->Eval(pt);
+    statuncty = fL1Prefiring_muon[3]->GetParError(2);
+  } else if (std::abs(eta) < 1.24) {
+    prefrate = fL1Prefiring_muon[4]->Eval(pt);
+    statuncty = fL1Prefiring_muon[4]->GetParError(2);
+  } else if (std::abs(eta) < 1.4) {
+    prefrate = fL1Prefiring_muon[5]->Eval(pt);
+    statuncty = fL1Prefiring_muon[5]->GetParError(2);
+  } else if (std::abs(eta) < 1.6) {
+    prefrate = fL1Prefiring_muon[6]->Eval(pt);
+    statuncty = fL1Prefiring_muon[6]->GetParError(2);
+  } else if (std::abs(eta) < 1.8) {
+    prefrate = fL1Prefiring_muon[7]->Eval(pt);
+    statuncty = fL1Prefiring_muon[7]->GetParError(2);
+  } else if (std::abs(eta) < 2.1) {
+    prefrate = fL1Prefiring_muon[8]->Eval(pt);
+    statuncty = fL1Prefiring_muon[8]->GetParError(2);
+  } else if (std::abs(eta) < 2.25) {
+    prefrate = fL1Prefiring_muon[9]->Eval(pt);
+    statuncty = fL1Prefiring_muon[9]->GetParError(2);
+  } else if (std::abs(eta) < 2.4) {
+    prefrate = fL1Prefiring_muon[10]->Eval(pt);
+    statuncty = fL1Prefiring_muon[10]->GetParError(2);
+  } else {
+    //LogDebug("L1PrefireWeightProducer") << "Muon outside of |eta| <= 2.4. Prefiring weight set to 0." << std::endl;
+    return 0.;
+  }
+  double systuncty = prefiringRateSystUncMuon_ * prefrate;
+
+  if (sys == 1)
+    prefrate = std::min(1., prefrate + sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  else if (sys == -1)
+    prefrate = std::max(0., prefrate - sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  //else if (fluctuation == upSyst)
+  //  prefrate = std::min(1., prefrate + systuncty);
+  //else if (fluctuation == downSyst)
+  //  prefrate = std::max(0., prefrate - systuncty);
+  //else if (fluctuation == upStat)
+  //  prefrate = std::min(1., prefrate + statuncty);
+  //else if (fluctuation == downStat)
+  //  prefrate = std::max(0., prefrate - statuncty);
+
+  if (prefrate > 1.) {
+    //edm::LogWarning("L1PrefireWeightProducer") << "Found a prefiring probability > 1. Setting to 1." << std::endl;
+    return 1.;
+  }
+  return prefrate;
+}
+double SMPAnalyzerCore::GetL1PrefiringWeight() const {
+  double jetMaxMuonFraction_=0.5;
+
+  //Photons
+  vector<Photon> thePhotons = GetAllPhotons();
+
+  //Jets
+  vector<Jet> theJets = GetAllJets();
+
+  //Muons
+  vector<Muon> theMuons = GetAllMuons();
+
+  //Probability for the event NOT to prefire, computed with the prefiring maps per object.
+  //Up and down values correspond to the resulting value when shifting up/down all prefiring rates in prefiring maps.
+  double nonPrefiringProba[3] = {1., 1., 1.};      //0: central, 1: up, 2: down
+  double nonPrefiringProbaECAL[3] = {1., 1., 1.};  //0: central, 1: up, 2: down
+  double nonPrefiringProbaMuon[7] = {
+    1., 1., 1., 1., 1., 1., 1.};  //0: central, 1: up, 2: down, 3: up stat, 4: down stat, 5: up syst, 6: down syst
+
+  for (const auto sys : {0, +1, -1}) {
+    if(DataYear<2018){
+      for (const auto& photon : thePhotons) {
+	double pt_gam = photon.UncorrPt();
+	double eta_gam = photon.Eta();
+	if (pt_gam < 20.)
+	  continue;
+	if (fabs(eta_gam) < 2.)
+	  continue;
+	if (fabs(eta_gam) > 3.)
+	  continue;
+	double prefiringprob_gam = getPrefiringRateEcal(eta_gam, pt_gam, fL1Prefiring_photon, sys);
+	nonPrefiringProbaECAL[sys] *= (1. - prefiringprob_gam);
+      }
+      
+      //Now applying the prefiring maps to jets in the affected regions.
+      for (const auto& jet : theJets) {
+	double pt_jet = jet.Pt()/jet.JER();
+	double eta_jet = jet.Eta();
+	//double phi_jet = jet.Phi();
+	if (pt_jet < 20.)
+	  continue;
+	if (fabs(eta_jet) < 2.)
+	  continue;
+	if (fabs(eta_jet) > 3.)
+	  continue;
+	if (jetMaxMuonFraction_ > 0 && jet.muonEnergyFraction() > jetMaxMuonFraction_)
+	  continue;
+	//Loop over photons to remove overlap
+	double nonprefiringprobfromoverlappingphotons = 1.;
+	bool foundOverlappingPhotons = false;
+	for (const auto& photon : thePhotons) {
+	  double pt_gam = photon.UncorrPt();
+	  double eta_gam = photon.Eta();
+	  //double phi_gam = photon.Phi();
+	  if (pt_gam < 20.)
+	  continue;
+	  if (fabs(eta_gam) < 2.)
+	    continue;
+	  if (fabs(eta_gam) > 3.)
+	    continue;
+	  double dR = jet.DeltaR(photon);
+	  if (dR > 0.4)
+	    continue;
+	  double prefiringprob_gam = getPrefiringRateEcal(eta_gam, pt_gam, fL1Prefiring_photon, sys);
+	  nonprefiringprobfromoverlappingphotons *= (1. - prefiringprob_gam);
+	  foundOverlappingPhotons = true;
+	}
+	//useEMpt =true if one wants to use maps parametrized vs Jet EM pt instead of pt.
+	//if (useEMpt_) pt_jet *= (jet.neutralEmEnergyFraction() + jet.chargedEmEnergyFraction());
+	double nonprefiringprobfromoverlappingjet = 1. - getPrefiringRateEcal(eta_jet, pt_jet, fL1Prefiring_jet, sys);
+	
+	if (!foundOverlappingPhotons) {
+	  nonPrefiringProbaECAL[sys] *= nonprefiringprobfromoverlappingjet;
+	}
+	//If overlapping photons have a non prefiring rate larger than the jet, then replace these weights by the jet one
+	else if (nonprefiringprobfromoverlappingphotons > nonprefiringprobfromoverlappingjet) {
+	  if (nonprefiringprobfromoverlappingphotons > 0.) {
+            nonPrefiringProbaECAL[sys] *= nonprefiringprobfromoverlappingjet / nonprefiringprobfromoverlappingphotons;
+	  } else {
+	    nonPrefiringProbaECAL[sys] = 0.;
+	  }
+	}
+	//Last case: if overlapping photons have a non prefiring rate smaller than the jet, don't consider the jet in the event weight, and do nothing.
+      }
+    }
+    //Now calculate prefiring weights for muons
+    for (const auto& muon : theMuons) {
+      double pt = muon.MiniAODPt();
+      double phi = muon.Phi();
+      double eta = muon.Eta();
+      // Remove crappy tracker muons which would not have prefired the L1 trigger
+      if (pt < 5 || !muon.isPOGLoose())
+	continue;
+      double prefiringprob_mu = getPrefiringRateMuon(eta, phi, pt, sys);
+      nonPrefiringProbaMuon[sys] *= (1. - prefiringprob_mu);
+    }
+  }
+  // Calculate combined weight as product of the weight for individual objects
+  for (const auto sys : {0, +1, -1}) {
+    nonPrefiringProba[sys] = nonPrefiringProbaECAL[sys] * nonPrefiringProbaMuon[sys];
+  }
+  // Calculate statistical and systematic uncertainty separately in the muon case
+  /*
+  for (const auto fluct :
+    {fluctuations::upSyst, fluctuations::downSyst, fluctuations::upStat, fluctuations::downStat}) {
+    if (!missingInputMuon_ && doMuons_) {
+      for (const auto& muon : theMuons) {
+        double pt = muon.pt();
+        double phi = muon.phi();
+        double eta = muon.eta();
+        // Remove crappy tracker muons which would not have prefired the L1 trigger
+        if (pt < 5 || !muon.isLooseMuon())
+          continue;
+        double prefiringprob_mu = getPrefiringRateMuon(eta, phi, pt, fluct);
+        nonPrefiringProbaMuon[fluct] *= (1. - prefiringprob_mu);
+      }
+    }
+  }
+  */
+  //if(fabs(L1PrefireReweight_Central-nonPrefiringProba[0])<1e-6) cout<<"OK"<<endl;
+  //else cout<<L1PrefireReweight_Central<<" "<<nonPrefiringProba[0]<<" "<<nonPrefiringProbaECAL[0]<<" "<<nonPrefiringProbaMuon[0]<<endl;
+  return nonPrefiringProba[0];
+}
+

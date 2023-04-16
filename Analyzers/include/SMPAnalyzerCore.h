@@ -5,6 +5,7 @@
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
 #include "TPRegexp.h"
+#include "TProfile.h"
 #include "RoccoR.h"
 #include "Aepcor.h"
 #include "TH4D.h"
@@ -111,6 +112,9 @@ public:
 
   std::map< TString, TH4D* > maphist_TH4D;
   TH4D* GetHist4D(TString histname);
+  void FillProfile(TString histname,
+		   Double_t value_x, Double_t value_y, Double_t weight,
+		   Int_t n_binx, Double_t x_min, Double_t x_max);
   void FillHist(TString histname,
                 Double_t value_x, Double_t value_y, Double_t value_z, Double_t value_u,
                 Double_t weight,
@@ -252,6 +256,18 @@ public:
   TAxis* fZptWeightYaxis=NULL;
   vector<TF1*> fZptWeightM;
   TAxis* fZptWeightMaxis=NULL;
+
+  // L1PrefiringWeight
+  virtual void SetupL1PrefiringWeight();
+  virtual void DeleteL1PrefiringWeight();
+  virtual double getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys) const;
+  virtual double getPrefiringRateMuon(double eta, double phi, double pt, int sys) const;
+  virtual double GetL1PrefiringWeight() const;
+  TH2* fL1Prefiring_photon=NULL;
+  TH2* fL1Prefiring_jet=NULL;
+  TF1* fL1Prefiring_muon[12]={};
+ 
+
 
   bool IsDYSample=false;
   bool IsTTSample=false;

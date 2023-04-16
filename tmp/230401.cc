@@ -21,9 +21,11 @@ void plot(){
 	//aa.SavePlotCondor("v13/"+channel+era_+"/m80to100/leta",common+"suffix:_noDZSF:sim save:"+channel+era+"_leta_noDZSF_v13");
 	//aa.SavePlotCondor("v13/"+channel+era_+"/m80to100/leta",common+"suffix:_nomuonTrackingSF:sim save:"+channel+era+"_leta_nomuonTrackingSF_v13");
 	//aa.SavePlotCondor("v13/"+channel+era_+"/m80to100/leta",common+"suffix:_nomuonRECOSF:sim save:"+channel+era+"_leta_nomuonRECOSF_v13");
+      }else{
+	aa.SavePlotCondor(channel+era_+"/m80to100/lsceta",common+"sysname:effAN sysdetail 2:sysleg save:"+channel+era+"_lsceta 2:xtitle:'electron #eta_{SC}'");
       }
       common=" xmin:-2.4 xmax:2.4 1:ytitle:Events 2:ytitle:'data/Pred.' 2:xtitle:'y(ll)' norm 2:ymin:0.92 2:ymax:1.08 rebin:2 ";
-      aa.SavePlotCondor(channel+era_+"/m80to100/dirap",common+"sysname:effAN sysdetail 2:sysleg save:"+channel+era+"_dirap");
+      //aa.SavePlotCondor(channel+era_+"/m80to100/dirap",common+"sysname:effAN sysdetail 2:sysleg save:"+channel+era+"_dirap");
     }
   }
 }
