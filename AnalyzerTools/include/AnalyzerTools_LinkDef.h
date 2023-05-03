@@ -18,5 +18,6 @@
 #pragma link C++ class Aepcor;
 #pragma link C++ class Efficiency;
 #pragma link C++ class EfficiencyTool;
+#pragma link C++ class RocPFProb;
 
 #endif

@@ -1683,7 +1683,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.SetChannel(channel);
   p.option=option;
   p.SetGens(gens);
-
   p.hprefix="";
   p.w.lumiweight=reductionweight;
   p.w.PUweight=1;  p.w.PUweight_up=1;  p.w.PUweight_down=1;
@@ -2051,7 +2050,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.w.btagSF_lup=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTag");
     p.w.btagSF_ldown=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystDownLTag");
   }
-
   return p;
 }
 vector<TString> SMPAnalyzerCore::Split(TString s,TString del){
@@ -2146,6 +2144,15 @@ void SMPAnalyzerCore::SetupL1PrefiringWeight(){
       }
     }
   }
+  {
+    TString infile=(TString)getenv("SKFlat_WD")+"/external/RocPFProb/prefiring_table_v1.txt";
+    if(IsExists(infile)){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+infile<<endl;
+      rocpfprob=new RocPFProb(infile.Data());
+    }else{
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no "+infile<<endl;
+    }
+  }
   return;
 }
 void SMPAnalyzerCore::DeleteL1PrefiringWeight(){
@@ -2153,9 +2160,10 @@ void SMPAnalyzerCore::DeleteL1PrefiringWeight(){
   if(fL1Prefiring_jet) delete fL1Prefiring_jet;
   for(int i=0;i<12;i++)
     if(fL1Prefiring_muon[i]) delete fL1Prefiring_muon[i];
+  if(rocpfprob) delete rocpfprob;
   return;
 }
-double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys) const {
+double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys, int mode) const {
   double prefiringRateSystUncEcal_=0.2;
   //Check pt is not above map overflow
   int nbinsy = h_prefmap->GetNbinsY();
@@ -2165,7 +2173,23 @@ double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefm
   int thebin = h_prefmap->FindBin(eta, pt);
 
   double prefrate = h_prefmap->GetBinContent(thebin);
-
+  double abseta=fabs(eta);
+  if(mode==1){
+    prefrate=h_prefmap->Interpolate(eta,pt);
+  }else if(mode==2&&2.0<abseta&&abseta<2.5){
+    int sign=eta>0?1:-1;
+    double y1=h_prefmap->GetBinContent(h_prefmap->FindBin(sign*2.1, pt));
+    double y2=h_prefmap->GetBinContent(h_prefmap->FindBin(sign*2.4, pt));
+    double e12=h_prefmap->GetBinError(h_prefmap->FindBin(sign*2.1, pt)); e12=e12*e12;
+    double e22=h_prefmap->GetBinError(h_prefmap->FindBin(sign*2.4, pt)); e22=e22*e22;
+    double x12=0.015625;
+    double x22=0.140625;
+      
+    double a=(y1*e22*x12+y2*e12*x22)/(x12*x12*e22+x22*x22*e12);
+    prefrate=a*pow(abseta-2,2);
+    //cout<<" "<<eta<<" "<<pt<<" "<<h_prefmap->GetBinContent(thebin)<<" "<<h_prefmap->Interpolate(eta,pt)<<" "<<prefrate<<endl;
+  }
+    
   double statuncty = h_prefmap->GetBinError(thebin);
   double systuncty = prefiringRateSystUncEcal_ * prefrate;
 
@@ -2178,6 +2202,62 @@ double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefm
     return 1.;
   }
   return prefrate;
+}
+double SMPAnalyzerCore::getPrefiringRatePhoton(double eta, double pt, int sys, int mode) const {
+  if(mode>2){
+    int iera=0;
+    if(DataEra=="2016preVFP") iera=1;
+    else if(DataEra=="2016postVPF") iera=2;
+    else if(DataEra=="2017") iera=3;
+    if(mode==3)
+      return rocpfprob->getPrefireProb(iera,1,eta,pt);
+    else if(mode==4){
+      double abseta=fabs(eta);
+      int sign=eta>0?1:-1;
+      double x0,y0,x1,y1;
+      if(abseta<2) return 0;
+      else if(abseta<2.125){
+	x0=2; y0=0;
+	x1=2.125; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else if(abseta<2.375){
+	x0=2.125; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.375; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else if(abseta<2.625){
+	x0=2.375; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.625; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else{
+	x0=2.625; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.875; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }
+      return (y1-y0)/(x1-x0)*(abseta-x0)+y0;
+    }else if(mode==5){
+      double abseta=fabs(eta);
+      if(abseta>2.5)
+	return rocpfprob->getPrefireProb(iera,1,eta,pt);
+      int sign=eta>0?1:-1;
+      double x0,y0,x1,y1;
+      if(abseta<2) return 0;
+      else if(abseta<2.125){
+	x0=2; y0=0;
+	x1=2.125; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else{
+	x0=2.125; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.375; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }
+      return (y1-y0)/(x1-x0)*(abseta-x0)+y0;
+    }
+  }
+  return getPrefiringRateEcal(eta, pt, fL1Prefiring_photon, sys, mode);
+}
+double SMPAnalyzerCore::getPrefiringRateJet(double eta, double pt, int sys, int mode) const {
+  if(mode>2){
+    int iera=0;
+    if(DataEra=="2016preVFP") iera=1;
+    else if(DataEra=="2016postVPF") iera=2;
+    else if(DataEra=="2017") iera=3;
+    return rocpfprob->getPrefireProb(iera,2,eta,pt);
+  }    
+  return getPrefiringRateEcal(eta, pt, fL1Prefiring_jet, sys, mode);
 }
 double SMPAnalyzerCore::getPrefiringRateMuon(double eta, double phi, double pt, int sys) const {
   double prefiringRateSystUncMuon_=0.2;
@@ -2245,7 +2325,7 @@ double SMPAnalyzerCore::getPrefiringRateMuon(double eta, double phi, double pt, 
   }
   return prefrate;
 }
-double SMPAnalyzerCore::GetL1PrefiringWeight() const {
+double SMPAnalyzerCore::GetL1PrefiringWeight(int mode) const {
   double jetMaxMuonFraction_=0.5;
 
   //Photons
@@ -2275,7 +2355,7 @@ double SMPAnalyzerCore::GetL1PrefiringWeight() const {
 	  continue;
 	if (fabs(eta_gam) > 3.)
 	  continue;
-	double prefiringprob_gam = getPrefiringRateEcal(eta_gam, pt_gam, fL1Prefiring_photon, sys);
+	double prefiringprob_gam = getPrefiringRatePhoton(eta_gam, pt_gam, sys, mode);
 	nonPrefiringProbaECAL[sys] *= (1. - prefiringprob_gam);
       }
       
@@ -2308,13 +2388,13 @@ double SMPAnalyzerCore::GetL1PrefiringWeight() const {
 	  double dR = jet.DeltaR(photon);
 	  if (dR > 0.4)
 	    continue;
-	  double prefiringprob_gam = getPrefiringRateEcal(eta_gam, pt_gam, fL1Prefiring_photon, sys);
+	  double prefiringprob_gam = getPrefiringRatePhoton(eta_gam, pt_gam, sys, mode);
 	  nonprefiringprobfromoverlappingphotons *= (1. - prefiringprob_gam);
 	  foundOverlappingPhotons = true;
 	}
 	//useEMpt =true if one wants to use maps parametrized vs Jet EM pt instead of pt.
 	//if (useEMpt_) pt_jet *= (jet.neutralEmEnergyFraction() + jet.chargedEmEnergyFraction());
-	double nonprefiringprobfromoverlappingjet = 1. - getPrefiringRateEcal(eta_jet, pt_jet, fL1Prefiring_jet, sys);
+	double nonprefiringprobfromoverlappingjet = 1. - getPrefiringRateJet(eta_jet, pt_jet, sys);
 	
 	if (!foundOverlappingPhotons) {
 	  nonPrefiringProbaECAL[sys] *= nonprefiringprobfromoverlappingjet;

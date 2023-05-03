@@ -27,5 +27,6 @@
 #pragma link C++ class SkimTree_EgammaTnP+;
 #pragma link C++ class DZAnalyzer+;
 #pragma link C++ class EMuAnalyzer+;
+#pragma link C++ class L1PrefireAnalyzer+;
 
 #endif

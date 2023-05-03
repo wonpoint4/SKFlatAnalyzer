@@ -438,8 +438,9 @@ std::vector<Jet> AnalyzerCore::GetAllJets() const {
 
     //==== Jet energy up and down are 1.xx or 0.99, not energy
     jet.SetEnShift( jet_shiftedEnUp->at(i), jet_shiftedEnDown->at(i) );
-    jet.SetJECJER(jet_JECFull->at(i),jet_smearedRes->at(i));
+    jet.SetJEC(jet_JECFull->at(i));
     if(!IsDATA){
+      jet.SetJER(jet_smearedRes->at(i));
       jet *= jet_smearedRes->at(i);
       jet.SetResShift( jet_smearedResUp->at(i)/jet_smearedRes->at(i), jet_smearedResDown->at(i)/jet_smearedRes->at(i) );
       jet.SetGenFlavours(jet_partonFlavour->at(i), jet_hadronFlavour->at(i));

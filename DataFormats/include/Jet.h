@@ -24,7 +24,8 @@ public:
   void SetMultiplicities(double cM, double nM);
   void SetPileupJetId(double v);
 
-  void SetJECJER(double jec,double jer);
+  void SetJEC(double jec);
+  void SetJER(double jer);
   inline double JEC() const { return j_JECFull; }
   inline double JER() const { return j_smearedRes; }
 

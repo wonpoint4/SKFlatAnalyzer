@@ -10,6 +10,7 @@
 #include "Aepcor.h"
 #include "TH4D.h"
 #include "EfficiencyTool.h"
+#include "RocPFProb.h"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 
@@ -260,9 +261,12 @@ public:
   // L1PrefiringWeight
   virtual void SetupL1PrefiringWeight();
   virtual void DeleteL1PrefiringWeight();
-  virtual double getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys) const;
+  virtual double getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys, int mode=0) const;
+  virtual double getPrefiringRatePhoton(double eta, double pt, int sys, int mode=0) const;
+  virtual double getPrefiringRateJet(double eta, double pt, int sys, int mode=0) const;
   virtual double getPrefiringRateMuon(double eta, double phi, double pt, int sys) const;
-  virtual double GetL1PrefiringWeight() const;
+  virtual double GetL1PrefiringWeight(int mode=0) const;
+  RocPFProb* rocpfprob=NULL;
   TH2* fL1Prefiring_photon=NULL;
   TH2* fL1Prefiring_jet=NULL;
   TF1* fL1Prefiring_muon[12]={};

@@ -73,8 +73,10 @@ void Jet::SetPileupJetId(double v){
   j_PileupJetId = v;
 }
 
-void Jet::SetJECJER(double jec,double jer){
+void Jet::SetJEC(double jec){
   j_JECFull=jec;
+}
+void Jet::SetJER(double jer){
   j_smearedRes=jer;
 }
 void Jet::SetEnShift(double en_up, double en_down){
