@@ -2030,13 +2030,41 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
   }
   p.bjets.clear();
+  vector<Muon> allmuons=GetAllMuons();
+  vector<Electron> allelectrons=GetAllElectrons();
   for(const auto& jet:p.jets){
     if(jet.GetTaggerResult(jtp.j_Tagger) < mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP)) continue;
     if(!p.option.Contains("nobjetcleaning")){
       if(p.lepton0&&jet.DeltaR(*p.lepton0)<0.4) continue;
       if(p.lepton1&&jet.DeltaR(*p.lepton1)<0.4) continue;
-    } 
-    p.bjets.push_back(jet);
+    }
+    Jet bjet=jet;
+    double jetCharge = bjet.Charge();
+
+    vector<Muon> bmuon;
+    vector<Electron> belectron;
+
+    for(int l=0,n=allmuons.size(); l<n; l++){
+      if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(bjet.Vect())) <0.6) continue; // original, 1GeV
+      if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
+      if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
+      if(bjet.DeltaR(allmuons.at(l))<0.4) bmuon.push_back(allmuons.at(l));
+    }
+
+    //belectron Trial
+    for(unsigned int l=0; l<allelectrons.size(); l++){
+      if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(bjet.Vect())) <0.6) continue;
+      if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
+      if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
+      if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
+      if(bjet.DeltaR(allelectrons.at(l))<0.4) belectron.push_back(allelectrons.at(l));
+    }
+
+    //The jet has soft muon inside, and its charge will determine the jet charge
+    if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
+    else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
+    bjet.userFloat["AFBCharge"]=jetCharge;
+    p.bjets.push_back(bjet);
   }
   p.w.btagSF=1.;
   p.w.btagSF_hup=1.;
