@@ -1,0 +1,5 @@
+/gv0/Users/hsseo/Signal/SKFlat/Run2UltraLegacy_v3/2018/MC/bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8/230503_102616/0000/SKFlatNtuple_2018_MC_1.root
+/gv0/Users/hsseo/Signal/SKFlat/Run2UltraLegacy_v3/2018/MC/bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8/230503_102616/0000/SKFlatNtuple_2018_MC_2.root
+/gv0/Users/hsseo/Signal/SKFlat/Run2UltraLegacy_v3/2018/MC/bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8/230503_102616/0000/SKFlatNtuple_2018_MC_3.root
+/gv0/Users/hsseo/Signal/SKFlat/Run2UltraLegacy_v3/2018/MC/bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8/230503_102616/0000/SKFlatNtuple_2018_MC_4.root
+/gv0/Users/hsseo/Signal/SKFlat/Run2UltraLegacy_v3/2018/MC/bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8/230503_102616/0000/SKFlatNtuple_2018_MC_5.root
