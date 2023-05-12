@@ -16,31 +16,21 @@ void EfficiencyValidation::executeEvent(){
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm")); 
-    //executeEventWithParameter(MakeParameter("mm","mv11"));
-    //executeEventWithParameter(MakeParameter("mm","mv13"));
-    //executeEventWithParameter(MakeParameter("mm","noroccor"));
+    executeEventWithParameter(MakeParameter("mm","mv14"));
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("mu")); 
-    //executeEventWithParameter(MakeParameter("mu","mv11"));
-    //executeEventWithParameter(MakeParameter("mu","mv13"));
+    executeEventWithParameter(MakeParameter("mu","mv14"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
-    executeEventWithParameter(MakeParameter("ee","newreco"));
-    executeEventWithParameter(MakeParameter("ee","newid"));
-    executeEventWithParameter(MakeParameter("ee","newrecoid"));
-    //executeEventWithParameter(MakeParameter("ee","noroccor"));
-    //executeEventWithParameter(MakeParameter("ee","ev12"));
+    executeEventWithParameter(MakeParameter("ee","ev14"));
   }    
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("el"));
-    executeEventWithParameter(MakeParameter("el","newreco"));
-    executeEventWithParameter(MakeParameter("el","newid"));
-    executeEventWithParameter(MakeParameter("el","newrecoid"));
-    //executeEventWithParameter(MakeParameter("el","SelQ"));
-    //executeEventWithParameter(MakeParameter("el","ev12"));
-    //executeEventWithParameter(MakeParameter("el","SelQ ev12"));
+    executeEventWithParameter(MakeParameter("el","SelQ"));
+    executeEventWithParameter(MakeParameter("el","ev14"));
+    executeEventWithParameter(MakeParameter("el","SelQ ev14"));
   }
 
   //////// testing channels //////////
@@ -151,33 +141,16 @@ void EfficiencyValidation::executeEvent(){
 SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
   p.weightbit|=EfficiencyWeight;
-  if(option.Contains("ev12")){
-    p.prefix="v12/"+p.prefix;
-    for(int i=0,n=p.k.triggerSF.size();i<n;i++){
-      p.k.triggerSF[i]+="_v12";
-    }
-    p.k.electronIDSF+="_v12";
-    p.option.ReplaceAll("ev12","");
+  if(option.Contains("ev14")){
+    p.prefix="v14/"+p.prefix;
+    p.k.electronIDSF+="_v13"; 
+    p.k.electronRECOSF+="_POG";
+    p.option.ReplaceAll("ev14","");
   }
-  if(option.Contains("mv11")){
-    p.prefix="v11/"+p.prefix;
-    for(int i=0,n=p.k.triggerSF.size();i<n;i++){
-      p.k.triggerSF[i]+="_v11";
-    }
-    p.k.muonTrackingSF="";
+  if(option.Contains("mv14")){
+    p.prefix="v14/"+p.prefix;
     p.k.muonRECOSF="";
-    p.k.muonIDSF+="_v11";
-    p.option.ReplaceAll("mv11","");
-  }
-  if(option.Contains("mv13")){
-    p.prefix="v13/"+p.prefix;
-    for(int i=0,n=p.k.triggerSF.size();i<n;i++){
-      p.k.triggerSF[i]+="_v13";
-    }
-    p.k.muonTrackingSF+="_v13";
-    p.k.muonRECOSF="Muon_RECO_v13";
-    p.k.muonIDSF+="_v13";
-    p.option.ReplaceAll("mv13","");
+    p.option.ReplaceAll("mv14","");
   }
   if(option.Contains("noroccor")){
     p.suffix="_noroccor";
@@ -188,21 +161,6 @@ SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TStri
       p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,-1,0));
     }
   }
-  if(option.Contains("newrecoid")){
-    p.prefix="newrecoid/"+p.prefix;
-    p.k.electronRECOSF+="_v13_2";
-    p.k.electronIDSF+="_v13_2";
-    p.option.ReplaceAll("newrecoid","");
-  }else if(option.Contains("newreco")){
-    p.prefix="newreco/"+p.prefix;
-    p.k.electronRECOSF+="_v13_2";
-    p.option.ReplaceAll("newreco","");
-  }else if(option.Contains("newid")){
-    p.prefix="newid/"+p.prefix;
-    p.k.electronIDSF+="_v13_2";
-    p.option.ReplaceAll("newid","");
-  }
-
   return p;
 }
 void EfficiencyValidation::EvalWeights(Parameter& p){
@@ -211,13 +169,14 @@ void EfficiencyValidation::EvalWeights(Parameter& p){
     p.weightmap["_noweight"]=p.w.lumiweight;
     p.weightmap["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     p.weightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    p.weightmap["_newprefireweight1"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(1);
-    p.weightmap["_newprefireweight2"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(2);
-    p.weightmap["_newprefireweight3"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(3);
-    p.weightmap["_newprefireweight4"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(4);
-    p.weightmap["_newprefireweight5"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(5);
+    //// For prefireweight study
+    //p.weightmap["_newprefireweight1"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(1);
+    //p.weightmap["_newprefireweight2"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(2);
+    //p.weightmap["_newprefireweight3"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(3);
+    //p.weightmap["_newprefireweight4"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(4);
+    //p.weightmap["_newprefireweight5"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(5);
     p.weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    p.weightmap["_noz0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_z0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.z0weight;
     p.weightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     
     for(int j=0,nj=fEff->nreplica;j<nj;j++){
@@ -314,9 +273,10 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
       FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),eta,w,120,-3,3);
       
       FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,500,0,500);
-      if(eta<-2.0) FillHist(Form("%slpt_eta0%s",pre.Data(),suf.Data()),pt,w,500,0,500);
-      else if(eta<2.0) FillHist(Form("%slpt_eta1%s",pre.Data(),suf.Data()),pt,w,500,0,500);
-      else FillHist(Form("%slpt_eta2%s",pre.Data(),suf.Data()),pt,w,500,0,500);
+      //// For prefirieweight check
+      //if(eta<-2.0) FillHist(Form("%slpt_eta0%s",pre.Data(),suf.Data()),pt,w,500,0,500);
+      //else if(eta<2.0) FillHist(Form("%slpt_eta1%s",pre.Data(),suf.Data()),pt,w,500,0,500);
+      //else FillHist(Form("%slpt_eta2%s",pre.Data(),suf.Data()),pt,w,500,0,500);
 	
       FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,120,-3,3);
 
@@ -357,22 +317,22 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
 	FillHist(Form("%slrtrkiso%s",pre.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
       }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
 	Electron* el=(Electron*)p.leptons.at(i);
-	FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
-	FillProfile(pre+"leta_energyscale"+suf,el->scEta(),el->Pt()/el->UncorrPt(),w,60,-3,3);
-	FillProfile(pre+"leta_energyscale2"+suf,el->scEta(),el->Energy()/el->scE(),w,60,-3,3);
+	//FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
+	//FillProfile(pre+"leta_energyscale"+suf,el->scEta(),el->Pt()/el->UncorrPt(),w,60,-3,3);
+	//FillProfile(pre+"leta_energyscale2"+suf,el->scEta(),el->Energy()/el->scE(),w,60,-3,3);
       }
       int iphi=(p.leptons.at(i)->Phi()/TMath::Pi()+1)*4;      
-      FillHist(Form("%sleta%s_phi%d",pre.Data(),suf.Data(),iphi),eta,w,120,-3,3);
+      //FillHist(Form("%sleta%s_phi%d",pre.Data(),suf.Data(),iphi),eta,w,120,-3,3);
       if(vertex_Z<-4){
-	FillHist(Form("%sleta%s_z0",pre.Data(),suf.Data()),eta,w,120,-3,3);
+	//FillHist(Form("%sleta%s_z0",pre.Data(),suf.Data()),eta,w,120,-3,3);
       }else if(vertex_Z<4){
-	FillHist(Form("%sleta%s_z1",pre.Data(),suf.Data()),eta,w,120,-3,3);
+	//FillHist(Form("%sleta%s_z1",pre.Data(),suf.Data()),eta,w,120,-3,3);
       }else{
-	FillHist(Form("%sleta%s_z2",pre.Data(),suf.Data()),eta,w,120,-3,3);
+	//FillHist(Form("%sleta%s_z2",pre.Data(),suf.Data()),eta,w,120,-3,3);
       }
     }
-    if(p.truth_lepton0.Pt()) FillProfile(pre+"leta_deta"+suf,p.lepton0->Eta(),p.lepton0->Eta()-p.truth_lepton0.Eta(),w,60,-3,3);
-    if(p.truth_lepton1.Pt()) FillProfile(pre+"leta_deta"+suf,p.lepton1->Eta(),p.lepton1->Eta()-p.truth_lepton1.Eta(),w,60,-3,3);    
+    //if(p.truth_lepton0.Pt()) FillProfile(pre+"leta_deta"+suf,p.lepton0->Eta(),p.lepton0->Eta()-p.truth_lepton0.Eta(),w,60,-3,3);
+    //if(p.truth_lepton1.Pt()) FillProfile(pre+"leta_deta"+suf,p.lepton1->Eta(),p.lepton1->Eta()-p.truth_lepton1.Eta(),w,60,-3,3);    
       
     FillHist(pre+"x0"+suf,vertex_X,w,100,-0.2,0.2);
     FillHist(pre+"y0"+suf,vertex_Y,w,100,-0.2,0.2);

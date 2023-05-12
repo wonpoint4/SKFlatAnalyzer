@@ -1715,7 +1715,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.prefix=p.channel+GetEraShort()+"/";
   if(p.channel=="mu"){
     p.k.muonTrackingSF="Muon_Tracking";
-    //p.k.muonRECOSF="Muon_RECO";
+    p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,5,0));
     p.SetLeptonPtCut(27,10);
@@ -1731,7 +1731,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel=="mm"){
     p.k.muonTrackingSF="Muon_Tracking";
-    //p.k.muonRECOSF="Muon_RECO";
+    p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"Mu17Leg1_MediumID_trkIsoLoose","Mu8Leg2_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,5,0));
     p.SetLeptonPtCut(20,10);
