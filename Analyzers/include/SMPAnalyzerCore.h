@@ -4,6 +4,7 @@
 #include <tuple>
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
+#include "TPRegexp.h"
 #include "RoccoR.h"
 #include "Aepcor.h"
 #include "TH4D.h"
@@ -25,6 +26,8 @@ public:
     TString prefix,hprefix,suffix;
     vector<TString> triggers;
     vector<Gen> gens;
+    vector<Jet> jets;
+    vector<Jet> bjets;
     vector<Muon> muons;
     vector<Electron> electrons;
     vector<Muon> amuons;
@@ -49,6 +52,7 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
+      double topptweight=1;
       double weakweight=1;
       double electronRECOSF=1;
       vector<vector<double>> electronRECOSF_sys;
@@ -61,6 +65,7 @@ public:
       double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
       vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
+      double btagSF=1,btagSF_hup=1,btagSF_hdown=1,btagSF_lup=1,btagSF_ldown=1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -199,11 +204,13 @@ public:
   double GetDYWeakWeight(double mass);
 
   void SetupFakeRate();
+  double GetFakeTF(Parameter& p,TString option="",int sys=0);
   double GetFakeRate(const Lepton *lep);
   double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
   void DeleteFakeRate();
   TH2* fFakeRate_electron=NULL;
   TH2* fFakeRate_muon=NULL;
+  map<TString,TH2*> fFakeTF;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
@@ -229,6 +236,8 @@ public:
     return a;
   }
   
+  // Top pt weight
+  double GetTopPtReweight2(const std::vector<Gen>& gens);
 
   // ZptWeight
   void SetupZptWeight();
@@ -241,6 +250,7 @@ public:
   TAxis* fZptWeightMaxis=NULL;
 
   bool IsDYSample=false;
+  bool IsTTSample=false;
   Event _event;
   double reductionweight=1;
   vector<LHE> lhes;
@@ -255,6 +265,7 @@ public:
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
   double GetPFMET_T1Smear() const;
+  TString GetSkimName() const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

@@ -49,7 +49,9 @@ double Event::GetTriggerLumi(TString trig){
     if(trig=="Full") return 19517.523849863;
     else if(trig=="HLT_Mu3_PFJet40_v") return 3.911703648;
     else if(trig=="HLT_Mu8_v") return 3.319291722;
+    else if(trig=="HLT_Mu8_TrkIsoVVL_v") return 6.58539*1.31533*0.99;
     else if(trig=="HLT_Mu17_v") return 259.029439505;
+    else if(trig=="HLT_Mu17_TrkIsoVVL_v") return 192.1246*0.977825*0.94; 
     else if(trig=="HLT_Mu20_v") return 109.124528366;
     else if(trig=="HLT_Mu27_v") return 149.654826484;
     else if(trig=="HLT_Mu50_v") return 19517.523849863;
@@ -71,7 +73,9 @@ double Event::GetTriggerLumi(TString trig){
     if(trig=="Full") return 16812.151722482;
     else if(trig=="HLT_Mu3_PFJet40_v") return 3.580526616;
     else if(trig=="HLT_Mu8_v") return 0.659286323;
+    else if(trig=="HLT_Mu8_TrkIsoVVL_v") return 1.29683*1.31533*0.82;
     else if(trig=="HLT_Mu17_v") return 26.872793405;
+    else if(trig=="HLT_Mu17_TrkIsoVVL_v") return 26.87279*0.977825*0.93;
     else if(trig=="HLT_Mu20_v") return 32.291949992;
     else if(trig=="HLT_Mu27_v") return 103.565936026;
     else if(trig=="HLT_Mu50_v") return 16812.151722482;
@@ -92,6 +96,7 @@ double Event::GetTriggerLumi(TString trig){
   }else if(j_DataEra=="2017"){
     if(trig=="Full") return 41477.877400009;
     else if(trig=="HLT_Mu3_PFJet40_v") return 4.607782551;
+    else if(trig=="HLT_Mu8_TrkIsoVVL_v") return 2.89970*1.35542*0.95;
     else if(trig=="HLT_Mu8_v"){
       return 2.602078443;
       //FIXME what is norm?? (JS's code)
@@ -101,6 +106,7 @@ double Event::GetTriggerLumi(TString trig){
       //return 2.605*1.33461;
     }
     else if(trig=="HLT_Mu17_v") return 70.005238765;
+    else if(trig=="HLT_Mu17_TrkIsoVVL_v") return 65.8989*1.00362*0.95;
     else if(trig=="HLT_Mu19_v") return 46.204786104;
     else if(trig=="HLT_Mu20_v") return 575.585018236;
     else if(trig=="HLT_Mu27_v") return 184.843129035;
@@ -134,7 +140,9 @@ double Event::GetTriggerLumi(TString trig){
     if(trig=="Full") return 59827.879502925;
     else if(trig=="HLT_Mu3_PFJet40_v") return 2.704239929;
     else if(trig=="HLT_Mu8_v") return 8.566603827;
+    else if(trig=="HLT_Mu8_TrkIsoVVL_v") return 8.58157*1.09757*0.91;
     else if(trig=="HLT_Mu17_v") return 45.852032056;
+    else if(trig=="HLT_Mu17_TrkIsoVVL_v") return 45.852*0.954471*0.89;
     else if(trig=="HLT_Mu19_v") return 45.852032056;
     else if(trig=="HLT_Mu20_v") return 55.360539057;
     else if(trig=="HLT_Mu27_v") return 125.967123844;
