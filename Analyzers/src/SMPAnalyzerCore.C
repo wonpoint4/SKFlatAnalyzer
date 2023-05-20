@@ -1852,7 +1852,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
 	p.w.zptweight=GetZptWeight(genZ.M(),genZ.Rapidity(),genZ.Pt());
 	p.w.weakweight=GetDYWeakWeight(genZ.M());
 
-	/*
         // Only qqbar collisions (LO DY)
         if(lhe_p0.ID()+lhe_p1.ID()==0) p.hprefix+="";
         // Only qG collisions (NLO DY)
@@ -1916,7 +1915,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
           else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyqqcbar_";
           else p.hprefix+="";//"Dyqq_";
         }
-	  */
+
       }else p.hprefix+="tau_";
     }
   }

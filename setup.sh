@@ -50,6 +50,12 @@ elif [[ $HOSTNAME == *"knu"* ]]; then
   export SKFlatRunlogDir="/u/user/$USER/scratch/SKFlatRunlog/"
   export SKFlatOutputDir="/u/user/$USER/scratch/SKFlatOutput/"
 
+elif [[ $HOSTNAME == *"lxplus"* ]]; then
+
+  echo "@@@@ Working on Lxplus"
+  export SKFlatRunlogDir="/afs/cern.ch/user/w/wjun/workspace/private/CMSSW_11_3_0/src/SKFlatRunlog/"
+  export SKFlatOutputDir="/afs/cern.ch/user/w/wjun/workspace/private/CMSSW_11_3_0/src/SKFlatOutput/"
+
 fi
 
 alias skout="cd $SKFlatOutputDir/$SKFlatV/"

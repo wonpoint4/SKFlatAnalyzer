@@ -39,29 +39,29 @@ public:
   double jet_charge=-5.5;
   TLorentzVector jet_vector;
 
-  static const int afb_mbinnum=30;//40;
-  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200};//,240,280,340,400,500,600,700,800,1000,3000};
+  static const int afb_mbinnum=28;
+  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,120,140,200,500,1000};
   static const int afb_ybinnum=12;
   const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
-  static const int afb_ptbinnum=26;//30;
-  const double afb_ptbin[afb_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160};//,190,250,400,650};
+  static const int afb_ptbinnum=8;
+  const double afb_ptbin[afb_ptbinnum+1]={0,10,20,30,45,60,100,200,650};
   static const int afb_costbinnum=20;
   const double afb_costbin[afb_costbinnum+1]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
 
-  static const int grid_mbinnum=5;//6;
-  const double grid_mbin[grid_mbinnum+1]={52,60,80,100,150,400};//,3000};
+  static const int grid_mbinnum=5;
+  const double grid_mbin[grid_mbinnum+1]={52,60,80,100,150,1000};
   static const int grid_ybinnum=4;
   const double grid_ybin[grid_ybinnum+1]={-2.4,-1.2,0,1.2,2.4};
-  static const int grid_ptbinnum=3;//4;
-  const double grid_ptbin[grid_ptbinnum+1]={0,20,50,100};//,650};
+  static const int grid_ptbinnum=3;
+  const double grid_ptbin[grid_ptbinnum+1]={0,20,50,650};
 
-  static const int fine_mbinnum=30;//38;
-  const double fine_mbin[fine_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200};//,240,280,340,400,600,1000,2000,5000};
-  static const int fine_ptbinnum=26;//30;
-  const double fine_ptbin[fine_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160};//,190,250,500,1000};
+  static const int fine_mbinnum=32;
+  const double fine_mbin[fine_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,500,1000};
+  static const int fine_ptbinnum=24;
+  const double fine_ptbin[fine_ptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,25,30,35,40,45,50,60,70,80,100,130,160,250,650};
 
-  static const int lptbinnum=56;
-  const double lptbin[lptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,64,68,72,76,80,85,90,95,100,110,120,130,140,150,160,180,200,250,300,350,400,500,600,700,800,900,1000};
+  static const int lptbinnum=36;
+  const double lptbin[lptbinnum+1]={0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,46,50,54,58,64,72,80,90,100,120,150,200,300,500,1000};
 };
 
 #endif
