@@ -3,6 +3,7 @@ TH1* hreco;
 map<TString,TH1*> hists;
 const int nabin=LTAnalyzer::nptbin*LTAnalyzer::njetbin;
 double As_nominal[nabin*2];
+TString outfilename;
 void NormalizeReco(TH1* hist){
   for(int i=0;i<nabin;i++){
     double istart=LTAnalyzer::ncostbin*LTAnalyzer::nphibin*i;
@@ -26,8 +27,13 @@ void Init(TString sim="mi",TString data="mg"){
   response=(TH2*)f->Get("mm2018/response");
   f->Close();
   
-  if(data=="mi") f=TFile::Open("/data6/Users/hsseo/SKFlatOutput//Run2UltraLegacy_v3/LTAnalyzer/2018/LTAnalyzer_DYJetsToMuMu_MiNNLO.root");
-  else if(data=="mg") f=TFile::Open("/data6/Users/hsseo/SKFlatOutput//Run2UltraLegacy_v3/LTAnalyzer/2018/LTAnalyzer_DYJets_MG.root");
+  if(data=="mi"){
+    f=TFile::Open("/data6/Users/hsseo/SKFlatOutput//Run2UltraLegacy_v3/LTAnalyzer/2018/LTAnalyzer_DYJetsToMuMu_MiNNLO.root");
+    outfilename="mi.root";
+  }else if(data=="mg"){
+    f=TFile::Open("/data6/Users/hsseo/SKFlatOutput//Run2UltraLegacy_v3/LTAnalyzer/2018/LTAnalyzer_DYJets_MG.root");
+    outfilename="mg.root";
+  }
   hreco=(TH1*)f->Get("mm2018/reco");
   NormalizeReco(hreco);
   if(f->Get("mm2018/response")){
@@ -185,7 +191,7 @@ void minimize(){
   for(int i=0;i<nabin;i++){
     cout<<i<<" "<<xs[i]<<" "<<xs[nabin+i]<<endl;
   }
-  TFile fout("out.root","recreate");
+  TFile fout(outfilename,"recreate");
   for(auto [name,hist]:hists){
     hist->Write();
   }

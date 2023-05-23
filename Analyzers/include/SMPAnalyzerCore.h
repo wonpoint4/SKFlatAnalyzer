@@ -11,6 +11,7 @@
 #include "TH4D.h"
 #include "EfficiencyTool.h"
 #include "RocPFProb.h"
+#include "fastjet/ClusterSequence.hh"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 
@@ -234,6 +235,7 @@ public:
   static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
   void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
   void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  vector<fastjet::PseudoJet> GetAllGenJets(const vector<Gen>& gens);  
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);

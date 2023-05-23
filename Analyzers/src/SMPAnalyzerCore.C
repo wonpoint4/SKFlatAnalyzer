@@ -1291,6 +1291,24 @@ void SMPAnalyzerCore::GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Ge
   }
 }
 
+vector<fastjet::PseudoJet> SMPAnalyzerCore::GetAllGenJets(const vector<Gen>& gens){
+  vector<fastjet::PseudoJet> particles;
+  for(const auto& gen:gens){
+    if(gen.Status()!=1) continue;
+    if(gen.PID()==12||gen.PID()==14||gen.PID()==16) continue;
+    particles.push_back(fastjet::PseudoJet(gen.Px(),gen.Py(),gen.Pz(),gen.E()));
+  }
+  // choose a jet definition
+  double R = 0.4;
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, R);
+
+  // run the clustering, extract the jets
+  fastjet::ClusterSequence cs(particles, jet_def);
+  vector<fastjet::PseudoJet> jets = fastjet::sorted_by_pt(cs.inclusive_jets());
+  
+  return jets;
+}
+
 Gen SMPAnalyzerCore::SMPGetGenMatchedLepton(const Lepton& lep,const std::vector<Gen>& gens,int mode){
   //0: default
   //1: dressed 0.1
