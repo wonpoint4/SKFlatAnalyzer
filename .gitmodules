@@ -8,3 +8,6 @@
 [submodule "external/KinematicFitter"]
 	path = external/KinematicFitter
 	url = https://github.com/bhoh/KinematicFitter.git
+[submodule "external/Aepcor"]
+	path = external/Aepcor
+	url = https://gitlab.cern.ch/hyseo/Aepcor.git

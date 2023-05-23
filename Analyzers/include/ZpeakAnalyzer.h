@@ -9,6 +9,7 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
+  void EvalWeights(Parameter& p);
   void FillHists(Parameter& p);
 
   ZpeakAnalyzer();

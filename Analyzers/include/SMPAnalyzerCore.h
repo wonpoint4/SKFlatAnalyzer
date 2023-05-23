@@ -4,6 +4,7 @@
 #include <tuple>
 #include "AnalyzerCore.h"
 #include "TRegexp.h"
+#include "TPRegexp.h"
 #include "RoccoR.h"
 #include "Aepcor.h"
 #include "TH4D.h"
@@ -58,6 +59,7 @@ public:
       double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
       double z0weight=1;
       double zptweight=1;
+      double topptweight=1;
       double weakweight=1;
       double electronRECOSF=1;
       vector<vector<double>> electronRECOSF_sys;
@@ -70,8 +72,8 @@ public:
       double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
       vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
+      double btagSF=1,btagSF_hup=1,btagSF_hdown=1,btagSF_lup=1,btagSF_ldown=1;
       double pujetSF=1;
-      double tagjetSF=1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -80,6 +82,7 @@ public:
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
       int nelectronmax=-1,nmuonmax=-1;
+      int nleptonmin=2;
       double jet0pt=-1,jet1pt=-1;
       int nbjetmax=-1,ncjetmax=-1,nljetmax=-1,nbjetmin=-1,ncjetmin=-1,nljetmin=-1;
     };
@@ -110,9 +113,11 @@ public:
 
   virtual void initializeAnalyzer();
   virtual void beginEvent();
-  virtual void executeEventWithParameter(Parameter p);
+  virtual void executeEventWithParameter(Parameter& p);
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
+  virtual void EvalWeights(Parameter& p);
   virtual bool PassSelection(Parameter& p);
   virtual Parameter MakeParameter(TString channel,TString option="");
 
@@ -150,10 +155,10 @@ public:
                 int n_binx, double x_min, double x_max,
                 int n_biny, double y_min, double y_max);
   void FillHist(TString histname,
-		double value_x, double value_y,
-		map<TString,double> weights,
-		int n_binx, const double *xbins,
-		int n_biny, const double *ybins);
+                double value_x, double value_y,
+                map<TString,double> weights,
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins);
   void FillHist(TString histname,
                 double value_x, double value_y, double value_z,
                 map<TString,double> weights,
@@ -161,11 +166,11 @@ public:
                 int n_biny, double y_min, double y_max,
                 int n_binz, double z_min, double z_max);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z,
-		map<TString,double> weights,
-		int n_binx, const double *xbins,
-		int n_biny, const double *ybins,
-		int n_binz, const double *zbins);
+                double value_x, double value_y, double value_z,
+                map<TString,double> weights,
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins,
+                int n_binz, const double *zbins);
   void FillHist(TString histname,
                 double value_x, double value_y, double value_z, double value_u,
                 map<TString,double> weights,
@@ -174,18 +179,18 @@ public:
                 int n_binz, double z_min, double z_max,
                 int n_binu, double u_min, double u_max);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z, double value_u,
-		map<TString,double> weights,
-		int n_binx, const double *xbins,
-		int n_biny, const double *ybins,
-		int n_binz, const double *zbins,
+                double value_x, double value_y, double value_z, double value_u,
+                map<TString,double> weights,
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins,
+                int n_binz, const double *zbins,
                 int n_binu, const double *ubins);
   void FillHist(TString histname,
-		double value_x, double value_y, double value_z, double value_u,
-		map<TString,double> weights,
-		int n_binx, const double *xbins,
-		int n_biny, const double *ybins,
-		int n_binz, const double *zbins,
+                double value_x, double value_y, double value_z, double value_u,
+                map<TString,double> weights,
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins,
+                int n_binz, const double *zbins,
                 int n_binu, double u_min, double u_max);
   virtual void FillHists(Parameter& p);
 
@@ -221,11 +226,13 @@ public:
   double GetDYWeakWeight(double mass);
 
   void SetupFakeRate();
+  double GetFakeTF(Parameter& p,TString option="",int sys=0);
   double GetFakeRate(const Lepton *lep);
   double GetFakeRate(Lepton::Flavour flavour,double eta,double pt);
   void DeleteFakeRate();
   TH2* fFakeRate_electron=NULL;
   TH2* fFakeRate_muon=NULL;
+  map<TString,TH2*> fFakeTF;
 
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
@@ -239,8 +246,8 @@ public:
   static double GetBinContentUser(TH1* hist,double valx,int sys);
   static double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
-  void GetDYLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
-  void GetDYGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
+  void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
+  void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& j0,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
@@ -252,6 +259,9 @@ public:
     return a;
   }
 
+  // Top pt weight
+  double GetTopPtReweight2(const std::vector<Gen>& gens);
+
   // ZptWeight
   void SetupZptWeight();
   double GetZptWeight(double mass,double rapidity,double pt,TString opt="GYM");
@@ -262,11 +272,10 @@ public:
   vector<TF1*> fZptWeightM;
   TAxis* fZptWeightMaxis=NULL;
 
-  TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
   bool IsDYSample=false;
+  bool IsTTSample=false;
   Event _event;
   double reductionweight=1;
-
   vector<LHE> lhes;
   LHE lhe_p0,lhe_p1,lhe_l0,lhe_l1,lhe_j0;
   vector<Gen> gens;
@@ -283,6 +292,9 @@ public:
   std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
 
   double GetPFMET_T1Smear() const;
+  TString GetSkimName() const;
+
+  TH2F *heff_data=NULL, *hmistag_data=NULL, *heff_mc=NULL, *hmistag_mc=NULL;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

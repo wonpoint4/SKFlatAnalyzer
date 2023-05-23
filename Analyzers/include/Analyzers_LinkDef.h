@@ -28,5 +28,7 @@
 #pragma link C++ class FakeAnalyzer+;
 #pragma link C++ class SkimTree_EgammaTnP+;
 #pragma link C++ class DZfiltercheck;
+#pragma link C++ class DZAnalyzer+;
+#pragma link C++ class EMuAnalyzer+;
 
 #endif

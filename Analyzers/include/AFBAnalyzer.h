@@ -3,48 +3,53 @@
 
 #include "TKey.h"
 #include "SMPAnalyzerCore.h"
+#include "LHAPDF/Reweighting.h"
 
 class AFBAnalyzer : public SMPAnalyzerCore {
 
 public:
-  void test();
-  void initializeAnalyzer();
-  void executeEvent();
-  void executeEventGen();
-  Parameter MakeParameter(TString key);
-  bool PassSelection(Parameter& p);
-  void FillHists(Parameter& p);
+  virtual void test();
+  virtual void initializeAnalyzer();
+  virtual void executeEvent();
+  virtual void executeEventGen();
+  virtual void executeEventWithParameter(Parameter& p);
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
+  static int GetUnfoldBin(int nbin,const double* bins,double mass,double cost);
+  virtual Parameter MakeParameter(TString key,TString option="");
+  virtual bool PassSelection(Parameter& p);
+  virtual void EvalWeights(Parameter& p);
+  virtual void ResetRecoWeights(Parameter& p);
+  virtual void FillHists(Parameter& p);
 
   AFBAnalyzer();
   ~AFBAnalyzer();
 
-  //double GetCosThetaCS(const vector<Lepton*>& leps);
-  double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
-  double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
-  double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
-  double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
-  void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
-  void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
-  void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
-  void SetupCosThetaWeight();
-  void DeleteCosThetaWeight();
-  double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
+  virtual double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
+  virtual double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
+  virtual double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
+  virtual double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);
+  virtual void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
+  virtual void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
+  //void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
+  //virtual void SetupCosThetaWeight();
+  //virtual void DeleteCosThetaWeight();
+  //virtual double GetCosThetaWeight(double mass,double pt,double cost,TString suffix);
 
   TString hardprefix;
-  map<TString,TH3D*> map_hist_cost;
-  double costhetaweight=1,costhetaweight_up=1,costhetaweight_down=1;
   bool IsNominalRun=true;
   bool IsSkimmed=false;
 
+  LHAPDF::PDF* PDFbase=NULL;
+  LHAPDF::PDF* PDFnf4=NULL;
   double jet_charge=-5.5;
   TLorentzVector jet_vector;
 
   static const int afb_mbinnum=28;
-  const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,120,140,200,500,1000};
+  static constexpr const double afb_mbin[afb_mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,120,140,200,500,1000};
   static const int afb_ybinnum=12;
-  const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
+  static constexpr const double afb_ybin[afb_ybinnum+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
   static const int afb_ptbinnum=8;
-  const double afb_ptbin[afb_ptbinnum+1]={0,10,20,30,45,60,100,200,650};
+  static constexpr const double afb_ptbin[afb_ptbinnum+1]={0,10,20,30,45,60,100,200,650};
   static const int afb_costbinnum=20;
   const double afb_costbin[afb_costbinnum+1]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
 

@@ -9,7 +9,8 @@ public:
 
   void executeEventWithChannelName(TString channelname);
   void executeEvent();
-  void FillHists(Parameter& weights);
+  void EvalWeights(Parameter& p);
+  void FillHists(Parameter& p);
 
   ZptWeight();
   ~ZptWeight();

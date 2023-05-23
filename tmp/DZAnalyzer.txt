@@ -1,0 +1,20 @@
+SKFlat.py -a DZAnalyzer -i DoubleEG --skim SkimTree_Dilepton -n 10 -e 2016a
+SKFlat.py -a DZAnalyzer -i DoubleMuon --skim SkimTree_Dilepton -n 10 -e 2016a
+SKFlat.py -a DZAnalyzer -i DYJetsToEE_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2016a
+SKFlat.py -a DZAnalyzer -i DYJetsToMuMu_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2016a
+
+SKFlat.py -a DZAnalyzer -i DoubleEG --skim SkimTree_Dilepton -n 10 -e 2016b
+SKFlat.py -a DZAnalyzer -i DoubleMuon --skim SkimTree_Dilepton -n 10 -e 2016b
+SKFlat.py -a DZAnalyzer -i DYJetsToEE_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2016b
+SKFlat.py -a DZAnalyzer -i DYJetsToMuMu_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2016b
+
+SKFlat.py -a DZAnalyzer -i DoubleEG --skim SkimTree_Dilepton -n 10 -e 2017
+SKFlat.py -a DZAnalyzer -i DoubleMuon --skim SkimTree_Dilepton -n 10 -e 2017
+SKFlat.py -a DZAnalyzer -i DYJetsToEE_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2017
+SKFlat.py -a DZAnalyzer -i DYJetsToMuMu_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2017
+SKFlat.py -a DZAnalyzer -i DYJetsToTauTau_MiNNLO --skim SkimTree_Dilepton -n 5 -e 2017
+
+SKFlat.py -a DZAnalyzer -i EGamma --skim SkimTree_Dilepton -n 20 -e 2018
+SKFlat.py -a DZAnalyzer -i DoubleMuon --skim SkimTree_Dilepton -n 20 -e 2018
+SKFlat.py -a DZAnalyzer -i DYJetsToEE_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2018
+SKFlat.py -a DZAnalyzer -i DYJetsToMuMu_MiNNLO --skim SkimTree_Dilepton -n 50 -e 2018
