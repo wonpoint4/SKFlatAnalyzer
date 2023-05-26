@@ -16,21 +16,21 @@ void EfficiencyValidation::executeEvent(){
   //////// nominal channels //////////
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm")); 
-    executeEventWithParameter(MakeParameter("mm","mv14"));
+    //executeEventWithParameter(MakeParameter("mm","mv14"));
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("mu")); 
-    executeEventWithParameter(MakeParameter("mu","mv14"));
+    //executeEventWithParameter(MakeParameter("mu","mv14"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
-    executeEventWithParameter(MakeParameter("ee","ev14"));
+    //executeEventWithParameter(MakeParameter("ee","ev16"));
   }    
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("el"));
-    executeEventWithParameter(MakeParameter("el","SelQ"));
-    executeEventWithParameter(MakeParameter("el","ev14"));
-    executeEventWithParameter(MakeParameter("el","SelQ ev14"));
+    //executeEventWithParameter(MakeParameter("el","SelQ"));
+    //executeEventWithParameter(MakeParameter("el","ev16"));
+    //executeEventWithParameter(MakeParameter("el","SelQ ev14"));
   }
 
   //////// testing channels //////////
@@ -141,11 +141,11 @@ void EfficiencyValidation::executeEvent(){
 SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
   p.weightbit|=EfficiencyWeight;
-  if(option.Contains("ev14")){
-    p.prefix="v14/"+p.prefix;
-    p.k.electronIDSF+="_v13"; 
-    p.k.electronRECOSF+="_POG";
-    p.option.ReplaceAll("ev14","");
+  if(option.Contains("ev16")){
+    p.prefix="v16/"+p.prefix;
+    p.k.electronIDSF+="_v16"; 
+    p.k.electronRECOSF+="_v16";
+    p.option.ReplaceAll("ev16","");
   }
   if(option.Contains("mv14")){
     p.prefix="v14/"+p.prefix;
@@ -164,17 +164,24 @@ SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TStri
   return p;
 }
 void EfficiencyValidation::EvalWeights(Parameter& p){
+  if(!HasFlag("PDFSYS")){
   p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
   if(!IsDATA&&p.suffix==""&&!p.hprefix.Contains("ss_")){
     p.weightmap["_noweight"]=p.w.lumiweight;
     p.weightmap["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_PUweight_up"]=p.w.lumiweight*p.w.PUweight_up*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_PUweight_down"]=p.w.lumiweight*p.w.PUweight_down*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     p.weightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_prefireweight_up"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight_up*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+    p.weightmap["_prefireweight_down"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight_down*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
+
     //// For prefireweight study
     //p.weightmap["_newprefireweight1"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(1);
     //p.weightmap["_newprefireweight2"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(2);
     //p.weightmap["_newprefireweight3"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(3);
     //p.weightmap["_newprefireweight4"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(4);
     //p.weightmap["_newprefireweight5"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetL1PrefiringWeight(5);
+
     p.weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
     p.weightmap["_z0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.z0weight;
     p.weightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
@@ -244,17 +251,31 @@ void EfficiencyValidation::EvalWeights(Parameter& p){
     
     p.weightmap["_noCFSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
   }
+  }else{
+    if(!IsDATA&&p.suffix==""&&!p.hprefix.Contains("ss_")){
+      for(unsigned int i=0;i<weight_Scale->size();i++){
+	p.weightmap[Form("_scalevariation%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*weight_Scale->at(i);
+      }
+      for(unsigned int i=0;i<weight_PDF->size();i++){
+	p.weightmap[Form("_pdf%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*weight_PDF->at(i);
+      }
+      if(weight_AlphaS->size()==2){
+	p.weightmap["_alphaS_down"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*weight_AlphaS->at(0);
+	p.weightmap["_alphaS_up"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*weight_AlphaS->at(1);
+      }
+    }
+  }
 }
 void EfficiencyValidation::FillHists(Parameter& p){
   TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
   double dimass=dilepton.M();
   if(dimass>=52) FillHist(p.prefix+"m52to3000/"+p.hprefix+"dimass"+p.suffix,dimass,p.weightmap,mbinnum,mbin);
   if(dimass>=52&&dimass<150){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m52to150",p.weightmap[""]);
-    FillHistsEfficiency(p,"m52to150/");
+    if(!HasFlag("PDFSYS")) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m52to150",p.weightmap[""]);
+    //FillHistsEfficiency(p,"m52to150/");
   }
   if(dimass>=80&&dimass<100){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m80to100",p.weightmap[""]);
+    if(!HasFlag("PDFSYS")) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m80to100",p.weightmap[""]);
     FillHistsEfficiency(p,"m80to100/");
   }
 }
@@ -294,6 +315,7 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
     FillHist(pre+"dimass"+suf,dimass,w,196,52,150);
     FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
     FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
+    FillHist(pre+"cost"+suf,GetCosThetaCS(p.lepton0,p.lepton1),w,100,-1,1);
     FillHist(pre+"z0"+suf,vertex_Z,w,100,-20,20);
 
     if(wname!="") continue;
@@ -415,4 +437,52 @@ double EfficiencyValidation::GetLeptonTriggerORSF_old(const Parameter& p,int set
   sim_eff=1-sim_eff;
   if(sim_eff==0) return 1.;
   else return (lumi0*data_eff_key0+lumi1*data_eff_key1)/((lumi0+lumi1+lumi2)*sim_eff);
+}
+
+double EfficiencyValidation::GetCosThetaCS(const Particle *p0,const Particle *p1,int direction) const {
+  if(!p0||!p1) return 0.;
+  const TLorentzVector *l0,*l1;
+  if(p0->Charge()<0&&p1->Charge()>0){
+    l0=p0;
+    l1=p1;
+  }else if(p0->Charge()>0&&p1->Charge()<0){
+    l0=p1;
+    l1=p0;
+  }else if(strcmp(p0->ClassName(),"LHE")==0){
+    if(((LHE*)p0)->ID()>0&&((LHE*)p1)->ID()<0){
+      l0=p0;
+      l1=p1;
+    }else if(((LHE*)p0)->ID()<0&&((LHE*)p1)->ID()>0){
+      l0=p1;
+      l1=p0;
+    }else{
+      gRandom->SetSeed((run<<15)+(lumi<<10)+(event<<5)+p0->Eta()*100);
+      if(gRandom->Rndm()<0.5){
+        l0=p0;
+        l1=p1;
+      }else{
+        l0=p1;
+        l1=p0;
+      }
+    }
+  }else{
+    gRandom->SetSeed((run<<15)+(lumi<<10)+(event<<5)+p0->Eta()*100);
+    if(gRandom->Rndm()<0.5){
+      l0=p0;
+      l1=p1;
+    }else{
+      l0=p1;
+      l1=p0;
+    }
+  }
+
+  TLorentzVector dilepton=*l0+*l1;
+  double l0pp=(l0->E()+l0->Pz())/sqrt(2);
+  double l0pm=(l0->E()-l0->Pz())/sqrt(2);
+  double l1pp=(l1->E()+l1->Pz())/sqrt(2);
+  double l1pm=(l1->E()-l1->Pz())/sqrt(2);
+  double dimass=dilepton.M();
+  double dipt=dilepton.Pt();
+  if(direction==0) direction=dilepton.Pz()>0?1:-1;
+  return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 }

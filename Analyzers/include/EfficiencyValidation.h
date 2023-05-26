@@ -16,6 +16,7 @@ public:
   virtual bool PassSelection(Parameter& p);
 
   virtual double GetLeptonTriggerORSF_old(const Parameter& p,int iset=0,int imem=0);
+  virtual double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0) const;
 
   EfficiencyValidation();
   ~EfficiencyValidation();
