@@ -121,45 +121,46 @@ bool AFBAnalyzer::PassSelection(Parameter& p){
           else p.hprefix += "";//"Dyg_";
         }
 
-        if(nparton==0) FillHist(p.prefix+p.hprefix+"MatchedParton_PID"+p.suffix,0,eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
-        else if(nparton==1) FillHist(p.prefix+p.hprefix+"MatchedParton_PID"+p.suffix,gen_j0.PID(),eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
-        else if(nparton==2) FillHist(p.prefix+p.hprefix+"MatchedParton_PID"+p.suffix,8,eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
-        else FillHist(p.prefix+p.hprefix+"MatchedParton_PID"+p.suffix,9,eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
+        if(nparton==0)      FillHist(p.prefix+p.hprefix+"MatchedParton_PID",0,           eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
+        else if(nparton==1) FillHist(p.prefix+p.hprefix+"MatchedParton_PID",gen_j0.PID(),eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
+        else if(nparton==2) FillHist(p.prefix+p.hprefix+"MatchedParton_PID",8,           eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
+        else                FillHist(p.prefix+p.hprefix+"MatchedParton_PID",9,           eventweight*p.w.pujetSF*p.w.btagSF,20,-10,10);
       }
     }
 
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"PUJetSF",eventweight*p.w.pujetSF);
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,Tag+"SF",eventweight*p.w.pujetSF*p.w.btagSF);
+    FillCutflow(p.prefix+p.hprefix+"cutflow","PUJetSF",eventweight*p.w.pujetSF);
+    FillCutflow(p.prefix+p.hprefix+"cutflow",Tag+"SF",eventweight*p.w.pujetSF*p.w.btagSF);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_costhetaCS"+p.suffix,(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaCS((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_costhetaRecoil"+p.suffix,(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaRecoil((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_costhetaCS",(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaCS((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_costhetaRecoil",(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaRecoil((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_yll"+p.suffix,               (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_pTll"+p.suffix,              (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_mll",               (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_yll",               (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_pTll",              (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_njet"+p.suffix,              realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_njet_noPUJetSF"+p.suffix,    realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_njet_no"+Tag+"SF"+p.suffix,  realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_njet",              realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_njet_noPUJetSF",    realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_njet_no"+Tag+"SF",  realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet"+p.suffix,             p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet_noPUJetSF"+p.suffix,   p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet_no"+Tag+"SF"+p.suffix, p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet",             p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet_noPUJetSF",   p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nbjet_no"+Tag+"SF", p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet"+p.suffix,             p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet_noPUJetSF"+p.suffix,   p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet_no"+Tag+"SF"+p.suffix, p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet",             p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet_noPUJetSF",   p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_ncjet_no"+Tag+"SF", p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet"+p.suffix,             p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet_noPUJetSF"+p.suffix,   p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet_no"+Tag+"SF"+p.suffix, p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet",             p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet_noPUJetSF",   p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nljet_no"+Tag+"SF", p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet"+p.suffix,             p.ajets.size(),              eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet_noPUJetSF"+p.suffix,   p.ajets.size(),              eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet_no"+Tag+"SF"+p.suffix, p.ajets.size(),              eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet",             p.ajets.size(),              eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet_noPUJetSF",   p.ajets.size(),              eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_na"+tag+"jet_no"+Tag+"SF", p.ajets.size(),              eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet"+p.suffix,             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet_noPUJetSF"+p.suffix,   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet_no"+Tag+"SF"+p.suffix, p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet",             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet_noPUJetSF",   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+Tag+"SF_nt"+tag+"jet_no"+Tag+"SF", p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
   }
 
   if(!p.jet0) return false;
@@ -170,38 +171,38 @@ bool AFBAnalyzer::PassSelection(Parameter& p){
   if((p.c.nljetmax>=0&&(int)p.ljets.size()>p.c.nljetmax) || (int)p.ljets.size()<p.c.nljetmin) return false;
 
   if(p.weightbit&NominalWeight){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Tight"+tag+"",eventweight*p.w.pujetSF*p.w.btagSF);
+    FillCutflow(p.prefix+p.hprefix+"cutflow","Tight"+tag+"",eventweight*p.w.pujetSF*p.w.btagSF);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_costhetaCS"+p.suffix,(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaCS((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_costhetaRecoil"+p.suffix,(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaRecoil((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_costhetaCS",(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaCS((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_costhetaRecoil",(*p.lepton0+*p.lepton1).M(),(*p.lepton0+*p.lepton1).Rapidity(),(*p.lepton0+*p.lepton1).Pt(),GetCosThetaRecoil((Particle*)p.lepton0,(Particle*)p.lepton1),eventweight*p.w.pujetSF*p.w.btagSF,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_mll"+p.suffix,                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_yll"+p.suffix,                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_pTll"+p.suffix,                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_mll",                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_yll",                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_pTll",                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet"+p.suffix,                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet_noPUJetSF"+p.suffix,      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet_no"+Tag+"SF"+p.suffix,    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet",                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet_noPUJetSF",      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_njet_no"+Tag+"SF",    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet"+p.suffix,               p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet_noPUJetSF"+p.suffix,     p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet_no"+Tag+"SF"+p.suffix,   p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet",               p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet_noPUJetSF",     p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nbjet_no"+Tag+"SF",   p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet"+p.suffix,               p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet_noPUJetSF"+p.suffix,     p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet_no"+Tag+"SF"+p.suffix,   p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet",               p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet_noPUJetSF",     p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_ncjet_no"+Tag+"SF",   p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet"+p.suffix,               p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet_noPUJetSF"+p.suffix,     p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet_no"+Tag+"SF"+p.suffix,   p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet",               p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet_noPUJetSF",     p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nljet_no"+Tag+"SF",   p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet"+p.suffix,             p.ajets.size(),                eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet_noPUJetSF"+p.suffix,   p.ajets.size(),                eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet_no"+Tag+"SF"+p.suffix, p.ajets.size(),                eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet",             p.ajets.size(),                eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet_noPUJetSF",   p.ajets.size(),                eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_na"+tag+"jet_no"+Tag+"SF", p.ajets.size(),                eventweight*p.w.pujetSF ,5,0,5);
 
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet"+p.suffix,             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet_noPUJetSF"+p.suffix,   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
-    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet_no"+Tag+"SF"+p.suffix, p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet",             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet_noPUJetSF",   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
+    FillHist(p.prefix+p.hprefix+"Tight"+tag+"_nt"+tag+"jet_no"+Tag+"SF", p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
   }
 
   if(p.channel[3]=='x'){ //DY+b, DY+c, DY+l
@@ -210,80 +211,89 @@ bool AFBAnalyzer::PassSelection(Parameter& p){
 
     if(p.jet1) return false;
     if(p.weightbit&NominalWeight){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"2"+tag+"veto",eventweight*p.w.pujetSF*p.w.btagSF);
+      FillCutflow(p.prefix+p.hprefix+"cutflow","2"+tag+"veto",eventweight*p.w.pujetSF*p.w.btagSF);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_mll"+p.suffix,                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_yll"+p.suffix,                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_pTll"+p.suffix,                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_mll",                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_yll",                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_pTll",                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet"+p.suffix,                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet_noPUJetSF"+p.suffix,      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet_no"+Tag+"SF"+p.suffix,    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet"+p.suffix,              n_30jet,                            eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet_noPUJetSF"+p.suffix,    n_30jet,                            eventweight*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet_no"+Tag+"SF"+p.suffix,  n_30jet,                            eventweight*p.w.pujetSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet",                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet_noPUJetSF",      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_njet_no"+Tag+"SF",    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet",              n_30jet,                            eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet_noPUJetSF",    n_30jet,                            eventweight*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_n30jet_no"+Tag+"SF",  n_30jet,                            eventweight*p.w.pujetSF ,10,0,10);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet"+p.suffix,               p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet_noPUJetSF"+p.suffix,     p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet_no"+Tag+"SF"+p.suffix,   p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet",               p.bjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet_noPUJetSF",     p.bjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nbjet_no"+Tag+"SF",   p.bjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet"+p.suffix,               p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet_noPUJetSF"+p.suffix,     p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet_no"+Tag+"SF"+p.suffix,   p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet",               p.cjets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet_noPUJetSF",     p.cjets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_ncjet_no"+Tag+"SF",   p.cjets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet"+p.suffix,               p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet_noPUJetSF"+p.suffix,     p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet_no"+Tag+"SF"+p.suffix,   p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet",               p.ljets.size(),                     eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet_noPUJetSF",     p.ljets.size(),                     eventweight*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nljet_no"+Tag+"SF",   p.ljets.size(),                     eventweight*p.w.pujetSF ,5,0,5);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet"+p.suffix,             p.ajets.size(),                eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet_noPUJetSF"+p.suffix,   p.ajets.size(),                eventweight*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet_no"+Tag+"SF"+p.suffix, p.ajets.size(),                eventweight*p.w.pujetSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet",             p.ajets.size(),                eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet_noPUJetSF",   p.ajets.size(),                eventweight*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_na"+tag+"jet_no"+Tag+"SF", p.ajets.size(),                eventweight*p.w.pujetSF ,5,0,5);
 
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet"+p.suffix,             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet_noPUJetSF"+p.suffix,   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
-      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet_no"+Tag+"SF"+p.suffix, p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet",             p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet_noPUJetSF",   p.bjets.size()+p.ajets.size(), eventweight*p.w.btagSF ,5,0,5);
+      FillHist(p.prefix+p.hprefix+"2"+tag+"veto_nt"+tag+"jet_no"+Tag+"SF", p.bjets.size()+p.ajets.size(), eventweight*p.w.pujetSF ,5,0,5);
     }
 
     if(n_30jet >1) return false;
     if(p.weightbit&NominalWeight){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"2jveto",eventweight*p.w.pujetSF*p.w.btagSF);
+      FillCutflow(p.prefix+p.hprefix+"cutflow","2jveto",eventweight*p.w.pujetSF*p.w.btagSF);
 
-      FillHist(p.prefix+p.hprefix+"2jveto_mll"+p.suffix,                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
-      FillHist(p.prefix+p.hprefix+"2jveto_yll"+p.suffix,                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
-      FillHist(p.prefix+p.hprefix+"2jveto_pTll"+p.suffix,                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillHist(p.prefix+p.hprefix+"2jveto_mll",                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 250,50,300);
+      FillHist(p.prefix+p.hprefix+"2jveto_yll",                 (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 60,-3,3);
+      FillHist(p.prefix+p.hprefix+"2jveto_pTll",                (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
 
-      FillHist(p.prefix+p.hprefix+"2jveto_njet"+p.suffix,                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2jveto_njet_noPUJetSF"+p.suffix,      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2jveto_njet_no"+Tag+"SF"+p.suffix,    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2jveto_n30jet"+p.suffix,              n_30jet,                            eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2jveto_n30jet_noPUJetSF"+p.suffix,    n_30jet,                            eventweight*p.w.btagSF ,10,0,10);
-      FillHist(p.prefix+p.hprefix+"2jveto_n30jet_no"+Tag+"SF"+p.suffix,  n_30jet,                            eventweight*p.w.pujetSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_njet",                realjets.size(),                    eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_njet_noPUJetSF",      realjets.size(),                    eventweight*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_njet_no"+Tag+"SF",    realjets.size(),                    eventweight*p.w.pujetSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_n30jet",              n_30jet,                            eventweight*p.w.pujetSF*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_n30jet_noPUJetSF",    n_30jet,                            eventweight*p.w.btagSF ,10,0,10);
+      FillHist(p.prefix+p.hprefix+"2jveto_n30jet_no"+Tag+"SF",  n_30jet,                            eventweight*p.w.pujetSF ,10,0,10);
 
-      FillHist(p.prefix+p.hprefix+"2jveto_MET"+p.suffix,                 (*p.lepton0+*p.lepton1).M(),        eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
-      FillHist(p.prefix+p.hprefix+"2jveto_puppiMET"+p.suffix,            (*p.lepton0+*p.lepton1).Rapidity(), eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
-      FillHist(p.prefix+p.hprefix+"2jveto_MET-puppiMET"+p.suffix,        (*p.lepton0+*p.lepton1).Pt(),       eventweight*p.w.pujetSF*p.w.btagSF, 200,-100,100);
+      FillHist(p.prefix+p.hprefix+"2jveto_MET",                 pfMET_Type1_pt,                     eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
+      FillHist(p.prefix+p.hprefix+"2jveto_puppiMET",            PuppiMET_Type1_pt,                  eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
+      FillHist(p.prefix+p.hprefix+"2jveto_MET-puppiMET",        pfMET_Type1_pt - PuppiMET_Type1_pt, eventweight*p.w.pujetSF*p.w.btagSF, 200,-100,100);
+      FillHist(p.prefix+p.hprefix+"2jveto_Z"+tag+"dPh",         (*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0), eventweight*p.w.pujetSF*p.w.btagSF, 140,-3.5,3.5);
+      FillHist(p.prefix+p.hprefix+"2jveto_Z"+tag+"pT",          (*p.lepton0+*p.lepton1+*p.jet0).Pt(), eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
     }
 
     if(PuppiMET_Type1_pt >75) return false;
     if(p.weightbit&NominalWeight){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"MET75",eventweight*p.w.pujetSF*p.w.btagSF);
-      FillHist(p.prefix+p.hprefix+"MET75_Z"+tag+"dPhi"+p.suffix, (*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0), eventweight*p.w.pujetSF*p.w.btagSF, 140,-3.5,3.5);
+      FillCutflow(p.prefix+p.hprefix+"cutflow","MET75",eventweight*p.w.pujetSF*p.w.btagSF);
+      FillHist(p.prefix+p.hprefix+"MET75_puppiMET",             PuppiMET_Type1_pt,                         eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
+      FillHist(p.prefix+p.hprefix+"MET75_pfMET",                pfMET_Type1_pt,                            eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
+      FillHist(p.prefix+p.hprefix+"MET75_Z"+tag+"dPhi",         (*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0), eventweight*p.w.pujetSF*p.w.btagSF, 140,-3.5,3.5);
+      FillHist(p.prefix+p.hprefix+"MET75_Z"+tag+"pT",           (*p.lepton0+*p.lepton1+*p.jet0).Pt(),      eventweight*p.w.pujetSF*p.w.btagSF, 150,0,150);
+      FillHist(p.prefix+p.hprefix+"MET75_pTll",                 (*p.lepton0+*p.lepton1).Pt(),              eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
     }
 
     if(abs((*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0)) <1.6) return false;
     if(p.weightbit&NominalWeight){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Z"+tag+"dPhi1p6",eventweight*p.w.pujetSF*p.w.btagSF);
-      FillHist(p.prefix+p.hprefix+"Z"+tag+"dPhi1p6_Z"+tag+"pT"+p.suffix, (*p.lepton0+*p.lepton1+*p.jet0).Pt(), eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillCutflow(p.prefix+p.hprefix+"cutflow","Z"+tag+"dPhi1p6",eventweight*p.w.pujetSF*p.w.btagSF);
+      FillHist(p.prefix+p.hprefix+"Z"+tag+"dPhi1p6_Z"+tag+"dPhi", (*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0), eventweight*p.w.pujetSF*p.w.btagSF, 140,-3.5,3.5);
+      FillHist(p.prefix+p.hprefix+"Z"+tag+"dPhi1p6_Z"+tag+"pT", (*p.lepton0+*p.lepton1+*p.jet0).Pt(), eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillHist(p.prefix+p.hprefix+"Z"+tag+"dPhi1p6_pTll",       (*p.lepton0+*p.lepton1).Pt(),         eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
     }
 
     if((*p.lepton0+*p.lepton1+*p.jet0).Pt() >60) return false;
     if(p.weightbit&NominalWeight){
-      FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Z"+tag+"pT60",eventweight*p.w.pujetSF*p.w.btagSF);
-      FillHist(p.prefix+p.hprefix+"Z"+tag+"pT60_ZpT"+p.suffix, (*p.lepton0+*p.lepton1).Pt(),eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillCutflow(p.prefix+p.hprefix+"cutflow","Z"+tag+"pT60",eventweight*p.w.pujetSF*p.w.btagSF);
+      FillHist(p.prefix+p.hprefix+"Z"+tag+"pT60_Z"+tag+"pT", (*p.lepton0+*p.lepton1+*p.jet0).Pt(), eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
+      FillHist(p.prefix+p.hprefix+"Z"+tag+"pT60_pTll", (*p.lepton0+*p.lepton1).Pt(),eventweight*p.w.pujetSF*p.w.btagSF, 200,0,200);
     }
 
     if((*p.lepton0+*p.lepton1).Pt() <15) return false;
-    if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ZpT15",eventweight*p.w.pujetSF*p.w.btagSF);
+    if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow","ZpT15",eventweight*p.w.pujetSF*p.w.btagSF);
   }
 
   return true;
@@ -651,13 +661,13 @@ void AFBAnalyzer::FillHists(Parameter& p){
   // FillHist jet_charge raw Only when Nominal
   jet_charge = jetCharge(*p.jet0, 1, p.prefix+p.hprefix, eventweight, p.weightbit&NominalWeight);
   if(p.weightbit&NominalWeight){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"ZpT15",eventweight);
+    FillCutflow(p.prefix+p.hprefix+"cutflow","ZpT15",eventweight);
     if(fabs(jet_charge) > 1.) FillHist(p.prefix+p.hprefix+tag+"jetCharge_raw_SL",jet_charge,eventweight,600,-6,6);
     else FillHist(p.prefix+p.hprefix+tag+"jetCharge_raw_noSL",jet_charge,eventweight,600,-6,6);
   }
 
-  //FillHistsAFB(p.prefix,p.hprefix,"_bCh00"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
-  //if(fabs(jet_charge) > 0.1) FillHistsAFB(p.prefix,p.hprefix,"_bCh01"+p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
+  //FillHistsAFB(p.prefix,p.hprefix,"_bCh00",(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
+  //if(fabs(jet_charge) > 0.1) FillHistsAFB(p.prefix,p.hprefix,"_bCh01",(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
 
   if(jet_charge < 0.) p.suffix += "_M";
   else p.suffix += "_P";
@@ -675,24 +685,30 @@ void AFBAnalyzer::FillHists(Parameter& p){
   FillHist(p.prefix+p.hprefix+tag+"jetCharge"+p.suffix,jet_charge,eventweight,600,-6,6);
   FillHist(p.prefix+p.hprefix+tag+"jetPUID"+p.suffix,(*p.jet0).PileupJetId(),eventweight,200,-2,2);
 
-  FillHist(p.prefix+p.hprefix+"yZ"+p.suffix,(*p.lepton0+*p.lepton1).Rapidity(),eventweight,60,-3,3);
-  FillHist(p.prefix+p.hprefix+"y"+tag+p.suffix,(*p.jet0).Rapidity(),eventweight,60,-3,3);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_y"+p.suffix,(*p.lepton0+*p.lepton1+*p.jet0).Rapidity(),eventweight,100,-5,5);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_pT"+p.suffix,(*p.lepton0+*p.lepton1+*p.jet0).Pt(),eventweight,100,0,100);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dy"+p.suffix,(*p.lepton0+*p.lepton1).Rapidity()-(*p.jet0).Rapidity(),eventweight,100,-5,5);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dphi"+p.suffix,(*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0),eventweight,100,-5,5);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dR"+p.suffix,(*p.lepton0+*p.lepton1).DeltaR(*p.jet0),eventweight,60,0,6);
-  FillHist(p.prefix+p.hprefix+"Z"+tag+"_y2D"+p.suffix,(*p.lepton0+*p.lepton1).Rapidity(),(*p.jet0).Rapidity(),eventweight,30,-3,3,30,-3,3);
+  FillHist(p.prefix+p.hprefix+tag+"jetpt",(*p.jet0).Pt(),eventweight,200,0,1000);
+  FillHist(p.prefix+p.hprefix+tag+"jeteta",(*p.jet0).Eta(),eventweight,100,-5,5);
+  FillHist(p.prefix+p.hprefix+tag+"jetM",(*p.jet0).M(),eventweight,200,0,50);
+  FillHist(p.prefix+p.hprefix+tag+"jetCharge",jet_charge,eventweight,600,-6,6);
+  FillHist(p.prefix+p.hprefix+tag+"jetPUID",(*p.jet0).PileupJetId(),eventweight,200,-2,2);
 
-  FillHist(p.prefix+p.hprefix+"mll"+p.suffix,(*p.lepton0+*p.lepton1).M(),eventweight,250,50,300);
-  FillHist(p.prefix+p.hprefix+"yll"+p.suffix,(*p.lepton0+*p.lepton1).Rapidity(),eventweight,60,-3,3);
-  FillHist(p.prefix+p.hprefix+"pTll"+p.suffix,(*p.lepton0+*p.lepton1).Pt(),eventweight,200,0,200);
+  FillHist(p.prefix+p.hprefix+"yZ",(*p.lepton0+*p.lepton1).Rapidity(),eventweight,60,-3,3);
+  FillHist(p.prefix+p.hprefix+"y"+tag,(*p.jet0).Rapidity(),eventweight,60,-3,3);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_y",(*p.lepton0+*p.lepton1+*p.jet0).Rapidity(),eventweight,100,-5,5);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_pT",(*p.lepton0+*p.lepton1+*p.jet0).Pt(),eventweight,100,0,100);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dy",(*p.lepton0+*p.lepton1).Rapidity()-(*p.jet0).Rapidity(),eventweight,100,-5,5);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dphi",(*p.lepton0+*p.lepton1).DeltaPhi(*p.jet0),eventweight,100,-5,5);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_dR",(*p.lepton0+*p.lepton1).DeltaR(*p.jet0),eventweight,60,0,6);
+  FillHist(p.prefix+p.hprefix+"Z"+tag+"_y2D",(*p.lepton0+*p.lepton1).Rapidity(),(*p.jet0).Rapidity(),eventweight,30,-3,3,30,-3,3);
 
-  FillHist(p.prefix+p.hprefix+"MET"+p.suffix,pfMET_Type1_pt,eventweight,200,0,200);
-  FillHist(p.prefix+p.hprefix+"puppiMET"+p.suffix,PuppiMET_Type1_pt,eventweight,200,0,200);
+  FillHist(p.prefix+p.hprefix+"mll",(*p.lepton0+*p.lepton1).M(),eventweight,250,50,300);
+  FillHist(p.prefix+p.hprefix+"yll",(*p.lepton0+*p.lepton1).Rapidity(),eventweight,60,-3,3);
+  FillHist(p.prefix+p.hprefix+"pTll",(*p.lepton0+*p.lepton1).Pt(),eventweight,200,0,200);
+
+  FillHist(p.prefix+p.hprefix+"MET",pfMET_Type1_pt,eventweight,200,0,200);
+  FillHist(p.prefix+p.hprefix+"puppiMET",PuppiMET_Type1_pt,eventweight,200,0,200);
 
   if((*p.lepton0+*p.lepton1).M() >200) return;
-  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"Mass200",eventweight);
+  if(p.weightbit&NominalWeight) FillCutflow(p.prefix+p.hprefix+"cutflow","Mass200",eventweight);
 
   ///////////////////////fill TH4D hists///////////////////////
   TLorentzVector dilepton=*p.lepton0+*p.lepton1;

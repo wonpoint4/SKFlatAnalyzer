@@ -2400,12 +2400,21 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       if(p.lepton1){if(p.lepton1->DeltaR(alljets.at(l)) <0.4) continue;}
       lepvetojets.push_back(alljets.at(l));
     }
-    for(unsigned int l=0; l<lepvetojets.size();l++){
-      if(!PUJetIDPass(alljets.at(l), "Loose")) continue;
-      realjets.push_back(alljets.at(l));
-    }
 
     p.w.pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
+
+    for(unsigned int l=0; l<lepvetojets.size();l++){
+      if(!PUJetIDPass(lepvetojets.at(l), "Loose")) continue;
+      realjets.push_back(lepvetojets.at(l));
+    }
+
+    double eventweight = p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.topptweight;
+    FillHist(p.prefix+p.hprefix+"alljets", alljets.size(), eventweight, 15,0,15);
+    FillHist(p.prefix+p.hprefix+"lepvetojets", lepvetojets.size(), eventweight, 15,0,15);
+    FillHist(p.prefix+p.hprefix+"realjets", realjets.size(), eventweight, 15,0,15);
+    FillHist(p.prefix+p.hprefix+"pujetSF_all", GetPUJetWeight(alljets, "Loose", 0), eventweight, 100,0,5);
+    FillHist(p.prefix+p.hprefix+"pujetSF_lepveto", p.w.pujetSF, eventweight, 100,0,5);
+    FillHist(p.prefix+p.hprefix+"pujetSF_real", GetPUJetWeight(realjets, "Loose", 0), eventweight, 100,0,5);
 
     if(p.channel(2,2)=="bx"){
       p.SetJetPtCut(30,20);

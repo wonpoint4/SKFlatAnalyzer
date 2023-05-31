@@ -896,7 +896,7 @@ try:
                   if nhadd<4: break
                   os.system('echo "Too many hadd currently (nhadd='+str(nhadd)+'). Sleep 60s" >> JobStatus.log')
                   time.sleep(60)
-                if NJobs<35:
+                if NJobs<45:
                   os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
                   os.system('rm output/*.root')
                 else:
