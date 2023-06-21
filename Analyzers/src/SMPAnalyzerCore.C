@@ -849,11 +849,13 @@ double SMPAnalyzerCore::GetTopPtReweight2(const std::vector<Gen>& gens){
 
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
-  TString datapath=getenv("DATA_DIR");
-  TString rocpath=datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEraShort()+"UL.txt";
+  TString erashort=GetEraShort();
+
+  //TString rocpath=datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEraShort()+"UL.txt"; //central roccor for amc
+  TString rocpath=TString(getenv("SKFlat_WD"))+"/external/Aepcor/u_"+erashort(2,3)+"UL_1.txt"; //roccor for minnlo
   if(IsExists(rocpath)) roc=new RoccoR(rocpath.Data());
   else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocpath<<endl;
-  TString erashort=GetEraShort();
+
   TString rocelepath=TString(getenv("SKFlat_WD"))+"/external/Aepcor/e_"+erashort(2,3)+"UL_1.txt";
   if(IsExists(rocelepath)){
     rocele=new Aepcor;
@@ -1713,7 +1715,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   }
 
   p.prefix=p.channel+GetEraShort()+"/";
-  int roccor_set=5,roccor_mem=0,aepcor_set=0,aepcor_mem=0;
+  int roccor_set=0,roccor_mem=0,aepcor_set=0,aepcor_mem=0;
   if(p.option.Contains(TRegexp("roccor_s[0-9]+m[0-9]+"))){
     TObjArray* array=TPRegexp("roccor_s([0-9]+)m([0-9]+)").MatchS(p.option);
     TString sset=((TObjString*)array->At(1))->GetString();
