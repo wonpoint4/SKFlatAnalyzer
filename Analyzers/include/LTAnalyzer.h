@@ -8,7 +8,6 @@ class LTAnalyzer : public SMPAnalyzerCore {
 public:
 
   virtual void initializeAnalyzer();
-  virtual void beginEvent();
   virtual void executeEvent();
   virtual void executeEventWithParameter(Parameter& p);
   virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
@@ -22,7 +21,6 @@ public:
   LTAnalyzer();
   ~LTAnalyzer();
 
-  vector<fastjet::PseudoJet> genjets;
   static const int mbinnum=42;
   static constexpr const double mbin[mbinnum+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,1500,2000,3000};
   static const int njetbin=2;
