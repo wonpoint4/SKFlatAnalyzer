@@ -269,6 +269,8 @@ public:
   virtual double getPrefiringRateMuon(double eta, double phi, double pt, int sys) const;
   virtual double GetL1PrefiringWeight(int mode=0) const;
   RocPFProb* rocpfprob=NULL;
+  TH2* fFGPP=NULL;
+  TH2* fFGPM=NULL;
   TH2* fL1Prefiring_photon=NULL;
   TH2* fL1Prefiring_jet=NULL;
   TF1* fL1Prefiring_muon[12]={};
