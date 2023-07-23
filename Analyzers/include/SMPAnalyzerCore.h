@@ -68,7 +68,7 @@ public:
       vector<vector<double>> muonIDSF_sys;
       double muonISOSF=1;
       vector<vector<double>> muonISOSF_sys;
-      double triggerSF=1,triggerSF_up=1,triggerSF_down=1;
+      double triggerSF=1,triggerSF_up=1,triggerSF_down=1,triggerSF_mode1=1,triggerSF_interpolation=1;
       vector<vector<double>> triggerSF_sys;
       double CFSF=1,CFSF_up=1,CFSF_down=1;
       double btagSF=1,btagSF_hup=1,btagSF_hdown=1,btagSF_lup=1,btagSF_ldown=1;
@@ -224,9 +224,9 @@ public:
   EfficiencyTool* fEff=NULL;
   void SetupEfficiency();
   void DeleteEfficiency();
-  double GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem);
-  double GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem);
-  double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,TString DZSFhistkey,const vector<Lepton*>& leps,int set,int mem);
+  double GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem,TString option="");
+  double GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem,TString option="");
+  double GetDileptonTriggerSF(TString SFhistkey0,TString SFhistkey1,TString DZSFhistkey,const vector<Lepton*>& leps,int set,int mem,TString option="");
 
   void PrintGens(const vector<Gen>& gens);
   static double GetBinContentUser(TH1* hist,double valx,int sys);
@@ -293,6 +293,11 @@ public:
 
   double GetPFMET_T1Smear() const;
   TString GetSkimName() const;
+
+  bool PassSLT1(const Lepton* lep) const;
+  bool PassSLT2(const Lepton* lep) const;
+  bool PassDLT1(const Lepton* lep) const;
+  bool PassDLT2(const Lepton* lep) const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

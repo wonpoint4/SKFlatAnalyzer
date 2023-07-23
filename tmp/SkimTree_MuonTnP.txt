@@ -1,0 +1,15 @@
+SKFlat.py -a SkimTree_MuonTnP -i SingleMuon -e 2016a -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJetsToMuMu_MiNNLO -e 2016a -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJets_MG -e 2016a -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+
+SKFlat.py -a SkimTree_MuonTnP -i SingleMuon -e 2016b -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJetsToMuMu_MiNNLO -e 2016b -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJets_MG -e 2016b -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+
+SKFlat.py -a SkimTree_MuonTnP -i SingleMuon -e 2017 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJetsToMuMu_MiNNLO -e 2017 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJets_MG -e 2017 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+
+SKFlat.py -a SkimTree_MuonTnP -i SingleMuon -e 2018 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJetsToMuMu_MiNNLO -e 2018 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat
+SKFlat.py -a SkimTree_MuonTnP -i DYJets_MG -e 2018 -n 300 -o /gv0/Users/hsseo/MuonTnP/SKFlat

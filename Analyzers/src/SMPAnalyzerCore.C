@@ -98,75 +98,79 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
       p.w.muonIDSF_sys=fEff->GetStructure(p.k.muonIDSF);
       p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
     }
-    for(const auto& electron:p.electrons){
-      p.w.electronRECOSF*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.electronRECOSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.electronRECOSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,s,m);
-	  }
-	}
-      }
-      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,0,0);
-      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.electronIDSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.electronIDSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
-	    // electronIDSF2 is for the selective charge ID
-	    if(fEff->Get(p.k.electronIDSF2)){
-	      if(s<(int)fEff->Get(p.k.electronIDSF2)->fDataPlus.size())
-		p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
-	      else
-		p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
+    for(const Lepton* lepton:p.leptons){
+      if(!lepton) continue;
+      if(lepton->LeptonFlavour()==Lepton::ELECTRON){
+	const Electron* electron=(const Electron*)lepton;
+	p.w.electronRECOSF*=fEff->GetEfficiencySF(p.k.electronRECOSF,electron,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.electronRECOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.electronRECOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,electron,s,m);
 	    }
 	  }
 	}
-      }
-    }
-    for(const auto& muon:p.muons){
-      //p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
-      p.w.muonTrackingSF*=fEff->GetEfficiencySF(p.k.muonTrackingSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonTrackingSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonTrackingSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonTrackingSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonTrackingSF,&muon,s,m);
+	p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,electron,0,0);
+	p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.electronIDSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.electronIDSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,electron,s,m);
+	      // electronIDSF2 is for the selective charge ID
+	      if(fEff->Get(p.k.electronIDSF2)){
+		if(s<(int)fEff->Get(p.k.electronIDSF2)->fDataPlus.size())
+		  p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,s,m);
+		else
+		  p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,0,0);
+	      }
+	    }
 	  }
 	}
-      }
-      p.w.muonRECOSF*=fEff->GetEfficiencySF(p.k.muonRECOSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonRECOSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonRECOSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonRECOSF,&muon,s,m);
+      }else if(lepton->LeptonFlavour()==Lepton::MUON){
+	const Muon* muon=(const Muon*)lepton;
+	//p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
+	p.w.muonTrackingSF*=fEff->GetEfficiencySF(p.k.muonTrackingSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonTrackingSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonTrackingSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonTrackingSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonTrackingSF,muon,s,m);
+	    }
 	  }
 	}
-      }
-      p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonIDSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonIDSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,s,m);
+	p.w.muonRECOSF*=fEff->GetEfficiencySF(p.k.muonRECOSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonRECOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonRECOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonRECOSF,muon,s,m);
+	    }
 	  }
 	}
-      }
-      p.w.muonISOSF*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-	int nset=p.w.muonISOSF_sys.size();
-	for(int s=0;s<nset;s++){
-	  int nmem=p.w.muonISOSF_sys[s].size();
-	  for(int m=0;m<nmem;m++){
-	    p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,s,m);
+	p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonIDSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonIDSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,muon,s,m);
+	    }
+	  }
+	}
+	p.w.muonISOSF*=fEff->GetEfficiencySF(p.k.muonISOSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonISOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonISOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,muon,s,m);
+	    }
 	  }
 	}
       }
@@ -179,6 +183,7 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
 void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   if(!IsDATA){
     vector<Lepton*> triggerables;
+    vector<Lepton*> triggerables_mode1=p.leptons;
     if(p.k.triggerSF.size()){
       if(p.weightbit&EfficiencyWeight){
 	p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
@@ -188,6 +193,8 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
     }
     if(p.k.triggerSF.size()==1){
       p.w.triggerSF*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,0,0);
+      p.w.triggerSF_mode1*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables_mode1,0,0);
+      p.w.triggerSF_interpolation*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,0,0,"interpolation");
       if(p.weightbit&EfficiencyWeight){
 	int nset=p.w.triggerSF_sys.size();
 	for(int s=0;s<nset;s++){
@@ -200,6 +207,8 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
     }else if(p.k.triggerSF.size()==2){
       if(GetPtThreshold(p.k.triggerSF[0])<GetPtThreshold(p.k.triggerSF[1])){
 	p.w.triggerSF*=GetLeptonTriggerORSF(p,triggerables,0,0);
+	p.w.triggerSF_mode1*=GetLeptonTriggerORSF(p,triggerables_mode1,0,0);
+	p.w.triggerSF_interpolation*=GetLeptonTriggerORSF(p,triggerables,0,0,"interpolation");
 	if(p.weightbit&EfficiencyWeight){
 	  int nset=p.w.triggerSF_sys.size();
 	  for(int s=0;s<nset;s++){
@@ -211,6 +220,8 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
 	}
       }else{
 	p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables,0,0);
+	p.w.triggerSF_mode1*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables_mode1,0,0);
+	p.w.triggerSF_interpolation*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables_mode1,0,0,"interpolation");
 	if(p.weightbit&EfficiencyWeight){
 	  int nset=p.w.triggerSF_sys.size();
 	  for(int s=0;s<nset;s++){
@@ -293,28 +304,14 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
 	if(p.lepton0->LeptonFlavour()!=Lepton::MUON) return false;
 	if(p.lepton1->LeptonFlavour()!=Lepton::MUON) return false;
 	Muon *muon0=(Muon*)p.lepton0,*muon1=(Muon*)p.lepton1;
-	if(GetEra()=="2016preVFP"||GetEra()=="2016postVFP"){
-	  if(!muon0->PassFilterOR({"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"})) return false;
-	  if(!muon1->PassFilterOR({"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"})) return false;
-	  if(!muon0->PassFilterOR({"hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17","hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17","hltL3fL1sDoubleMu114TkFiltered17Q"})
-	     &&!muon1->PassFilterOR({"hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17","hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17","hltL3fL1sDoubleMu114TkFiltered17Q"})) return false;
-	  if(!muon0->PassFilterOR({"hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8","hltDiMuonGlbFiltered17TrkFiltered8","hltDiTkMuonTkFiltered17TkFiltered8"})
-	     ||!muon1->PassFilterOR({"hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8","hltDiMuonGlbFiltered17TrkFiltered8","hltDiTkMuonTkFiltered17TkFiltered8"})) return false;
-	}else if(GetEra()=="2017"||GetEra()=="2018"){
-	  if(!muon0->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4")) return false;
-	  if(!muon1->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4")) return false;
-	  if(!muon0->PassFilter("hltL3fL1DoubleMu155fFiltered17")&&!muon1->PassFilter("hltL3fL1DoubleMu155fFiltered17")) return false;
-	  if(!muon0->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")||!muon1->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")) return false;
-	}else{
-	  cout<<"[SMPAnalyzerCore::PassSelection] trigger matching for "<<GetEra()<<" "<<p.triggers.at(0)<<" is not implemented"<<endl;
-	  exit(EXIT_FAILURE);
-	}
+	if(!PassDLT1(muon0)&&!PassDLT1(muon1)) return false;
+	if(!PassDLT2(muon0)||!PassDLT2(muon1)) return false;
       }else if(p.triggers.at(0).Contains("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL")){
 	if(p.lepton0->LeptonFlavour()!=Lepton::ELECTRON) return false;
 	if(p.lepton1->LeptonFlavour()!=Lepton::ELECTRON) return false;
 	Electron *electron0=(Electron*)p.lepton0,*electron1=(Electron*)p.lepton1;
-	if(!electron0->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter")&&!electron1->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter")) return false;
-	if(!electron0->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter")||!electron1->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter")) return false;
+	if(!PassDLT1(electron0)&&!PassDLT1(electron1)) return false;
+	if(!PassDLT2(electron0)||!PassDLT2(electron1)) return false;
       }else if(p.channel=="mj"||p.channel=="Mj"){
 	bool passor=false;
 	for(auto trigger:p.triggers){
@@ -529,22 +526,22 @@ void SMPAnalyzerCore::SetupEfficiency(){
 void SMPAnalyzerCore::DeleteEfficiency(){
   if(fEff) delete fEff;
 }
-double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
   if(triggerSF_key=="") return 1;
   if(triggerSF_key=="Default") return 1;
 
   double data_eff=1.,sim_eff=1.;
   for(const auto& lep:leps){
-    data_eff*=1-fEff->GetDataEfficiency(triggerSF_key,lep,set,mem);
-    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key,lep,set,mem);
+    data_eff*=1-fEff->GetDataEfficiency(triggerSF_key,lep,set,mem,option);
+    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key,lep,set,mem,option);
   }
   data_eff=1-data_eff;
   sim_eff=1-sim_eff;
   if(sim_eff==0) return 1.;
   else return data_eff/sim_eff;
 }
-double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
   if(p.triggers.size()!=2){
     cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] p.triggers.size()= "<<p.triggers.size()<<endl;
@@ -572,10 +569,10 @@ double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lep
   double data_eff0=1.,sim_eff0=1.;
   double data_eff1=1.,sim_eff1=1.;
   for(const auto& lep:leps){
-    data_eff0*=1-fEff->GetDataEfficiency(p.k.triggerSF[0],lep,set,mem);
-    sim_eff0*=1-fEff->GetSimEfficiency(p.k.triggerSF[0],lep,set,mem);
-    data_eff1*=1-fEff->GetDataEfficiency(p.k.triggerSF[1],lep,set,mem);
-    sim_eff1*=1-fEff->GetSimEfficiency(p.k.triggerSF[1],lep,set,mem);
+    data_eff0*=1-fEff->GetDataEfficiency(p.k.triggerSF[0],lep,set,mem,option);
+    sim_eff0*=1-fEff->GetSimEfficiency(p.k.triggerSF[0],lep,set,mem,option);
+    data_eff1*=1-fEff->GetDataEfficiency(p.k.triggerSF[1],lep,set,mem,option);
+    sim_eff1*=1-fEff->GetSimEfficiency(p.k.triggerSF[1],lep,set,mem,option);
   }
   data_eff0=1-data_eff0;
   sim_eff0=1-sim_eff0;
@@ -629,7 +626,7 @@ double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lep
   }    
   return sf;
 }
-double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,TString DZSF,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,TString DZSF,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
   if((triggerSF_key0==""||triggerSF_key0=="Default")&&(triggerSF_key1==""||triggerSF_key1=="Default")) return 1;
   int nlep=leps.size();
@@ -641,13 +638,13 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
   vector<double> data_oneleg1_noleg2(nlep,1.);
   vector<double> sim_oneleg1_noleg2(nlep,1.);
   for(int i=0;i<nlep;i++){
-    double data_eff_leg1=fEff->GetDataEfficiency(triggerSF_key0,leps.at(i),set,mem);
-    double data_eff_leg2=fEff->GetDataEfficiency(triggerSF_key1,leps.at(i),set,mem);
-    double sim_eff_leg1=fEff->GetSimEfficiency(triggerSF_key0,leps.at(i),set,mem);
-    double sim_eff_leg2=fEff->GetSimEfficiency(triggerSF_key1,leps.at(i),set,mem);
+    double data_eff_leg1=fEff->GetDataEfficiency(triggerSF_key0,leps.at(i),set,mem,option);
+    double data_eff_leg2=fEff->GetDataEfficiency(triggerSF_key1,leps.at(i),set,mem,option);
+    double sim_eff_leg1=fEff->GetSimEfficiency(triggerSF_key0,leps.at(i),set,mem,option);
+    double sim_eff_leg2=fEff->GetSimEfficiency(triggerSF_key1,leps.at(i),set,mem,option);
     if(DZSF!=""){
-      double data_eff_dz=fEff->GetDataEfficiency(DZSF,leps.at(i),0,0);
-      double sim_eff_dz=fEff->GetSimEfficiency(DZSF,leps.at(i),0,0);
+      double data_eff_dz=fEff->GetDataEfficiency(DZSF,leps.at(i),0,0,option);
+      double sim_eff_dz=fEff->GetSimEfficiency(DZSF,leps.at(i),0,0,option);
       data_eff_leg1*=data_eff_dz;
       data_eff_leg2*=data_eff_dz;
       sim_eff_leg1*=sim_eff_dz;
@@ -2515,3 +2512,93 @@ double SMPAnalyzerCore::GetL1PrefiringWeight(int mode) const {
   return nonPrefiringProba[0];
 }
 
+bool SMPAnalyzerCore::PassSLT1(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return muon->PassFilterOR({"hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09","hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"});
+    else if(DataYear==2017||DataYear==2018)
+      return muon->PassFilter("hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07");
+    else{
+      cout<<"[SMPAnalyzerCore::PassSLT1] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    cout<<"[SMPAnalyzerCore::PassSLT1] not yet implemented"<<endl;
+    exit(EXIT_FAILURE);
+  }else{
+    cout<<"[SMPAnalyzerCore::PassSLT1] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassSLT2(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return false;
+    else if(DataYear==2017)
+      return muon->PassFilter("hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07");
+    else if(DataYear==2018)
+      return false;
+    else{
+      cout<<"[SMPAnalyzerCore::PassSLT2] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    cout<<"[SMPAnalyzerCore::PassSLT2] not yet implemented"<<endl;
+    exit(EXIT_FAILURE);
+  }else{
+    cout<<"[SMPAnalyzerCore::PassSLT2] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassDLT1(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return (muon->PassFilter("hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17")&&muon->PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17")&&muon->PassFilter("hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltL3fL1sDoubleMu114TkFiltered17Q")&&muon->PassFilter("hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"));
+    else if(DataYear==2017||DataYear==2018)
+      return (muon->PassFilter("hltL3fL1DoubleMu155fFiltered17")&&muon->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4"));
+    else{
+      cout<<"[SMPAnalyzerCore::PassDLT1] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    const Electron* electron=(Electron*)lep;
+    return electron->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter");
+  }else{
+    cout<<"[SMPAnalyzerCore::PassDLT1] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassDLT2(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return (muon->PassFilter("hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8")&&muon->PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltDiMuonGlbFiltered17TrkFiltered8")&&muon->PassFilter("hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltDiTkMuonTkFiltered17TkFiltered8")&&muon->PassFilter("hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"));
+    else if(DataYear==2017||DataYear==2018)
+      return (muon->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")&&muon->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4"));
+    else{
+      cout<<"[SMPAnalyzerCore::PassDLT2] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    const Electron* electron=(Electron*)lep;
+    return electron->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter");
+  }else{
+    cout<<"[SMPAnalyzerCore::PassDLT2] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}

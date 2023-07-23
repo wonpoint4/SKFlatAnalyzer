@@ -70,8 +70,8 @@ def addResidual(infilename):
     hsf_origin=f.Get("sf")
 
     plotter=ROOT.AFBPlotter("data mi+tau_mi+vv+wjets+tt+st+qcdss+aa","EfficiencyValidation")
-    hdata4d=plotter.GetHist(0,channel+era+"/m80to100/lpetaptlmetapt","noproject")
-    hsim4d=plotter.GetHist(1,channel+era+"/m80to100/lpetaptlmetapt","noproject")
+    hdata4d=plotter.GetHist(0,"v17/"+channel+era+"/m80to100/lpetaptlmetapt","noproject")
+    hsim4d=plotter.GetHist(1,"v17/"+channel+era+"/m80to100/lpetaptlmetapt","noproject")
     scale=hdata4d.Integral(0,-1,0,-1,0,-1,0,-1)/hsim4d.Integral(0,-1,0,-1,0,-1,0,-1)
     hsim4d.Scale(scale)
 
@@ -94,19 +94,20 @@ def addResidual(infilename):
         chi2_old=chi2
 
     ## fluctuataion
-    hdata2d=Make2D(hdata4d)
-    hsim2d=Make2D(hsim4d)
-    chi2,ndf,prob=GetChi2(hdata2d,hsim2d)
-    print "before fluctuation", chi2, ndf, prob
-    errscale=(1-(chi2/ndf))**0.5
-    this_hsf=hdata2d.Clone("this_hsf")
-    this_hsf.Divide(hsim2d)
-    for j in range(this_hsf.GetNcells()):
-        err=this_hsf.GetBinError(j)
-        this_hsf.SetBinContent(j,ROOT.gRandom.Gaus(this_hsf.GetBinContent(j),err*errscale))
-        this_hsf.SetBinError(j,0)
-    Apply(hsim4d,this_hsf)
-    hsf.Multiply(this_hsf)
+#    hdata2d=Make2D(hdata4d)
+#    hsim2d=Make2D(hsim4d)
+#    chi2,ndf,prob=GetChi2(hdata2d,hsim2d)
+#    print "before fluctuation", chi2, ndf, prob
+#    errscale=(1-(chi2/ndf))**0.5
+#    this_hsf=hdata2d.Clone("this_hsf")
+#    this_hsf.Divide(hsim2d)
+#    for j in range(this_hsf.GetNcells()):
+#        err=this_hsf.GetBinError(j)
+#        this_hsf.SetBinContent(j,ROOT.gRandom.Gaus(this_hsf.GetBinContent(j),err*errscale))
+#        this_hsf.SetBinError(j,0)
+#    Apply(hsim4d,this_hsf)
+#    hsf.Multiply(this_hsf)
+
     print "final", GetChi2(Make2D(hdata4d),Make2D(hsim4d))
 
     hdata=hsim.Clone("data")
@@ -128,8 +129,8 @@ if __name__=="__main__":
     if sys.argv[1]=="all":
         for era in ["2016preVFP","2016postVFP","2017","2018"]:
             erashort=era.replace("preVFP","a").replace("postVFP","b")
-            addResidual("data/Run2UltraLegacy_v3/{}/ID/Electron/{}_MediumID_v15.root".format(era,erashort))
-            addResidual("data/Run2UltraLegacy_v3/{}/ID/Muon/MediumID_LooseTrkIso_Inclusive_v14.root".format(era))
+            addResidual("data/Run2UltraLegacy_v3/{}/ID/Electron/{}_MediumID_v17.root".format(era,erashort))
+            addResidual("data/Run2UltraLegacy_v3/{}/ID/Muon/{}_MediumID_LooseTrkIso_v17.root".format(era,erashort))
     else:
         addResidual(sys.argv[1])
     

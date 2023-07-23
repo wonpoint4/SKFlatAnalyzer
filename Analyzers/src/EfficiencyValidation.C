@@ -23,7 +23,7 @@ void EfficiencyValidation::executeEvent(){
       } 
     }else{
       executeEventWithParameter(MakeParameter("mm")); 
-      //executeEventWithParameter(MakeParameter("mm","mv14"));
+      //executeEventWithParameter(MakeParameter("mm","mv17"));
     }
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
@@ -35,7 +35,7 @@ void EfficiencyValidation::executeEvent(){
       } 
     }else{
       executeEventWithParameter(MakeParameter("mu")); 
-      //executeEventWithParameter(MakeParameter("mu","mv14"));
+      //executeEventWithParameter(MakeParameter("mu","mv17"));
     }
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
@@ -47,7 +47,7 @@ void EfficiencyValidation::executeEvent(){
       } 
     }else{
       executeEventWithParameter(MakeParameter("ee"));
-      executeEventWithParameter(MakeParameter("ee","ev16"));
+      //executeEventWithParameter(MakeParameter("ee","ev17"));
     }
   }    
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
@@ -59,8 +59,8 @@ void EfficiencyValidation::executeEvent(){
       } 
     }else{
       executeEventWithParameter(MakeParameter("el"));
-      //executeEventWithParameter(MakeParameter("el","SelQ"));
-      executeEventWithParameter(MakeParameter("el","ev16"));
+      executeEventWithParameter(MakeParameter("el","SelQ"));
+      //executeEventWithParameter(MakeParameter("el","ev17"));
       //executeEventWithParameter(MakeParameter("el","SelQ ev14"));
     }
   }
@@ -173,18 +173,21 @@ void EfficiencyValidation::executeEvent(){
 SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
   p.weightbit|=EfficiencyWeight;
-  if(option.Contains("ev16")){
-    p.prefix="v16/"+p.prefix;
-    p.k.electronIDSF+="_v16"; 
-    p.k.electronRECOSF+="_v16";
+  if(option.Contains("ev17")){
+    p.prefix="v17/"+p.prefix;
+    p.k.electronIDSF+="_v17"; 
+    p.k.electronRECOSF+="_v17";
     for(auto& key:p.k.triggerSF)
-      key=key+"_v16";
-    p.option.ReplaceAll("ev16","");
+      key=key+"_v17";
+    p.option.ReplaceAll("ev17","");
   }
-  if(option.Contains("mv14")){
-    p.prefix="v14/"+p.prefix;
-    p.k.muonRECOSF="";
-    p.option.ReplaceAll("mv14","");
+  if(option.Contains("mv17")){
+    p.prefix="v17/"+p.prefix;
+    p.k.muonRECOSF+="_v17";
+    p.k.muonTrackingSF+="_v17";
+    p.k.muonIDSF+="_v17";
+    for(auto& key:p.k.triggerSF) key=key+"_v17";
+    p.option.ReplaceAll("mv17","");
   }
   if(option.Contains("noroccor")){
     p.suffix="_noroccor";
@@ -268,6 +271,8 @@ void EfficiencyValidation::EvalWeights(Parameter& p){
       }	
       
       p.weightmap["_notriggerSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.CFSF;
+      p.weightmap["_triggerSF_mode1"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_mode1*p.w.CFSF;
+      p.weightmap["_triggerSF_interpolation"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_interpolation*p.w.CFSF;
       for(int i=1,ni=p.w.triggerSF_sys.size();i<ni;i++){
 	for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
 	  p.weightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_sys[i][j]*p.w.CFSF;
@@ -378,12 +383,12 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
 	double rtrkiso=((Muon*)p.leptons.at(i))->TrkIso()/pt;
 	FillHist(Form("%slrtrkiso%s",pre.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
       }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
-	Electron* el=(Electron*)p.leptons.at(i);
+	//Electron* el=(Electron*)p.leptons.at(i);
 	//FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
 	//FillProfile(pre+"leta_energyscale"+suf,el->scEta(),el->Pt()/el->UncorrPt(),w,60,-3,3);
 	//FillProfile(pre+"leta_energyscale2"+suf,el->scEta(),el->Energy()/el->scE(),w,60,-3,3);
       }
-      int iphi=(p.leptons.at(i)->Phi()/TMath::Pi()+1)*4;      
+      //int iphi=(p.leptons.at(i)->Phi()/TMath::Pi()+1)*4;      
       //FillHist(Form("%sleta%s_phi%d",pre.Data(),suf.Data(),iphi),eta,w,120,-3,3);
       if(vertex_Z<-4){
 	//FillHist(Form("%sleta%s_z0",pre.Data(),suf.Data()),eta,w,120,-3,3);
