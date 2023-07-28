@@ -314,7 +314,7 @@ void EfficiencyValidation::FillHists(Parameter& p){
   if(dimass>=52) FillHist(p.prefix+"m52to3000/"+p.hprefix+"dimass"+p.suffix,dimass,p.weightmap,mbinnum,mbin);
   if(dimass>=52&&dimass<150){
     if(!Userflags.size()) FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m52to150",p.weightmap[""]);
-    //FillHistsEfficiency(p,"m52to150/");
+    FillHistsEfficiency(p,"m52to150/");
     FillHist(p.prefix+p.hprefix+"costym"+p.suffix,fabs(GetCosThetaCS(p.lepton0,p.lepton1)),fabs(dilepton.Rapidity()),dimass,p.weightmap,rochester_ncostbin,rochester_costbins,rochester_nybin,rochester_ybins,rochester_nmbin,rochester_mbins);
   }
   if(dimass>=80&&dimass<100){
