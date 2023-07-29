@@ -64,31 +64,31 @@ public:
   Event GetEvent();
 
 
-  std::vector<Electron> GetAllElectrons();
-  std::vector<Electron> GetElectrons(TString id, double ptmin, double fetamax, bool vetoHEM = false);
+  std::vector<Electron> GetAllElectrons() const;
+  std::vector<Electron> GetElectrons(TString id, double ptmin, double fetamax, bool vetoHEM = false) const;
 
-  std::vector<Muon> GetAllMuons();
-  std::vector<Muon> GetMuons(TString id, double ptmin, double fetamax);
+  std::vector<Muon> GetAllMuons() const;
+  std::vector<Muon> GetMuons(TString id, double ptmin, double fetamax) const;
 
-  std::vector<Tau> GetAllTaus();
-  std::vector<Tau> GetTaus(TString id, double ptmin, double fetamax);
+  std::vector<Tau> GetAllTaus() const;
+  std::vector<Tau> GetTaus(TString id, double ptmin, double fetamax) const;
 
-  std::vector<Photon> GetAllPhotons();
-  std::vector<Photon> GetPhotons(TString id, double ptmin, double fetamax);
+  std::vector<Photon> GetAllPhotons() const;
+  std::vector<Photon> GetPhotons(TString id, double ptmin, double fetamax) const;
 
   //==== If TightIso is set, it calculate ptcone
   //==== If UseMini is true, Lepton::RelIso() returns MiniRelIso
   std::vector<Lepton *> MakeLeptonPointerVector(const std::vector<Muon>& muons, double TightIso=-999, bool UseMini=false);
   std::vector<Lepton *> MakeLeptonPointerVector(const std::vector<Electron>& electrons, double TightIso=-999, bool UseMini=false);
 
-  std::vector<Jet> GetAllJets();
-  std::vector<Jet> GetJets(TString id, double ptmin, double fetamax);
+  std::vector<Jet> GetAllJets() const;
+  std::vector<Jet> GetJets(TString id, double ptmin, double fetamax) const;
 
-  std::vector<FatJet> GetAllFatJets();
-  std::vector<FatJet> GetFatJets(TString id, double ptmin, double fetamax);
+  std::vector<FatJet> GetAllFatJets() const;
+  std::vector<FatJet> GetFatJets(TString id, double ptmin, double fetamax) const;
 
-  std::vector<Gen> GetGens();
-  std::vector<LHE> GetLHEs();
+  std::vector<Gen> GetGens() const;
+  std::vector<LHE> GetLHEs() const;
 
   //===================================================
   //==== Get objects METHOD 2
@@ -201,7 +201,7 @@ public:
   static bool IsFinalPhotonSt23_Public(const std::vector<Gen>& TruthColl);
   int  GetPrElType_InSameSCRange_Public(int TruthIdx, const std::vector<Gen>& TruthColl);
   bool IsSignalPID(int pid);
-  bool FindHEMElectron(Electron electron);
+  bool FindHEMElectron(Electron electron) const;
 
   //==== Plotting
 

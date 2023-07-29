@@ -20,8 +20,14 @@ public:
   inline bool IsGenMatched() const { return j_GenHFHadronMatcher_flavour!=-999; }
   void SetTaggerResults(std::vector<double> ds);
   void SetEnergyFractions(double cH, double nH, double nEM, double cEM, double muE);
+  inline double muonEnergyFraction() const { return j_muonEnergyFraction; }
   void SetMultiplicities(double cM, double nM);
   void SetPileupJetId(double v);
+
+  void SetJEC(double jec);
+  void SetJER(double jer);
+  inline double JEC() const { return j_JECFull; }
+  inline double JER() const { return j_smearedRes; }
 
   void SetEnShift(double en_up, double en_down);
   inline double EnShift(int s) const {
@@ -72,6 +78,8 @@ private:
   int j_chargedMultiplicity;
   int j_neutralMultiplicity;
   double j_PileupJetId;
+  double j_JECFull=1.;
+  double j_smearedRes=1.;
   double j_En_up;
   double j_En_down;
   double j_Res_up;

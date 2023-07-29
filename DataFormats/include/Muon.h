@@ -120,6 +120,7 @@ public:
   bool PassFilter(TString filter) const;
   bool PassFilterOR(const vector<TString>& filters) const;
   bool PassPath(TString path) const;
+  bool PassPathOR(const vector<TString>& paths) const;
 
 
 private:

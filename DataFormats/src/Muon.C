@@ -109,6 +109,7 @@ bool Muon::PassID(TString ID) const {
   if(ID=="POGHighPt") return isPOGHighPt();
   if(ID=="POGMedium") return isPOGMedium();
   if(ID=="POGMedium_nohip") return isPOGMedium_nohip();
+  if(ID=="POGMedium_hip") return isPOGMedium_hip();
   if(ID=="POGLoose") return isPOGLoose();
   if(ID=="POGTightWithTightIso") return Pass_POGTightWithTightIso();
   if(ID=="POGHighPtWithLooseTrkIso") return Pass_POGHighPtWithLooseTrkIso();
@@ -257,5 +258,11 @@ bool Muon::PassPath(TString path) const{
     cout<<"[Muon::PassPath] unknown path "<<path<<endl;
     exit(ENODATA);
   }
+  return false;
+}
+bool Muon::PassPathOR(const vector<TString>& paths) const{
+  for(const auto& path:paths)
+    if(PassPath(path))
+      return true;
   return false;
 }

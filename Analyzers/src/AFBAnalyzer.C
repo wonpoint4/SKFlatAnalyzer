@@ -73,7 +73,7 @@ SMPAnalyzerCore::Parameter AFBAnalyzer::MakeParameter(TString key,TString option
 
   if(IsDYSample&&p.hprefix==""){
     if(abs(genWeight_id1)==5||abs(genWeight_id2)==5){
-      p.hprefix="bx_";
+      //p.hprefix="bx_";
     }
   }
 
@@ -379,13 +379,18 @@ void AFBAnalyzer::FillHists(Parameter& p){
   double dirap=dilepton.Rapidity();
   double dipt=dilepton.Pt();
   FillHistsAFB(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,p.weightmap);
+  //FillHist(p.prefix+p.hprefix+"zpmass"+p.suffix,dimass,p.weightmap,100,600,800);
   FillHist(p.prefix+p.hprefix+"jets"+p.suffix,dimass,dirap,dipt,p.jets.size(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,10,0,10);
   if(p.jets.size()){
     FillHist(p.prefix+p.hprefix+"j0pt"+p.suffix,dimass,dirap,dipt,p.jets.at(0).Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
   }
   FillHist(p.prefix+p.hprefix+"bjets"+p.suffix,dimass,dirap,dipt,p.bjets.size(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,10,0,10);
   if(p.bjets.size()){
+    FillHist(p.prefix+p.hprefix+"costhetaRecoil"+p.suffix,dimass,dirap,dipt,GetCosThetaRecoil(p.lepton0,p.lepton1,&p.bjets[0]),p.weightmap,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    //FillHist(p.prefix+p.hprefix+"costhetaRecoil2"+p.suffix,dimass,dirap,dipt,GetCosThetaRecoil(p.lepton0,p.lepton1,&p.bjets[0],1),p.weightmap,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
     FillHist(p.prefix+p.hprefix+"b0pt"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+    FillHist(p.prefix+p.hprefix+"b0charge"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).userFloat["AFBCharge"],p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-5,5);
+    FillHist(p.prefix+p.hprefix+"zb0dphi"+p.suffix,dilepton.DeltaPhi(p.bjets.at(0)),SelectWeights(p.weightmap,{""}),100,-5,5);
   }
   FillHist(p.prefix+p.hprefix+"z0"+p.suffix,dimass,dirap,dipt,vertex_Z,SelectWeights(p.weightmap,{"","_noz0weight"}),grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
   map<TString,double> map_PUweight=SelectWeights(p.weightmap,{"","_noPUweight","_PUweight_up","_PUweight_down"});
@@ -527,6 +532,54 @@ double AFBAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
   if(direction==0) direction=dilepton.Pz()>0?1:-1;
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 } 
+double AFBAnalyzer::GetCosThetaRecoil(const Particle *p0,const Particle *p1,Particle *b,int mode){
+  if(!p0||!p1) return 0.;
+  const TLorentzVector *lm,*lp;
+  if(p0->Charge()<0&&p1->Charge()>0){
+    lm=p0;
+    lp=p1;
+  }else if(p0->Charge()>0&&p1->Charge()<0){
+    lm=p1;
+    lp=p0;
+  }else if(strcmp(p0->ClassName(),"LHE")==0){ 
+    if(((LHE*)p0)->ID()>0&&((LHE*)p1)->ID()<0){
+      lm=p0;
+      lp=p1;
+    }else if(((LHE*)p0)->ID()<0&&((LHE*)p1)->ID()>0){
+      lm=p1;
+      lp=p0;
+    }else{
+      if(gRandom->Rndm()<0.5){
+        lm=p0;
+        lp=p1;
+      }else{
+	lm=p1;
+	lp=p0;
+      }      
+    } 
+  }else{
+    if(gRandom->Rndm()<0.5){
+      lm=p0;
+      lp=p1;
+    }else{
+      lm=p1;
+      lp=p0;
+    }      
+  }
+  int direction=0;
+  if(b->userFloat.find("AFBCharge")!=b->userFloat.end()){
+    if(b->userFloat["AFBCharge"]>0) direction = -1;
+    else direction=1;
+  }
+  if(mode==0){
+    return direction*((*lm-*lp)*(*b))/((*lm+*lp)*(*b));
+  }else{
+    TLorentzVector b_m0;
+    b_m0.SetPtEtaPhiM(b->Pt(),b->Eta(),b->Phi(),0);
+    b_m0*=b->E()/b_m0.E();
+    return direction*((*lm-*lp)*(b_m0))/((*lm+*lp)*(b_m0));
+  }
+}
 double AFBAnalyzer::GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction){
   const Particle *lm=NULL,*lp=NULL;
   if(l0->Charge()<0&&l1->Charge()>0){

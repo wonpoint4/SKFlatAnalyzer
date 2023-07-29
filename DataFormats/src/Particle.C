@@ -16,6 +16,7 @@ Particle::Particle(const TLorentzVector& p) :
 
 Particle::Particle(const Particle& p) :
   TLorentzVector(p),
+  userFloat(p.userFloat),
   j_Charge(p.Charge())
 {
 }
@@ -30,6 +31,7 @@ Particle::Particle(double px, double py, double pz, double e) :
 Particle& Particle::operator=(const Particle& p){
   if(this != &p){
     TLorentzVector::operator=(p);
+    userFloat = p.userFloat;
     j_Charge = p.j_Charge;
   }
 

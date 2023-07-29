@@ -89,7 +89,7 @@ Event AnalyzerCore::GetEvent(){
 
 }
 
-std::vector<Muon> AnalyzerCore::GetAllMuons(){
+std::vector<Muon> AnalyzerCore::GetAllMuons() const {
 
   std::vector<Muon> out;
   if(!muon_pt) return out;
@@ -144,7 +144,7 @@ std::vector<Muon> AnalyzerCore::GetAllMuons(){
 
 }
 
-std::vector<Muon> AnalyzerCore::GetMuons(TString id, double ptmin, double fetamax){
+std::vector<Muon> AnalyzerCore::GetMuons(TString id, double ptmin, double fetamax) const {
 
   std::vector<Muon> muons = GetAllMuons();
   std::vector<Muon> out;
@@ -167,7 +167,7 @@ std::vector<Muon> AnalyzerCore::GetMuons(TString id, double ptmin, double fetama
 
 }
 
-std::vector<Electron> AnalyzerCore::GetAllElectrons(){
+std::vector<Electron> AnalyzerCore::GetAllElectrons() const {
 
   std::vector<Electron> out;
   if(!electron_Energy) return out;
@@ -243,7 +243,7 @@ std::vector<Electron> AnalyzerCore::GetAllElectrons(){
 
 }
 
-std::vector<Electron> AnalyzerCore::GetElectrons(TString id, double ptmin, double fetamax, bool vetoHEM){
+std::vector<Electron> AnalyzerCore::GetElectrons(TString id, double ptmin, double fetamax, bool vetoHEM) const {
 
   std::vector<Electron> electrons = GetAllElectrons();
   std::vector<Electron> out;
@@ -273,7 +273,7 @@ std::vector<Electron> AnalyzerCore::GetElectrons(TString id, double ptmin, doubl
 }
 
 
-std::vector<Tau> AnalyzerCore::GetAllTaus(){
+std::vector<Tau> AnalyzerCore::GetAllTaus() const {
 
   std::vector<Tau> out;
   if(!tau_pt) return out;
@@ -297,7 +297,7 @@ std::vector<Tau> AnalyzerCore::GetAllTaus(){
 
 
 
-std::vector<Tau> AnalyzerCore::GetTaus(TString id, double ptmin, double fetamax){
+std::vector<Tau> AnalyzerCore::GetTaus(TString id, double ptmin, double fetamax) const {
 
   std::vector<Tau> taus = GetAllTaus();
   std::vector<Tau> out;
@@ -367,7 +367,7 @@ std::vector<Lepton *> AnalyzerCore::MakeLeptonPointerVector(const std::vector<El
 
 
 
-std::vector<Photon> AnalyzerCore::GetAllPhotons(){
+std::vector<Photon> AnalyzerCore::GetAllPhotons() const {
 
   std::vector<Photon> out;
   for(unsigned int i=0; i<photon_Energy->size(); i++){
@@ -379,6 +379,7 @@ std::vector<Photon> AnalyzerCore::GetAllPhotons(){
     double pho_pt = photon_Energy->at(i) * TMath::Sin( pho_theta );
     pho.SetPtEtaPhiE( pho_pt, photon_eta->at(i), photon_phi->at(i), photon_Energy->at(i));
 
+    pho.SetUncorrE(photon_EnergyUnCorr->at(i));
     pho.SetSC(photon_scEta->at(i), photon_scPhi->at(i));
     pho.SetRho(Rho);
 
@@ -406,7 +407,7 @@ std::vector<Photon> AnalyzerCore::GetAllPhotons(){
   
 }
 
-std::vector<Photon> AnalyzerCore::GetPhotons(TString id, double ptmin, double fetamax){
+std::vector<Photon> AnalyzerCore::GetPhotons(TString id, double ptmin, double fetamax) const {
 
   std::vector<Photon> photons = GetAllPhotons();
   std::vector<Photon> out;
@@ -427,7 +428,7 @@ std::vector<Photon> AnalyzerCore::GetPhotons(TString id, double ptmin, double fe
 
 
 
-std::vector<Jet> AnalyzerCore::GetAllJets(){
+std::vector<Jet> AnalyzerCore::GetAllJets() const {
 
   std::vector<Jet> out;
   if(!jet_pt) return out;
@@ -437,7 +438,9 @@ std::vector<Jet> AnalyzerCore::GetAllJets(){
 
     //==== Jet energy up and down are 1.xx or 0.99, not energy
     jet.SetEnShift( jet_shiftedEnUp->at(i), jet_shiftedEnDown->at(i) );
+    jet.SetJEC(jet_JECFull->at(i));
     if(!IsDATA){
+      jet.SetJER(jet_smearedRes->at(i));
       jet *= jet_smearedRes->at(i);
       jet.SetResShift( jet_smearedResUp->at(i)/jet_smearedRes->at(i), jet_smearedResDown->at(i)/jet_smearedRes->at(i) );
       jet.SetGenFlavours(jet_partonFlavour->at(i), jet_hadronFlavour->at(i));
@@ -470,7 +473,7 @@ std::vector<Jet> AnalyzerCore::GetAllJets(){
 
 }
 
-std::vector<Jet> AnalyzerCore::GetJets(TString id, double ptmin, double fetamax){
+std::vector<Jet> AnalyzerCore::GetJets(TString id, double ptmin, double fetamax) const {
 
   std::vector<Jet> jets = GetAllJets();
   std::vector<Jet> out;
@@ -493,7 +496,7 @@ std::vector<Jet> AnalyzerCore::GetJets(TString id, double ptmin, double fetamax)
 
 }
 
-std::vector<FatJet> AnalyzerCore::GetAllFatJets(){
+std::vector<FatJet> AnalyzerCore::GetAllFatJets() const {
 
   std::vector<FatJet> out;
   for(unsigned int i=0; i<fatjet_pt->size(); i++){
@@ -540,7 +543,7 @@ std::vector<FatJet> AnalyzerCore::GetAllFatJets(){
 
 }
 
-std::vector<FatJet> AnalyzerCore::GetFatJets(TString id, double ptmin, double fetamax){
+std::vector<FatJet> AnalyzerCore::GetFatJets(TString id, double ptmin, double fetamax) const {
 
   std::vector<FatJet> jets = GetAllFatJets();
   std::vector<FatJet> out;
@@ -563,7 +566,7 @@ std::vector<FatJet> AnalyzerCore::GetFatJets(TString id, double ptmin, double fe
 
 }
 
-std::vector<Gen> AnalyzerCore::GetGens(){
+std::vector<Gen> AnalyzerCore::GetGens() const {
 
   std::vector<Gen> out;
   if(IsDATA) return out;
@@ -600,7 +603,7 @@ std::vector<Gen> AnalyzerCore::GetGens(){
 
 }
 
-std::vector<LHE> AnalyzerCore::GetLHEs(){
+std::vector<LHE> AnalyzerCore::GetLHEs() const {
 
   std::vector<LHE> out;
   if(IsDATA) return out;
@@ -857,7 +860,7 @@ std::vector<Electron> AnalyzerCore::SmearElectrons(const std::vector<Electron>& 
 
 }
 
-bool AnalyzerCore::FindHEMElectron(Electron electron){
+bool AnalyzerCore::FindHEMElectron(Electron electron) const {
 
     if (DataYear != 2018) return false;
 

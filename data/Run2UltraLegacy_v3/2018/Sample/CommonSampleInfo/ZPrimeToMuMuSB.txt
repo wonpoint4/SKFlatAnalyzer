@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumsign sumw
+ZPrimeToMuMuSB	ZPrimeToMuMuSB_Allanach_Y3_M1000_gzpfit_0p14_thetasb_-0p15_TuneCP5_13TeV-madgraph-pythia8	1	480000	480000.0	9.615236876198e+01

@@ -37,10 +37,10 @@ class Efficiency{
   
   const vector<vector<TH2*>>* GetTarget(bool isData,int charge) const;
   vector<vector<TH2*>>* GetTarget(bool isData,int charge);
-  double GetEfficiency(bool isData,double eta,double pt,int charge,int set,int mem) const;
-  double GetDataEfficiency(double eta,double pt,int charge,int set,int mem) const;
-  double GetSimEfficiency(double eta,double pt,int charge,int set,int mem) const;
-  double GetEfficiencySF(double eta,double pt,int charge,int set,int mem) const;
+  double GetEfficiency(bool isData,double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetDataEfficiency(double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetSimEfficiency(double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetEfficiencySF(double eta,double pt,int charge,int set,int mem,TString option="") const;
 
   void Print(TString opt="") const;
   static bool HasKey(TString path,TString key);
@@ -60,12 +60,12 @@ class EfficiencyTool{
   void Setup(TString path);
 
   const Efficiency* Get(TString key) const;
-  double GetDataEfficiency(TString key,double eta,double pt,int charge,int set,int mem) const;
-  double GetDataEfficiency(TString key,const Lepton* lep,int set,int mem) const;
-  double GetSimEfficiency(TString key,double eta,double pt,int charge,int set,int mem) const;
-  double GetSimEfficiency(TString key,const Lepton* lep,int set,int mem) const;
-  double GetEfficiencySF(TString key,double eta,double pt,int charge,int set,int mem) const;
-  double GetEfficiencySF(TString key,const Lepton* lep,int set,int mem) const;
+  double GetDataEfficiency(TString key,double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetDataEfficiency(TString key,const Lepton* lep,int set,int mem,TString option="") const;
+  double GetSimEfficiency(TString key,double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetSimEfficiency(TString key,const Lepton* lep,int set,int mem,TString option="") const;
+  double GetEfficiencySF(TString key,double eta,double pt,int charge,int set,int mem,TString option="") const;
+  double GetEfficiencySF(TString key,const Lepton* lep,int set,int mem,TString option="") const;
   vector<vector<double>> GetStructure(TString key) const;
 
   static bool IsPlus(TString path);

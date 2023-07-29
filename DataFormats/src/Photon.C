@@ -23,6 +23,10 @@ void Photon::SetSC(double sceta, double scphi){
   j_scPhi = scphi;
 }
 
+void Photon::SetUncorrE(double une){
+  j_EnergyUnCorr = une;
+}
+
 void Photon::SetCutBasedIDVariables(double Full5x5_sigmaIetaIeta, double HoverE, double ChIsoWithEA, double NhIsoWithEA, double PhIsoWithEA){
   j_Full5x5_sigmaIetaIeta = Full5x5_sigmaIetaIeta;
   j_HoverE = HoverE;

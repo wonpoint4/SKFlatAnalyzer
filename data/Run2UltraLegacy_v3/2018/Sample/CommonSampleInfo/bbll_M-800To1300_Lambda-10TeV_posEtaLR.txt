@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumsign sumw
+bbll_M-800To1300_Lambda-10TeV_posEtaLR	bbll_4FermionCI_M-800To1300_Lambda-10TeV_posEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.001194	50248	50200.0	5.020000000000e+04

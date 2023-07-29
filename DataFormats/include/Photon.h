@@ -12,6 +12,10 @@ public:
   void SetSC(double sceta, double scphi);
   inline double scEta() const { return j_scEta; }
   inline double scPhi() const { return j_scPhi; }
+
+  void SetUncorrE(double une);
+  inline double UncorrE() const { return j_EnergyUnCorr; }
+  inline double UncorrPt() const { return Pt() * j_EnergyUnCorr/E(); }
     
   void SetCutBasedIDVariables(double Full5x5_sigmaIetaIeta, double HoverE, double ChIsoWithEA, double NhIsoWithEA, double PhIsoWithEA);
   inline double Full5x5_sigmaIetaIeta() const { return j_Full5x5_sigmaIetaIeta; }
@@ -45,6 +49,7 @@ private:
   double j_scEta;
   double j_scPhi;
   double j_scE;
+  double j_EnergyUnCorr;
   double j_Full5x5_sigmaIetaIeta;
   double j_HoverE;
   double j_ChIsoWithEA;
