@@ -8,6 +8,8 @@ void Hists_1D_AFB(TString channel="[em][em]bx201[6-8][ab]?/", TString charge="ol
 void Hists_2D_AFB(TString channel="[em][em]bx201[6-8][ab]?/", TString frame="AFBrecoil");
 void Plots_1D_chi2(TString inputfile="sintheta.root");
 void Plots_2D_chi2(TString inputfile="sintheta.root");
+void Charge_Purity_Calc(TString channel="[em][em]bx201[6-8][ab]?/");
+void Charge_Purity_Calc2(TString channel="[em][em]bx201[6-8][ab]?/");
 
 
 void chi2_AFBextractor(){
@@ -15,7 +17,10 @@ void chi2_AFBextractor(){
   //Hists_2D_AFB();
 
   //Plots_1D_chi2();
-  Plots_2D_chi2();
+  //Plots_2D_chi2();
+
+  //Charge_Purity_Calc();
+  Charge_Purity_Calc2();
 }
 
 void Hists_1D_AFB(TString channel="[em][em]bx201[6-8][ab]?/", TString charge="old", TString frame="AFBrecoil"){
@@ -177,5 +182,85 @@ void Plots_2D_chi2(TString inputfile="sintheta.root"){
     }
     cout<<"])"<<endl;
     c_AFB->SaveAs(Form("AFBrecoil_plots_ch%d.png",ch));
+  }
+}
+
+void Charge_Purity_Calc(TString channel="[em][em]bx201[6-8][ab]?/"){
+  AFBPlotter b("Data ^Dyb_mi+Dybbar_mi+mi+Dyc_mi+Dycbar_mi+Dyudsg_mi+tau_mi+vv+ss_mi+aa+tttw Dyb_mi Dybbar_mi");
+  vector<TString> charges = {"P", "M"};
+
+  for(unsigned int ch=0; ch<charges.size(); ch++){
+    TString hist_name = channel+"bjetCharge_"+charges.at(ch)+"[2-5]";
+    TH1* Data_hist  = b.GetHist(0, hist_name, "");
+    TH1* allMC_hist = b.GetTH1(b.GetHist(1, hist_name, ""));
+    TH1* Dyb_hist   = b.GetHist(2, hist_name, "");
+    TH1* Dybbar_hist= b.GetHist(3, hist_name, "");
+
+    double Data  = Data_hist->Integral();
+    double allMC = allMC_hist->Integral();
+    double Dyb   = Dyb_hist->Integral();
+    double Dybbar= Dybbar_hist->Integral();
+
+    cout<<"In "+hist_name+", Data = "<<Data<<", All MC = "<<allMC<<", DY+b = "<<Dyb<<", DY+bbar = "<<Dybbar<<", and Charge = "<<(charges.at(ch)=="P"? Dybbar: Dyb)/(Dyb+Dybbar)<<", and Purity = "<<(Dyb+Dybbar)/allMC<<", and Norm = "<<Data/allMC<<endl;
+
+    for(unsigned int i=0; i<6; i++){
+      hist_name = channel+"bjetCharge_"+charges.at(ch)+Form("%d",i);
+      Data_hist  = b.GetHist(0, hist_name, "");
+      allMC_hist = b.GetTH1(b.GetHist(1, hist_name, ""));
+      Dyb_hist   = b.GetHist(2, hist_name, "");
+      Dybbar_hist= b.GetHist(3, hist_name, "");
+
+      Data  = Data_hist->Integral();
+      allMC = allMC_hist->Integral();
+      Dyb   = Dyb_hist->Integral();
+      Dybbar= Dybbar_hist->Integral();
+
+      cout<<"In "+hist_name+", Data = "<<Data<<", All MC = "<<allMC<<", DY+b = "<<Dyb<<", DY+bbar = "<<Dybbar<<", and Charge = "<<(charges.at(ch)=="P"? Dybbar: Dyb)/(Dyb+Dybbar)<<", and Purity = "<<(Dyb+Dybbar)/allMC<<", and Norm = "<<Data/allMC<<endl;
+    }
+  }
+}
+
+void Charge_Purity_Calc2(TString channel="[em][em]bx201[6-8][ab]?/"){
+  AFBPlotter b("Data ^Dyb_mi+Dybbar_mi+mi+Dyc_mi+Dycbar_mi+Dyudsg_mi+tau_mi+vv+ss_mi+aa+tttw Dyb_mi Dybbar_mi");
+  vector<TString> charges = {"P", "M"};
+  vector<TString> pts = {"L", "M", "H"};
+  vector<TString> etas = {"B", "E"};
+
+  // Pt Bins
+  for(unsigned int pt=0; pt<pts.size(); pt++){
+    for(unsigned int ch=0; ch<charges.size(); ch++){
+      TString hist_name = channel+"bjetCharge_"+charges.at(ch)+pts.at(pt)+"[BE]";
+      TH1* Data_hist  = b.GetHist(0, hist_name, "");
+      TH1* allMC_hist = b.GetTH1(b.GetHist(1, hist_name, ""));
+      TH1* Dyb_hist   = b.GetHist(2, hist_name, "");
+      TH1* Dybbar_hist= b.GetHist(3, hist_name, "");
+
+      double Data  = Data_hist->Integral();
+      double allMC = allMC_hist->Integral();
+      double Dyb   = Dyb_hist->Integral();
+      double Dybbar= Dybbar_hist->Integral();
+
+      cout<<"In "+hist_name+", Data = "<<Data<<", All MC = "<<allMC<<", DY+b = "<<Dyb<<", DY+bbar = "<<Dybbar<<", and Charge = "<<(charges.at(ch)=="P"? Dybbar: Dyb)/(Dyb+Dybbar)<<", and Purity = "<<(Dyb+Dybbar)/allMC<<", and Norm = "<<Data/allMC<<endl;
+
+    }
+  }
+
+  // Eta Bins
+  for(unsigned int eta=0; eta<etas.size(); eta++){
+    for(unsigned int ch=0; ch<charges.size(); ch++){
+      TString hist_name = channel+"bjetCharge_"+charges.at(ch)+"[LMH]"+etas.at(eta);
+      TH1* Data_hist  = b.GetHist(0, hist_name, "");
+      TH1* allMC_hist = b.GetTH1(b.GetHist(1, hist_name, ""));
+      TH1* Dyb_hist   = b.GetHist(2, hist_name, "");
+      TH1* Dybbar_hist= b.GetHist(3, hist_name, "");
+
+      double Data  = Data_hist->Integral();
+      double allMC = allMC_hist->Integral();
+      double Dyb   = Dyb_hist->Integral();
+      double Dybbar= Dybbar_hist->Integral();
+
+      cout<<"In "+hist_name+", Data = "<<Data<<", All MC = "<<allMC<<", DY+b = "<<Dyb<<", DY+bbar = "<<Dybbar<<", and Charge = "<<(charges.at(ch)=="P"? Dybbar: Dyb)/(Dyb+Dybbar)<<", and Purity = "<<(Dyb+Dybbar)/allMC<<", and Norm = "<<Data/allMC<<endl;
+
+    }
   }
 }

@@ -671,12 +671,19 @@ void AFBAnalyzer::FillHists(Parameter& p){
 
   if(jet_charge < 0.) p.suffix += "_M";
   else p.suffix += "_P";
-  if(fabs(jet_charge) < 0.1) p.suffix += "0";
-  else if(fabs(jet_charge) < 0.2) p.suffix += "1";
-  else if(fabs(jet_charge) < 0.4) p.suffix += "2";
-  else if(fabs(jet_charge) < 1.0) p.suffix += "3";
-  else if(fabs(jet_charge) < 3.0) p.suffix += "4";
-  else p.suffix += "5";
+
+  if(fabs(jet_charge) < 0.2) return;
+
+  if((*p.jet0).Pt() < 45.) p.suffix += "L";
+  else if((*p.jet0).Pt() < 70.) p.suffix += "M";
+  else p.suffix += "H";
+
+  //if(fabs(jet_charge) < 0.1) p.suffix += "0";
+  //else if(fabs(jet_charge) < 0.2) p.suffix += "1";
+  //else if(fabs(jet_charge) < 0.4) p.suffix += "2";
+  //else if(fabs(jet_charge) < 1.0) p.suffix += "3";
+  //else if(fabs(jet_charge) < 3.0) p.suffix += "4";
+  //else p.suffix += "5";
 
   ///////////////////////fill hists///////////////////////
   FillHist(p.prefix+p.hprefix+tag+"jetpt"+p.suffix,(*p.jet0).Pt(),eventweight,200,0,1000);
