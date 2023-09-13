@@ -20,5 +20,6 @@
 #pragma link C++ class EfficiencyTool;
 #pragma link C++ class TSCorrection+;
 #pragma link C++ class TKinFitterDriver+;
+#pragma link C++ class RocPFProb;
 
 #endif

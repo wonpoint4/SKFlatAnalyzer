@@ -3,6 +3,7 @@
 
 #include "TLorentzVector.h"
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -26,6 +27,8 @@ public:
   Particle& operator=(const Particle& p);
 
   ~Particle();
+
+  map<TString,double> userFloat;
 
   void SetCharge(double q);
   inline double Charge() const {return j_Charge;}

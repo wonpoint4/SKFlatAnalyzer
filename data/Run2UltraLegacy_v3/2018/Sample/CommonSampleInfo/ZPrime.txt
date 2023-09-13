@@ -1,0 +1,2 @@
+# alias PD xsec nmc sumsign sumw
+ZPrime	ZPrime_private	0.14	100000	100000.0	1.000000000000e+05

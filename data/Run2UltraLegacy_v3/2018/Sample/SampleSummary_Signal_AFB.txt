@@ -1,0 +1,23 @@
+# alias PD xsec nmc sumsign sumw
+ZPrimeToMuMuSB	ZPrimeToMuMuSB_Allanach_Y3_M1000_gzpfit_0p14_thetasb_-0p15_TuneCP5_13TeV-madgraph-pythia8	1	480000	480000.0	9.615236876198e+01
+ZPrime  ZPrime_private  0.14    100000  100000.0        1.000000000000e+05
+bbll_M-1300To2000_Lambda-10TeV_posEtaLL	bbll_4FermionCI_M-1300To2000_Lambda-10TeV_posEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8	0.0007378	50112	50090.0	5.009000000000e+04
+bbll_M-1300To2000_Lambda-10TeV_posEtaLR	bbll_4FermionCI_M-1300To2000_Lambda-10TeV_posEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.000518	49805	49795.0	4.979500000000e+04
+bbll_M-1300To2000_Lambda-10TeV_posEtaRL	bbll_4FermionCI_M-1300To2000_Lambda-10TeV_posEtaRL_TuneCP2_13TeV-madgraphMLM-pythia8	0.0005993	49472	49442.0	4.944200000000e+04
+bbll_M-1300To2000_Lambda-10TeV_posEtaRR	bbll_4FermionCI_M-1300To2000_Lambda-10TeV_posEtaRR_TuneCP2_13TeV-madgraphMLM-pythia8	0.0006395	48960	48952.0	4.895200000000e+04
+bbll_M-2000ToInf_Lambda-10TeV_posEtaLL	bbll_4FermionCI_M-2000ToInf_Lambda-10TeV_posEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8	0.0001798	49899	49891.0	4.989100000000e+04
+bbll_M-2000ToInf_Lambda-10TeV_posEtaLR	bbll_4FermionCI_M-2000ToInf_Lambda-10TeV_posEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.0001538	49918	49908.0	4.990800000000e+04
+bbll_M-2000ToInf_Lambda-10TeV_posEtaRL	bbll_4FermionCI_M-2000ToInf_Lambda-10TeV_posEtaRL_TuneCP2_13TeV-madgraphMLM-pythia8	0.0001634	49719	49711.0	4.971100000000e+04
+bbll_M-2000ToInf_Lambda-10TeV_posEtaRR	bbll_4FermionCI_M-2000ToInf_Lambda-10TeV_posEtaRR_TuneCP2_13TeV-madgraphMLM-pythia8	0.000168	48738	48728.0	4.872800000000e+04
+bbll_M-300To800_Lambda-10TeV_posEtaLL	bbll_4FermionCI_M-300To800_Lambda-10TeV_posEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8	0.02372	50261	50205.0	5.020500000000e+04
+bbll_M-300To800_Lambda-10TeV_posEtaLR	bbll_4FermionCI_M-300To800_Lambda-10TeV_posEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.0001309	48498	-1836.0	-1.836000000000e+03
+bbll_M-300To800_Lambda-10TeV_posEtaRL	bbll_4FermionCI_M-300To800_Lambda-10TeV_posEtaRL_TuneCP2_13TeV-madgraphMLM-pythia8	0.008824	49320	49118.0	4.911800000000e+04
+bbll_M-300To800_Lambda-10TeV_posEtaRR	bbll_4FermionCI_M-300To800_Lambda-10TeV_posEtaRR_TuneCP2_13TeV-madgraphMLM-pythia8	0.01312	50008	49948.0	4.994800000000e+04
+bbll_M-800To1300_Lambda-10TeV_negEtaLL	bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8	0.0003021	50749	41631.0	4.163100000000e+04
+bbll_M-800To1300_Lambda-10TeV_negEtaLR	bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.001727	48938	48900.0	4.890000000000e+04
+bbll_M-800To1300_Lambda-10TeV_negEtaRL	bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaRL_TuneCP2_13TeV-madgraphMLM-pythia8	0.001198	48520	48404.0	4.840400000000e+04
+bbll_M-800To1300_Lambda-10TeV_negEtaRR	bbll_4FermionCI_M-800To1300_Lambda-10TeV_negEtaRR_TuneCP2_13TeV-madgraphMLM-pythia8	0.0009379	50426	50336.0	5.033600000000e+04
+bbll_M-800To1300_Lambda-10TeV_posEtaLL	bbll_4FermionCI_M-800To1300_Lambda-10TeV_posEtaLL_TuneCP2_13TeV-madgraphMLM-pythia8	0.002623	50525	50469.0	5.046900000000e+04
+bbll_M-800To1300_Lambda-10TeV_posEtaLR	bbll_4FermionCI_M-800To1300_Lambda-10TeV_posEtaLR_TuneCP2_13TeV-madgraphMLM-pythia8	0.001194	50248	50200.0	5.020000000000e+04
+bbll_M-800To1300_Lambda-10TeV_posEtaRL	bbll_4FermionCI_M-800To1300_Lambda-10TeV_posEtaRL_TuneCP2_13TeV-madgraphMLM-pythia8	0.001714	49571	49505.0	4.950500000000e+04
+bbll_M-800To1300_Lambda-10TeV_posEtaRR	bbll_4FermionCI_M-800To1300_Lambda-10TeV_posEtaRR_TuneCP2_13TeV-madgraphMLM-pythia8	0.001985	48818	48786.0	4.878600000000e+04

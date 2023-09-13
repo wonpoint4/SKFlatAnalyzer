@@ -165,7 +165,7 @@ const vector<vector<TH2*>>* Efficiency::GetTarget(bool isData,int charge) const{
 vector<vector<TH2*>>* Efficiency::GetTarget(bool isData,int charge){
   return const_cast<vector<vector<TH2*>>*>(const_cast<const Efficiency*>(this)->GetTarget(isData,charge));
 }
-double Efficiency::GetEfficiency(bool isData,double eta,double pt,int charge,int set,int mem) const{
+double Efficiency::GetEfficiency(bool isData,double eta,double pt,int charge,int set,int mem,TString option) const{
   const vector<vector<TH2*>> *target=GetTarget(isData,charge);
   int nset=target->size();
   if(nset<=set){
@@ -188,17 +188,18 @@ double Efficiency::GetEfficiency(bool isData,double eta,double pt,int charge,int
   if(ymin>=0) pt=fabs(pt);
   if(pt<ymin) pt=ymin+0.001;
   if(pt>=ymax) pt=ymax-0.001;
+  if(option.Contains("interpolation")) return hist->Interpolate(eta,pt);
   return hist->GetBinContent(hist->FindBin(eta,pt));
 }
-double Efficiency::GetDataEfficiency(double eta,double pt,int charge,int set,int mem) const{
-  return GetEfficiency(true,eta,pt,charge,set,mem);
+double Efficiency::GetDataEfficiency(double eta,double pt,int charge,int set,int mem,TString option) const{
+  return GetEfficiency(true,eta,pt,charge,set,mem,option);
 }
-double Efficiency::GetSimEfficiency(double eta,double pt,int charge,int set,int mem) const{
-  return GetEfficiency(false,eta,pt,charge,set,mem);
+double Efficiency::GetSimEfficiency(double eta,double pt,int charge,int set,int mem,TString option) const{
+  return GetEfficiency(false,eta,pt,charge,set,mem,option);
 }
-double Efficiency::GetEfficiencySF(double eta,double pt,int charge,int set,int mem) const{
-  double data=GetEfficiency(true,eta,pt,charge,set,mem);
-  double sim=GetEfficiency(false,eta,pt,charge,set,mem);
+double Efficiency::GetEfficiencySF(double eta,double pt,int charge,int set,int mem,TString option) const{
+  double data=GetEfficiency(true,eta,pt,charge,set,mem,option);
+  double sim=GetEfficiency(false,eta,pt,charge,set,mem,option);
   if(sim==0) return 1.;
   return data/sim;
 }
@@ -433,16 +434,16 @@ const Efficiency* EfficiencyTool::Get(TString key) const{
   if(fEfficiencies.find(key)!=fEfficiencies.end()) eff=fEfficiencies.find(key)->second;
   return eff;
 }
-double EfficiencyTool::GetDataEfficiency(TString key,double eta,double pt,int charge,int set,int mem) const{
+double EfficiencyTool::GetDataEfficiency(TString key,double eta,double pt,int charge,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   const Efficiency* eff=Get(key);
   if(!eff){
     cout<<"[EfficiencyTool::GetDataEfficiency] no key "<<key<<endl;
     exit(ENODATA);
   }
-  return eff->GetDataEfficiency(eta,pt,charge,set,mem);
+  return eff->GetDataEfficiency(eta,pt,charge,set,mem,option);
 }
-double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,int mem) const{
+double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   double eta=0;
   double pt=0;
@@ -450,7 +451,8 @@ double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,i
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
@@ -458,18 +460,18 @@ double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,i
     pt=mu->MiniAODPt();    
     charge=mu->Charge();
   }
-  return GetDataEfficiency(key,eta,pt,charge,set,mem);
+  return GetDataEfficiency(key,eta,pt,charge,set,mem,option);
 }
-double EfficiencyTool::GetSimEfficiency(TString key,double eta,double pt,int charge,int set,int mem) const{
+double EfficiencyTool::GetSimEfficiency(TString key,double eta,double pt,int charge,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   const Efficiency* eff=Get(key);
   if(!eff){
     cout<<"[EfficiencyTool::GetSimEfficiency] no key "<<key<<endl;
     exit(ENODATA);
   }
-  return eff->GetSimEfficiency(eta,pt,charge,set,mem);
+  return eff->GetSimEfficiency(eta,pt,charge,set,mem,option);
 }
-double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,int mem) const{
+double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   double eta=0;
   double pt=0;
@@ -477,7 +479,8 @@ double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,in
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
@@ -485,18 +488,18 @@ double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,in
     pt=mu->MiniAODPt();    
     charge=mu->Charge();
   }
-  return GetSimEfficiency(key,eta,pt,charge,set,mem);
+  return GetSimEfficiency(key,eta,pt,charge,set,mem,option);
 }
-double EfficiencyTool::GetEfficiencySF(TString key,double eta,double pt,int charge,int set,int mem) const{
+double EfficiencyTool::GetEfficiencySF(TString key,double eta,double pt,int charge,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   const Efficiency* eff=Get(key);
   if(!eff){
     cout<<"[EfficiencyTool::GetEfficiencySF] no key "<<key<<endl;
     exit(ENODATA);
   }
-  return eff->GetEfficiencySF(eta,pt,charge,set,mem);
+  return eff->GetEfficiencySF(eta,pt,charge,set,mem,option);
 }
-double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int mem) const{
+double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int mem,TString option) const{
   if(key==""||key=="Default") return 1.;
   double eta=0;
   double pt=0;
@@ -504,7 +507,8 @@ double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
     eta=el->Eta();
-    pt=el->UncorrPt();
+    if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
+    else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
@@ -512,7 +516,7 @@ double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int
     pt=mu->MiniAODPt();    
     charge=mu->Charge();
   }
-  return GetEfficiencySF(key,eta,pt,charge,set,mem);
+  return GetEfficiencySF(key,eta,pt,charge,set,mem,option);
 }
 vector<vector<double>> EfficiencyTool::GetStructure(TString key) const{
   vector<vector<double>> out;

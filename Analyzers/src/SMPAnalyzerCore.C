@@ -12,6 +12,7 @@ SMPAnalyzerCore::~SMPAnalyzerCore(){
   DeleteZptWeight();
   DeleteCFRate();
   DeleteFakeRate();
+  DeleteL1PrefiringWeight();
 }
 
 void SMPAnalyzerCore::initializeAnalyzer(){
@@ -22,16 +23,21 @@ void SMPAnalyzerCore::initializeAnalyzer(){
   SetupPUJetWeight();
   SetupCFRate();
   SetupFakeRate();
+  SetupL1PrefiringWeight();
   IsDYSample=false;
   IsTTSample=false;
+  IsTTLLSample=false;
   if(MCSample.Contains("DYJets")||MCSample.Contains("ZToEE")||MCSample.Contains("ZToMuMu")||MCSample.Contains(TRegexp("DY[0-9]Jets"))) IsDYSample=true;
   if(IsDYSample) SetupZptWeight();
   if(MCSample.Contains(TRegexp("TT[LJ][LJ]"))) IsTTSample=true;
 
   vector<JetTagging::Parameters> jtps={JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
                                        JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
                                        JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
                                        JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
+                                       JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets),
 
                                        JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
                                        JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
@@ -107,65 +113,91 @@ void SMPAnalyzerCore::executeEventWithParameter(Parameter& p){
   FillHists(p);
 }
 void SMPAnalyzerCore::EvalIDSF(Parameter& p){
-  p.doublemap["muontrackingSF"]=1.;
+  //p.doublemap["muontrackingSF"]=1.;
   if(!IsDATA){
     if(p.weightbit&EfficiencyWeight){
       p.w.electronRECOSF_sys=fEff->GetStructure(p.k.electronRECOSF);
       p.w.electronIDSF_sys=fEff->GetStructure(p.k.electronIDSF);
+      p.w.muonTrackingSF_sys=fEff->GetStructure(p.k.muonTrackingSF);
+      p.w.muonRECOSF_sys=fEff->GetStructure(p.k.muonRECOSF);
       p.w.muonIDSF_sys=fEff->GetStructure(p.k.muonIDSF);
       p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
     }
-    for(const auto& electron:p.electrons){
-      p.w.electronRECOSF*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,0,0);
-      if(p.weightbit&EfficiencyWeight){
-        int nset=p.w.electronRECOSF_sys.size();
-        for(int s=0;s<nset;s++){
-          int nmem=p.w.electronRECOSF_sys[s].size();
-          for(int m=0;m<nmem;m++){
-            p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,&electron,s,m);
-          }
-        }
-      }
-      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,0,0);
-      p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
-      if(p.weightbit&EfficiencyWeight){
-        int nset=p.w.electronIDSF_sys.size();
-        for(int s=0;s<nset;s++){
-          int nmem=p.w.electronIDSF_sys[s].size();
-          for(int m=0;m<nmem;m++){
-            p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,&electron,s,m);
-            // electronIDSF2 is for the selective charge ID
-            if(fEff->Get(p.k.electronIDSF2)){
-              if(s<(int)fEff->Get(p.k.electronIDSF2)->fDataPlus.size())
-                p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,s,m);
-              else
-                p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,&electron,0,0);
-            }
-          }
-        }
-      }
-    }
-    for(const auto& muon:p.muons){
-      p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
-      p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-        int nset=p.w.muonIDSF_sys.size();
-        for(int s=0;s<nset;s++){
-          int nmem=p.w.muonIDSF_sys[s].size();
-          for(int m=0;m<nmem;m++){
-            p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,&muon,s,m);
-          }
-        }
-      }
-      p.w.muonISOSF*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,0,0);
-      if(p.weightbit&EfficiencyWeight){
-        int nset=p.w.muonISOSF_sys.size();
-        for(int s=0;s<nset;s++){
-          int nmem=p.w.muonISOSF_sys[s].size();
-          for(int m=0;m<nmem;m++){
-            p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,&muon,s,m);
-          }
-        }
+    for(const Lepton* lepton:p.leptons){
+      if(!lepton) continue;
+      if(lepton->LeptonFlavour()==Lepton::ELECTRON){
+	const Electron* electron=(const Electron*)lepton;
+	p.w.electronRECOSF*=fEff->GetEfficiencySF(p.k.electronRECOSF,electron,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.electronRECOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.electronRECOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.electronRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronRECOSF,electron,s,m);
+	    }
+	  }
+	}
+	p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF,electron,0,0);
+	p.w.electronIDSF*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.electronIDSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.electronIDSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF,electron,s,m);
+	      // electronIDSF2 is for the selective charge ID
+	      if(fEff->Get(p.k.electronIDSF2)){
+		if(s<(int)fEff->Get(p.k.electronIDSF2)->fDataPlus.size())
+		  p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,s,m);
+		else
+		  p.w.electronIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.electronIDSF2,electron,0,0);
+	      }
+	    }
+	  }
+	}
+      }else if(lepton->LeptonFlavour()==Lepton::MUON){
+	const Muon* muon=(const Muon*)lepton;
+	//p.doublemap["muontrackingSF"]*=GetMuonTrackingSF(muon.Eta());
+	p.w.muonTrackingSF*=fEff->GetEfficiencySF(p.k.muonTrackingSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonTrackingSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonTrackingSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonTrackingSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonTrackingSF,muon,s,m);
+	    }
+	  }
+	}
+	p.w.muonRECOSF*=fEff->GetEfficiencySF(p.k.muonRECOSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonRECOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonRECOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonRECOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonRECOSF,muon,s,m);
+	    }
+	  }
+	}
+	p.w.muonIDSF*=fEff->GetEfficiencySF(p.k.muonIDSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonIDSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonIDSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonIDSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonIDSF,muon,s,m);
+	    }
+	  }
+	}
+	p.w.muonISOSF*=fEff->GetEfficiencySF(p.k.muonISOSF,muon,0,0);
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.muonISOSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.muonISOSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.muonISOSF_sys[s][m]*=fEff->GetEfficiencySF(p.k.muonISOSF,muon,s,m);
+	    }
+	  }
+	}
       }
     }
   }
@@ -176,6 +208,7 @@ void SMPAnalyzerCore::EvalIDSF(Parameter& p){
 void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   if(!IsDATA){
     vector<Lepton*> triggerables;
+    vector<Lepton*> triggerables_mode1=p.leptons;
     if(p.k.triggerSF.size()){
       if(p.weightbit&EfficiencyWeight){
         p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
@@ -185,6 +218,8 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
     }
     if(p.k.triggerSF.size()==1){
       p.w.triggerSF*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,0,0);
+      p.w.triggerSF_mode1*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables_mode1,0,0);
+      p.w.triggerSF_interpolation*=GetLeptonTriggerSF(p.k.triggerSF[0],triggerables,0,0,"interpolation");
       if(p.weightbit&EfficiencyWeight){
         int nset=p.w.triggerSF_sys.size();
         for(int s=0;s<nset;s++){
@@ -196,33 +231,37 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
       }
     }else if(p.k.triggerSF.size()==2){
       if(GetPtThreshold(p.k.triggerSF[0])<GetPtThreshold(p.k.triggerSF[1])){
-        p.w.triggerSF*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
-        if(p.weightbit&EfficiencyWeight){
-          int nset=p.w.triggerSF_sys.size();
-          for(int s=0;s<nset;s++){
-            int nmem=p.w.triggerSF_sys[s].size();
-            for(int m=0;m<nmem;m++){
-              p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
-            }
-          }
-        }
+	p.w.triggerSF*=GetLeptonTriggerORSF(p,triggerables,0,0);
+	p.w.triggerSF_mode1*=GetLeptonTriggerORSF(p,triggerables_mode1,0,0);
+	p.w.triggerSF_interpolation*=GetLeptonTriggerORSF(p,triggerables,0,0,"interpolation");
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.triggerSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.triggerSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.triggerSF_sys[s][m]*=GetLeptonTriggerORSF(p,triggerables,s,m);
+	    }
+	  }
+	}
       }else{
-        p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,0,0);
-        if(p.weightbit&EfficiencyWeight){
-          int nset=p.w.triggerSF_sys.size();
-          for(int s=0;s<nset;s++){
-            int nmem=p.w.triggerSF_sys[s].size();
-            for(int m=0;m<nmem;m++){
-              p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],triggerables,s,m);
-            }
-          }
-        }
+	p.w.triggerSF*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables,0,0);
+	p.w.triggerSF_mode1*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables_mode1,0,0);
+	p.w.triggerSF_interpolation*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables_mode1,0,0,"interpolation");
+	if(p.weightbit&EfficiencyWeight){
+	  int nset=p.w.triggerSF_sys.size();
+	  for(int s=0;s<nset;s++){
+	    int nmem=p.w.triggerSF_sys[s].size();
+	    for(int m=0;m<nmem;m++){
+	      p.w.triggerSF_sys[s][m]*=GetDileptonTriggerSF(p.k.triggerSF[0],p.k.triggerSF[1],p.k.DZSF,triggerables,s,m);
+	    }
+	  }
+	}
       }
     }
   }
 }
 void SMPAnalyzerCore::EvalWeights(Parameter& p){
-  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
+  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
 }
 bool SMPAnalyzerCore::PassSelection(Parameter& p){
   double weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.z0weight*p.w.zptweight*p.w.weakweight;
@@ -290,31 +329,17 @@ bool SMPAnalyzerCore::PassSelection(Parameter& p){
   if(p.option.Contains("triggermatching")){
     if(p.triggers.size()){
       if(p.triggers.at(0).Contains(TRegexp("HLT_[Tk]*Mu17_TrkIsoVVL_[Tk]*Mu8_TrkIsoVVL"))){
-        if(p.lepton0->LeptonFlavour()!=Lepton::MUON) return false;
-        if(p.lepton1->LeptonFlavour()!=Lepton::MUON) return false;
-        Muon *muon0=(Muon*)p.lepton0,*muon1=(Muon*)p.lepton1;
-        if(GetEra()=="2016preVFP"||GetEra()=="2016postVFP"){
-          if(!muon0->PassFilterOR({"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"})) return false;
-          if(!muon1->PassFilterOR({"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4","hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4","hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"})) return false;
-          if(!muon0->PassFilterOR({"hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17","hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17","hltL3fL1sDoubleMu114TkFiltered17Q"})
-             &&!muon1->PassFilterOR({"hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17","hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17","hltL3fL1sDoubleMu114TkFiltered17Q"})) return false;
-          if(!muon0->PassFilterOR({"hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8","hltDiMuonGlbFiltered17TrkFiltered8","hltDiTkMuonTkFiltered17TkFiltered8"})
-             ||!muon1->PassFilterOR({"hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8","hltDiMuonGlbFiltered17TrkFiltered8","hltDiTkMuonTkFiltered17TkFiltered8"})) return false;
-        }else if(GetEra()=="2017"||GetEra()=="2018"){
-          if(!muon0->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4")) return false;
-          if(!muon1->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4")) return false;
-          if(!muon0->PassFilter("hltL3fL1DoubleMu155fFiltered17")&&!muon1->PassFilter("hltL3fL1DoubleMu155fFiltered17")) return false;
-          if(!muon0->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")||!muon1->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")) return false;
-        }else{
-          cout<<"[SMPAnalyzerCore::PassSelection] trigger matching for "<<GetEra()<<" "<<p.triggers.at(0)<<" is not implemented"<<endl;
-          exit(EXIT_FAILURE);
-        }
+	if(p.lepton0->LeptonFlavour()!=Lepton::MUON) return false;
+	if(p.lepton1->LeptonFlavour()!=Lepton::MUON) return false;
+	Muon *muon0=(Muon*)p.lepton0,*muon1=(Muon*)p.lepton1;
+	if(!PassDLT1(muon0)&&!PassDLT1(muon1)) return false;
+	if(!PassDLT2(muon0)||!PassDLT2(muon1)) return false;
       }else if(p.triggers.at(0).Contains("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL")){
-        if(p.lepton0->LeptonFlavour()!=Lepton::ELECTRON) return false;
-        if(p.lepton1->LeptonFlavour()!=Lepton::ELECTRON) return false;
-        Electron *electron0=(Electron*)p.lepton0,*electron1=(Electron*)p.lepton1;
-        if(!electron0->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter")&&!electron1->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter")) return false;
-        if(!electron0->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter")||!electron1->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter")) return false;
+	if(p.lepton0->LeptonFlavour()!=Lepton::ELECTRON) return false;
+	if(p.lepton1->LeptonFlavour()!=Lepton::ELECTRON) return false;
+	Electron *electron0=(Electron*)p.lepton0,*electron1=(Electron*)p.lepton1;
+	if(!PassDLT1(electron0)&&!PassDLT1(electron1)) return false;
+	if(!PassDLT2(electron0)||!PassDLT2(electron1)) return false;
       }else if(p.channel=="mj"||p.channel=="Mj"){
         bool passor=false;
         for(auto trigger:p.triggers){
@@ -354,6 +379,22 @@ TH4D* SMPAnalyzerCore::GetHist4D(TString histname){
   std::map<TString, TH4D*>::iterator mapit = maphist_TH4D.find(histname);
   if(mapit != maphist_TH4D.end()) return mapit->second;
   return h;
+}
+
+void SMPAnalyzerCore::FillProfile(TString histname,
+				  Double_t value_x, Double_t value_y, Double_t weight,
+				  Int_t n_binx, Double_t x_min, Double_t x_max){
+  TProfile *this_hist = NULL;
+  std::map<TString, TH1D*>::iterator mapit = maphist_TH1D.find(histname);
+  if(mapit == maphist_TH1D.end()){
+    this_hist = new TProfile(histname, "", n_binx, x_min, x_max);
+    this_hist->SetDirectory(NULL);
+    maphist_TH1D[histname] = this_hist;
+  }else{
+    this_hist = (TProfile*)mapit->second;
+  }
+  this_hist->Fill(value_x, value_y, weight);
+
 }
 
 void SMPAnalyzerCore::FillHist(TString histname,
@@ -513,51 +554,107 @@ void SMPAnalyzerCore::SetupEfficiency(){
 void SMPAnalyzerCore::DeleteEfficiency(){
   if(fEff) delete fEff;
 }
-double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetLeptonTriggerSF(TString triggerSF_key,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
   if(triggerSF_key=="") return 1;
   if(triggerSF_key=="Default") return 1;
 
   double data_eff=1.,sim_eff=1.;
   for(const auto& lep:leps){
-    data_eff*=1-fEff->GetDataEfficiency(triggerSF_key,lep,set,mem);
-    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key,lep,set,mem);
+    data_eff*=1-fEff->GetDataEfficiency(triggerSF_key,lep,set,mem,option);
+    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key,lep,set,mem,option);
   }
   data_eff=1-data_eff;
   sim_eff=1-sim_eff;
   if(sim_eff==0) return 1.;
   else return data_eff/sim_eff;
 }
-double SMPAnalyzerCore::GetLeptonTriggerORSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetLeptonTriggerORSF(const Parameter& p,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
-
-  double lumi0=1.; //trigger0 on
-  double lumi1=0.; //only trigger1 on
-  double lumi2=0.; //both off
-  if(DataYear==2017&&triggerSF_key0.Contains("IsoMu24")&&triggerSF_key1.Contains("IsoMu27")){
-    lumi0=37997.005;    lumi1=3480.873;    lumi2=0.;
-  }else if(DataYear==2017&&triggerSF_key0.Contains("Ele27")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=31661.026;    lumi1=9522.208;    lumi2=295.;
-  }else if(DataYear==2018&&triggerSF_key0.Contains("Ele28")&&triggerSF_key1.Contains("Ele32")){
-    lumi0=23687.253;    lumi1=36140.626;   lumi2=0.;
+  if(p.triggers.size()!=2){
+    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] p.triggers.size()= "<<p.triggers.size()<<endl;
+    exit(EXIT_FAILURE);
+  }
+  if(p.k.triggerSF.size()!=2){
+    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] p.k.triggerSF.size()= "<<p.k.triggerSF.size()<<endl;
+    exit(EXIT_FAILURE);
+  }
+  double lumi=_event.GetTriggerLumi("Full");
+  double lumi0,lumi1,lumi01;
+  if(DataYear==2017&&p.k.triggerSF[0].Contains("IsoMu24")&&p.k.triggerSF[1].Contains("IsoMu27")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=lumi0;
+  }else if(DataYear==2017&&p.k.triggerSF[0].Contains("Ele27")&&p.k.triggerSF[1].Contains("Ele32")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=17599.732185;
+  }else if(DataYear==2018&&p.k.triggerSF[0].Contains("Ele28")&&p.k.triggerSF[1].Contains("Ele32")){
+    lumi0=_event.GetTriggerLumi(p.triggers[0]); lumi1=_event.GetTriggerLumi(p.triggers[1]); lumi01=lumi0;
   }else{
-    cout<<"[SMPAnalyzerCore::LeptonTriggerOR_SF] not available combination "<<triggerSF_key0<<"||"<<triggerSF_key1<<" for "<<DataEra<<endl;
+    cout<<"[SMPAnalyzerCore::GetLeptonTriggerORSF] not available combination '"<<p.k.triggerSF[0]<<"'||'"<<p.k.triggerSF[1]<<"' for "<<DataEra<<endl;
     exit(EXIT_FAILURE);
   }
 
-  double data_eff_key0=1.,data_eff_key1=1.,sim_eff=1.;
+  bool newflag=set<0; //temp
+  if(newflag) set=0; //temp
+  double data_eff0=1.,sim_eff0=1.;
+  double data_eff1=1.,sim_eff1=1.;
   for(const auto& lep:leps){
-    data_eff_key0*=1-fEff->GetDataEfficiency(triggerSF_key0,lep,set,mem);
-    data_eff_key1*=1-fEff->GetDataEfficiency(triggerSF_key1,lep,set,mem);
-    sim_eff*=1-fEff->GetSimEfficiency(triggerSF_key0,lep,set,mem);
+    data_eff0*=1-fEff->GetDataEfficiency(p.k.triggerSF[0],lep,set,mem,option);
+    sim_eff0*=1-fEff->GetSimEfficiency(p.k.triggerSF[0],lep,set,mem,option);
+    data_eff1*=1-fEff->GetDataEfficiency(p.k.triggerSF[1],lep,set,mem,option);
+    sim_eff1*=1-fEff->GetSimEfficiency(p.k.triggerSF[1],lep,set,mem,option);
   }
-  data_eff_key0=1-data_eff_key0;
-  data_eff_key1=1-data_eff_key1;
-  sim_eff=1-sim_eff;
-  if(sim_eff==0) return 1.;
-  else return (lumi0*data_eff_key0+lumi1*data_eff_key1)/((lumi0+lumi1+lumi2)*sim_eff);
+  data_eff0=1-data_eff0;
+  sim_eff0=1-sim_eff0;
+  data_eff1=1-data_eff1;
+  sim_eff1=1-sim_eff1;
+  double sf=0.;
+  if(_event.PassTrigger(p.triggers[1])){
+    double this_sf=(lumi1-lumi01)/lumi;
+    if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+    sf+=this_sf;
+  }
+  if(_event.PassTrigger(p.triggers[0])){
+    double this_sf=(lumi0-lumi01)/lumi;
+    if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+    sf+=this_sf;
+  }
+  //overlap region
+  if(!newflag){
+    if(lumi0>lumi1){
+      if(_event.PassTrigger(p.triggers[0])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+	sf+=this_sf;
+      }
+    }else{
+      if(_event.PassTrigger(p.triggers[1])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+	sf+=this_sf;
+      }else if(_event.PassTrigger(p.triggers[0])){
+	double this_sf=lumi01/lumi;
+	if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+	sf+=this_sf;
+      }
+    }    
+  }else{
+    if(_event.PassTrigger(p.triggers[0])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+      sf+=this_sf;
+    }
+    if(_event.PassTrigger(p.triggers[1])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff1) this_sf*=data_eff1/sim_eff1;
+      sf+=this_sf;
+    }else if(_event.PassTrigger(p.triggers[0])){
+      double this_sf=lumi01/2/lumi;
+      if(sim_eff0) this_sf*=data_eff0/sim_eff0;
+      sf+=this_sf;
+    }    
+  }    
+  return sf;
 }
-double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,const vector<Lepton*>& leps,int set,int mem){
+double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString triggerSF_key1,TString DZSF,const vector<Lepton*>& leps,int set,int mem,TString option){
   if(IsDATA) return 1;
   if((triggerSF_key0==""||triggerSF_key0=="Default")&&(triggerSF_key1==""||triggerSF_key1=="Default")) return 1;
   int nlep=leps.size();
@@ -569,10 +666,18 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
   vector<double> data_oneleg1_noleg2(nlep,1.);
   vector<double> sim_oneleg1_noleg2(nlep,1.);
   for(int i=0;i<nlep;i++){
-    double data_eff_leg1=fEff->GetDataEfficiency(triggerSF_key0,leps.at(i),set,mem);
-    double data_eff_leg2=fEff->GetDataEfficiency(triggerSF_key1,leps.at(i),set,mem);
-    double sim_eff_leg1=fEff->GetSimEfficiency(triggerSF_key0,leps.at(i),set,mem);
-    double sim_eff_leg2=fEff->GetSimEfficiency(triggerSF_key1,leps.at(i),set,mem);
+    double data_eff_leg1=fEff->GetDataEfficiency(triggerSF_key0,leps.at(i),set,mem,option);
+    double data_eff_leg2=fEff->GetDataEfficiency(triggerSF_key1,leps.at(i),set,mem,option);
+    double sim_eff_leg1=fEff->GetSimEfficiency(triggerSF_key0,leps.at(i),set,mem,option);
+    double sim_eff_leg2=fEff->GetSimEfficiency(triggerSF_key1,leps.at(i),set,mem,option);
+    if(DZSF!=""){
+      double data_eff_dz=fEff->GetDataEfficiency(DZSF,leps.at(i),0,0,option);
+      double sim_eff_dz=fEff->GetSimEfficiency(DZSF,leps.at(i),0,0,option);
+      data_eff_leg1*=data_eff_dz;
+      data_eff_leg2*=data_eff_dz;
+      sim_eff_leg1*=sim_eff_dz;
+      sim_eff_leg2*=sim_eff_dz;
+    } 
     data_noleg1*=(1-data_eff_leg1);
     sim_noleg1*=(1-sim_eff_leg1);
     for(int j=0;j<nlep;j++){
@@ -591,8 +696,10 @@ double SMPAnalyzerCore::GetDileptonTriggerSF(TString triggerSF_key0,TString trig
     data_eff-=data_oneleg1_noleg2[i];
     sim_eff-=sim_oneleg1_noleg2[i];
   }
-  if(sim_eff==0) return 1.;
-  else return data_eff/sim_eff;
+  double sf=1.;
+  if(sim_eff==0) return sf=1.;
+  else sf=data_eff/sim_eff;
+  return sf;
 }
 
 // ZptWeight
@@ -765,11 +872,13 @@ double SMPAnalyzerCore::GetTopPtReweight2(const std::vector<Gen>& gens){
 
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;
-  TString datapath=getenv("DATA_DIR");
-  TString rocpath=datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEraShort()+"UL.txt";
+  TString erashort=GetEraShort();
+
+  //TString rocpath=datapath+"/"+GetEra()+"/RoccoR/RoccoR"+GetEraShort()+"UL.txt"; //central roccor for amc
+  TString rocpath=TString(getenv("SKFlat_WD"))+"/external/Aepcor/u_"+erashort(2,3)+"UL_1.txt"; //roccor for minnlo
   if(IsExists(rocpath)) roc=new RoccoR(rocpath.Data());
   else cout<<"[SMPAnalyzerCore::SetupRoccoR] no "+rocpath<<endl;
-  TString erashort=GetEraShort();
+
   TString rocelepath=TString(getenv("SKFlat_WD"))+"/external/Aepcor/e_"+erashort(2,3)+"UL_1.txt";
   if(IsExists(rocelepath)){
     rocele=new Aepcor;
@@ -1376,21 +1485,25 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
-    TString IDhip = GetEraShort()=="2016a"? "POGMedium" : "POGMedium_nohip";
-    vector<Muon> muons=SelectMuons(allmus,IDhip,ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIsoSideBand"){
-    vector<Muon> muons=GetMuons("POGMedium_nohip",ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       if(muon.TrkIso()/muon.Pt()>0.4) continue;
       out.push_back(muon);
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
-    TString IDhip = GetEraShort()=="2016a"? "POGMedium": "POGMedium_nohip";
-    vector<Muon> muons=SelectMuons(allmus,IDhip,ptmin,fetamax);
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
@@ -1398,7 +1511,11 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
   }else if(id=="NotMediumWithLooseTrkIso"){
     vector<Muon> muons=GetMuons("NOCUT",ptmin,fetamax);
     for(auto const& muon: muons){
-      if(muon.PassID("POGMedium_nohip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
+      if(DataEra=="2016preVFP"){
+	if(muon.PassID("POGMedium_hip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
+      }else{
+	if(muon.PassID("POGMedium")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;	
+      }
       out.push_back(muon);
     }
   }else if(id=="POGTightWithAntiIso"){
@@ -1997,7 +2114,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.SetChannel(channel);
   p.option=option;
   p.SetGens(gens);
-
   p.hprefix="";
   p.w.lumiweight=reductionweight;
   p.w.PUweight=1;  p.w.PUweight_up=1;  p.w.PUweight_down=1;
@@ -2094,9 +2210,24 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   }
 
   p.prefix=p.channel+GetEraShort()+"/";
+  int roccor_set=0,roccor_mem=0,aepcor_set=0,aepcor_mem=0;
+  if(p.option.Contains(TRegexp("roccor_s[0-9]+m[0-9]+"))){
+    TObjArray* array=TPRegexp("roccor_s([0-9]+)m([0-9]+)").MatchS(p.option);
+    TString sset=((TObjString*)array->At(1))->GetString();
+    TString smem=((TObjString*)array->At(2))->GetString();
+    roccor_set=sset.Atoi();
+    aepcor_set=sset.Atoi();
+    roccor_mem=smem.Atoi();
+    aepcor_mem=smem.Atoi();
+    p.suffix+="_"+((TObjString*)array->At(0))->GetString();
+    delete array;
+  }
+  
   if(p.channel(0,2)=="mu"){
+    p.k.muonTrackingSF="Muon_Tracking";
+    p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -2109,22 +2240,27 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_IsoMu24_v"};
     }
   }else if(p.channel(0,2)=="mm"){
+    p.k.muonTrackingSF="Muon_Tracking";
+    p.k.muonRECOSF="Muon_RECO";
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"Mu17Leg1_MediumID_trkIsoLoose","Mu8Leg2_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(20,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",};
     }else if(GetEraShort()=="2016b"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v","HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }else if(GetEraShort()=="2017"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
+      p.k.DZSF="DZ_MediumID_trkIsoLoose";
     }
   }else if(p.option.Contains("SelQ")&&p.channel=="el"){
     p.prefix="selq/"+p.prefix;
     p.SetElectronKeys("Electron_MediumID","Electron_SelQ_MediumID",{"Ele27_SelQ_MediumID"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ",0.0,2.5),0,0));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -2139,7 +2275,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="el"){
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -2154,17 +2290,21 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="ee"){
     p.SetElectronKeys("Electron_MediumID",{"Ele23Leg1_MediumID","Ele12Leg2_MediumID"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(25,15);
-    if(GetEraShort()=="2016a") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
-    else if(GetEraShort()=="2016b") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
-    else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
+    if(GetEraShort()=="2016a"){
+      p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
+      p.k.DZSF="DZ_MediumID";
+    }else if(GetEraShort()=="2016b"){
+      p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
+      p.k.DZSF="DZ_MediumID";
+    }else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
   }else if(p.channel(0,2)=="me"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.k.electronIDSF="Electron_MediumID";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -2179,8 +2319,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   }else if(p.channel(0,2)=="em"){
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -2195,9 +2335,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="mM"||p.channel(0,2)=="Mm"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",8.0,2.4),0,roccor_set,roccor_mem));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=1;
     p.option+=" triggermatching strictorder";
@@ -2211,9 +2351,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",8.0,2.4),0,roccor_set,roccor_mem));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(27,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v"};
@@ -2227,9 +2367,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="MM"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
-    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",8.0,2.4),0,roccor_set,roccor_mem));
+    //p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("NotMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(20,10);
     //p.c.nmuonmax=0;
     p.option+=" triggermatching strictorder";
@@ -2244,8 +2384,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="eE"||p.channel(0,2)=="Ee"){
     p.k.electronIDSF="Electron_MediumID";
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",0.0,2.5)));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
+    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(25,15);
     //p.c.nelectronmax=1;
     p.option+=" triggermatching strictorder";
@@ -2254,8 +2394,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",0.0,2.5)));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
+    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(30,10);
     if(GetEraShort()=="2016a"){
       p.triggers={"HLT_Ele27_WPTight_Gsf_v"};
@@ -2270,8 +2410,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel(0,2)=="EE"){
     p.k.electronIDSF="Electron_MediumID";
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",0.0,2.5)));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
+    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",8.0,2.5),aepcor_set,aepcor_mem));
     //p.c.nelectronmax=0;
     p.option+=" triggermatching strictorder";
     p.SetLeptonPtCut(25,15);
@@ -2281,7 +2421,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
   }else if(p.channel=="mn"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(27,-1);
     p.c.nleptonmin=1;
     if(GetEraShort()=="2016a"){
@@ -2296,7 +2436,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel=="en"){
     p.SetElectronKeys("Electron_MediumID",{"Ele27_MediumID"});
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5),0,0));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(30,-1);
     p.c.nleptonmin=1;
     if(GetEraShort()=="2016a"){
@@ -2312,8 +2452,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }else if(p.channel=="ej"||p.channel=="Ej"){
     p.k.electronIDSF="Electron_MediumID";
-    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",0.0,2.5)));
-    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",0.0,2.5)));
+    p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),aepcor_set,aepcor_mem));
+    p.SetAElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumIDSideBand",8.0,2.5),aepcor_set,aepcor_mem));
     p.SetLeptonPtCut(10,-1);
     p.c.nleptonmin=1;
     if(p.channel=="ej") p.c.nelectronmax=1;
@@ -2325,8 +2465,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v","HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30_v","HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v"};
   }else if(p.channel=="mj"||p.channel=="Mj"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
-    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,5,0));
-    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",0.0,2.4),0,5,0));
+    p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
+    p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetLeptonPtCut(10,-1);
     p.c.nleptonmin=1;
     if(p.channel=="mj") p.c.nmuonmax=1;
@@ -2382,6 +2522,56 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.jets=SelectJets(SmearJets(GetAllJets(),-1),"tightLepVeto",40,2.4);
   }else{
     p.jets=SelectJets(GetAllJets(),"tightLepVeto",40,2.4);
+  }    
+  std::sort(p.jets.begin(),p.jets.end(),PtComparing);
+  JetTagging::Parameters jtp;
+  if(p.option.Contains("DeepCSV::Medium")){
+    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+  }else if(p.option.Contains("DeepCSV")){
+    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  }else if(p.option.Contains("DeepJet::Medium")){
+    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+  }else if(p.option.Contains("DeepJet::Tight::mujets")){
+    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets);
+  }else{
+    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  }
+  p.bjets.clear();
+  vector<Muon> allmuons=GetAllMuons();
+  vector<Electron> allelectrons=GetAllElectrons();
+  for(const auto& jet:p.jets){
+    if(jet.GetTaggerResult(jtp.j_Tagger) < mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP)) continue;
+    if(!p.option.Contains("nobjetcleaning")){
+      if(p.lepton0&&jet.DeltaR(*p.lepton0)<0.4) continue;
+      if(p.lepton1&&jet.DeltaR(*p.lepton1)<0.4) continue;
+    }
+    Jet bjet=jet;
+    double jetCharge = bjet.Charge();
+
+    vector<Muon> bmuon;
+    vector<Electron> belectron;
+
+    for(int l=0,n=allmuons.size(); l<n; l++){
+      if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(bjet.Vect())) <0.6) continue; // original, 1GeV
+      if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
+      if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
+      if(bjet.DeltaR(allmuons.at(l))<0.4) bmuon.push_back(allmuons.at(l));
+    }
+
+    //belectron Trial
+    for(unsigned int l=0; l<allelectrons.size(); l++){
+      if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(bjet.Vect())) <0.6) continue;
+      if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
+      if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
+      if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
+      if(bjet.DeltaR(allelectrons.at(l))<0.4) belectron.push_back(allelectrons.at(l));
+    }
+
+    //The jet has soft muon inside, and its charge will determine the jet charge
+    if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
+    else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
+    bjet.userFloat["AFBCharge"]=jetCharge;
+    p.bjets.push_back(bjet);
   }
   std::sort(p.jets.begin(),p.jets.end(),PtComparing);
   */
@@ -2579,7 +2769,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
       p.w.btagSF_ldown=1.;
     }
   }
-
   return p;
 }
 vector<TString> SMPAnalyzerCore::Split(TString s,TString del){
@@ -2619,4 +2808,476 @@ TString SMPAnalyzerCore::GetSkimName() const {
     exit(EXIT_FAILURE);
   }
   return skimname;
+}
+void SMPAnalyzerCore::SetupL1PrefiringWeight(){
+  TString datapath=(TString)getenv("DATA_DIR")+"/"+GetEra()+"/SMP/";
+  TString L1PrefiringMaps="L1PrefiringMaps.root";
+  TString L1MuonPrefiringParametriations="L1MuonPrefiringParametriations.root";
+  if(IsExists(datapath+L1PrefiringMaps)&&IsExists(datapath+L1MuonPrefiringParametriations)){
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+datapath+L1PrefiringMaps<<endl;
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+datapath+L1MuonPrefiringParametriations<<endl;
+  }else{
+    cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no "+datapath+L1PrefiringMaps+" or "+datapath+L1MuonPrefiringParametriations<<endl;
+    return;
+  }
+  DeleteL1PrefiringWeight();
+  if(DataYear<2018){
+    TString era=DataEra;
+    if(era=="2017") era="2017BtoF";
+    TFile f(datapath+L1PrefiringMaps);
+    fL1Prefiring_photon=(TH2*)f.Get("L1prefiring_photonptvseta_UL"+era);
+    fL1Prefiring_jet=(TH2*)f.Get("L1prefiring_jetptvseta_UL"+era);
+    if(!fL1Prefiring_photon){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist L1prefiring_photonptvseta_UL"+era<<endl;
+      exit(ENODATA);
+    }
+    if(!fL1Prefiring_jet){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist L1prefiring_jetptvseta_UL"+era<<endl;
+      exit(ENODATA);
+    }
+    fL1Prefiring_photon->SetDirectory(0);
+    fL1Prefiring_jet->SetDirectory(0);
+  }
+  {
+    TString era=DataEra;
+    if(era=="2017"||era=="2018") era="20172018";
+    TFile f(datapath+L1MuonPrefiringParametriations);
+    fL1Prefiring_muon[0]=(TF1*)f.Get("L1prefiring_muonparam_0.0To0.2_"+era);
+    fL1Prefiring_muon[1]=(TF1*)f.Get("L1prefiring_muonparam_0.2To0.3_"+era);
+    fL1Prefiring_muon[2]=(TF1*)f.Get("L1prefiring_muonparam_0.3To0.55_"+era);
+    fL1Prefiring_muon[3]=(TF1*)f.Get("L1prefiring_muonparam_0.55To0.83_"+era);
+    fL1Prefiring_muon[4]=(TF1*)f.Get("L1prefiring_muonparam_0.83To1.24_"+era);
+    fL1Prefiring_muon[5]=(TF1*)f.Get("L1prefiring_muonparam_1.24To1.4_"+era);
+    fL1Prefiring_muon[6]=(TF1*)f.Get("L1prefiring_muonparam_1.4To1.6_"+era);
+    fL1Prefiring_muon[7]=(TF1*)f.Get("L1prefiring_muonparam_1.6To1.8_"+era);
+    fL1Prefiring_muon[8]=(TF1*)f.Get("L1prefiring_muonparam_1.8To2.1_"+era);
+    fL1Prefiring_muon[9]=(TF1*)f.Get("L1prefiring_muonparam_2.1To2.25_"+era);
+    fL1Prefiring_muon[10]=(TF1*)f.Get("L1prefiring_muonparam_2.25To2.4_"+era);
+    if(era.Contains("2016")){
+      fL1Prefiring_muon[11]=(TF1*)f.Get("L1prefiring_muonparam_HotSpot_"+era);
+    }
+    for(int i=0;i<11+era.Contains("2016")?1:0;i++){
+      if(!fL1Prefiring_muon[i]){
+	cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no hist for fL1Prefiring_muon["<<i<<"]"<<endl;
+	exit(ENODATA);
+      }
+    }
+  }
+  {
+    TString infile=(TString)getenv("SKFlat_WD")+"/external/RocPFProb/prefiring_table_v1.txt";
+    if(IsExists(infile)){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+infile<<endl;
+      rocpfprob=new RocPFProb(infile.Data());
+    }else{
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no "+infile<<endl;
+    }
+  }
+  {
+    TString infile=(TString)getenv("SKFlat_WD")+"/external/RocPFProb/fine_grain_map.root";
+    if(IsExists(infile)){
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] using file "+infile<<endl;
+      TFile f(infile);
+      fFGPP=(TH2*)f.Get("fgpp_map");
+      fFGPM=(TH2*)f.Get("fgpm_map");
+      if(fFGPP) fFGPP->SetDirectory(NULL);
+      if(fFGPM) fFGPM->SetDirectory(NULL);
+    }else{
+      cout<<"[SMPAnalyzerCore::SetupL1PrefiringWeight] no "+infile<<endl;
+    }
+  }    
+  return;
+}
+void SMPAnalyzerCore::DeleteL1PrefiringWeight(){
+  if(fL1Prefiring_photon) delete fL1Prefiring_photon;
+  if(fL1Prefiring_jet) delete fL1Prefiring_jet;
+  for(int i=0;i<12;i++)
+    if(fL1Prefiring_muon[i]) delete fL1Prefiring_muon[i];
+  if(rocpfprob) delete rocpfprob;
+  if(fFGPP) delete fFGPP;
+  if(fFGPM) delete fFGPM;
+  return;
+}
+double SMPAnalyzerCore::getPrefiringRateEcal(double eta, double pt, TH2* h_prefmap, int sys, int mode) const {
+  double prefiringRateSystUncEcal_=0.2;
+  //Check pt is not above map overflow
+  int nbinsy = h_prefmap->GetNbinsY();
+  double maxy = h_prefmap->GetYaxis()->GetBinLowEdge(nbinsy + 1);
+  if (pt >= maxy)
+    pt = maxy - 0.01;
+  int thebin = h_prefmap->FindBin(eta, pt);
+
+  double prefrate = h_prefmap->GetBinContent(thebin);
+  double abseta=fabs(eta);
+  if(mode==1){
+    prefrate=h_prefmap->Interpolate(eta,pt);
+  }else if(mode==2&&2.0<abseta&&abseta<2.5){
+    int sign=eta>0?1:-1;
+    double y1=h_prefmap->GetBinContent(h_prefmap->FindBin(sign*2.1, pt));
+    double y2=h_prefmap->GetBinContent(h_prefmap->FindBin(sign*2.4, pt));
+    double e12=h_prefmap->GetBinError(h_prefmap->FindBin(sign*2.1, pt)); e12=e12*e12;
+    double e22=h_prefmap->GetBinError(h_prefmap->FindBin(sign*2.4, pt)); e22=e22*e22;
+    double x12=0.015625;
+    double x22=0.140625;
+      
+    double a=(y1*e22*x12+y2*e12*x22)/(x12*x12*e22+x22*x22*e12);
+    prefrate=a*pow(abseta-2,2);
+    //cout<<" "<<eta<<" "<<pt<<" "<<h_prefmap->GetBinContent(thebin)<<" "<<h_prefmap->Interpolate(eta,pt)<<" "<<prefrate<<endl;
+  }
+    
+  double statuncty = h_prefmap->GetBinError(thebin);
+  double systuncty = prefiringRateSystUncEcal_ * prefrate;
+
+  if (sys == 1)
+    prefrate = std::min(1., prefrate + sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  else if (sys == -1)
+    prefrate = std::max(0., prefrate - sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  if (prefrate > 1.) {
+    //edm::LogWarning("L1PrefireWeightProducer") << "Found a prefiring probability > 1. Setting to 1." << std::endl;
+    return 1.;
+  }
+  return prefrate;
+}
+double SMPAnalyzerCore::getPrefiringRatePhoton(double eta, double pt, int sys, int mode) const {
+  if(mode>2){
+    int iera=0;
+    if(DataEra=="2016preVFP") iera=1;
+    else if(DataEra=="2016postVPF") iera=2;
+    else if(DataEra=="2017") iera=3;
+    if(mode==3) //RocPFProb
+      return rocpfprob->getPrefireProb(iera,1,eta,pt);
+    else if(mode==4){ //RocPFProb linear interpolation
+      double abseta=fabs(eta);
+      int sign=eta>0?1:-1;
+      double x0,y0,x1,y1;
+      if(abseta<2) return 0;
+      else if(abseta<2.125){
+	x0=2; y0=0;
+	x1=2.125; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else if(abseta<2.375){
+	x0=2.125; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.375; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else if(abseta<2.625){
+	x0=2.375; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.625; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else{
+	x0=2.625; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.875; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }
+      return (y1-y0)/(x1-x0)*(abseta-x0)+y0;
+    }else if(mode==5){ //RocPFProb linear interpolation only |eta|<2.5
+      double abseta=fabs(eta);
+      if(abseta>2.5)
+	return rocpfprob->getPrefireProb(iera,1,eta,pt);
+      int sign=eta>0?1:-1;
+      double x0,y0,x1,y1;
+      if(abseta<2) return 0;
+      else if(abseta<2.125){
+	x0=2; y0=0;
+	x1=2.125; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }else{
+	x0=2.125; y0=rocpfprob->getPrefireProb(iera,1,sign*x0,pt);
+	x1=2.375; y1=rocpfprob->getPrefireProb(iera,1,sign*x1,pt);
+      }
+      return (y1-y0)/(x1-x0)*(abseta-x0)+y0;
+    }else if(mode==6){
+      double abseta=fabs(eta);
+      if(abseta<2) return 0;
+      TH2* fg_map=NULL;
+      if(eta>0) fg_map=fFGPP;
+      else fg_map=fFGPM;
+      int ibin=fg_map->FindBin(eta,pt);
+      return fg_map->GetBinContent(ibin);
+    }
+  }
+  return getPrefiringRateEcal(eta, pt, fL1Prefiring_photon, sys, mode);
+}
+double SMPAnalyzerCore::getPrefiringRateJet(double eta, double pt, int sys, int mode) const {
+  if(mode>2){
+    int iera=0;
+    if(DataEra=="2016preVFP") iera=1;
+    else if(DataEra=="2016postVPF") iera=2;
+    else if(DataEra=="2017") iera=3;
+    return rocpfprob->getPrefireProb(iera,2,eta,pt);
+  }    
+  return getPrefiringRateEcal(eta, pt, fL1Prefiring_jet, sys, mode);
+}
+double SMPAnalyzerCore::getPrefiringRateMuon(double eta, double phi, double pt, int sys) const {
+  double prefiringRateSystUncMuon_=0.2;
+  double prefrate;
+  double statuncty;
+  if ((DataYear==2016) && (eta > 1.24 && eta < 1.6) &&
+      (phi > 2.44346 && phi < 2.79253)) {
+    prefrate = fL1Prefiring_muon[11]->Eval(pt);
+    statuncty = fL1Prefiring_muon[11]->GetParError(2);
+  } else if (std::abs(eta) < 0.2) {
+    prefrate = fL1Prefiring_muon[0]->Eval(pt);
+    statuncty = fL1Prefiring_muon[0]->GetParError(2);
+  } else if (std::abs(eta) < 0.3) {
+    prefrate = fL1Prefiring_muon[1]->Eval(pt);
+    statuncty = fL1Prefiring_muon[1]->GetParError(2);
+  } else if (std::abs(eta) < 0.55) {
+    prefrate = fL1Prefiring_muon[2]->Eval(pt);
+    statuncty = fL1Prefiring_muon[2]->GetParError(2);
+  } else if (std::abs(eta) < 0.83) {
+    prefrate = fL1Prefiring_muon[3]->Eval(pt);
+    statuncty = fL1Prefiring_muon[3]->GetParError(2);
+  } else if (std::abs(eta) < 1.24) {
+    prefrate = fL1Prefiring_muon[4]->Eval(pt);
+    statuncty = fL1Prefiring_muon[4]->GetParError(2);
+  } else if (std::abs(eta) < 1.4) {
+    prefrate = fL1Prefiring_muon[5]->Eval(pt);
+    statuncty = fL1Prefiring_muon[5]->GetParError(2);
+  } else if (std::abs(eta) < 1.6) {
+    prefrate = fL1Prefiring_muon[6]->Eval(pt);
+    statuncty = fL1Prefiring_muon[6]->GetParError(2);
+  } else if (std::abs(eta) < 1.8) {
+    prefrate = fL1Prefiring_muon[7]->Eval(pt);
+    statuncty = fL1Prefiring_muon[7]->GetParError(2);
+  } else if (std::abs(eta) < 2.1) {
+    prefrate = fL1Prefiring_muon[8]->Eval(pt);
+    statuncty = fL1Prefiring_muon[8]->GetParError(2);
+  } else if (std::abs(eta) < 2.25) {
+    prefrate = fL1Prefiring_muon[9]->Eval(pt);
+    statuncty = fL1Prefiring_muon[9]->GetParError(2);
+  } else if (std::abs(eta) < 2.4) {
+    prefrate = fL1Prefiring_muon[10]->Eval(pt);
+    statuncty = fL1Prefiring_muon[10]->GetParError(2);
+  } else {
+    //LogDebug("L1PrefireWeightProducer") << "Muon outside of |eta| <= 2.4. Prefiring weight set to 0." << std::endl;
+    return 0.;
+  }
+  double systuncty = prefiringRateSystUncMuon_ * prefrate;
+
+  if (sys == 1)
+    prefrate = std::min(1., prefrate + sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  else if (sys == -1)
+    prefrate = std::max(0., prefrate - sqrt(pow(statuncty, 2) + pow(systuncty, 2)));
+  //else if (fluctuation == upSyst)
+  //  prefrate = std::min(1., prefrate + systuncty);
+  //else if (fluctuation == downSyst)
+  //  prefrate = std::max(0., prefrate - systuncty);
+  //else if (fluctuation == upStat)
+  //  prefrate = std::min(1., prefrate + statuncty);
+  //else if (fluctuation == downStat)
+  //  prefrate = std::max(0., prefrate - statuncty);
+
+  if (prefrate > 1.) {
+    //edm::LogWarning("L1PrefireWeightProducer") << "Found a prefiring probability > 1. Setting to 1." << std::endl;
+    return 1.;
+  }
+  return prefrate;
+}
+double SMPAnalyzerCore::GetL1PrefiringWeight(int mode) const {
+  double jetMaxMuonFraction_=0.5;
+
+  //Photons
+  vector<Photon> thePhotons = GetAllPhotons();
+
+  //Jets
+  vector<Jet> theJets = GetAllJets();
+
+  //Muons
+  vector<Muon> theMuons = GetAllMuons();
+
+  //Probability for the event NOT to prefire, computed with the prefiring maps per object.
+  //Up and down values correspond to the resulting value when shifting up/down all prefiring rates in prefiring maps.
+  double nonPrefiringProba[3] = {1., 1., 1.};      //0: central, 1: up, 2: down
+  double nonPrefiringProbaECAL[3] = {1., 1., 1.};  //0: central, 1: up, 2: down
+  double nonPrefiringProbaMuon[7] = {
+    1., 1., 1., 1., 1., 1., 1.};  //0: central, 1: up, 2: down, 3: up stat, 4: down stat, 5: up syst, 6: down syst
+
+  for (const auto sys : {0, +1, -1}) {
+    if(DataYear<2018){
+      for (const auto& photon : thePhotons) {
+	double pt_gam = photon.UncorrPt();
+	double eta_gam = photon.Eta();
+	if (pt_gam < 20.)
+	  continue;
+	if (fabs(eta_gam) < 2.)
+	  continue;
+	if (fabs(eta_gam) > 3.)
+	  continue;
+	double prefiringprob_gam = getPrefiringRatePhoton(eta_gam, pt_gam, sys, mode);
+	nonPrefiringProbaECAL[sys] *= (1. - prefiringprob_gam);
+      }
+      
+      //Now applying the prefiring maps to jets in the affected regions.
+      for (const auto& jet : theJets) {
+	double pt_jet = jet.Pt()/jet.JER();
+	double eta_jet = jet.Eta();
+	//double phi_jet = jet.Phi();
+	if (pt_jet < 20.)
+	  continue;
+	if (fabs(eta_jet) < 2.)
+	  continue;
+	if (fabs(eta_jet) > 3.)
+	  continue;
+	if (jetMaxMuonFraction_ > 0 && jet.muonEnergyFraction() > jetMaxMuonFraction_)
+	  continue;
+	//Loop over photons to remove overlap
+	double nonprefiringprobfromoverlappingphotons = 1.;
+	bool foundOverlappingPhotons = false;
+	for (const auto& photon : thePhotons) {
+	  double pt_gam = photon.UncorrPt();
+	  double eta_gam = photon.Eta();
+	  //double phi_gam = photon.Phi();
+	  if (pt_gam < 20.)
+	  continue;
+	  if (fabs(eta_gam) < 2.)
+	    continue;
+	  if (fabs(eta_gam) > 3.)
+	    continue;
+	  double dR = jet.DeltaR(photon);
+	  if (dR > 0.4)
+	    continue;
+	  double prefiringprob_gam = getPrefiringRatePhoton(eta_gam, pt_gam, sys, mode);
+	  nonprefiringprobfromoverlappingphotons *= (1. - prefiringprob_gam);
+	  foundOverlappingPhotons = true;
+	}
+	//useEMpt =true if one wants to use maps parametrized vs Jet EM pt instead of pt.
+	//if (useEMpt_) pt_jet *= (jet.neutralEmEnergyFraction() + jet.chargedEmEnergyFraction());
+	double nonprefiringprobfromoverlappingjet = 1. - getPrefiringRateJet(eta_jet, pt_jet, sys);
+	
+	if (!foundOverlappingPhotons) {
+	  nonPrefiringProbaECAL[sys] *= nonprefiringprobfromoverlappingjet;
+	}
+	//If overlapping photons have a non prefiring rate larger than the jet, then replace these weights by the jet one
+	else if (nonprefiringprobfromoverlappingphotons > nonprefiringprobfromoverlappingjet) {
+	  if (nonprefiringprobfromoverlappingphotons > 0.) {
+            nonPrefiringProbaECAL[sys] *= nonprefiringprobfromoverlappingjet / nonprefiringprobfromoverlappingphotons;
+	  } else {
+	    nonPrefiringProbaECAL[sys] = 0.;
+	  }
+	}
+	//Last case: if overlapping photons have a non prefiring rate smaller than the jet, don't consider the jet in the event weight, and do nothing.
+      }
+    }
+    //Now calculate prefiring weights for muons
+    for (const auto& muon : theMuons) {
+      double pt = muon.MiniAODPt();
+      double phi = muon.Phi();
+      double eta = muon.Eta();
+      // Remove crappy tracker muons which would not have prefired the L1 trigger
+      if (pt < 5 || !muon.isPOGLoose())
+	continue;
+      double prefiringprob_mu = getPrefiringRateMuon(eta, phi, pt, sys);
+      nonPrefiringProbaMuon[sys] *= (1. - prefiringprob_mu);
+    }
+  }
+  // Calculate combined weight as product of the weight for individual objects
+  for (const auto sys : {0, +1, -1}) {
+    nonPrefiringProba[sys] = nonPrefiringProbaECAL[sys] * nonPrefiringProbaMuon[sys];
+  }
+  // Calculate statistical and systematic uncertainty separately in the muon case
+  /*
+  for (const auto fluct :
+    {fluctuations::upSyst, fluctuations::downSyst, fluctuations::upStat, fluctuations::downStat}) {
+    if (!missingInputMuon_ && doMuons_) {
+      for (const auto& muon : theMuons) {
+        double pt = muon.pt();
+        double phi = muon.phi();
+        double eta = muon.eta();
+        // Remove crappy tracker muons which would not have prefired the L1 trigger
+        if (pt < 5 || !muon.isLooseMuon())
+          continue;
+        double prefiringprob_mu = getPrefiringRateMuon(eta, phi, pt, fluct);
+        nonPrefiringProbaMuon[fluct] *= (1. - prefiringprob_mu);
+      }
+    }
+  }
+  */
+  //if(fabs(L1PrefireReweight_Central-nonPrefiringProba[0])<1e-6) cout<<"OK"<<endl;
+  //else cout<<L1PrefireReweight_Central<<" "<<nonPrefiringProba[0]<<" "<<nonPrefiringProbaECAL[0]<<" "<<nonPrefiringProbaMuon[0]<<endl;
+  return nonPrefiringProba[0];
+}
+
+bool SMPAnalyzerCore::PassSLT1(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return muon->PassFilterOR({"hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09","hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09"});
+    else if(DataYear==2017||DataYear==2018)
+      return muon->PassFilter("hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07");
+    else{
+      cout<<"[SMPAnalyzerCore::PassSLT1] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    cout<<"[SMPAnalyzerCore::PassSLT1] not yet implemented"<<endl;
+    exit(EXIT_FAILURE);
+  }else{
+    cout<<"[SMPAnalyzerCore::PassSLT1] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassSLT2(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return false;
+    else if(DataYear==2017)
+      return muon->PassFilter("hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07");
+    else if(DataYear==2018)
+      return false;
+    else{
+      cout<<"[SMPAnalyzerCore::PassSLT2] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    cout<<"[SMPAnalyzerCore::PassSLT2] not yet implemented"<<endl;
+    exit(EXIT_FAILURE);
+  }else{
+    cout<<"[SMPAnalyzerCore::PassSLT2] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassDLT1(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return (muon->PassFilter("hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17")&&muon->PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17")&&muon->PassFilter("hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltL3fL1sDoubleMu114TkFiltered17Q")&&muon->PassFilter("hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"));
+    else if(DataYear==2017||DataYear==2018)
+      return (muon->PassFilter("hltL3fL1DoubleMu155fFiltered17")&&muon->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4"));
+    else{
+      cout<<"[SMPAnalyzerCore::PassDLT1] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    const Electron* electron=(Electron*)lep;
+    return electron->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter");
+  }else{
+    cout<<"[SMPAnalyzerCore::PassDLT1] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
+}
+bool SMPAnalyzerCore::PassDLT2(const Lepton* lep) const{
+  if(!lep) return false;
+  if(lep->LeptonFlavour()==Lepton::MUON){
+    const Muon* muon=(Muon*)lep;
+    if(DataYear==2016)
+      return (muon->PassFilter("hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8")&&muon->PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltDiMuonGlbFiltered17TrkFiltered8")&&muon->PassFilter("hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4"))||
+	(muon->PassFilter("hltDiTkMuonTkFiltered17TkFiltered8")&&muon->PassFilter("hltDiMuonTrk17Trk8RelTrkIsoFiltered0p4"));
+    else if(DataYear==2017||DataYear==2018)
+      return (muon->PassFilter("hltL3fL1DoubleMu155fPreFiltered8")&&muon->PassFilter("hltDiMuon178RelTrkIsoFiltered0p4"));
+    else{
+      cout<<"[SMPAnalyzerCore::PassDLT2] unknown DataYear '"<<DataYear<<"'"<<endl;
+      exit(EXIT_FAILURE);
+    } 
+  }else if(lep->LeptonFlavour()==Lepton::ELECTRON){
+    const Electron* electron=(Electron*)lep;
+    return electron->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter");
+  }else{
+    cout<<"[SMPAnalyzerCore::PassDLT2] invalid lepton flavour"<<endl;
+    exit(EXIT_FAILURE);
+  }
+  return false;
 }

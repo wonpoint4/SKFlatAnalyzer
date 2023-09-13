@@ -25,6 +25,7 @@ public:
   ~AFBAnalyzer();
 
   virtual double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0);
+  virtual double GetCosThetaRecoil(const Particle *p0,const Particle *p1,Particle *b,int mode=0);
   virtual double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
   virtual double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
   virtual double GetCosThetaRecoil(const Particle *p0,const Particle *p1,int direction=1);

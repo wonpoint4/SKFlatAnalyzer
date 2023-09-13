@@ -11,3 +11,6 @@
 [submodule "external/Aepcor"]
 	path = external/Aepcor
 	url = https://gitlab.cern.ch/hyseo/Aepcor.git
+[submodule "external/RocPFProb"]
+	path = external/RocPFProb
+	url = https://gitlab.cern.ch/hyseo/RocPFProb.git
