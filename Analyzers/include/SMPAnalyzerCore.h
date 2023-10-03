@@ -309,7 +309,6 @@ public:
   Gen gen_p0,gen_p1,gen_l0,gen_l1,gen_j0,gen_l0_dressed,gen_l1_dressed,gen_l0_bare,gen_l1_bare;
   vector<Muon> allmus;
   vector<Electron> allels;
-  vector<Jet> alljets;
   vector<Jet> realjets;
 
   RoccoR* roc=NULL;

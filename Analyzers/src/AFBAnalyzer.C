@@ -2,7 +2,7 @@
 
 void AFBAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 PUJet 
-  //SetupCosThetaWeight();
+
   IsSkimmed= GetSkimName()!="" ? true : false;
   IsNominalRun=!HasFlag("SYS")&&!HasFlag("PDFSYS")&&IsSkimmed;
 
@@ -526,11 +526,11 @@ void AFBAnalyzer::EvalWeights(Parameter& p){
   if(p.weightbit&NominalWeight){
     p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*p.w.pujetSF;
     p.weightmap["_nopujetSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight;
-  }
 
-  if(MCSample.Contains("MiNNLO")){
-    for(unsigned int i=0;i<weight_sthw2->size();i++){
-      p.weightmap[Form("_sthw2_%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*p.w.pujetSF*weight_sthw2->at(i);
+    if(MCSample.Contains("MiNNLO")){
+      for(unsigned int i=0;i<weight_sthw2->size();i++){
+        p.weightmap[Form("_sthw2_%d",i)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*p.w.pujetSF*weight_sthw2->at(i);
+      }
     }
   }
 
@@ -669,6 +669,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   //FillHistsAFB(p.prefix,p.hprefix,"_bCh00",(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
   //if(fabs(jet_charge) > 0.1) FillHistsAFB(p.prefix,p.hprefix,"_bCh01",(Particle*)p.lepton0,(Particle*)p.lepton1,eventweight);
 
+  /*
   if(jet_charge < 0.) p.suffix += "_M";
   else p.suffix += "_P";
 
@@ -677,13 +678,14 @@ void AFBAnalyzer::FillHists(Parameter& p){
   if((*p.jet0).Pt() < 45.) p.suffix += "L";
   else if((*p.jet0).Pt() < 70.) p.suffix += "M";
   else p.suffix += "H";
+  */
 
-  //if(fabs(jet_charge) < 0.1) p.suffix += "0";
-  //else if(fabs(jet_charge) < 0.2) p.suffix += "1";
-  //else if(fabs(jet_charge) < 0.4) p.suffix += "2";
-  //else if(fabs(jet_charge) < 1.0) p.suffix += "3";
-  //else if(fabs(jet_charge) < 3.0) p.suffix += "4";
-  //else p.suffix += "5";
+  if(fabs(jet_charge) < 0.1) p.suffix += "0";
+  else if(fabs(jet_charge) < 0.2) p.suffix += "1";
+  else if(fabs(jet_charge) < 0.4) p.suffix += "2";
+  else if(fabs(jet_charge) < 1.0) p.suffix += "3";
+  else if(fabs(jet_charge) < 3.0) p.suffix += "4";
+  else p.suffix += "5";
 
   ///////////////////////fill hists///////////////////////
   FillHist(p.prefix+p.hprefix+tag+"jetpt"+p.suffix,(*p.jet0).Pt(),eventweight,200,0,1000);
@@ -724,7 +726,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   double dipt=dilepton.Pt();
 
   FillHistsAFB(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,p.weightmap);
-  FillHist(p.prefix+p.hprefix+tag+"jpt"+p.suffix,dimass,dirap,dipt,p.jets.at(0)->Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+  //FillHist(p.prefix+p.hprefix+tag+"jpt"+p.suffix,dimass,dirap,dipt,p.jets.at(0)->Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
 
   //FillHist(p.prefix+p.hprefix+"zpmass"+p.suffix,dimass,p.weightmap,100,600,800);
   //FillHist(p.prefix+p.hprefix+"jets"+p.suffix,dimass,dirap,dipt,p.jets.size(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,10,0,10);
@@ -739,11 +741,11 @@ void AFBAnalyzer::FillHists(Parameter& p){
   //  FillHist(p.prefix+p.hprefix+"b0charge"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).userFloat["AFBCharge"],p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-5,5);
   //  FillHist(p.prefix+p.hprefix+"zb0dphi"+p.suffix,dilepton.DeltaPhi(p.bjets.at(0)),SelectWeights(p.weightmap,{""}),100,-5,5);
   //}
-  FillHist(p.prefix+p.hprefix+"z0"+p.suffix,dimass,dirap,dipt,vertex_Z,SelectWeights(p.weightmap,{"","_noz0weight"}),grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-  map<TString,double> map_PUweight=SelectWeights(p.weightmap,{"","_noPUweight","_PUweight_up","_PUweight_down"});
-  FillHist(p.prefix+p.hprefix+"nPV"+p.suffix,dimass,dirap,dipt,nPV,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
-  FillHist(p.prefix+p.hprefix+"rho"+p.suffix,dimass,dirap,dipt,Rho,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
-  FillHist(p.prefix+p.hprefix+"puppimet"+p.suffix,dimass,dirap,dipt,PuppiMET_Type1_pt,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
+  //FillHist(p.prefix+p.hprefix+"z0"+p.suffix,dimass,dirap,dipt,vertex_Z,SelectWeights(p.weightmap,{"","_noz0weight"}),grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
+  //map<TString,double> map_PUweight=SelectWeights(p.weightmap,{"","_noPUweight","_PUweight_up","_PUweight_down"});
+  //FillHist(p.prefix+p.hprefix+"nPV"+p.suffix,dimass,dirap,dipt,nPV,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
+  //FillHist(p.prefix+p.hprefix+"rho"+p.suffix,dimass,dirap,dipt,Rho,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
+  //FillHist(p.prefix+p.hprefix+"puppimet"+p.suffix,dimass,dirap,dipt,PuppiMET_Type1_pt,map_PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
   if(IsDYSample&&p.hprefix==""&&IsNominalRun){
     vector<Gen> gens=GetGens();
     Gen truth_l0=GetGenMatchedLepton(*p.lepton0,gens);

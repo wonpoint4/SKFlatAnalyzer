@@ -51,13 +51,12 @@ void SMPAnalyzerCore::initializeAnalyzer(){
 }
 void SMPAnalyzerCore::beginEvent(){
   _event=GetEvent();
+  allmus.clear();
   allmus=GetAllMuons();
   std::sort(allmus.begin(),allmus.end(),PtComparing);
+  allels.clear();
   allels=GetAllElectrons();
   std::sort(allels.begin(),allels.end(),PtComparing);
-  alljets=GetJets("tightLepVeto",20,2.4); // These part shows ERROR only in data when EfficiencyValidation
-  std::sort(alljets.begin(),alljets.end(),PtComparing);
-
   if(!IsDATA){
     lhes=GetLHEs();
     gens=GetGens();
@@ -1431,7 +1430,7 @@ std::vector<Electron> SMPAnalyzerCore::SMPGetElectrons(TString id, double ptmin,
       out.push_back(el);
     }
   }else if(id=="passMediumIDSideBand"){
-    vector<Electron> electrons = GetAllElectrons();
+    vector<Electron> electrons = allels;
     for(unsigned int i=0; i<electrons.size(); i++){
       Electron el= electrons.at(i);
       if(!( el.Pt()>ptmin ))	continue;
@@ -1486,15 +1485,15 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
     }
   }else if(id=="POGMediumWithLooseTrkIso"){
     vector<Muon> muons;
-    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
-    else muons=GetMuons("POGMedium",ptmin,fetamax);
+    if(DataEra=="2016preVFP") muons=SelectMuons(allmus,"POGMedium_hip",ptmin,fetamax);
+    else muons=SelectMuons(allmus,"POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
   }else if(id=="POGMediumWithLooseTrkIsoSideBand"){
     vector<Muon> muons;
-    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
-    else muons=GetMuons("POGMedium",ptmin,fetamax);
+    if(DataEra=="2016preVFP") muons=SelectMuons(allmus,"POGMedium_hip",ptmin,fetamax);
+    else muons=SelectMuons(allmus,"POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       if(muon.TrkIso()/muon.Pt()>0.4) continue;
@@ -1502,14 +1501,14 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
     }
   }else if(id=="POGMediumWithAntiLooseTrkIso"){
     vector<Muon> muons;
-    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
-    else muons=GetMuons("POGMedium",ptmin,fetamax);
+    if(DataEra=="2016preVFP") muons=SelectMuons(allmus,"POGMedium_hip",ptmin,fetamax);
+    else muons=SelectMuons(allmus,"POGMedium",ptmin,fetamax);
     for(auto const& muon: muons){
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
       out.push_back(muon);
     }
   }else if(id=="NotMediumWithLooseTrkIso"){
-    vector<Muon> muons=GetMuons("NOCUT",ptmin,fetamax);
+    vector<Muon> muons=SelectMuons(allmus,"NOCUT",ptmin,fetamax);
     for(auto const& muon: muons){
       if(DataEra=="2016preVFP"){
 	if(muon.PassID("POGMedium_hip")&&muon.PassSelector(Muon::Selector::TkIsoLoose)) continue;
@@ -1907,15 +1906,12 @@ bool SMPAnalyzerCore::isGenMatchedJet(const Jet& jet, const vector<Gen>& gens){
   return false;
 }
 
-//double SMPAnalyzerCore::bjetCharge(const Jet& jet, int mode){
 double SMPAnalyzerCore::jetCharge(const Jet& jet, int mode, TString prefix, double eventweight, bool doFillHists){
   //In mode0, output is jet charge (Sum of pt weighted charge of tracks)
   double jetCharge = jet.Charge();
   if(mode == 0) return jetCharge;
   vector<Muon> bmuon;
-  bmuon.clear();
   vector<Electron> belectron;
-  belectron.clear();
 
   for(unsigned int l=0; l<allmus.size(); l++){
     if(allmus.at(l).P()*sin(allmus.at(l).Angle(jet.Vect())) <0.6) continue; // original, 1GeV
@@ -2149,8 +2145,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
           else if(lhe_p0.ID()==4||lhe_p1.ID()==4) p.hprefix+="Dyc_";
           else if(lhe_p0.ID()==-4||lhe_p1.ID()==-4) p.hprefix+="Dycbar_";
           else p.hprefix+="Dyudsg_";
-        } // Only GG collisions (NNLO DY)
-        else if(lhe_p0.ID()==21 && lhe_p1.ID()==21){
+        } // GG collisions or bq, cq collisions (NNLO DY) - find the heavy flavor parton with highest-pt within accptance
+        else if((lhe_p0.ID()==21 && lhe_p1.ID()==21) || (abs(lhe_p0.ID())==4 || abs(lhe_p0.ID())==5 || abs(lhe_p1.ID())==4 || abs(lhe_p1.ID())==5)){
           Gen heavyparton = gens.at(0);
           int nheavyparton = 0;
           for(unsigned int i=0; i<gens.size(); i++){
@@ -2169,39 +2165,12 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
               break;
             }
           }
-
           if(nheavyparton>0 && heavyparton.PID()==5) p.hprefix+="Dyb_";//"Dyggb_";
           else if(nheavyparton>0 && heavyparton.PID()==-5) p.hprefix+="Dybbar_";//"Dyggbbar_";
           else if(nheavyparton>0 && heavyparton.PID()==4) p.hprefix+="Dyc_";//"Dyggc_";
           else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyggcbar_";
           else p.hprefix+="";//"Dygg_";
-        } // Only bq or cq collisions (NNLO DY)
-        else if(abs(lhe_p0.ID())==4 || abs(lhe_p0.ID())==5 || abs(lhe_p1.ID())==4 || abs(lhe_p1.ID())==5){
-          Gen heavyparton = gens.at(0);
-          int nheavyparton = 0;
-          for(unsigned int i=0; i<gens.size(); i++){
-            if(!gens.at(i).isHardProcess()) continue;
-            if(abs(gens.at(i).PID())>=11 && abs(gens.at(i).PID())<=16) continue; // No Lepton
-            if(gens.at(i).PID()==22 || gens.at(i).PID()==23) continue; // No gamma, Z
-            if(gens.at(i).Pt() < 30 || abs(gens.at(i).Eta())>2.4) continue; // In the acceptance
-
-            if(nheavyparton==0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
-              heavyparton=gens.at(i);
-              nheavyparton++;
-              continue;
-            }
-            else if(nheavyparton>0 && (abs(gens.at(i).PID())==4 || abs(gens.at(i).PID())==5)){
-              heavyparton=(heavyparton.Pt()>gens.at(i).Pt()?heavyparton:gens.at(i));
-              break;
-            }
-          }
-          if(nheavyparton>0 && heavyparton.PID()==5) p.hprefix+="Dyb_";//"Dyqqb_";
-          else if(nheavyparton>0 && heavyparton.PID()==-5) p.hprefix+="Dybbar_";//"Dyqqbbar_";
-          else if(nheavyparton>0 && heavyparton.PID()==4) p.hprefix+="Dyc_";//"Dyqqc_";
-          else if(nheavyparton>0 && heavyparton.PID()==-4) p.hprefix+="Dycbar_";//"Dyqqcbar_";
-          else p.hprefix+="";//"Dyqq_";
         }
-
       }else p.hprefix+="tau_";
     }
     if(IsTTSample){
@@ -2350,6 +2319,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
+    /*
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
     p.SetAMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIsoSideBand",8.0,2.4),0,roccor_set,roccor_mem));
@@ -2365,6 +2335,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_IsoMu24_v"};
     }
+    */
   }else if(p.channel(0,2)=="MM"){
     p.k.muonIDSF="Muon_MediumID_trkIsoLoose";
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),0,roccor_set,roccor_mem));
@@ -2506,76 +2477,6 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }
   }
 
-  /*
-  p.jets.clear();
-  if(p.option.Contains("jet_scale_up")){
-    p.suffix+="_jet_scale_up";
-    p.jets=SelectJets(ScaleJets(GetAllJets(),1),"tightLepVeto",40,2.4);
-  }else if(p.option.Contains("jet_scale_down")){
-    p.suffix+="_jet_scale_down";
-    p.jets=SelectJets(ScaleJets(GetAllJets(),-1),"tightLepVeto",40,2.4);
-  }else if(p.option.Contains("jet_smear_up")){
-    p.suffix+="_jet_smear_up";
-    p.jets=SelectJets(SmearJets(GetAllJets(),1),"tightLepVeto",40,2.4);
-  }else if(p.option.Contains("jet_smear_down")){
-    p.suffix+="_jet_smear_down";
-    p.jets=SelectJets(SmearJets(GetAllJets(),-1),"tightLepVeto",40,2.4);
-  }else{
-    p.jets=SelectJets(GetAllJets(),"tightLepVeto",40,2.4);
-  }    
-  std::sort(p.jets.begin(),p.jets.end(),PtComparing);
-  JetTagging::Parameters jtp;
-  if(p.option.Contains("DeepCSV::Medium")){
-    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
-  }else if(p.option.Contains("DeepCSV")){
-    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
-  }else if(p.option.Contains("DeepJet::Medium")){
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
-  }else if(p.option.Contains("DeepJet::Tight::mujets")){
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets);
-  }else{
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
-  }
-  p.bjets.clear();
-  vector<Muon> allmuons=GetAllMuons();
-  vector<Electron> allelectrons=GetAllElectrons();
-  for(const auto& jet:p.jets){
-    if(jet.GetTaggerResult(jtp.j_Tagger) < mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP)) continue;
-    if(!p.option.Contains("nobjetcleaning")){
-      if(p.lepton0&&jet.DeltaR(*p.lepton0)<0.4) continue;
-      if(p.lepton1&&jet.DeltaR(*p.lepton1)<0.4) continue;
-    }
-    Jet bjet=jet;
-    double jetCharge = bjet.Charge();
-
-    vector<Muon> bmuon;
-    vector<Electron> belectron;
-
-    for(int l=0,n=allmuons.size(); l<n; l++){
-      if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(bjet.Vect())) <0.6) continue; // original, 1GeV
-      if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
-      if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
-      if(bjet.DeltaR(allmuons.at(l))<0.4) bmuon.push_back(allmuons.at(l));
-    }
-
-    //belectron Trial
-    for(unsigned int l=0; l<allelectrons.size(); l++){
-      if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(bjet.Vect())) <0.6) continue;
-      if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
-      if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
-      if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
-      if(bjet.DeltaR(allelectrons.at(l))<0.4) belectron.push_back(allelectrons.at(l));
-    }
-
-    //The jet has soft muon inside, and its charge will determine the jet charge
-    if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
-    else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
-    bjet.userFloat["AFBCharge"]=jetCharge;
-    p.bjets.push_back(bjet);
-  }
-  std::sort(p.jets.begin(),p.jets.end(),PtComparing);
-  */
-
   p.w.btagSF=1.;
   p.w.btagSF_hup=1.;
   p.w.btagSF_hdown=1.;
@@ -2583,28 +2484,40 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.btagSF_ldown=1.;
 
   if(p.channel.Length()>2){
+    vector<Jet> alljets = {};
+    if(p.option.Contains("jet_scale_up")){
+      p.suffix+="_jet_scale_up";
+      alljets=SelectJets(ScaleJets(GetAllJets(),1),"tightLepVeto",20,2.4);
+    }else if(p.option.Contains("jet_scale_down")){
+      p.suffix+="_jet_scale_down";
+      alljets=SelectJets(ScaleJets(GetAllJets(),-1),"tightLepVeto",20,2.4);
+    }else if(p.option.Contains("jet_smear_up")){
+      p.suffix+="_jet_smear_up";
+      alljets=SelectJets(SmearJets(GetAllJets(),1),"tightLepVeto",20,2.4);
+    }else if(p.option.Contains("jet_smear_down")){
+      p.suffix+="_jet_smear_down";
+      alljets=SelectJets(SmearJets(GetAllJets(),-1),"tightLepVeto",20,2.4);
+    }else{
+      alljets=SelectJets(GetAllJets(),"tightLepVeto",20,2.4);
+    }
+    std::sort(alljets.begin(),alljets.end(),PtComparing);
+
     vector<Jet> lepvetojets = {};
-    realjets.clear();
-    for(unsigned int l=0; l<alljets.size();l++){
-      if(p.lepton0){if(p.lepton0->DeltaR(alljets.at(l)) <0.4) continue;}
-      if(p.lepton1){if(p.lepton1->DeltaR(alljets.at(l)) <0.4) continue;}
-      lepvetojets.push_back(alljets.at(l));
+    for(const auto jet:alljets){
+      if(!p.option.Contains("nojetcleaning")){
+        if(p.lepton0 && jet.DeltaR(*p.lepton0) < 0.4) continue;
+        if(p.lepton1 && jet.DeltaR(*p.lepton1) < 0.4) continue;
+      }
+      lepvetojets.push_back(jet);
     }
 
     p.w.pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
 
-    for(unsigned int l=0; l<lepvetojets.size();l++){
-      if(!PUJetIDPass(lepvetojets.at(l), "Loose")) continue;
-      realjets.push_back(lepvetojets.at(l));
+    realjets.clear();
+    for(const auto jet:lepvetojets){
+      if(!PUJetIDPass(jet, "Loose")) continue;
+      realjets.push_back(jet);
     }
-
-    double eventweight = p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.topptweight;
-    FillHist(p.prefix+p.hprefix+"alljets", alljets.size(), eventweight, 15,0,15);
-    FillHist(p.prefix+p.hprefix+"lepvetojets", lepvetojets.size(), eventweight, 15,0,15);
-    FillHist(p.prefix+p.hprefix+"realjets", realjets.size(), eventweight, 15,0,15);
-    FillHist(p.prefix+p.hprefix+"pujetSF_all", GetPUJetWeight(alljets, "Loose", 0), eventweight, 100,0,5);
-    FillHist(p.prefix+p.hprefix+"pujetSF_lepveto", p.w.pujetSF, eventweight, 100,0,5);
-    FillHist(p.prefix+p.hprefix+"pujetSF_real", GetPUJetWeight(realjets, "Loose", 0), eventweight, 100,0,5);
 
     if(p.channel(2,2)=="bx"){
       p.SetJetPtCut(30,20);
@@ -3077,7 +2990,7 @@ double SMPAnalyzerCore::GetL1PrefiringWeight(int mode) const {
   vector<Jet> theJets = GetAllJets();
 
   //Muons
-  vector<Muon> theMuons = GetAllMuons();
+  vector<Muon> theMuons = allmus;
 
   //Probability for the event NOT to prefire, computed with the prefiring maps per object.
   //Up and down values correspond to the resulting value when shifting up/down all prefiring rates in prefiring maps.
