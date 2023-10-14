@@ -11,10 +11,20 @@ void AFBAnalyzer::initializeAnalyzer(){
 
 }
 void AFBAnalyzer::executeEvent(){
+  //cout<<"Event:"<<event<<endl;
   //// FIXME some events of DYJets has nan PDF weights. I don't know why...
   if(MCSample=="DYJets"&&!isnormal(weight_Scale->at(0))) return;
 
   ///////////////// GEN level /////////////////////
+  genfid_b0=NULL;
+  for(auto& lhe:lhes){
+    if(lhe.Status()!=1) continue;
+    if(abs(lhe.ID())!=5) continue;
+    if(lhe.Pt()<40) continue;
+    if(fabs(lhe.Eta())>2.4) continue;
+    if(genfid_b0&&genfid_b0->Pt()>lhe.Pt()) continue;
+    genfid_b0=&lhe;
+  }
   executeEventGen();
 
   ///////////////// RECO level /////////////////////
@@ -23,30 +33,28 @@ void AFBAnalyzer::executeEvent(){
   }
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
-    //if(IsNominalRun) executeEventWithParameter(MakeParameter("mm","DeepCSV")); //temp 
-    //if(IsNominalRun) executeEventWithParameter(MakeParameter("mm","DeepJet::Tight::mujets")); //temp
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
 	executeEventWithParameter(MakeParameter("mm",syst));
       }
     }
-    if(IsNominalRun) executeEventWithParameter(MakeParameter("mM"));
-    if(IsNominalRun) executeEventWithParameter(MakeParameter("MM"));
+    //For the fake estimation with transfer-factor method
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("mM"));
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("MM"));
   }
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     if(IsNominalRun) executeEventWithParameter(MakeParameter("el"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
-    //if(IsNominalRun) executeEventWithParameter(MakeParameter("ee","DeepCSV")); //temp 
-    //if(IsNominalRun) executeEventWithParameter(MakeParameter("ee","DeepJet::Tight::mujets")); //temp
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
 	executeEventWithParameter(MakeParameter("ee",syst));
       }
     }
-    if(IsNominalRun) executeEventWithParameter(MakeParameter("eE"));
-    if(IsNominalRun) executeEventWithParameter(MakeParameter("EE"));
+    //For the fake estimation with transfer-factor method
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("eE"));
+    //if(IsNominalRun) executeEventWithParameter(MakeParameter("EE"));
   }
 }
 SMPAnalyzerCore::Parameter AFBAnalyzer::MakeParameter(TString key,TString option){
@@ -143,8 +151,9 @@ void AFBAnalyzer::executeEventGen(){
       }
       
       map<TString,double> map_weight;
-      map_weight[""]=p.w.lumiweight*p.w.zptweight;
-      map_weight["_nozptweight"]=p.w.lumiweight;
+
+      map_weight[""]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.topptweight;
+      map_weight["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.weakweight*p.w.topptweight;
 
       //////////////// Fill LHE,Gen hists //////////////////////
       if(!IsSkimmed){
@@ -154,8 +163,8 @@ void AFBAnalyzer::executeEventGen(){
 	double lhe_Zpt=lhe_Z.Pt();
 	FillHistsAFB(p.prefix,"lhe_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
 	if(lhe_j0.Pt()){
-	  FillHist(p.prefix+"lhe_costhetaR",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaR(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
-	  FillHist(p.prefix+"lhe_costhetaT",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaT(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+	  //FillHist(p.prefix+"lhe_costhetaR",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaR(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+	  //FillHist(p.prefix+"lhe_costhetaT",lhe_Zmass,lhe_Zrap,lhe_Zpt,GetCosThetaT(&lhe_l0,&lhe_l1,&lhe_j0,0),map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 	}
 	if(lhe_l0.Pt()>p.c.lepton0pt&&lhe_l1.Pt()>p.c.lepton1pt&&fabs(lhe_l0.Eta())<letacut&&fabs(lhe_l1.Eta())<letacut){
 	  FillHistsAFB(p.prefix,"lhefid_","",(Particle*)&lhe_l0,(Particle*)&lhe_l1,map_weight);
@@ -163,16 +172,20 @@ void AFBAnalyzer::executeEventGen(){
 	FillHistsAFB(p.prefix,"gen_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	FillHistsAFB(p.prefix,"gen_","_dressed",(Particle*)&gen_l0_dressed,(Particle*)&gen_l1_dressed,map_weight);
 	FillHistsAFB(p.prefix,"gen_","_bare",(Particle*)&gen_l0_bare,(Particle*)&gen_l1_bare,map_weight);
-	if(gen_l0.Pt()>p.c.lepton0pt&&gen_l1.Pt()>p.c.lepton1pt&&fabs(gen_l0.Eta())<letacut&&fabs(gen_l1.Eta())<letacut){
+	if(TMath::Max(gen_l0.Pt(),gen_l1.Pt())>p.c.lepton0pt&&TMath::Min(gen_l0.Pt(),gen_l1.Pt())>p.c.lepton1pt&&fabs(gen_l0.Eta())<letacut&&fabs(gen_l1.Eta())<letacut){
 	  FillHistsAFB(p.prefix,"genfid_","",(Particle*)&gen_l0,(Particle*)&gen_l1,map_weight);
 	}
-	if(gen_l0_dressed.Pt()>p.c.lepton0pt&&gen_l1_dressed.Pt()>p.c.lepton1pt&&fabs(gen_l0_dressed.Eta())<letacut&&fabs(gen_l1_dressed.Eta())<letacut){
+	if(TMath::Max(gen_l0_dressed.Pt(),gen_l1_dressed.Pt())>p.c.lepton0pt&&TMath::Min(gen_l0_dressed.Pt(),gen_l1_dressed.Pt())>p.c.lepton1pt&&fabs(gen_l0_dressed.Eta())<letacut&&fabs(gen_l1_dressed.Eta())<letacut){
 	  FillHistsAFB(p.prefix,"genfid_","_dressed",(Particle*)&gen_l0_dressed,(Particle*)&gen_l1_dressed,map_weight);
+	  if(genfid_b0){
+	    //cout<<"Fill genfid_dressed "<<p.prefix<<" "<<map_weight[""]<<endl;
+	    FillHistsRecoil(p.prefix,"genfid_","_dressed",(Particle*)&gen_l0_dressed,(Particle*)&gen_l1_dressed,genfid_b0,map_weight);
+	  }
 	}
-	if(gen_l0_bare.Pt()>p.c.lepton0pt&&gen_l1_bare.Pt()>p.c.lepton1pt&&fabs(gen_l0_bare.Eta())<letacut&&fabs(gen_l1_bare.Eta())<letacut){
+	if(TMath::Max(gen_l0_bare.Pt(),gen_l1_bare.Pt())>p.c.lepton0pt&&TMath::Min(gen_l0_bare.Pt(),gen_l1_bare.Pt())>p.c.lepton1pt&&fabs(gen_l0_bare.Eta())<letacut&&fabs(gen_l1_bare.Eta())<letacut){
 	  FillHistsAFB(p.prefix,"genfid_","_bare",(Particle*)&gen_l0_bare,(Particle*)&gen_l1_bare,map_weight);
 	}
-	FillHist(p.prefix+"gen_costhetaCS_correct",gen_Zmass,gen_Zrap,gen_Zpt,gen_cost_correct,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+	//FillHist(p.prefix+"gen_costhetaCS_correct",gen_Zmass,gen_Zrap,gen_Zpt,gen_cost_correct,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
 	FillHist(p.prefix+"gen_nPU_noPUweight",gen_Zmass,gen_Zrap,gen_Zpt,nPileUp,p.w.lumiweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
 	FillHist(p.prefix+"gen_nPU",gen_Zmass,gen_Zrap,gen_Zpt,nPileUp,p.w.lumiweight*p.w.PUweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
 	FillHist(p.prefix+"gen_nPU_PUweight_up",gen_Zmass,gen_Zrap,gen_Zpt,nPileUp,p.w.lumiweight*p.w.PUweight_up,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
@@ -185,7 +198,8 @@ int AFBAnalyzer::GetUnfoldBin(int nbin,const double* bins,double value,double co
   int i;
   int forward=cost>0?1:0;
   if(value<bins[0]) return 0;
-  value=TMath::Min(value,bins[nbin]-0.1);
+  if(value>=bins[nbin]) return 0;
+  //value=TMath::Min(value,bins[nbin]-0.1);
   i=TMath::BinarySearch(nbin+1,bins,value);
   return forward*nbin+i+1;
 }
@@ -193,24 +207,36 @@ void AFBAnalyzer::executeEventWithParameter(Parameter& p){
   SMPAnalyzerCore::executeEventWithParameter(p);
   // response matrix for unfolding
   if(IsSkimmed) return;
-  if(p.channel=="ee"){
-    if(abs(lhe_l0.ID())!=11||abs(lhe_l1.ID())!=11) return;
-  }else if(p.channel=="mm"){
-    if(abs(lhe_l0.ID())!=13||abs(lhe_l1.ID())!=13) return;
-  }else return;
+  if(p.channel!="ee"&&p.channel!="mm") return;
+
+  TString gen_channel="";
+  if(abs(lhe_l0.ID())==11&&abs(lhe_l1.ID())==11) gen_channel="ee";
+  else if(abs(lhe_l0.ID())==13&&abs(lhe_l1.ID())==13) gen_channel="mm";
+
   TLorentzVector gen_ll_dressed=gen_l0_dressed+gen_l1_dressed;
   double genm=-1;
   double geny=-100;
   double genpt=-1;
   double gencost=0;
-  if(gen_l0_dressed.Pt()>25||gen_l1_dressed.Pt()>25){
-    if(gen_l0_dressed.Pt()>15&&gen_l1_dressed.Pt()>15){
-      if(fabs(gen_l0_dressed.Eta())<2.4&&fabs(gen_l1_dressed.Eta())<2.4){
-	if(gen_ll_dressed.M()>52){
-	  genm=gen_ll_dressed.M();
-	  geny=gen_ll_dressed.Rapidity();
-	  genpt=gen_ll_dressed.Pt();
-	  gencost=GetCosThetaCS(&gen_l0_dressed,&gen_l1_dressed);
+  if(gen_channel==p.channel){
+    if(TMath::Max(gen_l0_dressed.Pt(),gen_l1_dressed.Pt())>25){
+      if(TMath::Min(gen_l0_dressed.Pt(),gen_l1_dressed.Pt())>15){
+	if(fabs(gen_l0_dressed.Eta())<2.4&&fabs(gen_l1_dressed.Eta())<2.4){
+	  if(gen_ll_dressed.M()>52){
+	    if(p.prefix.Contains("nbjet")){
+	      if(genfid_b0){
+		genm=gen_ll_dressed.M();
+		geny=gen_ll_dressed.Rapidity();
+		genpt=gen_ll_dressed.Pt();
+		gencost=GetCosThetaRecoil(&gen_l0_dressed,&gen_l1_dressed,genfid_b0);
+	      }
+	    }else{
+	      genm=gen_ll_dressed.M();
+	      geny=gen_ll_dressed.Rapidity();
+	      genpt=gen_ll_dressed.Pt();
+	      gencost=GetCosThetaCS(&gen_l0_dressed,&gen_l1_dressed);
+	    }
+	  }
 	}
       }
     }
@@ -225,11 +251,19 @@ void AFBAnalyzer::executeEventWithParameter(Parameter& p){
     double recopt=-1;
     double recocost=0;
     if(p.weightmap.find(wname)!=p.weightmap.end()){
-      recoweight=p.weightmap[wname];
-      recom=(*p.lepton0+*p.lepton1).M();
-      recoy=(*p.lepton0+*p.lepton1).Rapidity();
-      recopt=(*p.lepton0+*p.lepton1).Pt();
-      recocost=GetCosThetaCS(p.lepton0,p.lepton1);
+      if(p.prefix.Contains("nbjet")){
+	recoweight=p.weightmap[wname];
+	recom=(*p.lepton0+*p.lepton1).M();
+	recoy=(*p.lepton0+*p.lepton1).Rapidity();
+	recopt=(*p.lepton0+*p.lepton1).Pt();
+	recocost=GetCosThetaRecoil(p.lepton0,p.lepton1,&p.bjets.at(0));
+      }else{
+	recoweight=p.weightmap[wname];
+	recom=(*p.lepton0+*p.lepton1).M();
+	recoy=(*p.lepton0+*p.lepton1).Rapidity();
+	recopt=(*p.lepton0+*p.lepton1).Pt();
+	recocost=GetCosThetaCS(p.lepton0,p.lepton1);
+      }
     }
     //cout<<"wname:"<<wname<<" genweight:"<<genweight<<" recoweight:"<<recoweight<<" recom:"<<recom<<endl;
     int imbin=GetUnfoldBin(afb_mbinnum,afb_mbin,genm,gencost);
@@ -249,6 +283,8 @@ void AFBAnalyzer::executeEventWithParameter(Parameter& p){
     for(int k=0;k<4;k++){
       int ibin=(genm>=massregion[k]&&genm<massregion[k+1]) ? iybin : 0;
       int jbin=(recom>=massregion[k]&&recom<massregion[k+1]) ? jybin : 0;
+
+      //if(wname==""&&ibin>0) cout<<"Fill response "<<p.prefix<<" "<<genweight<<endl;
       FillHist(p.prefix+p.hprefix+Form("response_afby_m%d",k)+p.suffix+wname,ibin,jbin,recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
       FillHist(p.prefix+p.hprefix+Form("response_afby_m%d",k)+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_ybinnum,1,2*afb_ybinnum+1,2*afb_ybinnum,1,2*afb_ybinnum+1);
 
@@ -256,6 +292,11 @@ void AFBAnalyzer::executeEventWithParameter(Parameter& p){
       jbin=(recom>=massregion[k]&&recom<massregion[k+1]) ? jptbin : 0;
       FillHist(p.prefix+p.hprefix+Form("response_afbpt_m%d",k)+p.suffix+wname,ibin,jbin,recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
       FillHist(p.prefix+p.hprefix+Form("response_afbpt_m%d",k)+p.suffix+wname,ibin,0,genweight-recoweight,2*afb_ptbinnum,1,2*afb_ptbinnum+1,2*afb_ptbinnum,1,2*afb_ptbinnum+1);
+    }
+
+    if(wname==""){
+      FillHist(p.prefix+p.hprefix+"genfid_myptcost_dressed_check"+p.suffix,genm,geny,genpt,gencost,genweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+      FillHist(p.prefix+p.hprefix+"myptcost_check"+p.suffix,recom,recoy,recopt,recocost,recoweight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
     }
   }
 }
@@ -369,8 +410,8 @@ void AFBAnalyzer::ResetRecoWeights(Parameter& p){
   p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
   p.w.triggerSF=1.;
   p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
+  p.w.CFSF=1.; p.w.CFSF_up=1.; p.w.CFSF_down=1.;
   p.w.btagSF=1.; p.w.btagSF_hup=1.; p.w.btagSF_hdown=1.; p.w.btagSF_lup=1.; p.w.btagSF_ldown=1.;
-
 }
 void AFBAnalyzer::FillHists(Parameter& p){
   if(!IsSkimmed) return;
@@ -386,7 +427,7 @@ void AFBAnalyzer::FillHists(Parameter& p){
   }
   FillHist(p.prefix+p.hprefix+"bjets"+p.suffix,dimass,dirap,dipt,p.bjets.size(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,10,0,10);
   if(p.bjets.size()){
-    FillHist(p.prefix+p.hprefix+"costhetaRecoil"+p.suffix,dimass,dirap,dipt,GetCosThetaRecoil(p.lepton0,p.lepton1,&p.bjets[0]),p.weightmap,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+    FillHistsRecoil(p.prefix,p.hprefix,p.suffix,(Particle*)p.lepton0,(Particle*)p.lepton1,(Particle*)&p.bjets[0],p.weightmap);
     //FillHist(p.prefix+p.hprefix+"costhetaRecoil2"+p.suffix,dimass,dirap,dipt,GetCosThetaRecoil(p.lepton0,p.lepton1,&p.bjets[0],1),p.weightmap,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
     FillHist(p.prefix+p.hprefix+"b0pt"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).Pt(),p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);
     FillHist(p.prefix+p.hprefix+"b0charge"+p.suffix,dimass,dirap,dipt,p.bjets.at(0).userFloat["AFBCharge"],p.weightmap,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,-5,5);
@@ -567,7 +608,10 @@ double AFBAnalyzer::GetCosThetaRecoil(const Particle *p0,const Particle *p1,Part
     }      
   }
   int direction=0;
-  if(b->userFloat.find("AFBCharge")!=b->userFloat.end()){
+  if(b->InheritsFrom("LHE")||b->InheritsFrom("Gen")){
+    if(b->Charge()>0) direction = -1;
+    else direction=1;    
+  }else if(b->userFloat.find("AFBCharge")!=b->userFloat.end()){
     if(b->userFloat["AFBCharge"]>0) direction = -1;
     else direction=1;
   }
@@ -680,7 +724,12 @@ void AFBAnalyzer::FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0
   double dipt=dilepton.Pt();
 
   double cost=GetCosThetaCS(l0,l1);
-  FillHist(pre+hpre+"costhetaCS"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,afb_ybinnum,(double*)afb_ybin,afb_ptbinnum,(double*)afb_ptbin,20,-1,1);
+  FillHist(pre+hpre+"myptcostCS"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"dimassCS"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"dirapCS"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,afb_ybinnum,(double*)afb_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"diptCS"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,afb_ptbinnum,(double*)afb_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"costhetaCS"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,afb_costbinnum,(double*)afb_costbin);
+
   //double h=0.5*pow(dipt/dimass,2)/(1+pow(dipt/dimass,2))*(1-3*cost*cost);
   //double den_weight=0.5*fabs(cost)/pow(1+cost*cost+h,2);
   //double num_weight=0.5*cost*cost/pow(1+cost*cost+h,3);
@@ -697,6 +746,20 @@ void AFBAnalyzer::FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0
   FillHist(pre+hpre+"leta"+suf,dimass,dirap,dipt,l0->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
   FillHist(pre+hpre+"leta"+suf,dimass,dirap,dipt,l1->Eta(),map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,60,-3,3);
 }
+void AFBAnalyzer::FillHistsRecoil(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,Particle* b,map<TString,double> map_weight){
+  TLorentzVector dilepton=(*l0)+(*l1);
+  double dimass=dilepton.M();
+  double dirap=dilepton.Rapidity();
+  double dipt=dilepton.Pt();
+
+  double cost=GetCosThetaRecoil(l0,l1,b);
+  FillHist(pre+hpre+"myptcostRecoil"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"dimassRecoil"+suf,dimass,dirap,dipt,cost,map_weight,afb_mbinnum,(double*)afb_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"dirapRecoil"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,afb_ybinnum,(double*)afb_ybin,grid_ptbinnum,(double*)grid_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"diptRecoil"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,afb_ptbinnum,(double*)afb_ptbin,grid_costbinnum,(double*)grid_costbin);
+  FillHist(pre+hpre+"costhetaRecoil"+suf,dimass,dirap,dipt,cost,map_weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,afb_costbinnum,(double*)afb_costbin);
+
+}
 void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w){
   Gen genhardl=genhardl0.PID()>0?genhardl0:genhardl1;
   TLorentzVector genZ=genhardl0+genhardl1;
@@ -705,14 +768,14 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
   FillHist(pre+"cos_l_p0"+suf,cos(genhardl.Angle(genparton0.Vect())),w,100,-1,1);
   FillHist(pre+"cos_l_p0_asym"+suf,cos(genhardl.Angle(genparton0.Vect())),w/2,100,-1,1);
   FillHist(pre+"cos_l_p0_asym"+suf,-1.*cos(genhardl.Angle(genparton0.Vect())),-w/2,100,-1,1);
-  if(cos(genhardl.Angle(genparton0.Vect()))>0) FillHist(pre+"cos_l_p0_forward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
-  else FillHist(pre+"cos_l_p0_backward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
+  if(cos(genhardl.Angle(genparton0.Vect()))>0) FillHist(pre+"cos_l_p0_forward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
+  else FillHist(pre+"cos_l_p0_backward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
 
   FillHist(pre+"cos_l_p1"+suf,cos(genhardl.Angle(genparton1.Vect())),w,100,-1,1);
   FillHist(pre+"cos_l_p1_asym"+suf,cos(genhardl.Angle(genparton1.Vect())),w/2,100,-1,1);
   FillHist(pre+"cos_l_p1_asym"+suf,-1.*cos(genhardl.Angle(genparton1.Vect())),-w/2,100,-1,1);
-  if(cos(genhardl.Angle(genparton1.Vect()))>0) FillHist(pre+"cos_l_p1_forward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
-  else FillHist(pre+"cos_l_p1_backward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
+  if(cos(genhardl.Angle(genparton1.Vect()))>0) FillHist(pre+"cos_l_p1_forward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
+  else FillHist(pre+"cos_l_p1_backward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
   
   FillHist(pre+"cos_Z_p0"+suf,cos(genZ.Angle(genparton0.Vect())),w,100,-1,1);
   FillHist(pre+"cos_Z_p0_asym"+suf,cos(genZ.Angle(genparton0.Vect())),w/2,100,-1,1);
@@ -735,8 +798,8 @@ void AFBAnalyzer::FillHardHists(TString pre,TString suf,const Gen& genparton0,co
     FillHist(pre+"cos_l_j0"+suf,cos(genhardl.Angle(genhardj0.Vect())),w,100,-1,1);
     FillHist(pre+"cos_l_j0_asym"+suf,cos(genhardl.Angle(genhardj0.Vect())),w/2,100,-1,1);
     FillHist(pre+"cos_l_j0_asym"+suf,-1.*cos(genhardl.Angle(genhardj0.Vect())),-w/2,100,-1,1);
-    if(cos(genhardl.Angle(genhardj0.Vect()))>0) FillHist(pre+"cos_l_j0_forward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
-    else FillHist(pre+"cos_l_j0_backward"+suf,genZ.M(),w,fine_mbinnum,(double*)fine_mbin);
+    if(cos(genhardl.Angle(genhardj0.Vect()))>0) FillHist(pre+"cos_l_j0_forward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
+    else FillHist(pre+"cos_l_j0_backward"+suf,genZ.M(),w,afb_mbinnum,(double*)afb_mbin);
 
     FillHist(pre+"cos_Z_j0"+suf,cos(genZ.Angle(genhardj0.Vect())),w,100,-1,1);
     FillHist(pre+"cos_Z_j0_asym"+suf,cos(genZ.Angle(genhardj0.Vect())),w/2,100,-1,1);
