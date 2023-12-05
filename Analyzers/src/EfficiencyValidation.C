@@ -23,7 +23,7 @@ void EfficiencyValidation::executeEvent(){
       } 
     }else{
       executeEventWithParameter(MakeParameter("mm")); 
-      //executeEventWithParameter(MakeParameter("mm","mv17"));
+      executeEventWithParameter(MakeParameter("mm","mv17"));
     }
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
@@ -84,6 +84,15 @@ void EfficiencyValidation::executeEvent(){
       executeEventWithParameter(p);}
       */
     }    
+  }else if(GetEra()=="2016postVFP"){
+    if(!IsDATA||DataStream.Contains("SingleMuon")){
+      //executeEventWithParameter(MakeParameter("mu","WMass")); 
+      //executeEventWithParameter(MakeParameter("mu","mv18")); 
+    }    
+    if(!IsDATA||DataStream.Contains("DoubleMuon")){
+      //executeEventWithParameter(MakeParameter("mm","WMass"));
+      //executeEventWithParameter(MakeParameter("mm","mv18")); 
+    }
   }else if(GetEra()=="2017"){
     if(!IsDATA||DataStream.Contains("DoubleEG")){
       Parameter p=MakeParameter("ee");
@@ -188,6 +197,26 @@ SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TStri
     p.k.muonIDSF+="_v17";
     for(auto& key:p.k.triggerSF) key=key+"_v17";
     p.option.ReplaceAll("mv17","");
+  }
+  if(option.Contains("mv18")){
+    p.prefix="v18/"+p.prefix;
+    p.k.muonRECOSF+="_v18";
+    p.k.muonIDSF+="_v18";
+    p.option.ReplaceAll("mv18","");
+  }
+  if(option.Contains("WMass")){
+    p.prefix="WMass/"+p.prefix;
+    p.k.muonRECOSF+="_WMass";
+    p.k.muonTrackingSF+="_WMass";
+    p.k.muonIDSF+="_WMass";
+    for(auto& key:p.k.triggerSF) key=key+"_WMass";
+    p.option.ReplaceAll("WMass","");
+    vector<Muon> muons;
+    for(auto muon:p.muons){
+      if(muon.IsType(Muon::Type::GlobalMuon))
+	muons.push_back(muon);
+    }
+    p.SetMuons(muons);
   }
   if(option.Contains("noroccor")){
     p.suffix="_noroccor";

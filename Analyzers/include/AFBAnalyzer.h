@@ -51,6 +51,33 @@ public:
   static const int afb_costbinnum=20;
   const double afb_costbin[afb_costbinnum+1]={-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
 
+  static const int unfold_0bjet_mbinnum_reco=40;
+  static constexpr const double unfold_0bjet_mbin_reco[unfold_0bjet_mbinnum_reco+1]={52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};
+  static const int unfold_0bjet_mbinnum_gen=20;
+  static constexpr const double unfold_0bjet_mbin_gen[unfold_0bjet_mbinnum_gen+1]={52,60,70,77,82,86,89,91,93,96,100,106,115,130,150,200,280,400,600,800,3000};
+  static const int unfold_0bjet_ybinnum_reco=12;
+  static constexpr const double unfold_0bjet_ybin_reco[unfold_0bjet_ybinnum_reco+1]={-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0.0,0.4,0.8,1.2,1.6,2.0,2.4};
+  static const int unfold_0bjet_ybinnum_gen=6;
+  static constexpr const double unfold_0bjet_ybin_gen[unfold_0bjet_ybinnum_gen+1]={0.0,0.4,0.8,1.2,1.6,2.0,2.4};
+  static const int unfold_0bjet_ptbinnum_reco=30;
+  static constexpr const double unfold_0bjet_ptbin_reco[unfold_0bjet_ptbinnum_reco+1]={0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
+  static const int unfold_0bjet_ptbinnum_gen=15;
+  static constexpr const double unfold_0bjet_ptbin_gen[unfold_0bjet_ptbinnum_gen+1]={0,4,8,12,16,20,28,36,45,55,70,90,120,160,250,650};
+
+  static const int unfold_nbjet_mbinnum_reco=16;
+  static constexpr const double unfold_nbjet_mbin_reco[unfold_nbjet_mbinnum_reco+1]={52,60,65,70,77,90,106,120,140,175,200,240,280,340,400,600,3000};
+  static const int unfold_nbjet_mbinnum_gen=8;
+  static constexpr const double unfold_nbjet_mbin_gen[unfold_nbjet_mbinnum_gen+1]={52,65,77,106,140,200,280,400,3000};
+  static const int unfold_nbjet_ybinnum_reco=10;
+  static constexpr const double unfold_nbjet_ybin_reco[unfold_nbjet_ybinnum_reco+1]={-2.4,-1.6,-1.2,-0.8,-0.4,0.0,0.4,0.8,1.2,1.6,2.4};
+  static const int unfold_nbjet_ybinnum_gen=5;
+  static constexpr const double unfold_nbjet_ybin_gen[unfold_nbjet_ybinnum_gen+1]={0.0,0.4,0.8,1.2,1.6,2.4};
+  static const int unfold_nbjet_ptbinnum_reco=15;
+  static constexpr const double unfold_nbjet_ptbin_reco[unfold_nbjet_ptbinnum_reco+1]={0,2,10,20,28,40,50,60,70,80,90,100,120,140,190,650};
+  static const int unfold_nbjet_ptbinnum_gen=8;
+  static constexpr const double unfold_nbjet_ptbin_gen[unfold_nbjet_ptbinnum_gen+1]={0,2,20,40,60,80,100,140,650};
+
+
   static const int grid_mbinnum=4;
   const double grid_mbin[grid_mbinnum+1]={52,77,106,280,3000};
   static const int grid_ybinnum=4;
