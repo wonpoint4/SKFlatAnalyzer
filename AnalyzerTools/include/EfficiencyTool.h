@@ -66,7 +66,7 @@ class EfficiencyTool{
   double GetSimEfficiency(TString key,const Lepton* lep,int set,int mem,TString option="") const;
   double GetEfficiencySF(TString key,double eta,double pt,int charge,int set,int mem,TString option="") const;
   double GetEfficiencySF(TString key,const Lepton* lep,int set,int mem,TString option="") const;
-  vector<vector<double>> GetStructure(TString key) const;
+  vector<int> GetStructure(TString key) const;
 
   static bool IsPlus(TString path);
   static bool IsMinus(TString path);

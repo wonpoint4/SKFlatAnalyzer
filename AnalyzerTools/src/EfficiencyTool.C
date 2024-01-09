@@ -518,8 +518,8 @@ double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int
   }
   return GetEfficiencySF(key,eta,pt,charge,set,mem,option);
 }
-vector<vector<double>> EfficiencyTool::GetStructure(TString key) const{
-  vector<vector<double>> out;
+vector<int> EfficiencyTool::GetStructure(TString key) const{
+  vector<int> out;
   if(key==""||key=="Default") return out;
   const Efficiency* eff=Get(key);
   if(!eff){
@@ -528,7 +528,7 @@ vector<vector<double>> EfficiencyTool::GetStructure(TString key) const{
   }
   int nset=eff->fDataPlus.size();
   for(int i=0;i<nset;i++)
-    out.push_back(vector<double>(eff->fDataPlus.at(i).size(),1.));
+    out.push_back(eff->fDataPlus.at(i).size());
   return out;
 }
 bool EfficiencyTool::IsPlus(TString path){
