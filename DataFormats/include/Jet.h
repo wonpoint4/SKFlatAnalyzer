@@ -24,6 +24,8 @@ public:
   void SetMultiplicities(double cM, double nM);
   void SetPileupJetId(double v);
 
+  void SetCorrectedPt(double pt){ j_correctedPt=pt; }
+  double CorrectedPt() const { return j_correctedPt; }
   void SetJEC(double jec);
   void SetJER(double jer);
   inline double JEC() const { return j_JECFull; }
@@ -78,6 +80,7 @@ private:
   int j_chargedMultiplicity;
   int j_neutralMultiplicity;
   double j_PileupJetId;
+  double j_correctedPt;
   double j_JECFull=1.;
   double j_smearedRes=1.;
   double j_En_up;
