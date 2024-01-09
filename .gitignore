@@ -11,4 +11,6 @@ python/UserInfo_*.py
 !python/UserInfo_template.py
 Plotter/
 AN-*/
-
+fig/
+AFBResult/
+LTAnalyzer/

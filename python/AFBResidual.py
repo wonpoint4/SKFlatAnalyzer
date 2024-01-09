@@ -46,6 +46,64 @@ def GetChi2(h1,h2):
             ndf+=1
     return chi2,ndf,ROOT.TMath.Prob(chi2,ndf)
 
+def MoveOverflow(h4d):
+    nx=h4d.GetXaxis().GetNbins()
+    ny=h4d.GetXaxis().GetNbins()
+    nz=h4d.GetXaxis().GetNbins()
+    nu=h4d.GetXaxis().GetNbins()
+    for iy,iz,iu in [(iy,iz,iu) for iy in range(ny+2) for iz in range(nz+2) for iu in range(nu+2)]:
+        val0=h4d.GetBinContent(0,iy,iz,iu)
+        err0=h4d.GetBinError(0,iy,iz,iu)
+        val1=h4d.GetBinContent(1,iy,iz,iu)
+        err1=h4d.GetBinError(1,iy,iz,iu)
+        h4d.SetBinContent(1,iy,iz,iu,val0+val1)
+        h4d.SetBinError(1,iy,iz,iu,(err0**2+err1**2)**0.5)
+        val0=h4d.GetBinContent(nx+1,iy,iz,iu)
+        err0=h4d.GetBinError(nx+1,iy,iz,iu)
+        val1=h4d.GetBinContent(nx,iy,iz,iu)
+        err1=h4d.GetBinError(nx,iy,iz,iu)
+        h4d.SetBinContent(nx,iy,iz,iu,val0+val1)
+        h4d.SetBinError(nx,iy,iz,iu,(err0**2+err1**2)**0.5)
+    for ix,iz,iu in [(ix,iz,iu) for ix in range(nx+2) for iz in range(nz+2) for iu in range(nu+2)]:
+        val0=h4d.GetBinContent(ix,0,iz,iu)
+        err0=h4d.GetBinError(ix,0,iz,iu)
+        val1=h4d.GetBinContent(ix,1,iz,iu)
+        err1=h4d.GetBinError(ix,1,iz,iu)
+        h4d.SetBinContent(ix,1,iz,iu,val0+val1)
+        h4d.SetBinError(ix,1,iz,iu,(err0**2+err1**2)**0.5)
+        val0=h4d.GetBinContent(ix,ny+1,iz,iu)
+        err0=h4d.GetBinError(ix,ny+1,iz,iu)
+        val1=h4d.GetBinContent(ix,ny,iz,iu)
+        err1=h4d.GetBinError(ix,ny,iz,iu)
+        h4d.SetBinContent(ix,ny,iz,iu,val0+val1)
+        h4d.SetBinError(ix,ny,iz,iu,(err0**2+err1**2)**0.5)
+    for ix,iy,iu in [(ix,iy,iu) for ix in range(nx+2) for iy in range(ny+2) for iu in range(nu+2)]:
+        val0=h4d.GetBinContent(ix,iy,0,iu)
+        err0=h4d.GetBinError(ix,iy,0,iu)
+        val1=h4d.GetBinContent(ix,iy,1,iu)
+        err1=h4d.GetBinError(ix,iy,1,iu)
+        h4d.SetBinContent(ix,iy,1,iu,val0+val1)
+        h4d.SetBinError(ix,iy,1,iu,(err0**2+err1**2)**0.5)
+        val0=h4d.GetBinContent(ix,iy,nz+1,iu)
+        err0=h4d.GetBinError(ix,iy,nz+1,iu)
+        val1=h4d.GetBinContent(ix,iy,nz,iu)
+        err1=h4d.GetBinError(ix,iy,nz,iu)
+        h4d.SetBinContent(ix,iy,nz,iu,val0+val1)
+        h4d.SetBinError(ix,iy,nz,iu,(err0**2+err1**2)**0.5)
+    for ix,iy,iz in [(ix,iy,iz) for ix in range(nx+2) for iy in range(ny+2) for iz in range(nz+2)]:
+        val0=h4d.GetBinContent(ix,iy,iz,0)
+        err0=h4d.GetBinError(ix,iy,iz,0)
+        val1=h4d.GetBinContent(ix,iy,iz,1)
+        err1=h4d.GetBinError(ix,iy,iz,1)
+        h4d.SetBinContent(ix,iy,iz,1,val0+val1)
+        h4d.SetBinError(ix,iy,iz,1,(err0**2+err1**2)**0.5)
+        val0=h4d.GetBinContent(ix,iy,iz,nu+1)
+        err0=h4d.GetBinError(ix,iy,iz,nu+1)
+        val1=h4d.GetBinContent(ix,iy,iz,nu)
+        err1=h4d.GetBinError(ix,iy,iz,nu)
+        h4d.SetBinContent(ix,iy,iz,nu,val0+val1)
+        h4d.SetBinError(ix,iy,iz,nu,(err0**2+err1**2)**0.5)
+
 def addResidual(infilename):
     print infilename
     outfilename=infilename.replace(".root","_residual.root")
@@ -70,8 +128,10 @@ def addResidual(infilename):
     hsf_origin=f.Get("sf")
 
     plotter=ROOT.AFBPlotter("data mi+tau_mi+vv+wjets+tt+st+qcdss+aa","EfficiencyValidation")
-    hdata4d=plotter.GetHist(0,"v17/"+channel+era+"/m80to100/lpetaptlmetapt","noproject")
-    hsim4d=plotter.GetHist(1,"v17/"+channel+era+"/m80to100/lpetaptlmetapt","noproject")
+    hdata4d=plotter.GetHist(0,channel+era+"/m80to100/lpetaptlmetapt","noproject")
+    #MoveOverflow(hdata4d)
+    hsim4d=plotter.GetHist(1,channel+era+"/m80to100/lpetaptlmetapt","noproject")
+    #MoveOverflow(hsim4d)
     scale=hdata4d.Integral(0,-1,0,-1,0,-1,0,-1)/hsim4d.Integral(0,-1,0,-1,0,-1,0,-1)
     hsim4d.Scale(scale)
 
@@ -125,12 +185,24 @@ def addResidual(infilename):
     hsf.Write()
     f.Close()
 
+    
+def GetCurrentEffFileName(era,channel):
+    if channel=="Electron":
+        key="Muon_MediumID_trkIsoLoose"
+    elif channel=="Muon":
+        key="Electron_MediumID"
+    else:
+        print "Unknown channal ",channel
+        exit(1)
+
+    filename=os.popen("cat $SKFlat_WD/data/$SKFlatV/"+era+"/ID/eff.conf|egrep '"+key+"[^_]'|awk '{print $3}'").read().strip()
+    filename=filename.replace("_residual","")
+    return os.environ["SKFlat_WD"]+"/data/"+os.environ["SKFlatV"]+"/"+era+"/ID/"+filename
+
 if __name__=="__main__":
     if sys.argv[1]=="all":
         for era in ["2016preVFP","2016postVFP","2017","2018"]:
-            erashort=era.replace("preVFP","a").replace("postVFP","b")
-            addResidual("data/Run2UltraLegacy_v3/{}/ID/Electron/{}_MediumID_v17.root".format(era,erashort))
-            addResidual("data/Run2UltraLegacy_v3/{}/ID/Muon/{}_MediumID_LooseTrkIso_v17.root".format(era,erashort))
+            addResidual(GetCurrentEffFileName(era,"Electron"))
+            addResidual(GetCurrentEffFileName(era,"Muon"))
     else:
         addResidual(sys.argv[1])
-    
