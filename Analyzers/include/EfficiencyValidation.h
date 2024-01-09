@@ -10,10 +10,11 @@ public:
   virtual void initializeAnalyzer();
   virtual void executeEvent();
   virtual Parameter MakeParameter(TString key,TString option="");
-  virtual void EvalWeights(Parameter& p);
+  virtual void EvalDefaultWeight(Parameter& p);
+  virtual Variations MakeVariations(const Parameter& p);
+  virtual void EvalVariationsBtag(const Parameter& p,Variations& variations){};
   virtual void FillHists(Parameter& p);
   virtual void FillHistsEfficiency(Parameter& p,TString region);
-  virtual bool PassSelection(Parameter& p);
 
   virtual double GetLeptonTriggerORSF_old(const Parameter& p,int iset=0,int imem=0);
   virtual double GetCosThetaCS(const Particle *p0,const Particle *p1,int direction=0) const;

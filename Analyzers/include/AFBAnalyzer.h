@@ -16,10 +16,10 @@ public:
   virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   static int GetUnfoldBin(int nbin,const double* bins,double mass,double cost);
   virtual Parameter MakeParameter(TString key,TString option="");
-  virtual bool PassSelection(Parameter& p);
-  virtual void EvalWeights(Parameter& p);
+  virtual bool PassSelection(Parameter& p,bool cutflow=false);
+  virtual Variations MakeVariations(const Parameter& p);
   virtual void ResetRecoWeights(Parameter& p);
-  virtual void FillHists(Parameter& p);
+  virtual void FillHistsSyst(Parameter p,Variations& vs);
 
   AFBAnalyzer();
   ~AFBAnalyzer();
@@ -29,8 +29,8 @@ public:
   virtual double GetCosThetaRecoil(const Particle *p0,const Particle *p1,Particle *b,int mode=0);
   virtual double GetCosThetaR(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
   virtual double GetCosThetaT(const Particle *l0,const Particle *l1,const Particle *j0,int direction=0);
-  virtual void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,map<TString,double> map_weight);
-  virtual void FillHistsRecoil(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,Particle* b,map<TString,double> map_weight);
+  virtual void FillHistsAFB(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,double weight);
+  virtual void FillHistsRecoil(TString pre,TString hpre,TString suf,Particle* l0,Particle* l1,Particle* b,double weight);
   virtual void FillHardHists(TString pre,TString suf,const Gen& genparton0,const Gen& genparton1,const Gen& genhardl0,const Gen& genhardl1,const Gen& genhardj0,double w);
   //void FillGenAFBHists(TString pre,TString suf,const Gen& genl0,const Gen& genl1,const Gen& genphotons,double w);
   

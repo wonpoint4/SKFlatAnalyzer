@@ -446,6 +446,7 @@ std::vector<Jet> AnalyzerCore::GetAllJets() const {
       jet.SetGenFlavours(jet_partonFlavour->at(i), jet_hadronFlavour->at(i));
       jet.SetGenHFHadronMatcher(jet_GenHFHadronMatcher_flavour->at(i),jet_GenHFHadronMatcher_origin->at(i));
     }
+    jet.SetCorrectedPt(jet.Pt());
     jet.SetBJetNNCorrection(jet_bJetNN_corr->at(i),jet_bJetNN_res->at(i));
     jet.SetCJetNNCorrection(jet_cJetNN_corr->at(i),jet_cJetNN_res->at(i));
     jet.SetCharge(jet_charge->at(i));
@@ -899,7 +900,7 @@ std::vector<Jet> AnalyzerCore::ScaleJets(const std::vector<Jet>& jets, int sys){
     //==== jets is a const vector. So in this function, we have to copy the elements like below
     Jet this_jet = jets.at(i);
 
-    this_jet *= this_jet.EnShift(sys);
+    this_jet *= this_jet.EnShift(sys)*this_jet.CorrectedPt()/this_jet.Pt();
 
     out.push_back( this_jet );
   }
@@ -914,7 +915,7 @@ std::vector<Jet> AnalyzerCore::SmearJets(const std::vector<Jet>& jets, int sys){
     //==== jets is a const vector. So in this function, we have to copy the elements like below
     Jet this_jet = jets.at(i);
 
-    this_jet *= this_jet.ResShift(sys);
+    this_jet *= this_jet.ResShift(sys)*this_jet.CorrectedPt()/this_jet.Pt();
 
     out.push_back( this_jet );
   }

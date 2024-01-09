@@ -9,7 +9,6 @@ public:
 
   virtual void executeEvent();
   virtual Parameter MakeParameter(TString key,TString option="");
-  virtual void EvalWeights(Parameter& p);
   virtual void FillHists(Parameter& p);
 
   EMuAnalyzer();
