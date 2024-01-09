@@ -20,6 +20,7 @@
 #pragma link C++ class SMPAnalyzerCore+;
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
+#pragma link C++ class AFBAnalyzerSyst+;
 #pragma link C++ class EfficiencyValidation+;
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
