@@ -131,6 +131,7 @@ public:
       vector<vector<Weight>> triggerSF_sys;
       Weight CFSF,CFSF_up,CFSF_down;
       Weight btagSF,btagSF_hup,btagSF_hdown,btagSF_lup,btagSF_ldown,btagSF_hcorr,btagSF_huncorr,btagSF_lcorr,btagSF_luncorr;
+      Weight bchargeSF,bchargeSF_up,bchargeSF_down;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -175,6 +176,7 @@ public:
   virtual void EvalVariationsPrefireweight(const Parameter& p,Variations& variations);
   virtual void EvalVariationsCF(const Parameter& p,Variations& variations);
   virtual void EvalVariationsBtag(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsBcharge(const Parameter& p,Variations& v);
   virtual void EvalVariationsEtc(const Parameter& p,Variations& variations);
   virtual void EvalVariationsEfficiency(const Parameter& p,Variations& variations);
   virtual void EvalVariationsPDF(const Parameter& p,Variations& variations);
@@ -369,6 +371,9 @@ public:
   bool PassDLT2(const Lepton* lep) const;
 
   static vector<vector<Weight>> Make2DWeights(const vector<int>& structure);
+
+  virtual double GetBchargeSF(const Jet& bjet,int sys=0) const;
+  virtual double GetBchargeSF(const Parameter& p,int sys=0) const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

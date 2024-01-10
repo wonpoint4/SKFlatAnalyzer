@@ -280,6 +280,17 @@ void SMPAnalyzerCore::EvalVariationsBtag(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_btagSF_lcorr",p.default_weight/p.w.btagSF*p.w.btagSF_lcorr);
   AddVariationWeight(v,"_btagSF_luncorr",p.default_weight/p.w.btagSF*p.w.btagSF_luncorr);
 }
+void SMPAnalyzerCore::EvalVariationsBcharge(const Parameter& p,Variations& v){
+  double bchargeSF=GetBchargeSF(p);
+  double bchargeSF_down=GetBchargeSF(p,-1);
+  double bchargeSF_up=GetBchargeSF(p,1);
+  AddVariationWeight(v,"_nobchargeSF",p.default_weight/bchargeSF);
+  AddVariationWeight(v,"_bchargeSF_down",p.default_weight/bchargeSF*bchargeSF_down);
+  AddVariationWeight(v,"_bchargeSF_up",p.default_weight/bchargeSF*bchargeSF_up);
+  // AddVariationWeight(v,"_nobchargeSF",p.default_weight/p.w.bchargeSF);
+  // AddVariationWeight(v,"_bchargeSF_down",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_down);
+  // AddVariationWeight(v,"_bchargeSF_up",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_up);
+}
 void SMPAnalyzerCore::EvalVariationsEtc(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_z0weight",p.default_weight*p.w.z0weight);
   AddVariationWeight(v,"_zptweight_gym",p.default_weight/p.w.zptweight*p.w.zptweight_gym);
@@ -1863,7 +1874,7 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     if(IsDYSample){
       if(abs(lhe_l0.ID())==11||abs(lhe_l0.ID())==13){
 	TLorentzVector genZ=(gen_l0+gen_l1);
-	p.w.zptweight=fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity(),genZ.M());
+	p.w.zptweight=fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity());
 	p.w.zptweight_g=fZptCorrection->GetZptWeight(genZ.Pt());
 	p.w.zptweight_gy=fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity());
 	p.w.zptweight_gym=fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity(),genZ.M());
@@ -2769,4 +2780,27 @@ vector<vector<Weight>> SMPAnalyzerCore::Make2DWeights(const vector<int>& structu
     rt.push_back(vector<Weight>(nmem,1.0));
   }
   return rt;
+}
+double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
+  double sf=1.;
+  double charge=bjet.GetUserFloat("AFBCharge");
+  int flavour=bjet.GenHFHadronMatcherFlavour();
+  int origin=bjet.GenHFHadronMatcherOrigin();
+  if(flavour!=5) return sf;
+  if(origin==-999) return sf;
+  double data_accuracy=0.63;
+  double sim_accuracy=0.63+0.02*sys;
+  if(origin*charge<0){
+    sf=data_accuracy/sim_accuracy;
+  }else{
+    sf=(1-data_accuracy)/(1-sim_accuracy);
+  }  
+  return sf;
+}
+double SMPAnalyzerCore::GetBchargeSF(const Parameter& p,int sys) const {
+  double sf=1.;
+  if(!p.bjets.size()) return sf;
+  if(p.bjets.at(0).Pt()<p.c.jetpt) return sf;
+  sf*=GetBchargeSF(p.bjets.at(0),sys);
+  return sf;
 }
