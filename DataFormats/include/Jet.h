@@ -14,6 +14,7 @@ public:
   void SetGenFlavours(int pf, int hf);
   inline int partonFlavour() const { return j_partonFlavour; }
   inline int hadronFlavour() const { return j_hadronFlavour; }
+  inline double PileupJetId() const { return j_PileupJetId; }
   void SetGenHFHadronMatcher(int flavour, int origin);
   inline int GenHFHadronMatcherFlavour() const { return j_GenHFHadronMatcher_flavour; }
   inline int GenHFHadronMatcherOrigin() const { return j_GenHFHadronMatcher_origin; }
