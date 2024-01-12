@@ -347,6 +347,7 @@ void AFBAnalyzer::ResetRecoWeights(Parameter& p){
   p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
   p.w.CFSF=1.; p.w.CFSF_up=1.; p.w.CFSF_down=1.;
   p.w.btagSF=1.; p.w.btagSF_hup=1.; p.w.btagSF_hdown=1.; p.w.btagSF_lup=1.; p.w.btagSF_ldown=1.;
+  p.w.bchargeSF=1.; p.w.bchargeSF_up=1.; p.w.bchargeSF_down=1.;
 }
 void AFBAnalyzer::FillHistsSyst(Parameter p,Variations& vs){
   if(!IsSkimmed) return;
