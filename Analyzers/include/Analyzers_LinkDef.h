@@ -32,5 +32,6 @@
 #pragma link C++ class L1PrefireAnalyzer+;
 #pragma link C++ class LTAnalyzer+;
 #pragma link C++ class BjetAnalyzer+;
+#pragma link C++ class BBAnalyzer+;
 
 #endif
