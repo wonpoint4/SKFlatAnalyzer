@@ -212,7 +212,7 @@ void SMPAnalyzerCore::EvalTriggerSF(Parameter& p){
   }
 }
 void SMPAnalyzerCore::EvalDefaultWeight(Parameter& p){
-  p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
   p.weight=p.default_weight;
 }
 SMPAnalyzerCore::Variations SMPAnalyzerCore::MakeVariations(const Parameter& p){
@@ -225,6 +225,7 @@ SMPAnalyzerCore::Variations SMPAnalyzerCore::MakeVariations(const Parameter& p){
       EvalVariationsPUweight(p,v);
       EvalVariationsPrefireweight(p,v);
       EvalVariationsBtag(p,v);
+      EvalVariationsBcharge(p,v);
       EvalVariationsEtc(p,v);
       EvalVariationsJetCorrection(p,v);
     }
@@ -281,15 +282,9 @@ void SMPAnalyzerCore::EvalVariationsBtag(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_btagSF_luncorr",p.default_weight/p.w.btagSF*p.w.btagSF_luncorr);
 }
 void SMPAnalyzerCore::EvalVariationsBcharge(const Parameter& p,Variations& v){
-  double bchargeSF=GetBchargeSF(p);
-  double bchargeSF_down=GetBchargeSF(p,-1);
-  double bchargeSF_up=GetBchargeSF(p,1);
-  AddVariationWeight(v,"_nobchargeSF",p.default_weight/bchargeSF);
-  AddVariationWeight(v,"_bchargeSF_down",p.default_weight/bchargeSF*bchargeSF_down);
-  AddVariationWeight(v,"_bchargeSF_up",p.default_weight/bchargeSF*bchargeSF_up);
-  // AddVariationWeight(v,"_nobchargeSF",p.default_weight/p.w.bchargeSF);
-  // AddVariationWeight(v,"_bchargeSF_down",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_down);
-  // AddVariationWeight(v,"_bchargeSF_up",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_up);
+  AddVariationWeight(v,"_nobchargeSF",p.default_weight/p.w.bchargeSF);
+  AddVariationWeight(v,"_bchargeSF_down",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_down);
+  AddVariationWeight(v,"_bchargeSF_up",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_up);
 }
 void SMPAnalyzerCore::EvalVariationsEtc(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_z0weight",p.default_weight*p.w.z0weight);
@@ -2261,6 +2256,9 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.w.btagSF_lcorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTagCorr");
     p.w.btagSF_luncorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTagUnCorr");
     //cout<<p.w.btagSF<<" "<<p.w.btagSF_hup<<" "<<p.w.btagSF_hcorr<<" "<<p.w.btagSF_huncorr<<endl;
+    p.w.bchargeSF=GetBchargeSF(p);
+    p.w.bchargeSF_up=GetBchargeSF(p,1);
+    p.w.bchargeSF_down=GetBchargeSF(p,-1);
   }
   return p;
 }
@@ -2788,8 +2786,10 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
   int origin=bjet.GenHFHadronMatcherOrigin();
   if(flavour!=5) return sf;
   if(origin==-999) return sf;
-  double data_accuracy=0.63;
-  double sim_accuracy=0.63+0.02*sys;
+  double data_accuracy=0.619894+0.004496*sys;
+  //data (BB SS method): 0.619894+-0.004496
+  double sim_accuracy=0.639483;
+  //sim (BB SS method): 0.639483+-0.000594
   if(origin*charge<0){
     sf=data_accuracy/sim_accuracy;
   }else{
@@ -2800,7 +2800,9 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
 double SMPAnalyzerCore::GetBchargeSF(const Parameter& p,int sys) const {
   double sf=1.;
   if(!p.bjets.size()) return sf;
-  if(p.bjets.at(0).Pt()<p.c.jetpt) return sf;
-  sf*=GetBchargeSF(p.bjets.at(0),sys);
+  for(int i=0,n=p.bjets.size();i<n;i++){
+    if(p.bjets.at(i).Pt()<p.c.jetpt) return sf;
+    sf*=GetBchargeSF(p.bjets.at(i),sys);
+  }
   return sf;
 }
