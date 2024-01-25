@@ -2786,14 +2786,28 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
   int origin=bjet.GenHFHadronMatcherOrigin();
   if(flavour!=5) return sf;
   if(origin==-999) return sf;
-  double data_accuracy=0.619894+0.004496*sys;
-  //data (BB SS method): 0.619894+-0.004496
-  double sim_accuracy=0.639483;
+  double data_m_accuracy=0.615651+sys*0.003372;
+  double data_p_accuracy=0.629591+sys*0.003385;
+  //data (BB SS method (mm)): 0.619894+-0.004496
+  //data - (BB SS method (me)): 0.615651+-0.003372
+  //data + (BB SS method (me)): 0.629591+-0.003385
+  double sim_m_accuracy=0.632788;
+  double sim_p_accuracy=0.645423;
   //sim (BB SS method): 0.639483+-0.000594
+  //sim - (BB SS method (me)): 0.632788+-0.000486
+  //sim + (BB SS method (me)): 0.645423+-0.000485
   if(origin*charge<0){
-    sf=data_accuracy/sim_accuracy;
+    if(origin>0){
+      sf=data_m_accuracy/sim_m_accuracy;
+    }else{
+      sf=data_p_accuracy/sim_p_accuracy;
+    }      
   }else{
-    sf=(1-data_accuracy)/(1-sim_accuracy);
+    if(origin>0){
+      sf=(1-data_m_accuracy)/(1-sim_m_accuracy);
+    }else{
+      sf=(1-data_p_accuracy)/(1-sim_p_accuracy);
+    }      
   }  
   return sf;
 }

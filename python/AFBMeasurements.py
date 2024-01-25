@@ -10,16 +10,7 @@ SystematicSuffixes=dict(_plotter.GetSystematicSuffixes("totalsys")).keys()
 Systematics=dict(_plotter.systematics)
 
 def Variation2Suffix(variation):
-    variation=str(variation)
-    words=variation.split(":")
-    Type=words[0]
-    tag=words[2]
-    if Type=="replace":
-        return "_"+tag+words[1].split("->")[1]
-    elif Type=="scale":
-        return "_"+tag+"_scale"
-    print "[Error] [Variation2Suffix] Cannot convert "+variation
-    return None
+    return str(ROOT.Plotter.Variation2Suffix(variation))
 
 class AFBMeasurement:
     def __init__(self,value,stat):
@@ -40,7 +31,7 @@ class AFBMeasurement:
         return
 
     def GetSystError(self,key):
-        return self.syst[key]
+        return self.syst[key]    
 
     def __mul__(self,other):
         rt=copy.deepcopy(self)
@@ -132,6 +123,10 @@ class AFBMeasurements:
             vecs=[[x.GetSystError(subkey) for x in measurements] for subkey in subkeys]
             covs=map(lambda x:np.outer(x,x),vecs)
             rt=sum(covs)
+        elif syst.type==ROOT.Systematic.Type.CORRELATED:
+            subkeys=map(Variation2Suffix,syst.variations)
+            vec=[sum([x.GetSystError(subkey) for subkey in subkeys]) for x in measurements]
+            rt=np.outer(vec,vec)
         else:
             print "[Error] Unknown systematic type",syst.type,syst.title
             exit(1)
@@ -243,7 +238,7 @@ class AFBMeasurements:
         out="\n".join(out)
         print out
         
-def CompareEraAll(inputpath,outputpath):
+def SaveCompareEraAll(inputpath,outputpath):
     colors=[ROOT.kBlack,ROOT.kRed,ROOT.kGreen+1,ROOT.kBlue,ROOT.kYellow+1,ROOT.kMagenta,ROOT.kCyan,ROOT.kGray,ROOT.kPink+1,ROOT.kSpring+1,ROOT.kAzure+1,ROOT.kOrange+1,ROOT.kViolet+1,ROOT.kTeal+1,ROOT.kWhite,ROOT.kGray+1,ROOT.kGray+3]
     _plotter.plotdir=outputpath
     for channel in ["mm","ee"]:
@@ -331,11 +326,12 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
                 sim_histoption+=" Xmin:106 Xmax:280"
             elif "_m3" in histname:
                 sim_histoption+=" Xmin:280 Xmax:3000"
-            hsim=_plotter.GetHistSys(sim_index,sim_histname,sim_histoption)
-            for h in hsim:
-                h.SetOption("hist e1")
+            hsim=_plotter.GetHistVariations(sim_index,sim_histname,sim_histoption)
+            for i in range(len(hsim)):
+                hsim[i].SetOption("hist e1")
 
-            for h in hdata:
+            for i in range(len(hdata)):
+                h=hdata[i]
                 h.SetName("RunII (blind)")
                 h.SetOption("e1")
                 h.SetMarkerStyle(20)
@@ -344,6 +340,7 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
                 h.SetMarkerColor(1)
                 for i in range(h.GetNcells()):
                     h.SetBinContent(i,hsim[0].GetBinContent(i))
+                    pass
             print sim_histname,sim_histoption
             p=ROOT.Plot()
             p.SetOption(plot_option)
@@ -438,7 +435,8 @@ def SaveDeltaPlotAll(inputpath,outputpath):
 
 if __name__=="__main__":
     # inputpath=os.environ["SKFlatOutputDir"]+os.environ["SKFlatV"]+"/AFBAnalyzer/"
-    SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
+
+    #SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
     SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
 
     # hists=ROOT.vector("Hists")()

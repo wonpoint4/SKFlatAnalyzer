@@ -15,9 +15,15 @@ void BBAnalyzer::executeEvent(){
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
   }
+  if(!IsDATA||DataStream.Contains("SingleMuon")){
+    executeEventWithParameter(MakeParameter("me"));
+  }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
   }
+  // if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
+  //   executeEventWithParameter(MakeParameter("em"));
+  // }
 }
 
 void BBAnalyzer::EvalDefaultWeight(Parameter& p){
@@ -66,11 +72,11 @@ void BBAnalyzer::FillHists(Parameter& p){
   double dipt=dilepton.Pt();
 
   if(dimass<52) return;
-  if(dimass>76 && dimass<106) return;
   int nbjet=count_if(p.bjets.begin(),p.bjets.end(),[&p](auto& jet){return jet.Pt()>p.c.jetpt;});
   if(nbjet<2) return;
 
   FillHist(pre+"dimass"+suf,dimass,weight,nmassbin,massbins);
+  if( (p.channel=="ee" || p.channel=="mm") && dimass>76 && dimass<106) return;
 
   int bits=0;
   if(p.bjets.at(0).userFloat["AFBCharge"]>0) bits+=1<<0;
@@ -83,11 +89,17 @@ void BBAnalyzer::FillHists(Parameter& p){
        && (abs(p.bjets.at(0).GenHFHadronMatcherOrigin())==6 && abs(p.bjets.at(1).GenHFHadronMatcherOrigin())==6)
        && (p.bjets.at(0).GenHFHadronMatcherOrigin()*p.bjets.at(1).GenHFHadronMatcherOrigin()<0) 
 	){
+      for(int i=0;i<2;i++){
+	int correct=p.bjets.at(i).userFloat["AFBCharge"]*p.bjets.at(i).GenHFHadronMatcherOrigin()<0;
+	TString scharge=p.bjets.at(i).GenHFHadronMatcherOrigin()<0 ? "p" : "m";
+	FillHist(pre+Form("b%d%scorrect",i,scharge.Data())+suf,correct,weight,2,0,2);
+      }
     }else{
       pre+="unmatched_";    
     }
   }
 
+  FillHist(pre+"charge"+suf,bits,weight,4,0,4);
   FillHist(pre+"dimass"+csuf+suf,dimass,weight,nmassbin,massbins);
   FillHist(pre+"dirap"+csuf+suf,dirap,weight,netabin,etabins);
   FillHist(pre+"dipt"+csuf+suf,dipt,weight,nptbin,ptbins);

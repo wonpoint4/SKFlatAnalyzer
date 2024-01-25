@@ -6,14 +6,14 @@ import ROOT,ctypes
 ROOT.TH1.AddDirectory(0)
 ROOT.TH1.SetDefaultSumw2(1)
 
-ROOT.gROOT.ProcessLine('#include"AFBPlotter.cc"')
-SystematicSuffixes=dict(ROOT.AFBPlotter("").GetSystematicSuffixes("totalsys"))
+ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
+SystematicSuffixes=dict(ROOT.AFBSystPlotter("").GetSystematicSuffixes("totalsys_bcharge"))
 DEBUG=0
 
 class Config(object):
-    def __init__(self,histname,data=None,sim=None):
-        self.histname=histname[:histname.find("_dressed")+8]
-        self.suffix=histname[histname.find("_dressed")+8:]
+    def __init__(self,histname,suffix="",data=None,sim=None):
+        self.histname=histname
+        self.suffix=suffix
         self.option=""
         if self.suffix!="":
             self.option=SystematicSuffixes[self.suffix]
@@ -22,52 +22,35 @@ class Config(object):
         self.channel=words[0][:2]
         self.era=words[0][2:]
         self.region=words[1]
-        self.bins=[
-            array.array("d",[52.,3000.]),
-            array.array("d",[-2.4,2.4]),
-            array.array("d",[0.,650.]),
-            array.array("d",[-1.,0.,1.]),
-        ]
         if "dimass" in histname:
-            self.merge_axis=None
-            self.merge_bins=array.array("d",[0,1])
-            self.primary_axis=0
-            self.primary_bins_skflat=array.array("d",ROOT.AFBAnalyzer.afb_mbin)
+            self.matrixname=re.sub(r"/dimass","/response_afbm",self.histname)
+            self.bins_matrix=array.array("d",ROOT.AFBAnalyzer.afb_mbin)
             if self.region=="0bjet":
-                self.primary_bins=array.array("d",ROOT.AFBAnalyzer.afb_mbin)
-                self.bins[self.primary_axis]=self.primary_bins[::2]
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_mbin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_mbin_gen)
             else:
-                self.primary_bins=array.array("d",[52,60,65,70,77,90,106,120,140,175,200,240,280,340,400,600,3000])
-                self.bins[self.primary_axis]=array.array("d",[52,65,77,106,140,200,280,400,3000])
-            self.matrixnames=[re.sub(r"genfid_dimass[CSRecoil]*_dressed","response_afbm",self.histname)]
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_mbin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_mbin_gen)
         elif "dirap" in histname:
-            self.merge_axis=0
-            self.merge_bins=array.array("d",[52.,77.,106.,280.,3000.])
-            self.bins[self.merge_axis]=self.merge_bins[:]
-            self.primary_axis=1
-            self.primary_bins_skflat=array.array("d",ROOT.AFBAnalyzer.afb_ybin)
+            self.matrixname=re.sub(r"/dirap","/response_afby",self.histname)
+            self.bins_matrix=array.array("d",ROOT.AFBAnalyzer.afb_ybin)
             if self.region=="0bjet":
-                self.primary_bins=array.array("d",[-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0.0,0.4,0.8,1.2,1.6,2.0,2.4])
-                self.bins[self.primary_axis]=array.array("d",[0.0,0.4,0.8,1.2,1.6,2.0,2.4])
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_ybin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_ybin_gen)
             else:
-                self.primary_bins=array.array("d",[-2.4,-1.6,-1.2,-0.8,-0.4,0.0,0.4,0.8,1.2,1.6,2.4])
-                self.bins[self.primary_axis]=array.array("d",[0.0,0.4,0.8,1.2,1.6,2.4])
-            self.matrixnames=[re.sub(r"genfid_dirap[CSRecoil]*_dressed","response_afby",self.histname)+"_m"+str(i) for i in range(len(self.merge_bins)-1)]
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_ybin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_ybin_gen)
         elif "dipt" in histname:
-            self.merge_axis=0
-            self.merge_bins=array.array("d",[52.,77.,106.,280.,3000.])
-            self.bins[self.merge_axis]=self.merge_bins[:]
-            self.primary_axis=2
-            self.primary_bins_skflat=array.array("d",ROOT.AFBAnalyzer.afb_ptbin)
+            self.matrixname=re.sub(r"/dipt","/response_afbpt",self.histname)
+            self.bins_matrix=array.array("d",ROOT.AFBAnalyzer.afb_ptbin)
             if self.region=="0bjet":
-                self.primary_bins=array.array("d",ROOT.AFBAnalyzer.afb_ptbin)
-                self.bins[self.primary_axis]=self.primary_bins[::2]
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_ptbin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_0bjet_ptbin_gen)
             else:
-                self.primary_bins=array.array("d",[0,2,10,20,28,40,50,60,70,80,90,100,120,140,190,650])
-                self.bins[self.primary_axis]=array.array("d",[0,2,20,40,60,80,100,140,650])
-            self.matrixnames=[re.sub(r"genfid_dipt[CSRecoil]*_dressed","response_afbpt",self.histname)+"_m"+str(i) for i in range(len(self.merge_bins)-1)]
-        self.primary_nbin=len(self.primary_bins)-1
-        self.merge_nbin=len(self.merge_bins)-1
+                self.bins_reco=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_ptbin_reco)
+                self.bins_gen=array.array("d",ROOT.AFBAnalyzer.unfold_nbjet_ptbin_gen)
+        self.nbin_reco=len(self.bins_reco)-1
+        self.nbin_gen=len(self.bins_gen)-1
 
         if data==None:
             if self.region=="0bjet":
@@ -85,16 +68,8 @@ class Config(object):
             else:
                 print "[Config::Init] Unknown region"
                 exit(1)
-        self.plotter=ROOT.AFBPlotter(data+" "+sim)
-
-        self.outfilename=os.environ["SKFlat_WD"]+"/AFBResult/result_"+data.split("-",1)[0]+"_"+sim+"_"+histname.replace("/","_")+self.suffix+".root"
-
-    def PrimaryAxisStr(self):
-        axes=["x","y","z","u"]
-        return axes[self.primary_axis]
-    def MergeAxisStr(self):
-        axes=["x","y","z","u"]
-        return axes[self.merge_axis]
+        self.plotter=ROOT.AFBSystPlotter(data+" "+sim)
+        self.hists=[]
 
 def GetUnfoldBinCenter(bins,i):
     if type(i) is ctypes.c_int:
@@ -146,41 +121,40 @@ def RebinResponseMatrix(matrix,xbins_old,ybins_old,xbins_new,ybins_new):
     return rt
         
         
-def GetUnfoldedAFBHists(config):
-    config.unfolded_afb_hists=[]
-    for h in config.unfolded_hists:
-        print h.GetName(),h.GetTitle()
-        histname=str(h.GetName()).replace("unfolded","unfoldedafb")
-        afb_hist=ROOT.TH1D(histname,histname,len(config.bins[config.primary_axis])-1,config.bins[config.primary_axis])
+def GetUnfoldedAFBHist(config):
+    h=config.unfolded_hist
+    histname=str(h.GetName()).replace("unfolded","unfoldedafb")
+    afb_hist=ROOT.TH1D(histname,histname,len(config.bins_gen)-1,config.bins_gen)
+    if hasattr(h,"cov"):
+        afb_hist.cov=ROOT.TH2D(histname+"_cov",histname+"_cov",len(config.bins_gen)-1,config.bins_gen,len(config.bins_gen)-1,config.bins_gen)
+    n=afb_hist.GetNbinsX()
+    for i in range(1,n+1):
+        nf=h.GetBinContent(i+n)
+        nb=h.GetBinContent(i)
+        afb_hist.SetBinContent(i,(nf-nb)/(nf+nb))
         if hasattr(h,"cov"):
-            afb_hist.cov=ROOT.TH2D(histname+"_cov",histname+"_cov",len(config.bins[config.primary_axis])-1,config.bins[config.primary_axis],len(config.bins[config.primary_axis])-1,config.bins[config.primary_axis])
-        n=afb_hist.GetNbinsX()
-        for i in range(1,n+1):
-            nf=h.GetBinContent(i+n)
-            nb=h.GetBinContent(i)
-            afb_hist.SetBinContent(i,(nf-nb)/(nf+nb))
-            if hasattr(h,"cov"):
-                ef2=h.cov.GetBinContent(i+n,i+n)
-                eb2=h.cov.GetBinContent(i,i)
-                efeb=h.cov.GetBinContent(i+n,i)
-                for j in range(i,n+1):
-                    nfj=h.GetBinContent(j+n)
-                    nbj=h.GetBinContent(j)
-                    efefj=h.cov.GetBinContent(i+n,j+n)
-                    efebj=h.cov.GetBinContent(i+n,j)
-                    ebefj=h.cov.GetBinContent(i,j+n)
-                    ebebj=h.cov.GetBinContent(i,j)
-                    afb_hist.cov.SetBinContent(i,j,4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj))
-                    if i!=j:
-                        afb_hist.cov.SetBinContent(j,i,4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj))
-            else:
-                ef2=h.GetBinError(i+n)**2
-                eb2=h.GetBinError(i)**2
-                efeb=0.
-            afb_hist.SetBinError(i,2./(nf+nb)**2*(ef2*nb**2+eb2*nf**2-2*nf*nb*efeb)**0.5)
+            ef2=h.cov.GetBinContent(i+n,i+n)
+            eb2=h.cov.GetBinContent(i,i)
+            efeb=h.cov.GetBinContent(i+n,i)
+            for j in range(i,n+1):
+                nfj=h.GetBinContent(j+n)
+                nbj=h.GetBinContent(j)
+                efefj=h.cov.GetBinContent(i+n,j+n)
+                efebj=h.cov.GetBinContent(i+n,j)
+                ebefj=h.cov.GetBinContent(i,j+n)
+                ebebj=h.cov.GetBinContent(i,j)
+                afb_hist.cov.SetBinContent(i,j,4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj))
+                if i!=j:
+                    afb_hist.cov.SetBinContent(j,i,4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj))
+        else:
+            ef2=h.GetBinError(i+n)**2
+            eb2=h.GetBinError(i)**2
+            efeb=0.
+        afb_hist.SetBinError(i,2./(nf+nb)**2*(ef2*nb**2+eb2*nf**2-2*nf*nb*efeb)**0.5)
                 
-        config.unfolded_afb_hists+=[afb_hist]
-    return config.unfolded_afb_hists
+    config.unfolded_afb_hist=afb_hist
+    config.hists+=[afb_hist]
+    return config.unfolded_afb_hist
 
 def ClosureTest(config):
     hist=config.plotter.GetHist(1,"mm2017/nbjet/genfid_myptcostRecoil_dressed")
@@ -294,40 +268,36 @@ def Unfold(matrix_orig,hist_orig,savecov=False):
         raw_input()
     return unfolded
 
-def GetUnfoldedHists(config):
-    config.unfolded_hists=[]
-    for im in range(config.merge_nbin):
-        histname=config.histname.replace("genfid_","").replace("_dressed","")
-        str_project=" project:{} ".format(config.PrimaryAxisStr())
-        str_merge_bin=" "
-        if config.merge_axis is not None:
-            str_merge_bin=" {merge_axis}min:{low} {merge_axis}max:{high} ".format(merge_axis=config.MergeAxisStr().upper(),low=config.merge_bins[im],high=config.merge_bins[im+1])
-        str_rebin= " rebin:{"+",".join(map(str,config.primary_bins))+"} "
-        print histname, config.option, str_project,str_merge_bin,str_rebin
-        forward=config.plotter.GetHist(0,histname,config.option+" Umin:0 Umax:1 "+str_project+str_merge_bin+str_rebin)
-        backward=config.plotter.GetHist(0,histname,config.option+" Umin:-1 Umax:0 "+str_project+str_merge_bin+str_rebin)
-        hist_input=ROOT.TH1D(forward.GetName(),forward.GetTitle(),2*config.primary_nbin,1,2*config.primary_nbin+1)
-        for i in range(1,forward.GetNbinsX()+1):
-            ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.primary_nbin,config.primary_bins,forward.GetBinCenter(i),0.5)
-            hist_input.SetBinContent(ibin,forward.GetBinContent(i)+hist_input.GetBinContent(ibin))
-            hist_input.SetBinError(ibin,(forward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
-            ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.primary_nbin,config.primary_bins,backward.GetBinCenter(i),-0.5)
-            hist_input.SetBinContent(ibin,backward.GetBinContent(i)+hist_input.GetBinContent(ibin))
-            hist_input.SetBinError(ibin,(backward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
+def GetUnfoldedHist(config):
+    histname=config.histname
+    str_project=" project:x "
+    str_rebin= " rebin:{"+",".join(map(str,config.bins_reco))+"} "
+    print histname, config.option, str_project,str_rebin
+    forward=config.plotter.GetHist(0,histname,config.option+" Ymin:0 Ymax:1 "+str_project+str_rebin)
+    backward=config.plotter.GetHist(0,histname,config.option+" Ymin:-1 Ymax:0 "+str_project+str_rebin)
+    hist_input=ROOT.TH1D(forward.GetName(),forward.GetTitle(),2*config.nbin_reco,1,2*config.nbin_reco+1)
+    for i in range(1,forward.GetNbinsX()+1):
+        ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.nbin_reco,config.bins_reco,forward.GetBinCenter(i),0.5)
+        hist_input.SetBinContent(ibin,forward.GetBinContent(i)+hist_input.GetBinContent(ibin))
+        hist_input.SetBinError(ibin,(forward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
+        ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.nbin_reco,config.bins_reco,backward.GetBinCenter(i),-0.5)
+        hist_input.SetBinContent(ibin,backward.GetBinContent(i)+hist_input.GetBinContent(ibin))
+        hist_input.SetBinError(ibin,(backward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
         
-        matrixname=config.matrixnames[im]
-        print matrixname, config.option+" noproject"
-        matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
-        matrix=RebinResponseMatrix(matrix,config.primary_bins_skflat,config.primary_bins_skflat,config.bins[config.primary_axis],config.primary_bins)
-        hist_unfolded=Unfold(matrix,hist_input,config.suffix=="")
-        hist_unfolded.SetName(matrixname.replace("response","unfolded")+config.suffix)
-        hist_unfolded.SetTitle(matrixname.replace("response","unfolded")+config.suffix)
-        if hasattr(hist_unfolded,"cov"):
-            hist_unfolded.cov.SetName(hist_unfolded.GetName()+"_cov")
-            hist_unfolded.cov.SetTitle(hist_unfolded.GetTitle()+"_cov")
-        config.unfolded_hists+=[hist_unfolded]
-        config.plotter.pdir=ROOT.TDirectory("plotdir","plotdir")
-    return config.unfolded_hists
+    matrixname=config.matrixname
+    print matrixname, config.option+" noproject"
+    matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
+    matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+    hist_unfolded=Unfold(matrix,hist_input,config.suffix=="")
+    hist_unfolded.SetName(matrixname.replace("response","unfolded")+config.suffix)
+    hist_unfolded.SetTitle(matrixname.replace("response","unfolded")+config.suffix)
+    if hasattr(hist_unfolded,"cov"):
+        hist_unfolded.cov.SetName(hist_unfolded.GetName()+"_cov")
+        hist_unfolded.cov.SetTitle(hist_unfolded.GetTitle()+"_cov")
+    config.unfolded_hist=hist_unfolded
+    config.plotter.pdir=ROOT.TDirectory("plotdir","plotdir")
+    config.hists+=[config.unfolded_hist]
+    return config.unfolded_hist
 
 def Fluctuate(hist,name=""):
     rt=hist.Clone(name)
@@ -399,16 +369,40 @@ def WriteHist(hist):
     if hasattr(hist,"cov"):
         WriteHist(hist.cov)
 
-def Run(config):
-    GetUnfoldedHists(config)
-    GetUnfoldedAFBHists(config)
-    GetHist4D(config)
-    if not os.path.exists(os.path.dirname(config.outfilename)):
-        os.makedirs(os.path.dirname(config.outfilename))
-    f=ROOT.TFile(config.outfilename,"recreate")
-    for h in config.unfolded_hists+config.unfolded_afb_hists+[config.hist4d]:
+def WriteHists(config,outfilename):
+    f=ROOT.TFile(outfilename,"update")
+    for h in config.hists:
         print h.GetName()
         WriteHist(h)
+
+def Run(suffix):
+    if suffix=="nominal": suffix=""
+    outfilename=os.environ["SKFlat_WD"]+"/AFBResult/result"+suffix+".root"
+    if os.path.exists(outfilename):
+        os.remove(outfilename)
+
+    histnames=[]
+    for channel in ["ee","mm"]:
+        for era in ["2016a","2016b","2017","2018"]:
+            for region in ["/0bjet","/nbjet"]:
+                histnames+=[channel+era+region+"/dimass"]
+                histnames+=[channel+era+region+"/dirap_m0"]
+                histnames+=[channel+era+region+"/dirap_m1"]
+                histnames+=[channel+era+region+"/dirap_m2"]
+                histnames+=[channel+era+region+"/dirap_m3"]
+                histnames+=[channel+era+region+"/dipt_m0"]
+                histnames+=[channel+era+region+"/dipt_m1"]
+                histnames+=[channel+era+region+"/dipt_m2"]
+                histnames+=[channel+era+region+"/dipt_m3"]
+
+    for histname in histnames:
+        config=Config(histname,suffix)
+        GetUnfoldedHist(config)
+        GetUnfoldedAFBHist(config)
+        #GetHist4D(config)
+        if not os.path.exists(os.path.dirname(outfilename)):
+            os.makedirs(os.path.dirname(outfilename))
+        WriteHists(config,outfilename)
 
     # GetBias(config)
     # hist_bias_mean=ROOT.TH1D(config.matrixname.replace("response_","bias_")+"_mean",config.matrixname.replace("response_","bias_")+"_mean",100,-1,1)
@@ -421,11 +415,11 @@ def Run(config):
     # WriteHist(hist_bias_std)
          
 def RunCondor(arg):
-    os.system('condor_submit $SKFlat_WD/AFBResult/condor.jds -a arguments={}'.format(arg))
+    os.system('condor_submit $SKFlat_WD/AFBResult/condor.jds -a arguments={} > /dev/null'.format(arg))
     
 def Merge():
     files=os.listdir(os.environ["SKFlat_WD"]+"/AFBResult")
-    files=filter(lambda x:x.startswith("result_"),files)
+    files=sorted(filter(lambda x:x.startswith("result"),files))
     n=900
     for i in range(len(files)/n+1):
         os.system("cd $SKFlat_WD/AFBResult; hadd -f final_{}.root {}".format(i," ".join(files[i*n:(i+1)*n])))
@@ -441,22 +435,31 @@ if __name__=="__main__":
             Merge()
             exit()
         else:
-            c=Config(sys.argv[1])
-            Run(c)
+            Run(sys.argv[1])
             exit()
 
-    suffixes=list(SystematicSuffixes.keys())
-    for channel in ["ee","mm"]:
-        for era in ["2016a","2016b","2017","2018"]:
-            #for suffix in [""]:
-            for suffix in [""]+suffixes:
-                print channel,era,suffix
-                RunCondor(channel+era+"/0bjet/genfid_dimassCS_dressed"+suffix)
-                RunCondor(channel+era+"/0bjet/genfid_diptCS_dressed"+suffix)
-                RunCondor(channel+era+"/0bjet/genfid_dirapCS_dressed"+suffix)
-                RunCondor(channel+era+"/nbjet/genfid_dimassRecoil_dressed"+suffix)
-                RunCondor(channel+era+"/nbjet/genfid_diptRecoil_dressed"+suffix)
-                RunCondor(channel+era+"/nbjet/genfid_dirapRecoil_dressed"+suffix)
+
+    condor_jds=os.environ["SKFlat_WD"]+"/AFBResult/condor.jds"
+    if not os.path.exists(condor_jds):
+        if not os.path.exists(os.path.dirname(condor_jds)):
+            os.makedirs(os.path.dirname(condor_jds))
+        with open(condor_jds,"w") as f:
+            f.write(
+'''
+executable = $ENV(SKFlat_WD)/python/AFBUnfold.py
+log = $ENV(SKFlat_WD)/AFBResult/condor.log
+output = $ENV(SKFlat_WD)/AFBResult/condor.out
+error = $ENV(SKFlat_WD)/AFBResult/condor.err
+getenv = true
+should_transfer_files = yes
+jobbatchname = AFBResult
+queue 1
+'''
+            )
+
+    suffixes=sorted(list(SystematicSuffixes.keys()))
+    for suffix in ["nominal"]+suffixes:
+        RunCondor(suffix)
     os.system("condor_wait $SKFlat_WD/AFBResult/condor.log")
     Merge()    
     exit()
