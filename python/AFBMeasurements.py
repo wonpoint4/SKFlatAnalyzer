@@ -332,7 +332,7 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
 
             for i in range(len(hdata)):
                 h=hdata[i]
-                h.SetName("RunII (blind)")
+                h.SetName("data (blind)")
                 h.SetOption("e1")
                 h.SetMarkerStyle(20)
                 h.SetMarkerSize(0.7)
@@ -347,6 +347,7 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
             p.hists=ROOT.vector("Hists")([hdata,hsim])
             c=ROOT.TCanvas()
             _plotter.DrawCompare(p)
+            _plotter.DrawPreliminary(c,"Run2")
             _plotter.SaveCanvas(c,region+"_"+histname+".png")
             #raw_input()
 
@@ -414,7 +415,7 @@ def SaveDeltaPlotAll(inputpath,outputpath):
                 h.SetOption("hist e1")
 
             for h in hdata:
-                h.SetName("RunII (blind)")
+                h.SetName("data (blind)")
                 h.SetOption("e1")
                 h.SetMarkerStyle(20)
                 h.SetMarkerSize(0.7)
@@ -429,6 +430,7 @@ def SaveDeltaPlotAll(inputpath,outputpath):
             #p.hists=ROOT.vector("Hists")([hdata])
             c=ROOT.TCanvas()
             _plotter.DrawSig(p)
+            _plotter.DrawPreliminary(c,"Run2")
             _plotter.SaveCanvas(c,region+"_"+histname.replace("unfoldedafb","delta")+".png")
             #raw_input()
 
