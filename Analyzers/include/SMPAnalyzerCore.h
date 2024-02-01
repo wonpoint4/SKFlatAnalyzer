@@ -131,7 +131,7 @@ public:
       vector<vector<Weight>> triggerSF_sys;
       Weight CFSF,CFSF_up,CFSF_down;
       Weight btagSF,btagSF_hup,btagSF_hdown,btagSF_lup,btagSF_ldown,btagSF_hcorr,btagSF_huncorr,btagSF_lcorr,btagSF_luncorr;
-      Weight bchargeSF,bchargeSF_up,bchargeSF_down;
+      Weight bchargeSF,bchargeSF_s0m0,bchargeSF_s0m1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -372,8 +372,8 @@ public:
 
   static vector<vector<Weight>> Make2DWeights(const vector<int>& structure);
 
-  virtual double GetBchargeSF(const Jet& bjet,int sys=0) const;
-  virtual double GetBchargeSF(const Parameter& p,int sys=0) const;
+  virtual double GetBchargeSF(const Jet& bjet,int set=-1,int mem=-1) const;
+  virtual double GetBchargeSF(const Parameter& p,int set=-1,int mem=-1) const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

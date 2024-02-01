@@ -227,10 +227,12 @@ SMPAnalyzerCore::Variations SMPAnalyzerCore::MakeVariations(const Parameter& p){
       EvalVariationsBtag(p,v);
       EvalVariationsBcharge(p,v);
       EvalVariationsEtc(p,v);
-      EvalVariationsJetCorrection(p,v);
     }
     if(!IsDATA&&p.hprefix.Contains("ss_")){
       EvalVariationsCF(p,v);
+    }
+    if(!p.hprefix.Contains("ss_")){
+      EvalVariationsJetCorrection(p,v);
     }
   }
   if(p.variationbits&EfficiencyWeight){
@@ -283,8 +285,8 @@ void SMPAnalyzerCore::EvalVariationsBtag(const Parameter& p,Variations& v){
 }
 void SMPAnalyzerCore::EvalVariationsBcharge(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_nobchargeSF",p.default_weight/p.w.bchargeSF);
-  AddVariationWeight(v,"_bchargeSF_down",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_down);
-  AddVariationWeight(v,"_bchargeSF_up",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_up);
+  AddVariationWeight(v,"_bchargeSF_s0m0",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_s0m0);
+  AddVariationWeight(v,"_bchargeSF_s0m1",p.default_weight/p.w.bchargeSF*p.w.bchargeSF_s0m1);
 }
 void SMPAnalyzerCore::EvalVariationsEtc(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_z0weight",p.default_weight*p.w.z0weight);
@@ -398,8 +400,10 @@ void SMPAnalyzerCore::EvalVariationsElectronEnergy(const Parameter& p,Variations
 void SMPAnalyzerCore::EvalVariationsJetCorrection(const Parameter& p,Variations& v){
   AddVariationJES(v,"_jet_scale_down",-1);
   AddVariationJES(v,"_jet_scale_up",1);
-  AddVariationJER(v,"_jet_smear_down",-1);
-  AddVariationJER(v,"_jet_smear_up",1);
+  if(!IsDATA){
+    AddVariationJER(v,"_jet_smear_down",-1);
+    AddVariationJER(v,"_jet_smear_up",1);
+  }
 }
 
 bool SMPAnalyzerCore::PassSelection(Parameter& p,bool cutflow){
@@ -1593,8 +1597,7 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
 	if(!gen.IsEmpty()&&fabs(electron.Pt()/gen.Pt()-1.)<0.5){
 	  rc=rocele->kSpreadMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,gen.Pt(),set,member);
 	}else{
-	  //rc=rocele->kSmearMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,set,member);
-	  rc=1.;
+	  rc=rocele->kScaleMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),set,member);
 	}
       }      
       if(TMath::IsNaN(rc)) rc=1.;
@@ -2257,8 +2260,8 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.w.btagSF_luncorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTagUnCorr");
     //cout<<p.w.btagSF<<" "<<p.w.btagSF_hup<<" "<<p.w.btagSF_hcorr<<" "<<p.w.btagSF_huncorr<<endl;
     p.w.bchargeSF=GetBchargeSF(p);
-    p.w.bchargeSF_up=GetBchargeSF(p,1);
-    p.w.bchargeSF_down=GetBchargeSF(p,-1);
+    p.w.bchargeSF_s0m0=GetBchargeSF(p,0,0);
+    p.w.bchargeSF_s0m1=GetBchargeSF(p,0,1);
   }
   return p;
 }
@@ -2779,15 +2782,15 @@ vector<vector<Weight>> SMPAnalyzerCore::Make2DWeights(const vector<int>& structu
   }
   return rt;
 }
-double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
+double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int set,int mem) const {
   double sf=1.;
   double charge=bjet.GetUserFloat("AFBCharge");
   int flavour=bjet.GenHFHadronMatcherFlavour();
   int origin=bjet.GenHFHadronMatcherOrigin();
   if(flavour!=5) return sf;
   if(origin==-999) return sf;
-  double data_m_accuracy=0.615651+sys*0.003372;
-  double data_p_accuracy=0.629591+sys*0.003385;
+  double data_m_accuracy=0.615651;
+  double data_p_accuracy=0.629591;
   //data (BB SS method (mm)): 0.619894+-0.004496
   //data - (BB SS method (me)): 0.615651+-0.003372
   //data + (BB SS method (me)): 0.629591+-0.003385
@@ -2796,6 +2799,15 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
   //sim (BB SS method): 0.639483+-0.000594
   //sim - (BB SS method (me)): 0.632788+-0.000486
   //sim + (BB SS method (me)): 0.645423+-0.000485
+  if(set==0){
+    if(mem==0){
+      data_m_accuracy+=-0.001086;
+      data_p_accuracy+=0.001081;
+    }else if(mem==1){
+      data_m_accuracy+=-0.003192;
+      data_p_accuracy+=-0.003208;
+    }
+  }
   if(origin*charge<0){
     if(origin>0){
       sf=data_m_accuracy/sim_m_accuracy;
@@ -2811,12 +2823,12 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int sys) const {
   }  
   return sf;
 }
-double SMPAnalyzerCore::GetBchargeSF(const Parameter& p,int sys) const {
+double SMPAnalyzerCore::GetBchargeSF(const Parameter& p,int set,int mem) const {
   double sf=1.;
   if(!p.bjets.size()) return sf;
   for(int i=0,n=p.bjets.size();i<n;i++){
     if(p.bjets.at(i).Pt()<p.c.jetpt) return sf;
-    sf*=GetBchargeSF(p.bjets.at(i),sys);
+    sf*=GetBchargeSF(p.bjets.at(i),set,mem);
   }
   return sf;
 }
