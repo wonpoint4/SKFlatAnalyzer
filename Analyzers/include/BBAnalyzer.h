@@ -14,6 +14,8 @@ public:
   virtual void EvalVariationsBcharge(const Parameter& p,Variations& v);
   virtual void FillHists(Parameter& p);
 
+  bool IsDileptonSkim;
+
   BBAnalyzer();
   ~BBAnalyzer();
 

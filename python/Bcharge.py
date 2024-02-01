@@ -23,6 +23,14 @@ def calcWithCov(a0,e0,a1,e1,a2,e2,a3,e3):
     cov+=np.outer(stat1-nominal,stat1-nominal)
     cov+=np.outer(stat2-nominal,stat2-nominal)
     cov+=np.outer(stat3-nominal,stat3-nominal)
+    print(nominal)
+    print(cov)
+    values,vectors=np.linalg.eig(cov)
+    vector0=np.array([vectors[0][0],vectors[1][0]])*values[0]**0.5
+    vector1=np.array([vectors[0][1],vectors[1][1]])*values[1]**0.5
+    print(vector0)
+    print(vector1)
+    print(np.outer(vector0,vector0)+np.outer(vector1,vector1))
     return nominal,cov
 
 def GetAccuracy(ientry,channel,option=""):
@@ -41,6 +49,15 @@ def GetTrueAccuracy(channel,option=""):
     hm=p.GetHist(1,channel+"/b[01]mcorrect",option)
     am,em=calc_eff(hm.GetBinContent(2),hm.GetBinContent(1),hm.GetBinError(2),hm.GetBinError(1))
     hp=p.GetHist(1,channel+"/b[01]pcorrect",option)
+    ap,ep=calc_eff(hp.GetBinContent(2),hp.GetBinContent(1),hp.GetBinError(2),hp.GetBinError(1))
+    return (am,ap),(em,ep)
+
+def GetTrueAccuracyByType(channel,type,option=""):
+    hm=p.GetHist(1,channel+"/b[01]mcorrect_type{}".format(type),option)
+    #hm=p.GetHist(1,channel+"/b1mcorrect_type{}".format(type),option)
+    am,em=calc_eff(hm.GetBinContent(2),hm.GetBinContent(1),hm.GetBinError(2),hm.GetBinError(1))
+    hp=p.GetHist(1,channel+"/b[01]pcorrect_type{}".format(type),option)
+    #hp=p.GetHist(1,channel+"/b1pcorrect_type{}".format(type),option)
     ap,ep=calc_eff(hp.GetBinContent(2),hp.GetBinContent(1),hp.GetBinError(2),hp.GetBinError(1))
     return (am,ap),(em,ep)
     
@@ -67,17 +84,17 @@ def DrawAccuracy(channels):
         g.SetPoint(2*i+1,value[1],2*i+1+0.5+0.1)
         g.SetPointError(2*i+1,cov[1][1]**0.5,0)
 
-        value,cov=GetAccuracy(1,channel,"suffix:_FSR_up:ttll")
-        g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.12)
-        g.SetPointError(2*i+2*len(channel),cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1+2*len(channel),value[1],2*i+1+0.5+0.12)
-        g.SetPointError(2*i+1+2*len(channel),cov[1][1]**0.5,0)
+        # value,cov=GetAccuracy(1,channel,"suffix:_FSR_up:ttll")
+        # g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.12)
+        # g.SetPointError(2*i+2*len(channel),cov[0][0]**0.5,0)
+        # g.SetPoint(2*i+1+2*len(channel),value[1],2*i+1+0.5+0.12)
+        # g.SetPointError(2*i+1+2*len(channel),cov[1][1]**0.5,0)
 
-        value,cov=GetAccuracy(1,channel,"suffix:_FSR_down:ttll")
-        g.SetPoint(2*i+4*len(channel),value[0],2*i+0.5+0.14)
-        g.SetPointError(2*i+4*len(channel),cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.14)
-        g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
+        # value,cov=GetAccuracy(1,channel,"suffix:_FSR_down:ttll")
+        # g.SetPoint(2*i+4*len(channel),value[0],2*i+0.5+0.14)
+        # g.SetPointError(2*i+4*len(channel),cov[0][0]**0.5,0)
+        # g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.14)
+        # g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
     
         g=gtrue
         value,error=GetTrueAccuracy(channel)
@@ -86,17 +103,17 @@ def DrawAccuracy(channels):
         g.SetPoint(2*i+1,value[1],2*i+1+0.5+0.2)
         g.SetPointError(2*i+1,error[1],0)
 
-        value,error=GetTrueAccuracy(channel,"suffix:_FSR_up:ttll")
-        g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.22)
-        g.SetPointError(2*i+2*len(channel),cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1+2*len(channel),value[1],2*i+1+0.5+0.22)
-        g.SetPointError(2*i+1+2*len(channel),cov[1][1]**0.5,0)
+        # value,error=GetTrueAccuracy(channel,"suffix:_FSR_up:ttll")
+        # g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.22)
+        # g.SetPointError(2*i+2*len(channel),cov[0][0]**0.5,0)
+        # g.SetPoint(2*i+1+2*len(channel),value[1],2*i+1+0.5+0.22)
+        # g.SetPointError(2*i+1+2*len(channel),cov[1][1]**0.5,0)
 
-        value,error=GetTrueAccuracy(channel,"suffix:_FSR_down:ttll")
-        g.SetPoint(2*i+4*len(channel),value[0],2*i+0.5+0.24)
-        g.SetPointError(2*i+4*len(channel),cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.24)
-        g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
+        # value,error=GetTrueAccuracy(channel,"suffix:_FSR_down:ttll")
+        # g.SetPoint(2*i+4*len(channel),value[0],2*i+0.5+0.24)
+        # g.SetPointError(2*i+4*len(channel),cov[0][0]**0.5,0)
+        # g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.24)
+        # g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
     
     hframe=ROOT.TH2D("hframe","",100,0.60,0.65,len(channels)*2,0,len(channels)*2);
     for i in range(len(channels)):
@@ -124,6 +141,44 @@ def DrawAccuracy(channels):
     
     raw_input()
 
-DrawAccuracy(["me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
-#DrawAccuracy([channel+era for channel in ["me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
-#DrawAccuracy([channel+era for channel in ["[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
+def DrawAccuracyByType(channels,types):
+    c=ROOT.gROOT.MakeDefCanvas()
+    c.SetLeftMargin(0.25)
+
+    gtrue=ROOT.TGraphErrors()
+    for i in range(len(types)*len(channels)):
+        ic=i//len(types)
+        it=i%len(types)        
+        channel=channels[ic]
+        g=gtrue
+        value,error=GetTrueAccuracyByType(channel,types[it])
+        g.SetPoint(2*i,value[0],2*i+0.5+0.2)
+        g.SetPointError(2*i,error[0],0)
+        g.SetPoint(2*i+1,value[1],2*i+1+0.5+0.2)
+        g.SetPointError(2*i+1,error[1],0)
+    
+    hframe=ROOT.TH2D("hframe","",100,0.60,0.70,len(channels)*len(types)*2,0,len(channels)*len(types)*2);
+    for i in range(len(types)*len(channels)):
+        ic=i//len(types)
+        it=i%len(types)
+        hframe.GetYaxis().SetBinLabel(i*2+1,"#alpha^{-} ("+channels[ic]+", type "+str(types[it])+")")
+        hframe.GetYaxis().SetBinLabel(i*2+2,"#alpha^{+} ("+channels[ic]+", type "+str(types[it])+")")
+    hframe.SetStats(0)
+    hframe.Draw()
+    gtrue.SetMarkerStyle(20)
+    gtrue.SetMarkerSize(0.6)
+    gtrue.SetMarkerColor(4)
+    gtrue.SetLineColor(4)
+    gtrue.Draw("same p")
+    
+    raw_input()
+
+
+#value,cov=GetAccuracy(0,"me201[678][ab]?")
+#value,cov=GetAccuracy(1,"me201[678][ab]?")
+#DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
+#DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
+#DrawAccuracy([channel+era for channel in ["[me]n","[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
+
+DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
+#DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])

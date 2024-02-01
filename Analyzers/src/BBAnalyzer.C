@@ -10,20 +10,27 @@ void BBAnalyzer::initializeAnalyzer(){
   fChain->SetBranchStatus("pfMET_Type1_pt",true);
   fChain->SetBranchStatus("fatjet_*",false);
   fChain->SetBranchStatus("photon_*",false);
+  IsDileptonSkim=GetSkimName()=="Dilepton";
 }
 void BBAnalyzer::executeEvent(){
-  if(!IsDATA||DataStream.Contains("DoubleMuon")){
-    executeEventWithParameter(MakeParameter("mm"));
+  if(IsDileptonSkim){
+    if(!IsDATA||DataStream.Contains("DoubleMuon")){
+      executeEventWithParameter(MakeParameter("mm"));
+    }
+    if(!IsDATA||DataStream.Contains("SingleMuon")){
+      executeEventWithParameter(MakeParameter("me"));
+    }
+    if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
+      executeEventWithParameter(MakeParameter("ee"));
+    }
+  }else{
+    if(!IsDATA||DataStream.Contains("SingleMuon")){
+      executeEventWithParameter(MakeParameter("mn"));
+    }
+    if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
+      executeEventWithParameter(MakeParameter("en"));
+    }
   }
-  if(!IsDATA||DataStream.Contains("SingleMuon")){
-    executeEventWithParameter(MakeParameter("me"));
-  }
-  if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
-    executeEventWithParameter(MakeParameter("ee"));
-  }
-  // if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
-  //   executeEventWithParameter(MakeParameter("em"));
-  // }
 }
 
 void BBAnalyzer::EvalDefaultWeight(Parameter& p){
@@ -40,13 +47,14 @@ SMPAnalyzerCore::Variations BBAnalyzer::MakeVariations(const Parameter& p){
     EvalVariationsBtag(p,v);
     EvalVariationsBcharge(p,v);
     EvalVariationsEtc(p,v);
-    EvalVariationsJetCorrection(p,v);
   }
   if(!IsDATA&&p.hprefix.Contains("ss_")){
     EvalVariationsCF(p,v);
   }
-
-  if(IsTTLLSample){
+  if(!p.hprefix.Contains("ss_")){
+    EvalVariationsJetCorrection(p,v);
+  }
+  if(MCSample.Contains("TTLL")||MCSample.Contains("TTLJ")){
     if(!IsDATA&&p.hprefix==""){
       EvalVariationsPDF(p,v);
     }
@@ -57,8 +65,8 @@ SMPAnalyzerCore::Variations BBAnalyzer::MakeVariations(const Parameter& p){
 
 void BBAnalyzer::EvalVariationsBcharge(const Parameter& p,Variations& v){
   AddVariationWeight(v,"_bchargeSF",p.default_weight*p.w.bchargeSF);
-  AddVariationWeight(v,"_bchargeSF_down",p.default_weight*p.w.bchargeSF_down);
-  AddVariationWeight(v,"_bchargeSF_up",p.default_weight*p.w.bchargeSF_up);
+  AddVariationWeight(v,"_bchargeSF_s0m0",p.default_weight*p.w.bchargeSF_s0m0);
+  AddVariationWeight(v,"_bchargeSF_s0m1",p.default_weight*p.w.bchargeSF_s0m1);
 }
 
 void BBAnalyzer::FillHists(Parameter& p){
@@ -66,24 +74,31 @@ void BBAnalyzer::FillHists(Parameter& p){
   TString suf=p.suffix+p.vsuffix;
   double weight=p.weight;
 
-  TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
-  double dimass=dilepton.M();
-  double dirap=dilepton.Rapidity();
-  double dipt=dilepton.Pt();
-
-  if(dimass<52) return;
   int nbjet=count_if(p.bjets.begin(),p.bjets.end(),[&p](auto& jet){return jet.Pt()>p.c.jetpt;});
   if(nbjet<2) return;
-
-  FillHist(pre+"dimass"+suf,dimass,weight,nmassbin,massbins);
-  if( (p.channel=="ee" || p.channel=="mm") && dimass>76 && dimass<106) return;
 
   int bits=0;
   if(p.bjets.at(0).userFloat["AFBCharge"]>0) bits+=1<<0;
   if(p.bjets.at(1).userFloat["AFBCharge"]>0) bits+=1<<1;
   TString csuf=Form("_c%d",bits);
+  
+  if(IsDileptonSkim){
+    TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
+    double dimass=dilepton.M();
+    double dirap=dilepton.Rapidity();
+    double dipt=dilepton.Pt();
 
-  if(MCSample.Contains("TTLL")){
+    if(dimass<52) return;
+
+    FillHist(pre+"dimass"+suf,dimass,weight,nmassbin,massbins);
+    if( (p.channel=="ee" || p.channel=="mm") && dimass>76 && dimass<106) return;
+
+    FillHist(pre+"dimass"+csuf+suf,dimass,weight,nmassbin,massbins);
+    FillHist(pre+"dirap"+csuf+suf,dirap,weight,netabin,etabins);
+    FillHist(pre+"dipt"+csuf+suf,dipt,weight,nptbin,ptbins);
+  }
+
+  if(MCSample.Contains("TTLL")||MCSample.Contains("TTLJ")){
     if( 
        (p.bjets.at(0).GenHFHadronMatcherFlavour()==5 && p.bjets.at(1).GenHFHadronMatcherFlavour()==5 )
        && (abs(p.bjets.at(0).GenHFHadronMatcherOrigin())==6 && abs(p.bjets.at(1).GenHFHadronMatcherOrigin())==6)
@@ -93,6 +108,15 @@ void BBAnalyzer::FillHists(Parameter& p){
 	int correct=p.bjets.at(i).userFloat["AFBCharge"]*p.bjets.at(i).GenHFHadronMatcherOrigin()<0;
 	TString scharge=p.bjets.at(i).GenHFHadronMatcherOrigin()<0 ? "p" : "m";
 	FillHist(pre+Form("b%d%scorrect",i,scharge.Data())+suf,correct,weight,2,0,2);
+	if(p.vsuffix=""){
+	  if(fabs(p.bjets.at(i).userFloat["AFBCharge"])<1){
+	    FillHist(pre+Form("b%d%scorrect_type0",i,scharge.Data())+suf,correct,weight,2,0,2);
+	  }else if(fabs(p.bjets.at(i).userFloat["AFBCharge"])<3){
+	    FillHist(pre+Form("b%d%scorrect_type1",i,scharge.Data())+suf,correct,weight,2,0,2);
+	  }else if(fabs(p.bjets.at(i).userFloat["AFBCharge"])<5){
+	    FillHist(pre+Form("b%d%scorrect_type2",i,scharge.Data())+suf,correct,weight,2,0,2);	  
+	  }
+	}
       }
     }else{
       pre+="unmatched_";    
@@ -100,9 +124,6 @@ void BBAnalyzer::FillHists(Parameter& p){
   }
 
   FillHist(pre+"charge"+suf,bits,weight,4,0,4);
-  FillHist(pre+"dimass"+csuf+suf,dimass,weight,nmassbin,massbins);
-  FillHist(pre+"dirap"+csuf+suf,dirap,weight,netabin,etabins);
-  FillHist(pre+"dipt"+csuf+suf,dipt,weight,nptbin,ptbins);
   for(int i=0;i<2;i++){
     const Jet& bjet=p.bjets.at(i);
     double bjet_eta=bjet.Eta();
