@@ -19,6 +19,7 @@ void dybAnalyzer::initializeAnalyzer(){
                                          //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
                                          //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm)};
   mcCorr->SetJetTaggingParameters(jtps);
+  SetupPUJetWeight();
 }
 
 void dybAnalyzer::executeEvent(){
@@ -53,23 +54,18 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   }
   //p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*p.w.pujetSF;
   map_weight[""] = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
-  //map_weight["_lumi"] = lumiweight;
-  //map_weight["_pu"] = lumiweight * PUweight;
-  //map_weight["_prefire"] = lumiweight * PUweight * prefireweight;
-  //map_weight["_zpt"] = lumiweight * PUweight * prefireweight * zptweight; 
-  //map_weight["_weak"] = lumiweight * PUweight * prefireweight * zptweight * weakweight;
 
   if(MCSample.Contains("MiNNLO")){
     for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
   }
 
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "MiniAOD", 1.);
-  //FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight["_lumi"]);
-  //FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU", map_weight["_pu"]);
-  //FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", map_weight["_prefire"]);
-  //FillCutflow(prefix+hprefix+"cutflow"+suffix, "Zpt", map_weight["_zpt"]);
-  //FillCutflow(prefix+hprefix+"cutflow"+suffix, "Weak", map_weight["_weak"]);
-  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi"   , lumiweight);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU"     , lumiweight * PUweight);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", lumiweight * PUweight * prefireweight);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Zpt"    , lumiweight * PUweight * prefireweight * zptweight);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Weak"   , lumiweight * PUweight * prefireweight * zptweight * weakweight);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt"  , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight);
 
   // Trigger
   if(!IsFiredTriggers(channel)) return;
@@ -107,7 +103,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   JetTagging::Parameters DeepJet_Medium = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
   JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
 
-  // test alljets
+  /*// test alljets
   for(const auto& jet:lepvetojets){
     if(jet.Pt() > 30 && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
     else if(jet.Pt() > 20 && jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) ajets.push_back(jet);
@@ -158,11 +154,22 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
     FillHist(prefix+hprefix+"costhetaRecoil_Tightnb"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   }
   ajets.clear(); bjets.clear();jet0 = NULL;
+  */
 
   for(const auto& jet:realjets){
     if(jet.Pt() > 30 && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
     else if(jet.Pt() > 20 && jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) ajets.push_back(jet);
   }
+
+  // Jet related weights
+  if(!IsDATA){
+    pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
+    btagSF = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "central");
+  }
+
+  map_weight["_pujet"] = map_weight[""] * pujetSF;
+  map_weight[""] *= (pujetSF * btagSF);
+
   if(bjets.size() != 1) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
   jet0 = &bjets.at(0);
@@ -186,24 +193,30 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
 
   if(PuppiMET_Type1_pt > 75) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET75", map_weight[""]);
-  FillHist(prefix+hprefix+"costhetaRecoil_MET75"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  //FillHist(prefix+hprefix+"costhetaRecoil_MET75"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if(abs((*lepton0 + *lepton1).DeltaPhi(*jet0)) < 1.6) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbdPhi1p6", map_weight[""]);
-  FillHist(prefix+hprefix+"costhetaRecoil_ZbdPhi1p6"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  //FillHist(prefix+hprefix+"costhetaRecoil_ZbdPhi1p6"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if((*lepton0 + *lepton1 + *jet0).Pt() > 60) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbpT60", map_weight[""]);
-  FillHist(prefix+hprefix+"costhetaRecoil_ZbpT60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  //FillHist(prefix+hprefix+"costhetaRecoil_ZbpT60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   FillHist(prefix+hprefix+"ZbpT60_pTll", (*lepton0 +*lepton1).Pt(), map_weight[""], 200,0,200);
 
   if((*lepton0 + *lepton1).Pt() < 15) return;
+  map_weight["_lumi"]    = lumiweight;
+  map_weight["_pu"]      = lumiweight * PUweight;
+  map_weight["_prefire"] = lumiweight * PUweight * prefireweight;
+  map_weight["_zpt"]     = lumiweight * PUweight * prefireweight * zptweight;
+  map_weight["_weak"]    = lumiweight * PUweight * prefireweight * zptweight * weakweight;
+  map_weight["_toppt"]   = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
+
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
-
 }
-
+//// END
 
 bool dybAnalyzer::HasDileptons(TString channel){
   double l0pt = 20., l1pt = 10.;
@@ -287,6 +300,7 @@ double dybAnalyzer::jetCharge(const Jet& jet){
 dybAnalyzer::dybAnalyzer(){}
 dybAnalyzer::~dybAnalyzer(){}
 
+// From Hyonsan's functions in SMPAnalyzerCore
 void dybAnalyzer::executeEventGen(){
   gprefix = "";
   if(IsData) return;
@@ -514,6 +528,105 @@ double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Pa
   }
 }
 
+// Functions in MY SMPAnalyzerCore
+double dybAnalyzer::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst){
+  //Syst. usage ex.: "SystUpHTag"(all component variation for heavy flav(b,c).),
+  //                 "SystUpHTagCorr"(variation of heavy flav(b,c) sf only for yearly correlated components)
+  //change H->L for light flav., Up->Down for downward variation, Corr->UnCorr for yearly independent components
+
+  if(IsDATA) return 1.;
+
+  TString SystStr(Syst);
+  double Prob_MC(1.), Prob_DATA(1.), SF(1.);
+  bool Syst_HTag=false, Syst_LTag=false; int SystDir=0, CorrType=0;
+  string SystKey;
+  if(SystStr.Contains("Syst")){
+    if     (SystStr.Contains("HTag")) Syst_HTag=true;
+    else if(SystStr.Contains("LTag")) Syst_LTag=true;
+    if     (SystStr.Contains("Up")  ) SystDir= 1;
+    else if(SystStr.Contains("Down")) SystDir=-1;
+    if     (SystStr.Contains("UnCorr")) CorrType=-1;
+    else if(SystStr.Contains("Corr"))   CorrType= 1;
+    if(SystDir==0){ cout<<"SystStr in not correct form"<<endl; exit(ENODATA); }
+    if(!(Syst_HTag or Syst_LTag)){ cout<<"SystMode but no H/L mode assigned"<<endl; exit(ENODATA); }
+  }
+
+  for(unsigned int i=0; i<jets.size(); i++){
+    int JetHadFlav = jets.at(i).hadronFlavour();
+    bool ApplySyst=false;
+    if     (Syst_HTag && (JetHadFlav==4 or JetHadFlav==5)){ ApplySyst=true; }
+    else if(Syst_LTag && (JetHadFlav==0                 )){ ApplySyst=true; }
+
+    if     (ApplySyst && CorrType==0) SystKey=SystDir>0? "up":"down";
+    else if(ApplySyst && CorrType >0) SystKey=SystDir>0? "up_correlated":"down_correlated";
+    else if(ApplySyst && CorrType <0) SystKey=SystDir>0? "up_uncorrelated":"down_uncorrelated";
+    else                              SystKey="central";
+
+    double this_MC_EffT = mcCorr->GetMCJetTagEff(jtpT.j_Tagger, jtpT.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_MC_EffL = mcCorr->GetMCJetTagEff(jtpL.j_Tagger, jtpL.j_WP, jets.at(i).hadronFlavour(), jets.at(i).Pt(), jets.at(i).Eta());
+    double this_SFT = mcCorr->GetJetTaggingSF(jtpT,
+                                              jets.at(i).hadronFlavour(),
+                                              jets.at(i).Pt(),
+                                              jets.at(i).Eta(),
+                                              jets.at(i).GetTaggerResult(jtpT.j_Tagger),
+                                              SystKey );
+    double this_SFL = mcCorr->GetJetTaggingSF(jtpL,
+                                              jets.at(i).hadronFlavour(),
+                                              jets.at(i).Pt(),
+                                              jets.at(i).Eta(),
+                                              jets.at(i).GetTaggerResult(jtpL.j_Tagger),
+                                              SystKey );
+    double this_DATA_EffT = this_MC_EffT*this_SFT;
+    double this_DATA_EffL = this_MC_EffL*this_SFL;
+
+    bool isTaggedT = jets.at(i).GetTaggerResult(jtpT.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpT.j_Tagger, jtpT.j_WP);
+    bool isTaggedL = jets.at(i).GetTaggerResult(jtpL.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtpL.j_Tagger, jtpL.j_WP);
+    if(isTaggedT){
+      Prob_MC *= this_MC_EffT;
+      Prob_DATA *= this_DATA_EffT;
+    }
+    else if(isTaggedL){
+      if(this_MC_EffL == this_MC_EffT) this_MC_EffL += 1E-10;
+      Prob_MC *= this_MC_EffL - this_MC_EffT;
+      Prob_DATA *= this_DATA_EffL - this_DATA_EffT;
+    }
+    else{
+      Prob_MC *= 1.-this_MC_EffL;
+      Prob_DATA *= 1.-this_DATA_EffL;
+    }
+  }
+
+  if(Prob_MC>0. && Prob_DATA>0.) SF=Prob_DATA/Prob_MC;
+  else SF=0.;
+
+  return SF;
+}
+
+void dybAnalyzer::SetupPUJetWeight(){
+  TString datapath = getenv("DATA_DIR");
+  TFile fPUID(datapath+"/"+GetEra()+"/ID/PUJet/PUID.root");
+  vector<TString> IDs = {"T", "M", "L"};
+  for(unsigned int i=0; i<IDs.size(); i++){
+    cout<<"[dybAnalyzer::SetupPUJetWeight] setting PUJetWeight with ID : "+IDs.at(i)<<endl;
+
+    TString era = GetEra();
+    if(era == "2016postVFP") era = "2016";
+    else if(era == "2016preVFP") era = "2016APV";
+
+    heff_data = (TH2F*)fPUID.Get("h2_eff_dataUL"+era+"_"+IDs.at(i));
+    heff_mc   = (TH2F*)fPUID.Get("h2_eff_mcUL"+era+"_"+IDs.at(i));
+    hmistag_data = (TH2F*)fPUID.Get("h2_mistag_dataUL"+era+"_"+IDs.at(i));
+    hmistag_mc   = (TH2F*)fPUID.Get("h2_mistag_mcUL"+era+"_"+IDs.at(i));
+
+    heff_data->SetDirectory(0);
+    heff_mc->SetDirectory(0);
+    hmistag_data->SetDirectory(0);
+    hmistag_mc->SetDirectory(0);
+  }
+
+  fPUID.Close();
+}
+
 bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
   if(jet.Pt() >= 50) return true;
 
@@ -607,4 +720,54 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
     }
   }
   return false;
+}
+
+double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys){
+  sys = 0;
+  if(IsDATA) return 1.;
+
+  vector<Gen> gens=GetGens();
+
+  double Prob_MC(1.), Prob_DATA(1.);
+  for(unsigned int i=0; i<jets.size(); i++){
+    double jetpt = jets.at(i).Pt();
+    double jeteta = jets.at(i).Eta();
+    if(jets.at(i).Pt() < 20) cout<<"jet pt < 20GeV, something wrong"<<endl;;
+    if(jets.at(i).Pt() > 50) continue;
+    if(abs(jets.at(i).Eta()) > 2.5) continue;
+
+    double this_DATA_eff = heff_data->GetBinContent(heff_data->FindBin(jetpt, jeteta));
+    double this_MC_eff = heff_mc->GetBinContent(heff_mc->FindBin(jetpt, jeteta));
+    double this_DATA_mistag = hmistag_data->GetBinContent(hmistag_data->FindBin(jetpt, jeteta));
+    double this_MC_mistag = hmistag_mc->GetBinContent(hmistag_mc->FindBin(jetpt, jeteta));
+    if(this_DATA_eff * this_MC_eff * this_DATA_mistag * this_MC_mistag == 0.) continue;
+
+    bool isRealJet = false;
+    isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
+    bool isPassID = PUJetIDPass(jets.at(i), ID);
+
+    if(isRealJet){
+      if(isPassID){
+        if(this_MC_eff == 0) this_MC_eff += 1E-4;
+        Prob_DATA *= this_DATA_eff;
+        Prob_MC *= this_MC_eff;
+      }else{
+        if(this_MC_eff == 1) this_MC_eff -= 1E-4;
+        Prob_DATA *= 1.-this_DATA_eff;
+        Prob_MC *= 1.-this_MC_eff;
+      }
+    }else{
+      if(isPassID){
+        if(this_MC_mistag == 0) this_MC_mistag += 1E-4;
+        Prob_DATA *= this_DATA_mistag;
+        Prob_MC *= this_MC_mistag;
+      }else{
+        if(this_MC_mistag == 1) this_MC_mistag -= 1E-4;
+        Prob_DATA *= 1.-this_DATA_mistag;
+        Prob_MC *= 1.-this_MC_mistag;
+      }
+    }
+  }
+
+  return Prob_DATA/Prob_MC;
 }

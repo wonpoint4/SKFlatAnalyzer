@@ -16,7 +16,16 @@ public:
   bool IsFiredTriggers(TString channel);
   bool HasDileptons(TString channel);
   double jetCharge(const Jet& jet);
+  double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+
+  // PUJetID, SF
+  void SetupPUJetWeight();
+  TH2F *heff_data=NULL;
+  TH2F *hmistag_data=NULL;
+  TH2F *heff_mc=NULL;
+  TH2F *hmistag_mc=NULL;
   bool PUJetIDPass(Jet jet, TString ID);
+  double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys);
 
   dybAnalyzer();
   ~dybAnalyzer();
@@ -41,7 +50,9 @@ public:
   double prefireweight = 1.;
   double zptweight =1.;
   double weakweight = 1.;
+  double btagSF = 1.;
   double topptweight = 1.;
+  double pujetSF = 1.;
 
   bool IsNominalRun = true;
   bool IsSkimmed = false;
