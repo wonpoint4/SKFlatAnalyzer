@@ -161,24 +161,24 @@ void AFBAnalyzerSyst::FillHistsSyst(Parameter p,Variations& vs){
     TString suf=p.suffix+p.vsuffix;
     
     if(region=="0bjet/"){
-      FillHist(pre+"dimass"+suf,dimass,cost,p.weight,unfold_0bjet_mbinnum_reco,unfold_0bjet_mbin_reco,grid_costbinnum,grid_costbin);
-      FillHist(pre+"dirap"+suf,dirap,cost,p.weight,unfold_0bjet_ybinnum_reco,unfold_0bjet_ybin_reco,grid_costbinnum,grid_costbin);
-      FillHist(pre+"dipt"+suf,dipt,cost,p.weight,unfold_0bjet_ptbinnum_reco,unfold_0bjet_ptbin_reco,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dimass"+suf,dimass,cost,p.weight,afb_mbinnum,afb_mbin,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dirap"+suf,dirap,cost,p.weight,afb_ybinnum,afb_ybin,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dipt"+suf,dipt,cost,p.weight,afb_ptbinnum,afb_ptbin,grid_costbinnum,grid_costbin);
       FillHist(pre+"cost"+suf,cost,p.weight,20,-1,1);
     }else{
-      FillHist(pre+"dimass"+suf,dimass,cost,p.weight,unfold_nbjet_mbinnum_reco,unfold_nbjet_mbin_reco,grid_costbinnum,grid_costbin);
-      FillHist(pre+"dirap"+suf,dirap,cost,p.weight,unfold_nbjet_ybinnum_reco,unfold_nbjet_ybin_reco,grid_costbinnum,grid_costbin);
-      FillHist(pre+"dipt"+suf,dipt,cost,p.weight,unfold_nbjet_ptbinnum_reco,unfold_nbjet_ptbin_reco,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dimass"+suf,dimass,cost,p.weight,afb_mbinnum,afb_mbin,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dirap"+suf,dirap,cost,p.weight,afb_ybinnum,afb_ybin,grid_costbinnum,grid_costbin);
+      FillHist(pre+"dipt"+suf,dipt,cost,p.weight,afb_ptbinnum,afb_ptbin,grid_costbinnum,grid_costbin);
       FillHist(pre+"cost"+suf,cost,p.weight,20,-1,1);      
     }
     for(int im=0;im<grid_mbinnum;im++){
       if(dimass>=grid_mbin[im]&&dimass<grid_mbin[im+1]){
 	if(region=="0bjet/"){
-	  FillHist(pre+Form("dirap_m%d",im)+suf,dirap,cost,p.weight,unfold_0bjet_ybinnum_reco,unfold_0bjet_ybin_reco,grid_costbinnum,grid_costbin);
-	  FillHist(pre+Form("dipt_m%d",im)+suf,dipt,cost,p.weight,unfold_0bjet_ptbinnum_reco,unfold_0bjet_ptbin_reco,grid_costbinnum,grid_costbin);
+	  FillHist(pre+Form("dirap_m%d",im)+suf,dirap,cost,p.weight,afb_ybinnum,afb_ybin,grid_costbinnum,grid_costbin);
+	  FillHist(pre+Form("dipt_m%d",im)+suf,dipt,cost,p.weight,afb_ptbinnum,afb_ptbin,grid_costbinnum,grid_costbin);
 	}else{
-	  FillHist(pre+Form("dirap_m%d",im)+suf,dirap,cost,p.weight,unfold_nbjet_ybinnum_reco,unfold_nbjet_ybin_reco,grid_costbinnum,grid_costbin);
-	  FillHist(pre+Form("dipt_m%d",im)+suf,dipt,cost,p.weight,unfold_nbjet_ptbinnum_reco,unfold_nbjet_ptbin_reco,grid_costbinnum,grid_costbin);
+	  FillHist(pre+Form("dirap_m%d",im)+suf,dirap,cost,p.weight,afb_ybinnum,afb_ybin,grid_costbinnum,grid_costbin);
+	  FillHist(pre+Form("dipt_m%d",im)+suf,dipt,cost,p.weight,afb_ptbinnum,afb_ptbin,grid_costbinnum,grid_costbin);
 	}
       }
     }
