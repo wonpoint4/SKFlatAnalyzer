@@ -7,7 +7,7 @@ ROOT.TH1.AddDirectory(0)
 ROOT.TH1.SetDefaultSumw2(1)
 
 ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
-SystematicSuffixes=dict(ROOT.AFBSystPlotter("").GetSystematicSuffixes("totalsys_bcharge"))
+SystematicSuffixes=dict(ROOT.AFBSystPlotter("").GetSystematicSuffixes("totalsys"))
 DEBUG=0
 
 class Config(object):
@@ -117,7 +117,7 @@ def RebinResponseMatrix(matrix,xbins_old,ybins_old,xbins_new,ybins_new):
         rt.SetBinError(ix_new,iy_new,(err0**2+err1**2)**0.5)
         #print i,x,costx,y,costy,ix,iy,ix_new,iy_new,val0,val1,rt.Integral()
 
-    print matrix.Integral(),rt.Integral()
+    #print matrix.Integral(),rt.Integral()
     return rt
         
         
@@ -416,6 +416,40 @@ def Run(suffix):
          
 def RunCondor(arg):
     os.system('condor_submit $SKFlat_WD/AFBResult/condor.jds -a arguments={} > /dev/null'.format(arg))
+
+def PrintCondition():
+    histnames=[]
+    for channel in ["ee","mm"]:
+        for era in ["2016a","2016b","2017","2018"]:
+            for region in ["/0bjet","/nbjet"]:
+                histnames+=[channel+era+region+"/dimass"]
+                histnames+=[channel+era+region+"/dirap_m0"]
+                histnames+=[channel+era+region+"/dirap_m1"]
+                histnames+=[channel+era+region+"/dirap_m2"]
+                histnames+=[channel+era+region+"/dirap_m3"]
+                histnames+=[channel+era+region+"/dipt_m0"]
+                histnames+=[channel+era+region+"/dipt_m1"]
+                histnames+=[channel+era+region+"/dipt_m2"]
+                histnames+=[channel+era+region+"/dipt_m3"]
+
+    for histname in histnames:
+        config=Config(histname)
+        matrixname=config.matrixname
+        matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
+        matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+        proj=matrix.ProjectionX("proj",1,matrix.GetNbinsY())    
+        response=ROOT.TMatrixD(1,matrix.GetNbinsX(),1,matrix.GetNbinsY())
+        for i in range(1,matrix.GetNbinsX()+1):
+            for j in range(1,matrix.GetNbinsY()+1):
+                if proj.GetBinContent(i):
+                    response[i][j]=matrix.GetBinContent(i,j)/proj.GetBinContent(i)
+                else:
+                    print histname,i
+                    response[i][j]=0.
+        response.T()
+        svd=ROOT.TDecompSVD(response)
+        #response.Print()
+        print histname,svd.Condition()
     
 def Merge():
     files=os.listdir(os.environ["SKFlat_WD"]+"/AFBResult")
@@ -427,7 +461,76 @@ def Merge():
     os.system("rm $SKFlat_WD/AFBResult/final_*.root")
     return 
 
+def SaveResponseAll(path):
+    histnames=[]
+    for channel in ["ee","mm"]:
+        for era in ["2016a","2016b","2017","2018"]:
+            for region in ["/0bjet","/nbjet"]:
+                histnames+=[channel+era+region+"/dimass"]
+                histnames+=[channel+era+region+"/dirap_m0"]
+                histnames+=[channel+era+region+"/dirap_m1"]
+                histnames+=[channel+era+region+"/dirap_m2"]
+                histnames+=[channel+era+region+"/dirap_m3"]
+                histnames+=[channel+era+region+"/dipt_m0"]
+                histnames+=[channel+era+region+"/dipt_m1"]
+                histnames+=[channel+era+region+"/dipt_m2"]
+                histnames+=[channel+era+region+"/dipt_m3"]
+
+    for histname in histnames:
+        config=Config(histname)
+        matrixname=config.matrixname
+        matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
+        matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+        proj=matrix.ProjectionX("proj",1,matrix.GetNbinsY())    
+        response=ROOT.TMatrixD(1,matrix.GetNbinsX(),1,matrix.GetNbinsY())
+        for i in range(1,matrix.GetNbinsX()+1):
+            for j in range(1,matrix.GetNbinsY()+1):
+                if proj.GetBinContent(i):
+                    response[i][j]=matrix.GetBinContent(i,j)/proj.GetBinContent(i)
+                else:
+                    print histname,i
+                    response[i][j]=0.
+        c=ROOT.gROOT.MakeDefCanvas()
+        h=ROOT.TH2D(response)
+        h.SetStats(0)
+        dilepton="#mu#mu" if "mm201" in histname else "ee"
+        variable="m("+dilepton+")"
+        if "dirap" in histname: variable="y("+dilepton+")"
+        elif "dipt" in histname: variable="p_{T}("+dilepton+")"
+        h.GetYaxis().SetTitle("GEN "+variable+" bin index")
+        h.GetXaxis().SetTitle("RECO "+variable+" bin index")
+        h.Draw("colz")
+        if "2016a" in histname: era="2016preVFP"
+        elif "2016b" in histname: era="2016postVFP"
+        elif "2017" in histname: era="2017"
+        elif "2018" in histname: era="2018"
+        config.plotter.DrawPreliminary(c,era,"","nolumi")
+        latex=ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kGray)
+        if "0bjet" in histname:
+            latex.DrawLatex(0.17,0.8,"DY")
+        else:
+            latex.DrawLatex(0.17,0.8,"t#bar{t}")
+        cut=""
+        if "_m0" in histname:
+            latex.DrawLatex(0.17,0.75,"52 #leq m < 77 GeV")
+        elif "_m1" in histname:
+            latex.DrawLatex(0.17,0.75,"77 #leq m < 106 GeV")
+        elif "_m2" in histname:
+            latex.DrawLatex(0.17,0.75,"106 #leq m < 280 GeV")
+        elif "_m3" in histname:
+            latex.DrawLatex(0.17,0.75,"280 #leq m < 3000 GeV")
+            
+        print histname
+        #raw_input()
+        c.SaveAs(path+"/"+histname.replace("/","_")+".png")
+        c.SaveAs(path+"/"+histname.replace("/","_")+".pdf")
+    
+
 if __name__=="__main__":
+    # SaveResponseAll("")
+    # exit()
     #ClosureTest(Config("mm2017/nbjet/genfid_dirapRecoil_dressed"))
 
     if len(sys.argv)>1:

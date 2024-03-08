@@ -24,7 +24,7 @@ def calcWithCov(a0,e0,a1,e1,a2,e2,a3,e3):
     cov+=np.outer(stat2-nominal,stat2-nominal)
     cov+=np.outer(stat3-nominal,stat3-nominal)
     print(nominal)
-    print(cov)
+    print("cov",cov)
     values,vectors=np.linalg.eig(cov)
     vector0=np.array([vectors[0][0],vectors[1][0]])*values[0]**0.5
     vector1=np.array([vectors[0][1],vectors[1][1]])*values[1]**0.5
@@ -63,7 +63,7 @@ def GetTrueAccuracyByType(channel,type,option=""):
     
 def DrawAccuracy(channels):
     c=ROOT.gROOT.MakeDefCanvas()
-    c.SetLeftMargin(0.25)
+    c.SetLeftMargin(0.2)
 
     gdata=ROOT.TGraphErrors()
     gsim=ROOT.TGraphErrors()
@@ -115,12 +115,25 @@ def DrawAccuracy(channels):
         # g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.24)
         # g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
     
-    hframe=ROOT.TH2D("hframe","",100,0.60,0.65,len(channels)*2,0,len(channels)*2);
+    hframe=ROOT.TH2D("hframe","",100,0.60,0.65,len(channels)*2+1,0,len(channels)*2+1);
     for i in range(len(channels)):
-        hframe.GetYaxis().SetBinLabel(i*2+1,"#alpha^{-} ("+channels[i]+")")
-        hframe.GetYaxis().SetBinLabel(i*2+2,"#alpha^{+} ("+channels[i]+")")
+        title=channels[i]
+        title=title.replace("201[678][ab]?"," Run2")
+        title=title.replace("m","#mu")
+        hframe.GetYaxis().SetBinLabel(i*2+1,"#alpha^{#minus} ("+title+")")
+        hframe.GetYaxis().SetBinLabel(i*2+2,"#alpha^{#plus} ("+title+")")
     hframe.SetStats(0)
     hframe.Draw()
+    hframe.GetXaxis().SetTitle("Accuracy")
+    hframe.GetYaxis().SetLabelSize(hframe.GetYaxis().GetLabelSize()*1.5)
+
+    leg=ROOT.TLegend(c.GetLeftMargin()+0.01,0.79,0.99-c.GetRightMargin(),0.89)
+    leg.AddEntry(gdata,"data")
+    leg.AddEntry(gsim,"simulation")
+    leg.AddEntry(gtrue,"simulation (gen info)")
+    leg.SetBorderSize(0)
+    leg.Draw()
+
     gdata.SetMarkerStyle(20)
     gdata.SetMarkerSize(0.6)
     gdata.SetMarkerColor(1)
@@ -138,8 +151,10 @@ def DrawAccuracy(channels):
     gtrue.SetMarkerColor(4)
     gtrue.SetLineColor(4)
     gtrue.Draw("same p")
-    
-    raw_input()
+
+    #raw_input()
+    c.hists=[gdata,gsim,gtrue,hframe,leg]
+    return c
 
 def DrawAccuracyByType(channels,types):
     c=ROOT.gROOT.MakeDefCanvas()
@@ -173,12 +188,12 @@ def DrawAccuracyByType(channels,types):
     
     raw_input()
 
-
-#value,cov=GetAccuracy(0,"me201[678][ab]?")
-#value,cov=GetAccuracy(1,"me201[678][ab]?")
-#DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
-#DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
-#DrawAccuracy([channel+era for channel in ["[me]n","[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
-
-DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
-#DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])
+if __name__=="__main__":
+    #value,cov=GetAccuracy(0,"me201[678][ab]?")
+    #value,cov=GetAccuracy(1,"me201[678][ab]?")
+    #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
+    #DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
+    #DrawAccuracy([channel+era for channel in ["[me]n","[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
+    
+    DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
+    #DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])

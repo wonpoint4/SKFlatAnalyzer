@@ -73,6 +73,8 @@ class AFBMeasurements:
                     self.cov_stat[i][j]=hcov.GetBinContent(i,j)
         for suffix in SystematicSuffixes:
             h=f.Get(histname+suffix)
+            if not h:
+                print histname+suffix
             for i in range(ncells):
                 self.measurements[i].SetSystError(suffix,h.GetBinContent(i),isValue=True)
         self.syst={}
@@ -84,7 +86,7 @@ class AFBMeasurements:
         out=[]
         out+=[ "\t".join( ["bin","val","stat"]+syst ) ]
         for i in range(len(self.measurements)):
-            out+=[ "\t".join( map(str,[i,self.GetValue(i),self.GetStatError(i)]+[self.GetSystError(key,i) for key in syst]) ) ]
+            out+=[ "\t".join( map(str,[i,self.GetValue(i),self.GetStatError(i)]+[self.GetSystError(i,key) for key in syst]) ) ]
         return "\n".join(out)
 
     def EvalSystError(self,key):
@@ -132,7 +134,9 @@ class AFBMeasurements:
             exit(1)
         return rt
 
-    def GetSystError(self,key,i):
+    def GetSystError(self,i,key=""):
+        if key=="":
+            key=self.default_syst
         if key not in self.syst:
             self.EvalSystError(key)
         return self.syst[key][i][i]**0.5
@@ -144,7 +148,7 @@ class AFBMeasurements:
         return self.cov_stat[i][i]**0.5
 
     def GetTotalError(self,i):
-        return (self.GetStatError(i)**2+self.GetSystError(self.default_syst,i)**2)**0.5
+        return (self.GetStatError(i)**2+self.GetSystError(i,self.default_syst)**2)**0.5
 
     def GetSystCov(self,key,i,j):
         if key not in self.syst:
@@ -180,6 +184,8 @@ class AFBMeasurements:
     def __mod__(self,other):
         rt=copy.deepcopy(self)
         n=len(rt.measurements)
+        if n!=len(other.measurements):
+            print "Inconsistent number of bins",n,len(other.measurements)
         cov_stat0=copy.deepcopy(self.cov_stat)
         cov_stat1=copy.deepcopy(other.cov_stat)
         for i in range(n):
@@ -226,17 +232,50 @@ class AFBMeasurements:
         ndf=len(d[0])
         return {"chi2":chi2, "ndf":ndf, "pvalue":ROOT.TMath.Prob(chi2,ndf)}
 
-    def Save(self,filename):
-        out=["\\begin{tabular} { "+" ".join(["r" for i in range(1,len(self.measurements)-1+4)])+" }"]
+    def Save(self,filename=""):
+        systs=["efficiencySF","bcharge","electronenergy","muonmomentum","dytheory","tttheory"]
+        out=["\\begin{tabular} { "+" ".join(["r"]*(6+len(systs)))+" }"]
+        out+=["bin & min & max & val & stat & syst & "+" & ".join(systs)+" \\\\"]
         for i in range(1,len(self.measurements)-1):
-            line="{} & {} & {} & {} & ".format(i,self.bins[i-1],self.bins[i],round(self.GetValue(i),4)) \
-            +" & ".join([str(round(self.GetCov(i,j),4)) for j in range(1,len(self.measurements)-1)]) \
+            #line="{} & {} & {} & {} & {} & {} & ".format(i,self.bins[i-1],self.bins[i],round(self.GetValue(i),4),round(self.GetStatError(i),4),round(self.GetSystError(i),4)) \
+            line="{} & {} & {} & {} & {} & {} & ".format(i,self.bins[i-1],self.bins[i],"blind",round(self.GetStatError(i),4),round(self.GetSystError(i),4)) \
+            +" & ".join([format(self.GetSystError(i,syst),".4f") for syst in systs]) \
+            +" \\\\"
+            out+=[line]
+        out+=["\\end{tabular}"]
+        out="\n".join(out)
+        if filename!="":
+            dirname=os.path.dirname(filename)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            with open(filename,"w") as f:
+                f.write(out)
+        else:
+            print out
+        return
+
+    def SaveCov(self,filename=""):
+        out=["\\begin{tabular} { "+" ".join(["r" for i in range(1,len(self.measurements)-1+4)])+" }"]
+        out+=["bin & min & max & val & "+" & ".join([str(i) for i in range(1,len(self.measurements)-1)])+" \\\\"]
+        for i in range(1,len(self.measurements)-1):
+            #line="{} & {} & {} & {} & ".format(i,self.bins[i-1],self.bins[i],round(self.GetValue(i),4)) \
+            line="{} & {} & {} & {} & ".format(i,self.bins[i-1],self.bins[i],"blind") \
+            +" & ".join([format(self.GetCov(i,j),".8f") for j in range(1,len(self.measurements)-1)]) \
             +" \\\\"
             out+=[line]
         out+=["\\end{tabular}"]
         # out="\n".join(map(lambda x:x.replace("\\","\\\\"),out))
         out="\n".join(out)
-        print out
+        if filename!="":
+            dirname=os.path.dirname(filename)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            with open(filename,"w") as f:
+                f.write(out)
+        else:
+            print out
+        return
+        
         
 def SaveCompareEraAll(inputpath,outputpath):
     colors=[ROOT.kBlack,ROOT.kRed,ROOT.kGreen+1,ROOT.kBlue,ROOT.kYellow+1,ROOT.kMagenta,ROOT.kCyan,ROOT.kGray,ROOT.kPink+1,ROOT.kSpring+1,ROOT.kAzure+1,ROOT.kOrange+1,ROOT.kViolet+1,ROOT.kTeal+1,ROOT.kWhite,ROOT.kGray+1,ROOT.kGray+3]
@@ -338,9 +377,8 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
                 h.SetMarkerSize(0.7)
                 h.SetLineColor(1)
                 h.SetMarkerColor(1)
-                for i in range(h.GetNcells()):
-                    h.SetBinContent(i,hsim[0].GetBinContent(i))
-                    pass
+                for ib in range(h.GetNcells()):
+                    h.SetBinContent(ib,hsim[0].GetBinContent(ib))
             print sim_histname,sim_histoption
             p=ROOT.Plot()
             p.SetOption(plot_option)
@@ -348,7 +386,10 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
             c=ROOT.TCanvas()
             _plotter.DrawCompare(p)
             _plotter.DrawPreliminary(c,"Run2")
-            _plotter.SaveCanvas(c,region+"_"+histname+".png")
+            savename=histname.replace("unfoldedafb_afb","dafb_")
+            savename=savename.replace("y_m","y").replace("pt_m","pt")
+            _plotter.SaveCanvas(c,region+"_"+savename+".png",False)
+            _plotter.SaveCanvas(c,region+"_"+savename+".pdf")
             #raw_input()
 
 def SaveDeltaPlotAll(inputpath,outputpath):
@@ -411,35 +452,58 @@ def SaveDeltaPlotAll(inputpath,outputpath):
             hsim_mm.Add(hsim_ee,-1.)
             hsim=ROOT.Hists()
             hsim.push_back(hsim_mm)
-            for h in hsim:
-                h.SetOption("hist e1")
+            for i in range(len(hsim)):
+                hsim[i].SetOption("hist e1")
 
-            for h in hdata:
+            for i in range(len(hdata)):
+                h=hdata[i]
                 h.SetName("data (blind)")
                 h.SetOption("e1")
                 h.SetMarkerStyle(20)
                 h.SetMarkerSize(0.7)
                 h.SetLineColor(1)
                 h.SetMarkerColor(1)
-                for i in range(h.GetNcells()):
-                    h.SetBinContent(i,hsim[0].GetBinContent(i))
+                for ib in range(h.GetNcells()):
+                    #h.SetBinContent(ib,hsim[0].GetBinContent(ib))
+                    h.SetBinContent(ib,0.)
             print sim_histname,sim_histoption
             p=ROOT.Plot()
             p.SetOption(plot_option)
-            p.hists=ROOT.vector("Hists")([hdata,hsim])
-            #p.hists=ROOT.vector("Hists")([hdata])
+            #p.hists=ROOT.vector("Hists")([hdata,hsim])
+            p.hists=ROOT.vector("Hists")([hdata])
             c=ROOT.TCanvas()
             _plotter.DrawSig(p)
             _plotter.DrawPreliminary(c,"Run2")
-            _plotter.SaveCanvas(c,region+"_"+histname.replace("unfoldedafb","delta")+".png")
+            savename=histname.replace("unfoldedafb_afb","deltaafb_")
+            savename=savename.replace("y_m","y").replace("pt_m","pt")
+            _plotter.SaveCanvas(c,region+"_"+savename+".png",False)
+            _plotter.SaveCanvas(c,region+"_"+savename+".pdf")
             #raw_input()
 
+def SaveTableAll(inputpath,outputpath):
+    for region in ["0bjet","nbjet"]:
+        for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
+            ms=[]
+            for channel in ["ee","mm"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m=reduce(lambda x,y:x%y,ms)
+            m.Save(outputpath+"/"+region+"/"+histname+".tex")
+
+def SaveTableCovAll(inputpath,outputpath):
+    for region in ["0bjet","nbjet"]:
+        for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
+            ms=[]
+            for channel in ["ee","mm"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m=reduce(lambda x,y:x%y,ms)
+            m.SaveCov(outputpath+"/"+region+"/"+histname+"_cov.tex")
 
 if __name__=="__main__":
-    # inputpath=os.environ["SKFlatOutputDir"]+os.environ["SKFlatV"]+"/AFBAnalyzer/"
-
     #SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
-    SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
+    #SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
+    pass
 
     # hists=ROOT.vector("Hists")()
     # h2017=m2017.GetHists()
@@ -456,5 +520,3 @@ if __name__=="__main__":
     # _plotter.DrawCompare(p)
     # raw_input()
     # print m
-
- 
