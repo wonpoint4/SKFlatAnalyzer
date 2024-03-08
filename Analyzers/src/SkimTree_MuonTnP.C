@@ -83,7 +83,7 @@ void SkimTree_MuonTnP::executeEvent(){
     Parameter p=MakeParameter("mu");
     p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v","HLT_IsoMu27_v"};
     p.SetMuonKeys("Default","Default",{"Default"});
-    p.SetMuons(MuonMomentumCorrection(GetAllMuons(),0,0,0));
+    p.SetMuons(MuonMomentumCorrection(GetAllMuons()));
     executeEventWithParameter(p);
   }
 }

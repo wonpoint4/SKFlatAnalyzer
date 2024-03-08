@@ -358,9 +358,12 @@ public:
 
   RoccoR* roc=NULL;
   Aepcor* rocele=NULL;
+  map<TString,TH1*> fRoccorResidual;
 
-  std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0,bool sort=true);
-  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0,bool sort=true);
+  virtual double MuonMomentumCorrection(const Muon& muon,int set=0,int member=0);
+  virtual std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int set=0,int member=0,bool sort=true);
+  virtual double ElectronEnergyCorrection(const Electron& electron,int set=0,int member=0);
+  virtual std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0,bool sort=true);
 
   double GetPFMET_T1Smear() const;
   TString GetSkimName() const;
