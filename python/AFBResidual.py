@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+
 ## eff residual systematic set with iteration
-import os,sys,re
+import os,sys,re,ctypes
 import ROOT
-ROOT.gROOT.LoadMacro("./Plotter/AFBPlotter.cc")
+ROOT.gROOT.ProcessLine('#include"AFBPlotter.cc"')
 ROOT.TH1.AddDirectory(0)
 ROOT.TH1.SetDefaultSumw2(True)
 ROOT.gErrorIgnoreLevel = ROOT.kWarning
@@ -104,6 +106,25 @@ def MoveOverflow(h4d):
         h4d.SetBinContent(ix,iy,iz,nu,val0+val1)
         h4d.SetBinError(ix,iy,iz,nu,(err0**2+err1**2)**0.5)
 
+def Multiply(h1,h2):
+    h=h1.Clone()
+    for i in range(h.GetNcells()):
+        ix=ctypes.c_int(-1)
+        iy=ctypes.c_int(-1)
+        iz=ctypes.c_int(-1)
+        h.GetBinXYZ(i,ix,iy,iz)
+        x=h.GetXaxis().GetBinCenter(ix.value)
+        y=h.GetYaxis().GetBinCenter(iy.value)
+        if y>h2.GetYaxis().GetXmax(): 
+            y=h2.GetYaxis().GetXmax()-1e-6
+        j=h2.FindBin(x,y)
+        val=h.GetBinContent(i)
+        err=h.GetBinError(i)
+        scale=h2.GetBinContent(j)
+        h.SetBinContent(i,val*scale)
+        h.SetBinError(i,val*scale)
+    return h
+
 def addResidual(infilename):
     print infilename
     outfilename=infilename.replace(".root","_residual.root")
@@ -123,21 +144,22 @@ def addResidual(infilename):
         channel="mu"
 
     os.system("cp {} {}".format(infilename,outfilename));
-    f=ROOT.TFile(outfilename,"update")
-    hsim=f.Get("sim")
-    hsf_origin=f.Get("sf")
 
     plotter=ROOT.AFBPlotter("data mi+tau_mi+vv+wjets+tt+st+qcdss+aa","EfficiencyValidation")
     hdata4d=plotter.GetHist(0,channel+era+"/m80to100/lpetaptlmetapt","noproject")
-    #MoveOverflow(hdata4d)
+    MoveOverflow(hdata4d)
     hsim4d=plotter.GetHist(1,channel+era+"/m80to100/lpetaptlmetapt","noproject")
-    #MoveOverflow(hsim4d)
+    MoveOverflow(hsim4d)
     scale=hdata4d.Integral(0,-1,0,-1,0,-1,0,-1)/hsim4d.Integral(0,-1,0,-1,0,-1,0,-1)
     hsim4d.Scale(scale)
 
-    hsf=hsf_origin.Clone("hsf")
+    hsf=ROOT.TH2D("sf","sf",hdata4d.GetXaxis().GetNbins(),hdata4d.GetXaxis().GetXbins().GetArray(),hdata4d.GetYaxis().GetNbins(),hdata4d.GetYaxis().GetXbins().GetArray())
+    for i in range(hsf.GetNcells()):
+        hsf.SetBinContent(i,1.)
+
     chi2_old=1e6
     for i in range(10):
+        #if i>0: break
         hdata2d=Make2D(hdata4d)
         hsim2d=Make2D(hsim4d)
         chi2,ndf,prob=GetChi2(hdata2d,hsim2d)
@@ -149,7 +171,7 @@ def addResidual(infilename):
             this_hsf.SetBinError(j,0)
         Apply(hsim4d,this_hsf)
         hsf.Multiply(this_hsf)
-        if (chi2_old-chi2)/chi2_old<0.05:
+        if (chi2_old-chi2)/chi2_old<0.2:
             break
         chi2_old=chi2
 
@@ -170,10 +192,13 @@ def addResidual(infilename):
 
     print "final", GetChi2(Make2D(hdata4d),Make2D(hsim4d))
 
-    hdata=hsim.Clone("data")
-    hdata.Multiply(hsf)
+    f=ROOT.TFile(outfilename,"update")
+    hsim=f.Get("sim")
+    hdata=Multiply(hsf,f.Get("data"))
+    hsf=Multiply(hsf,f.Get("sf"))
     f.cd()
     for h in [hdata, hsim, hsf]:
+        h.SetStats(0)
         for i in range(h.GetNcells()):
             h.SetBinError(i,0)
     iset=max([int(re.match("sf_s([0-9]+)",key.GetName()).group(1)) for key in f.GetListOfKeys() if re.match("sf_s([0-9]+)",key.GetName())])+1
@@ -187,9 +212,9 @@ def addResidual(infilename):
 
     
 def GetCurrentEffFileName(era,channel):
-    if channel=="Electron":
+    if channel=="Muon":
         key="Muon_MediumID_trkIsoLoose"
-    elif channel=="Muon":
+    elif channel=="Electron":
         key="Electron_MediumID"
     else:
         print "Unknown channal ",channel
@@ -204,5 +229,9 @@ if __name__=="__main__":
         for era in ["2016preVFP","2016postVFP","2017","2018"]:
             addResidual(GetCurrentEffFileName(era,"Electron"))
             addResidual(GetCurrentEffFileName(era,"Muon"))
+    elif sys.argv[1]=="print":
+        for era in ["2016preVFP","2016postVFP","2017","2018"]:
+            print(GetCurrentEffFileName(era,"Electron"))
+            print(GetCurrentEffFileName(era,"Muon"))
     else:
         addResidual(sys.argv[1])
