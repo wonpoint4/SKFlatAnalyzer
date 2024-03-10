@@ -1007,6 +1007,11 @@ void SMPAnalyzerCore::SetupCFRate(){
     cout<<"[SMPAnalyzerCore::SetupCFRate] load hcfsf"<<endl;
     hcfsf->SetDirectory(0);
   }else cout<<"[SMPAnalyzerCore::SetupCFRate] no hcfsf"<<endl;
+  hcfscale=(TH2*)f.Get("cfscale");
+  if(hcfscale){
+    cout<<"[SMPAnalyzerCore::SetupCFRate] load hcfscale"<<endl;
+    hcfscale->SetDirectory(0);
+  }else cout<<"[SMPAnalyzerCore::SetupCFRate] no hcfscale"<<endl;
   //hcfenergyscale=(TH2*)f.Get("cfenergyscale");
   //if(hcfenergyscale){
   //  cout<<"[SMPAnalyzerCore::SetupCFRate] load hcfenergyscale"<<endl;
@@ -1021,19 +1026,46 @@ double SMPAnalyzerCore::GetCFSF(const Lepton* l,int sys){
   if(l->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
   return GetBinContentUser(hcfsf,l->Eta(),l->Pt(),sys);
 }
+double SMPAnalyzerCore::GetCFData(const Lepton* l,int sys){
+  if(IsDATA) return 1.;
+  if(!hcfsf) return 1.;
+  if(!l) return 1.;
+  if(l->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
+  return GetBinContentUser(hcfrate_data,l->Eta(),l->Pt(),sys);
+}
+double SMPAnalyzerCore::GetCFSim(const Lepton* l,int sys){
+  if(IsDATA) return 1.;
+  if(!hcfsf) return 1.;
+  if(!l) return 1.;
+  if(l->LeptonFlavour()!=Lepton::ELECTRON) return 1.;
+  return GetBinContentUser(hcfrate_mc,l->Eta(),l->Pt(),sys);
+}
 double SMPAnalyzerCore::GetCFSF(const Parameter& p,int sys){
   if(IsDATA) return 1.;
   double sf=1.;
-  if(p.lepton0&&!p.truth_lepton0.IsEmpty())
-    if(p.lepton0->Charge()*p.truth_lepton0.Charge()<0) sf*=GetCFSF(p.lepton0,sys);
-  if(p.lepton1&&!p.truth_lepton1.IsEmpty())
-    if(p.lepton1->Charge()*p.truth_lepton1.Charge()<0) sf*=GetCFSF(p.lepton1,sys);
+  if(p.lepton0&&!p.truth_lepton0.IsEmpty()){
+    if(p.lepton0->Charge()*p.truth_lepton0.Charge()<0){
+      sf*=GetCFData(p.lepton0,sys)/GetCFSim(p.lepton0,-sys);
+    }else{
+      double this_sf=(1-GetCFData(p.lepton0,sys))/(1-GetCFSim(p.lepton0,-sys));
+      if(isnormal(this_sf)) sf*=this_sf;
+    }
+  }
+  if(p.lepton1&&!p.truth_lepton1.IsEmpty()){
+    if(p.lepton1->Charge()*p.truth_lepton1.Charge()<0){
+      sf*=GetCFData(p.lepton1,sys)/GetCFSim(p.lepton1,-sys);
+    }else{
+      double this_sf=(1-GetCFData(p.lepton1,sys))/(1-GetCFSim(p.lepton1,-sys));
+      if(isnormal(this_sf)) sf*=this_sf;
+    }
+  }
   return sf;
 }
 void SMPAnalyzerCore::DeleteCFRate(){
   if(hcfrate_data) delete hcfrate_data;
   if(hcfrate_mc) delete hcfrate_mc;
   if(hcfsf) delete hcfsf;
+  if(hcfscale) delete hcfscale;
 }
 void SMPAnalyzerCore::SetupMuonTrackingSF(){
   jSetupMuonTrackingSF=true;
@@ -1647,6 +1679,12 @@ double SMPAnalyzerCore::ElectronEnergyCorrection(const Electron& electron,int se
     double u=gRandom->Rndm();
     if(!gen.IsEmpty()&&fabs(electron.Pt()/gen.Pt()-1.)<0.5){
       rc=rocele->kSpreadMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),u,gen.Pt(),set,member);
+      if(hcfscale){
+	if(gen.Charge()*electron.Charge()<0){
+	  double cfscale=GetBinContentUser(hcfscale,electron.Eta(),electron.Pt()*rc,0);
+	  rc*=cfscale;
+	}
+      }
     }else{
       rc=rocele->kScaleMC(electron.UncorrPt(),el_eta,el_phi,electron.R9(),set,member);
     }

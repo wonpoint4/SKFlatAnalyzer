@@ -274,11 +274,14 @@ public:
 
   void SetupCFRate();
   double GetCFSF(const Lepton* l,int sys=0);
+  double GetCFData(const Lepton* l,int sys=0);
+  double GetCFSim(const Lepton* l,int sys=0);
   double GetCFSF(const Parameter& p,int sys=0);
   void DeleteCFRate();
   TH2* hcfrate_data=NULL;
   TH2* hcfrate_mc=NULL;
   TH2* hcfsf=NULL;
+  TH2* hcfscale=NULL;
 
   void SetupMuonTrackingSF();
   double GetMuonTrackingSF(double eta,int sys=0);
