@@ -4,6 +4,7 @@ from array import array
 import ROOT as rt
 rt.gROOT.LoadMacro("./Plotter/ZpeakPlotter.cc")
 from ROOT import ZpeakPlotter
+rt.gROOT.SetBatch(True)
 
 def calc_eff(valp,valf,errp=None,errf=None):
     if valp+valf==0: return 0.,0.
@@ -14,39 +15,41 @@ def calc_eff(valp,valf,errp=None,errf=None):
     return eff,err
 
 def evaluate(args):
-    plotter=ZpeakPlotter("data-"+args.bgkey.replace("+wjets","").replace("+","-")+" "+args.dykey)
+    plotter=ZpeakPlotter("data-tau_mi"+" "+args.dykey)
     rt.Verbosity=0
 
-    ptbins=[10,30,40,50,70,90,200]
-    #ptbins=[10,200]
-    etabins=[0.0,1.0,1.5,1.7,2.0,2.5]
-    #etabins=[0,1.5,2.5]
+    #ptbins=[10,30,40,50,70,90,200]
+    ptbins=[10,200]
+    #etabins=[0.0,1.0,1.5,1.7,2.0,2.5]
+    etabins=[round(0.1*i,1) for i in range(-25,26)]
     cfdata=rt.TH2D("cfdata","cfdata",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
     cfmc=rt.TH2D("cfmc","cfmc",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
     cfscale=rt.TH2D("cfscale","cfscale",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
-    for h in [cfdata,cfmc,cfscale]:
-        for i in range(h.GetNcells()):
-            if h.GetBinContent(i)<0:
-                h.SetBinContent(i,0)
 
     rt.RooMsgService.instance().setGlobalKillBelow(rt.RooFit.WARNING)
     Import=getattr(rt.RooWorkspace,"import")
 
     if not os.path.exists("fig/CFRate"):
         os.makedirs("fig/CFRate")
-    rt.gROOT.SetBatch(True)
     for ip in range(len(ptbins)-1):
         for ie in range(len(etabins)-1):
-            binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absX project:z ".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
-            hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z "+binstring)
-            hdatass=plotter.GetHist(0,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z "+binstring)
-            hmcos=plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z "+binstring)
-            hmcss=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z "+binstring)
+            #binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absX project:z ".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
+            binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} project:z ".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
+            hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hdatass=plotter.GetHist(0,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hmcos=plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hmcss=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
 
-            hmcsscf=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass_cf","xmin:76 xmax:106 prject:z "+binstring)
+            hmcsscf=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass_cf","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+
+            for h in [hdataos,hdatass,hmcos,hmcss]:
+                for i in range(h.GetNcells()):
+                    if h.GetBinContent(i)<=0:
+                        h.SetBinContent(i,0)
+                        h.SetBinError(i,0)
 
             w=rt.RooWorkspace("w")
-            x=w.factory("x[70,110]")
+            x=w.factory("x[75,107]")
             x.setRange("fit_range",76,106)
             dataos=rt.RooDataHist("dataos","dataos",rt.RooArgList(x),rt.RooFit.Import(hdataos))
             datass=rt.RooDataHist("datass","datass",rt.RooArgList(x),rt.RooFit.Import(hdatass))
@@ -57,14 +60,24 @@ def evaluate(args):
             Import(w,mcospdf)
             Import(w,mcsspdf)
     
-            bgos=w.factory("CMSShape::bgos(x,alphaos[50,40,80],betaos[0.1,0.01,0.25],gammaos[0.05,0.0001,0.2],peak[90])")
-            modelos=w.factory("SUM::modelos(fsigos[0.9,0.1,1]*mcospdf,bgos)")
+            #bgos=w.factory("CMSShape::bgos(x,alphaos[50,40,80],betaos[0.1,0.01,0.25],gammaos[0.05,0.0001,0.2],peak[90])")
+            bgos=w.factory("Exponential::bgos(x,alphaos[-0.02,-1,0.5])")
+            modelos=w.factory("SUM::modelos(fsigos[0.95,0.8,1]*mcospdf,bgos)")
 
-            bgss=w.factory("CMSShape::bgss(x,alphass[50,40,80],betass[0.1,0.01,0.25],gammass[0.05,0.0001,0.2],peak[90])")
-            modelss=w.factory("SUM::modelss(fsigss[0.9,0.1,1]*mcsspdf,bgss)")
+            #bgss=w.factory("CMSShape::bgss(x,alphass[50,40,80],betass[0.1,0.01,0.25],gammass[0.05,0.0001,0.2],peak[90])")
+            bgss=w.factory("Exponential::bgss(x,alphass[-0.02,-1,0.5])")
+            modelss=w.factory("SUM::modelss(fsigss[0.95,0.8,1]*mcsspdf,bgss)")
 
             cos=rt.TCanvas("cos")
-            modelos.fitTo(dataos,rt.RooFit.Range("fit_range"))
+            for i in range(5):
+                result=modelos.fitTo(dataos,rt.RooFit.Range("fit_range"),rt.RooFit.Save(True),rt.RooFit.PrintLevel(-1),rt.RooFit.Minimizer("Minuit2","minimize"),rt.RooFit.Strategy(2),rt.RooFit.SumW2Error(True))
+                print "ie",ie,"modelos status",result.status()
+                if result.status()==0:
+                    break
+                else:
+                    for p in result.floatParsFinal():
+                        w.var(p.GetName()).randomize()
+
             plotos=x.frame(rt.RooFit.Title("os "+binstring))
             dataos.plotOn(plotos)
             modelos.plotOn(plotos)
@@ -73,7 +86,15 @@ def evaluate(args):
             cos.SaveAs("fig/CFRate/pt{}to{}_eta{}to{}_OS".format(ptbins[ip],ptbins[ip+1],etabins[ie],etabins[ie+1]).replace(".","p")+".png")
 
             css=rt.TCanvas("css")
-            modelss.fitTo(datass,rt.RooFit.Range("fit_range"))
+            for i in range(5):
+                result=modelss.fitTo(datass,rt.RooFit.Range("fit_range"),rt.RooFit.Save(True),rt.RooFit.PrintLevel(-1),rt.RooFit.Minimizer("Minuit2","minimize"),rt.RooFit.Strategy(2),rt.RooFit.SumW2Error(True))
+                print "ie",ie,"modelss status",result.status()
+                if result.status()==0:
+                    break
+                else:
+                    for p in result.floatParsFinal():
+                        w.var(p.GetName()).randomize()
+
             plotss=x.frame(rt.RooFit.Title("ss "+binstring)).Clone()
             datass.plotOn(plotss)
             modelss.plotOn(plotss)
@@ -119,9 +140,9 @@ def evaluate(args):
             
             
             hdatamean=hdatass.Clone()
-            hdatamean.GetXaxis().SetRangeUser(82,100)
+            hdatamean.GetXaxis().SetRangeUser(86,96)
             hmcmean=hmcss.Clone()
-            hmcmean.GetXaxis().SetRangeUser(82,100)
+            hmcmean.GetXaxis().SetRangeUser(86,96)
             scale=hdatamean.GetMean()/hmcmean.GetMean()
             scaleerr=( (hdatamean.GetMeanError()/hdatamean.GetMean())**2 + (hmcmean.GetMeanError()/hmcmean.GetMean())**2 )**0.5*scale
 
@@ -166,7 +187,8 @@ def evaluate(args):
             cfscale.Multiply(h)            
         fold.Close()
 
-    f=rt.TFile("CFRate.root","recreate")
+    this_cffilepath="CFRate{}.root".format(args.eras)
+    f=rt.TFile(this_cffilepath,"recreate")
 
     cfdata.SetOption("colz text e")
     cfdata.Write("cfdata")
@@ -328,13 +350,19 @@ def iterate(args):
         if i==0:
             cmd=""
             for sample in args.samples_dy+args.samples_data+args.samples_bg:
-                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & sleep 3; ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
             cmd+="wait;"
             os.system(cmd)
+        # elif i==1:
+        #     cmd=""
+        #     for sample in args.samples_dy+args.samples_bg:
+        #         cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & sleep 3; ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
+        #     cmd+="wait;"
+        #     os.system(cmd)
         else:
             cmd=""
             for sample in args.samples_dy:
-                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} & ".format(sample,args.era,args.nmax)
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} & sleep 3; ".format(sample,args.era,args.nmax)
             cmd+="wait;"
             os.system(cmd)
 
@@ -347,7 +375,9 @@ def iterate(args):
                 index+=1
             newpath=cffilepath.replace(".root","_old{}.root".format(index))
             os.system("mv {} {}".format(cffilepath,newpath))
-        os.system("mv CFRate.root "+cffilepath)
+
+        this_cffilepath="CFRate{}.root".format(args.eras)
+        os.system("mv "+this_cffilepath+" "+cffilepath)
 
         if stop:
             print "[CFRate] Stop at iteration {}".format(i)

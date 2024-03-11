@@ -49,15 +49,15 @@ SMPAnalyzerCore::Parameter ZpeakAnalyzer::MakeParameter(TString key,TString opti
 }
 void ZpeakAnalyzer::EvalDefaultWeight(Parameter& p){
   p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-  if(!IsDATA){
-    if(p.channel[0]=='e'){
-      int ie=p.w.electronIDSF_sys.size()-1;
-      p.default_weight*=p.w.electronIDSF_sys[ie][0]/p.w.electronIDSF;
-    }else if(p.channel[0]=='m'){
-      int im=p.w.muonIDSF_sys.size()-1;
-      p.default_weight*=p.w.muonIDSF_sys[im][0]/p.w.muonIDSF;
-    }
-  }
+  // if(!IsDATA){
+  //   if(p.channel[0]=='e'){
+  //     int ie=p.w.electronIDSF_sys.size()-1;
+  //     p.default_weight*=p.w.electronIDSF_sys[ie][0]/p.w.electronIDSF;
+  //   }else if(p.channel[0]=='m'){
+  //     int im=p.w.muonIDSF_sys.size()-1;
+  //     p.default_weight*=p.w.muonIDSF_sys[im][0]/p.w.muonIDSF;
+  //   }
+  // }
   p.weight=p.default_weight;
 }
 
@@ -65,13 +65,14 @@ SMPAnalyzerCore::Variations ZpeakAnalyzer::MakeVariations(const Parameter& p){
   Variations v;
   AddVariationWeight(v,"",p.default_weight);
   if(!IsDATA){
+    AddVariationWeight(v,"_z0weight",p.default_weight*p.w.z0weight);
     EvalVariationsCF(p,v);
     if(p.channel[0]=='e'){
       int ie=p.w.electronIDSF_sys.size()-1;
-      AddVariationWeight(v,"_efficiency_noresidual",p.default_weight*p.w.electronIDSF/p.w.electronIDSF_sys[ie][0]);
+      AddVariationWeight(v,"_efficiency_residual",p.default_weight/p.w.electronIDSF*p.w.electronIDSF_sys[ie][0]);
     }else if(p.channel[0]=='m'){
       int im=p.w.muonIDSF_sys.size()-1;
-      AddVariationWeight(v,"_efficiency_noresidual",p.default_weight*p.w.muonIDSF/p.w.muonIDSF_sys[im][0]);
+      AddVariationWeight(v,"_efficiency_residual",p.default_weight/p.w.muonIDSF*p.w.muonIDSF_sys[im][0]);
     }
   }
   if(p.channel[0]=='e'){
@@ -104,40 +105,20 @@ void ZpeakAnalyzer::FillHists(Parameter& p){
     lm=p.lepton0; lp=p.lepton1;
   }
   FillHist(pre+"lmetalpetam2"+suf,fabs(lm->Eta()),fabs(lp->Eta()),dimass*dimass,weight,25,0,2.5,25,0,2.5,170,4500,13000);
-  TH1* h=GetHist3D(pre+"dimass"+suf);
-  int l0etabin=h->GetXaxis()->FindBin(p.lepton0->Eta());
-  int l0ptbin=h->GetYaxis()->FindBin(p.lepton0->Pt());
-  int l1etabin=h->GetXaxis()->FindBin(p.lepton1->Eta());
-  int l1ptbin=h->GetYaxis()->FindBin(p.lepton1->Pt());
-  if((l0ptbin-l1ptbin+l0etabin-l1etabin)%2==0){
-    FillHist(pre+"dimass_even"+suf,p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-    FillHist(pre+"dimass_even"+suf,p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-  }else{
-    FillHist(pre+"dimass_odd"+suf,p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-    FillHist(pre+"dimass_odd"+suf,p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-  }
   if(!IsDATA){
     if(p.lepton0->Charge()*p.truth_lepton0.Charge()<0){
       FillHist(pre+"dimass_cf"+suf,p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-      if((l0ptbin-l1ptbin+l0etabin-l1etabin)%2==0)
-	FillHist(pre+"dimass_cf_even"+suf,p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-      else
-	FillHist(pre+"dimass_cf_odd"+suf,p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
     }
     if(p.lepton1->Charge()*p.truth_lepton1.Charge()<0){
       FillHist(pre+"dimass_cf"+suf,p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-      if((l0ptbin-l1ptbin+l0etabin-l1etabin)%2==0)
-	FillHist(pre+"dimass_cf_even"+suf,p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-      else
-	FillHist(pre+"dimass_cf_odd"+suf,p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
     }
   }
   FillHist(pre+"ym"+suf,fabs(dilepton.Rapidity()),dimass,weight,rochester_nybin,rochester_ybins,rochester_nmbin,rochester_mbins);
-  if(p.vsuffix=="_roccor_residual"){
-    double weight_efficiency_noresidual=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
-    FillHist(pre+"dimass"+suf+"_efficiency_noresidual",p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight_efficiency_noresidual,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-    FillHist(pre+"dimass"+suf+"_efficiency_noresidual",p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight_efficiency_noresidual,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
-    FillHist(pre+"ym"+suf+"_efficiency_noresidual",fabs(dilepton.Rapidity()),dimass,weight_efficiency_noresidual,rochester_nybin,rochester_ybins,rochester_nmbin,rochester_mbins);
-  }
-    
+  // if(p.vsuffix=="_roccor_residual"){
+  //   double weight_efficiency_residual=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  //   FillHist(pre+"dimass"+suf+"_efficiency_residual",p.lepton0->Eta(),p.lepton0->Pt(),dimass,weight_efficiency_noresidual,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
+  //   FillHist(pre+"dimass"+suf+"_efficiency_residual",p.lepton1->Eta(),p.lepton1->Pt(),dimass,weight_efficiency_noresidual,netabin,etabins,nptbin,ptbins,nmassbin,massbins);
+  //   FillHist(pre+"ym"+suf+"_efficiency_residual",fabs(dilepton.Rapidity()),dimass,weight_efficiency_noresidual,rochester_nybin,rochester_ybins,rochester_nmbin,rochester_mbins);
+  // }
+   
 }
