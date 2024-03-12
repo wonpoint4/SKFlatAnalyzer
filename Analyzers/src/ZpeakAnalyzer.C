@@ -19,14 +19,14 @@ void ZpeakAnalyzer::executeEvent(){
     //   executeEventWithParameter(MakeParameter("mm","medium_nohip"));
     //   executeEventWithParameter(MakeParameter("mm","tight"));
     // }
-    //executeEventWithParameter(MakeParameter("MM"));
+    executeEventWithParameter(MakeParameter("MM","fake"));
   }
   if(!IsDATA||DataStream.Contains("SingleMuon")){
     executeEventWithParameter(MakeParameter("mu"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
-    //executeEventWithParameter(MakeParameter("EE"));
+    executeEventWithParameter(MakeParameter("EE","fake"));
   }
   if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("el"));

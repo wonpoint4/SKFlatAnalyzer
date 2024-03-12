@@ -623,6 +623,7 @@ void SMPAnalyzerCore::FillHist(TString histname,
 
 }
 void SMPAnalyzerCore::FillHistsSyst(Parameter p,Variations& v){
+  p.SetLeptons();
   for(auto& [vsuf,variation]:v){
     Apply(p,vsuf,variation);
     if(PassSelection(p,vsuf=="")){
@@ -1172,6 +1173,7 @@ void SMPAnalyzerCore::SetupFakeRate(){
   }
 }
 double SMPAnalyzerCore::GetFakeTF(Parameter& p,TString option,int sys){
+  if(!p.lepton0||!p.lepton1) return 0.;
   TH2* fFakeTF_l0=NULL;
   TH2* fFakeTF_l1=NULL;
   TString key="";
@@ -2166,6 +2168,11 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     }else if(GetEraShort()=="2018"){
       p.triggers={"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
     }
+    if(p.option.Contains("fake")){
+      if(!p.hprefix.Contains("fake_")) p.hprefix="fake_"+p.hprefix;
+      p.prefix.ReplaceAll("MM201","mm201");
+      p.w.lumiweight*=GetFakeTF(p);
+    }
   }else if(p.channel=="eE"||p.channel=="Ee"){
     p.k.electronIDSF="Electron_MediumID";
     p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID",8.0,2.5),p.electronenergy_set,p.electronenergy_mem));
@@ -2205,6 +2212,11 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     else if(GetEraShort()=="2016b") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
     else if(GetEraShort()=="2017") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
     else if(GetEraShort()=="2018") p.triggers={"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
+    if(p.option.Contains("fake")){
+      if(!p.hprefix.Contains("fake_")) p.hprefix="fake_"+p.hprefix;
+      p.prefix.ReplaceAll("EE201","ee201");
+      p.w.lumiweight*=GetFakeTF(p);
+    }
   }else if(p.channel=="mn"){
     p.SetMuonKeys("Muon_MediumID_trkIsoLoose","",{"IsoMu24_MediumID_trkIsoLoose"});
     p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",8.0,2.4),p.muonmomentum_set,p.muonmomentum_mem));

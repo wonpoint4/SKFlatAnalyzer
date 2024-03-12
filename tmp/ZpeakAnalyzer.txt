@@ -1,5 +1,5 @@
-SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 100 -e 2016a
-SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 100 -e 2016a
+SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 40 -e 2016a
+SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 40 -e 2016a
 SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 10 -e 2016a
 SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 20 -e 2016a
 SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 20 -e 2016a
