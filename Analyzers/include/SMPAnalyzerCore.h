@@ -130,6 +130,7 @@ public:
       Weight triggerSF,triggerSF_up,triggerSF_down,triggerSF_mode1,triggerSF_interpolation;
       vector<vector<Weight>> triggerSF_sys;
       Weight CFSF,CFSF_up,CFSF_down;
+      Weight fakeTF,fakeTF_up,fakeTF_down;
       Weight btagSF,btagSF_hup,btagSF_hdown,btagSF_lup,btagSF_ldown,btagSF_hcorr,btagSF_huncorr,btagSF_lcorr,btagSF_luncorr;
       Weight bchargeSF,bchargeSF_s0m0,bchargeSF_s0m1;
     };
@@ -156,6 +157,7 @@ public:
     void SetMuonKeys(TString muID,TString muISO,vector<TString> trig);
     void SetLeptonPtCut(double l0pt,double l1pt);
     void SetLeptons();
+    void SetBjets();
     void SetGens(vector<Gen> gs);
     void SetElectrons(vector<Electron> els);
     void SetMuons(vector<Muon> mus);
@@ -175,6 +177,7 @@ public:
   virtual void EvalVariationsPUweight(const Parameter& p,Variations& variations);
   virtual void EvalVariationsPrefireweight(const Parameter& p,Variations& variations);
   virtual void EvalVariationsCF(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsFake(const Parameter& p,Variations& variations);
   virtual void EvalVariationsBtag(const Parameter& p,Variations& variations);
   virtual void EvalVariationsBcharge(const Parameter& p,Variations& v);
   virtual void EvalVariationsEtc(const Parameter& p,Variations& variations);
@@ -314,6 +317,7 @@ public:
   void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
   void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
+  bool PassID(const Lepton* lep,TString id);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);

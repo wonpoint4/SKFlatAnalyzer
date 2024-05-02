@@ -344,7 +344,8 @@ void AFBAnalyzer::ResetRecoWeights(Parameter& p){
   p.w.muonISOSF=1.;
   p.w.muonISOSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonISOSF));
   p.w.triggerSF=1.;
-  p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
+  if(p.k.triggerSF.size())
+    p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
   p.w.CFSF=1.; p.w.CFSF_up=1.; p.w.CFSF_down=1.;
   p.w.btagSF=1.; p.w.btagSF_hup=1.; p.w.btagSF_hdown=1.; p.w.btagSF_lup=1.; p.w.btagSF_ldown=1.;
   p.w.bchargeSF=1.; p.w.bchargeSF_s0m0=1.; p.w.bchargeSF_s0m1=1.;

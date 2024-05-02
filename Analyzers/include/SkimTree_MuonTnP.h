@@ -43,6 +43,7 @@ public:
   float probe_eta;
   float probe_phi;
   int probe_q;
+  float probe_rtkiso;
 
   bool tag_IsoMu24;
   bool tag_IsoMu27;
@@ -58,6 +59,7 @@ public:
   float tag_eta;
   float tag_phi;
   float tag_q;
+  float tag_rtkiso;
 
   float pair_mass;
   float pair_mass_cor;

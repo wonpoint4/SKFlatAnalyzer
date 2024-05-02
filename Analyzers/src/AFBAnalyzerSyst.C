@@ -23,9 +23,11 @@ void AFBAnalyzerSyst::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA||DataStream.Contains("DoubleMuon")){
     executeEventWithParameter(MakeParameter("mm"));
+    executeEventWithParameter(MakeParameter("MM","fake"));
   }
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")){
     executeEventWithParameter(MakeParameter("ee"));
+    executeEventWithParameter(MakeParameter("EE","fake"));
   }
 }
 SMPAnalyzerCore::Parameter AFBAnalyzerSyst::MakeParameter(TString key,TString option){
@@ -132,6 +134,7 @@ AFBAnalyzerSyst::Variations AFBAnalyzerSyst::MakeVariations(const Parameter& p){
   return v;
 }
 void AFBAnalyzerSyst::FillHistsSyst(Parameter p,Variations& vs){
+  p.SetLeptons();
   Parameter pgen=p.Clone();
   ResetRecoWeights(pgen);
   Variations genvariations=MakeVariations(pgen);

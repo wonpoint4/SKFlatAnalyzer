@@ -48,7 +48,7 @@ SMPAnalyzerCore::Parameter ZpeakAnalyzer::MakeParameter(TString key,TString opti
   return p;
 }
 void ZpeakAnalyzer::EvalDefaultWeight(Parameter& p){
-  p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.bchargeSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.fakeTF;
   // if(!IsDATA){
   //   if(p.channel[0]=='e'){
   //     int ie=p.w.electronIDSF_sys.size()-1;

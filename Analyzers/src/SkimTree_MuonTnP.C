@@ -45,6 +45,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("probe_eta",&probe_eta);
   newtree->Branch("probe_phi",&probe_phi);
   newtree->Branch("probe_q",&probe_q);
+  newtree->Branch("probe_rtkiso",&probe_rtkiso);
 
   newtree->Branch("tag_IsoMu24",&tag_IsoMu24);
   newtree->Branch("tag_IsoMu27",&tag_IsoMu27);
@@ -60,6 +61,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("tag_eta",&tag_eta);
   newtree->Branch("tag_phi",&tag_phi);
   newtree->Branch("tag_q",&tag_q);
+  newtree->Branch("tag_rtkiso",&tag_rtkiso);
   
   newtree->Branch("pair_mass",&pair_mass);
   newtree->Branch("pair_mass_cor",&pair_mass_cor);
@@ -157,6 +159,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       probe_eta=probe.Eta();
       probe_phi=probe.Phi();
       probe_q=probe.Charge();
+      probe_rtkiso=probe.TrkIso()/probe.Pt();
       
       tag_IsoMu24=PassSLT1(&tag);
       tag_IsoMu27=PassSLT2(&tag);
@@ -172,6 +175,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       tag_eta=tag.Eta();
       tag_phi=tag.Phi();
       tag_q=tag.Charge();
+      tag_rtkiso=tag.TrkIso()/tag.Pt();
 	
       TLorentzVector pair_cor=tag+probe;
       TLorentzVector pair=tag.MiniAODPt()/tag.Pt()*tag+probe.MiniAODPt()/probe.Pt()*probe;

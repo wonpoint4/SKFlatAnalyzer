@@ -108,6 +108,7 @@ void BBAnalyzer::FillHists(Parameter& p){
 	int correct=p.bjets.at(i).userFloat["AFBCharge"]*p.bjets.at(i).GenHFHadronMatcherOrigin()<0;
 	TString scharge=p.bjets.at(i).GenHFHadronMatcherOrigin()<0 ? "p" : "m";
 	FillHist(pre+Form("b%d%scorrect",i,scharge.Data())+suf,correct,weight,2,0,2);
+	FillHist(pre+Form("b%d%scharge",i,scharge.Data())+suf,p.bjets.at(i).userFloat["AFBCharge"],weight,100,-5,5);
 	if(p.vsuffix=""){
 	  if(fabs(p.bjets.at(i).userFloat["AFBCharge"])<1){
 	    FillHist(pre+Form("b%d%scorrect_type0",i,scharge.Data())+suf,correct,weight,2,0,2);

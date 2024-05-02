@@ -12,8 +12,8 @@ public:
   virtual void initializeAnalyzer();
   virtual void executeEvent();
   virtual void executeEventGen();
+  using SMPAnalyzerCore::executeEventWithParameter;
   virtual void executeEventWithParameter(Parameter& p);
-  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   static int GetUnfoldBin(int nbin,const double* bins,double mass,double cost);
   virtual Parameter MakeParameter(TString key,TString option="");
   virtual bool PassSelection(Parameter& p,bool cutflow=false);

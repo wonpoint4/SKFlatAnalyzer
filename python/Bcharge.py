@@ -62,27 +62,29 @@ def GetTrueAccuracyByType(channel,type,option=""):
     return (am,ap),(em,ep)
     
 def DrawAccuracy(channels):
+    channels.reverse()
     c=ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)
 
     gdata=ROOT.TGraphErrors()
     gsim=ROOT.TGraphErrors()
     gtrue=ROOT.TGraphErrors()
+    gdata=[ROOT.TGraphErrors(),ROOT.TGraphErrors()]
+    gsim=[ROOT.TGraphErrors(),ROOT.TGraphErrors()]
+    gtrue=[ROOT.TGraphErrors(),ROOT.TGraphErrors()]
     for i in range(len(channels)):
         channel=channels[i]
         g=gdata
         value,cov=GetAccuracy(0,channel)
-        g.SetPoint(2*i,value[0],2*i+0.5)
-        g.SetPointError(2*i,cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1,value[1],2*i+1+0.5)
-        g.SetPointError(2*i+1,cov[1][1]**0.5,0)
+        for j in range(2):
+            g[j].SetPoint(i,value[j],2*i+j+0.5)
+            g[j].SetPointError(i,cov[j][j]**0.5,0)
     
         g=gsim
         value,cov=GetAccuracy(1,channel)
-        g.SetPoint(2*i,value[0],2*i+0.5+0.1)
-        g.SetPointError(2*i,cov[0][0]**0.5,0)
-        g.SetPoint(2*i+1,value[1],2*i+1+0.5+0.1)
-        g.SetPointError(2*i+1,cov[1][1]**0.5,0)
+        for j in range(2):
+            g[j].SetPoint(i,value[j],2*i+j+0.4)
+            g[j].SetPointError(i,cov[j][j]**0.5,0)
 
         # value,cov=GetAccuracy(1,channel,"suffix:_FSR_up:ttll")
         # g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.12)
@@ -98,10 +100,9 @@ def DrawAccuracy(channels):
     
         g=gtrue
         value,error=GetTrueAccuracy(channel)
-        g.SetPoint(2*i,value[0],2*i+0.5+0.2)
-        g.SetPointError(2*i,error[0],0)
-        g.SetPoint(2*i+1,value[1],2*i+1+0.5+0.2)
-        g.SetPointError(2*i+1,error[1],0)
+        for j in range(2):
+            g[j].SetPoint(i,value[j],2*i+j+0.3)
+            g[j].SetPointError(i,cov[j][j]**0.5,0)
 
         # value,error=GetTrueAccuracy(channel,"suffix:_FSR_up:ttll")
         # g.SetPoint(2*i+2*len(channel),value[0],2*i+0.5+0.22)
@@ -128,29 +129,47 @@ def DrawAccuracy(channels):
     hframe.GetYaxis().SetLabelSize(hframe.GetYaxis().GetLabelSize()*1.5)
 
     leg=ROOT.TLegend(c.GetLeftMargin()+0.01,0.79,0.99-c.GetRightMargin(),0.89)
-    leg.AddEntry(gdata,"data")
-    leg.AddEntry(gsim,"simulation")
-    leg.AddEntry(gtrue,"simulation (gen info)")
+    leg.AddEntry(gdata[0],"data")
+    leg.AddEntry(gsim[0],"simulation")
+    leg.AddEntry(gtrue[0],"simulation (gen info)")
     leg.SetBorderSize(0)
     leg.Draw()
 
-    gdata.SetMarkerStyle(20)
-    gdata.SetMarkerSize(0.6)
-    gdata.SetMarkerColor(1)
-    gdata.SetLineColor(1)
-    gdata.Draw("same p")
+    gdata[0].SetMarkerStyle(20)
+    gdata[0].SetMarkerSize(0.8)
+    gdata[0].SetMarkerColor(1)
+    gdata[0].SetLineColor(1)
+    gdata[0].Draw("same p")
+
+    gdata[1].SetMarkerStyle(24)
+    gdata[1].SetMarkerSize(0.8)
+    gdata[1].SetMarkerColor(1)
+    gdata[1].SetLineColor(1)
+    gdata[1].Draw("same p")
     
-    gsim.SetMarkerStyle(20)
-    gsim.SetMarkerSize(0.6)
-    gsim.SetMarkerColor(2)
-    gsim.SetLineColor(2)
-    gsim.Draw("same p")
+    gsim[0].SetMarkerStyle(20)
+    gsim[0].SetMarkerSize(0.6)
+    gsim[0].SetMarkerColor(2)
+    gsim[0].SetLineColor(2)
+    gsim[0].Draw("same p")
+
+    gsim[1].SetMarkerStyle(24)
+    gsim[1].SetMarkerSize(0.6)
+    gsim[1].SetMarkerColor(2)
+    gsim[1].SetLineColor(2)
+    gsim[1].Draw("same p")
     
-    gtrue.SetMarkerStyle(20)
-    gtrue.SetMarkerSize(0.6)
-    gtrue.SetMarkerColor(4)
-    gtrue.SetLineColor(4)
-    gtrue.Draw("same p")
+    gtrue[0].SetMarkerStyle(20)
+    gtrue[0].SetMarkerSize(0.6)
+    gtrue[0].SetMarkerColor(4)
+    gtrue[0].SetLineColor(4)
+    gtrue[0].Draw("same p")
+
+    gtrue[1].SetMarkerStyle(24)
+    gtrue[1].SetMarkerSize(0.6)
+    gtrue[1].SetMarkerColor(4)
+    gtrue[1].SetLineColor(4)
+    gtrue[1].Draw("same p")
 
     #raw_input()
     c.hists=[gdata,gsim,gtrue,hframe,leg]
@@ -191,9 +210,10 @@ def DrawAccuracyByType(channels,types):
 if __name__=="__main__":
     #value,cov=GetAccuracy(0,"me201[678][ab]?")
     #value,cov=GetAccuracy(1,"me201[678][ab]?")
-    #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
+    DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
+    #DrawAccuracy(["ee201[678][ab]?","mm201[678][ab]?","me201[678][ab]?"])
     #DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
     #DrawAccuracy([channel+era for channel in ["[me]n","[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
     
-    DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
+    #DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
     #DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])
