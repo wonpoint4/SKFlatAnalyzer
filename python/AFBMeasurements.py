@@ -3,9 +3,9 @@ import numpy as np
 import ROOT
 ROOT.TH1.AddDirectory(0)
 ROOT.TH1.SetDefaultSumw2(1)
-ROOT.gROOT.ProcessLine('#include"AFBPlotter.cc"')
+ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
 
-_plotter=ROOT.AFBPlotter("mi ttll")
+_plotter=ROOT.AFBSystPlotter("mi ttll")
 SystematicSuffixes=dict(_plotter.GetSystematicSuffixes("totalsys")).keys()
 Systematics=dict(_plotter.systematics)
 
@@ -56,6 +56,7 @@ class AFBMeasurement:
 class AFBMeasurements:
     def __init__(self,filename,histname):
         self.default_syst="totalsys"
+        #self.default_syst="z0weight"
         self.histname=histname
         f=ROOT.TFile(filename)
         h=f.Get(histname)
@@ -71,6 +72,11 @@ class AFBMeasurements:
             for i in range(ncells):
                 for j in range(ncells):
                     self.cov_stat[i][j]=hcov.GetBinContent(i,j)
+        else:
+            self.cov_stat=np.zeros((ncells,ncells))
+            for i in range(ncells):
+                self.cov_stat[i][i]=h.GetBinError(i)**2
+            
         for suffix in SystematicSuffixes:
             h=f.Get(histname+suffix)
             if not h:
@@ -79,6 +85,9 @@ class AFBMeasurements:
                 self.measurements[i].SetSystError(suffix,h.GetBinContent(i),isValue=True)
         self.syst={}
         return
+
+    def __len__(self):
+        return len(self.measurements)
 
     def __str__(self,syst=[]):
         if len(syst)==0:
@@ -316,58 +325,41 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
     for region in ["0bjet","nbjet"]:
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             print region,histname
-            ms=[]
+            mdatas=[]
+            msims=[]
             for channel in ["ee","mm"]:
-                for era in ["2016a","2016b","2017","2018"]:
-                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
-            m=reduce(lambda x,y:x%y,ms)
+                #for era in ["2016a","2016b","2017","2018"]:
+                for era in ["Run2"]:
+                    mdatas+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+                    msims+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname.replace("unfoldedafb_","gen_"))]
+            mdata=reduce(lambda x,y:x%y,mdatas)
+            msim=reduce(lambda x,y:x%y,msims)
             #m=ms[-1]
-            hdata=m.GetHists()
-            str_bins=[str(m.GetHists().at(0).GetBinLowEdge(i)) for i in range(1,m.GetHists().at(0).GetNbinsX()+2)]
-            str_bins="{"+",".join(str_bins)+"}"
-            
+            hdata=mdata.GetHists()
+            hsim=msim.GetHists()
 
-            sim_histname=""
-            sim_histoption="AFB "
-            plot_option="ytitle:'A_{FB}'"
             if region=="0bjet":
-                sim_index=0
-                afbtype="CS"
-                #sim_histoption+=" sysname:dytheory"
+                plot_option="ytitle:'A_{FB}^{CS}'"
                 plot_option+=" ymin:-0.09 ymax:0.49"
+                for i in range(len(hsim)):
+                    hsim[i].SetOption("hist e1")
+                    hsim[i].SetLineColor(2)
+                    hsim[i].SetName("DY POWHEG MiNNLO_{PS}+Pythia8+PHOTOS")                    
             else:
-                sim_index=1
-                afbtype="Recoil"
-                #sim_histoption+=" sysname:tttheory" 
+                plot_option="ytitle:'A_{FB}^{Recoil}'"
                 plot_option+=" ymin:0.0 ymax:1.49"
+                for i in range(len(hsim)):
+                    hsim[i].SetOption("hist e1")
+                    hsim[i].SetLineColor(6)
+                    hsim[i].SetName("t\bar{t} POWHEG+Pythia8")
+
             if "afbm" in histname:
-                sim_histname="dimass"
-                sim_histoption+=" project:x"
-                sim_histoption+=" rebinX:"+str_bins
                 plot_option+=" xtitle:m(ll) logx"
             elif "afby" in histname:
-                sim_histname="dirap"
-                sim_histoption+=" project:y"
-                sim_histoption+=" rebinY:"+str_bins
                 plot_option+=" xtitle:y(ll)"
             elif "afbpt" in histname:
-                sim_histname="dipt"
-                sim_histoption+=" project:z"
-                sim_histoption+=" rebinZ:"+str_bins
                 plot_option+=" xtitle:p_{T}(ll) logx"
-            sim_histname="[em][em]201[678][ab]?/"+region+"/genfid_"+sim_histname+afbtype+"_dressed"
-            #sim_histname="mm2018/"+region+"/genfid_"+sim_histname+afbtype+"_dressed"
-            if "_m0" in histname:
-                sim_histoption+=" Xmin:52 Xmax:77"
-            elif "_m1" in histname:
-                sim_histoption+=" Xmin:77 Xmax:106"
-            elif "_m2" in histname:
-                sim_histoption+=" Xmin:106 Xmax:280"
-            elif "_m3" in histname:
-                sim_histoption+=" Xmin:280 Xmax:3000"
-            hsim=_plotter.GetHistVariations(sim_index,sim_histname,sim_histoption)
-            for i in range(len(hsim)):
-                hsim[i].SetOption("hist e1")
+
 
             for i in range(len(hdata)):
                 h=hdata[i]
@@ -378,15 +370,15 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
                 h.SetLineColor(1)
                 h.SetMarkerColor(1)
                 for ib in range(h.GetNcells()):
-                    h.SetBinContent(ib,hsim[0].GetBinContent(ib))
-            print sim_histname,sim_histoption
+                   h.SetBinContent(ib,hsim[0].GetBinContent(ib))
+
             p=ROOT.Plot()
             p.SetOption(plot_option)
             p.hists=ROOT.vector("Hists")([hdata,hsim])
             c=ROOT.TCanvas()
             _plotter.DrawCompare(p)
             _plotter.DrawPreliminary(c,"Run2")
-            savename=histname.replace("unfoldedafb_afb","dafb_")
+            savename=histname.replace("unfoldedafb_afb","afb_")
             savename=savename.replace("y_m","y").replace("pt_m","pt")
             _plotter.SaveCanvas(c,region+"_"+savename+".png",False)
             _plotter.SaveCanvas(c,region+"_"+savename+".pdf")
@@ -397,63 +389,37 @@ def SaveDeltaPlotAll(inputpath,outputpath):
     for region in ["0bjet","nbjet"]:
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             print region,histname
-            ms=[]
+            mdatas=[]
+            msims=[]
             for channel in ["ee","mm"]:
-                mss=[]
-                for era in ["2016a","2016b","2017","2018"]:
-                    mss+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
-                ms+=[reduce(lambda x,y:x%y,mss)]
-            m=ms[1]-ms[0]
-            #m=ms[-1]
-            hdata=m.GetHists()
-            str_bins=[str(m.GetHists().at(0).GetBinLowEdge(i)) for i in range(1,m.GetHists().at(0).GetNbinsX()+2)]
-            str_bins="{"+",".join(str_bins)+"}"
-            
+                mdatass=[]
+                msimss=[]
+                #for era in ["2016a","2016b","2017","2018"]:
+                for era in ["Run2"]:
+                    mdatass+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+                    msimss+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname.replace("unfoldedafb_","gen_"))]
+                mdatas+=[reduce(lambda x,y:x%y,mdatass)]
+                msims+=[reduce(lambda x,y:x%y,msimss)]
+            mdata=mdatas[1]-mdatas[0]
+            msim=msims[1]-msims[0]
+            hdata=mdata.GetHists()
+            hsim=msim.GetHists()
 
-            sim_histname=""
-            sim_histoption="AFB "
-            plot_option="ytitle:'#Delta A_{FB}'"
             if region=="0bjet":
-                sim_index=0
-                afbtype="CS"
-                #sim_histoption+=" sysname:dytheory"
-                #plot_option+=" ymin:-0.49 ymax:0.49"
+                plot_option="ytitle:'#Delta A_{FB}^{CS}'"
+                for i in range(len(hsim)):
+                    hsim[i].SetOption("hist e1")
             else:
-                sim_index=1
-                afbtype="Recoil"
-                #sim_histoption+=" sysname:tttheory" 
-                #plot_option+=" ymin:-0.49 ymax:0.49"
+                plot_option="ytitle:'#Delta A_{FB}^{Recoil}'"
+                for i in range(len(hsim)):
+                    hsim[i].SetOption("hist e1")
+
             if "afbm" in histname:
-                sim_histname="dimass"
-                sim_histoption+=" project:x"
-                sim_histoption+=" rebinX:"+str_bins
                 plot_option+=" xtitle:m(ll) logx"
             elif "afby" in histname:
-                sim_histname="dirap"
-                sim_histoption+=" project:y"
-                sim_histoption+=" rebinY:"+str_bins
                 plot_option+=" xtitle:y(ll)"
             elif "afbpt" in histname:
-                sim_histname="dipt"
-                sim_histoption+=" project:z"
-                sim_histoption+=" rebinZ:"+str_bins
                 plot_option+=" xtitle:p_{T}(ll) logx"
-            #sim_histname="mm2018/"+region+"/genfid_"+sim_histname+afbtype+"_dressed"
-            if "_m0" in histname:
-                sim_histoption+=" Xmin:52 Xmax:77"
-            elif "_m1" in histname:
-                sim_histoption+=" Xmin:77 Xmax:106"
-            elif "_m2" in histname:
-                sim_histoption+=" Xmin:106 Xmax:280"
-            elif "_m3" in histname:
-                sim_histoption+=" Xmin:280 Xmax:3000"
-            hsim_ee=_plotter.GetHist(sim_index,"ee201[678][ab]?/"+region+"/genfid_"+sim_histname+afbtype+"_dressed",sim_histoption)
-            hsim_mm=_plotter.GetHist(sim_index,"mm201[678][ab]?/"+region+"/genfid_"+sim_histname+afbtype+"_dressed",sim_histoption)
-            hsim_mm.Add(hsim_ee,-1.)
-            hsim=ROOT.Hists()
-            hsim.push_back(hsim_mm)
-            for i in range(len(hsim)):
-                hsim[i].SetOption("hist e1")
 
             for i in range(len(hdata)):
                 h=hdata[i]
@@ -464,9 +430,8 @@ def SaveDeltaPlotAll(inputpath,outputpath):
                 h.SetLineColor(1)
                 h.SetMarkerColor(1)
                 for ib in range(h.GetNcells()):
-                    #h.SetBinContent(ib,hsim[0].GetBinContent(ib))
                     h.SetBinContent(ib,0.)
-            print sim_histname,sim_histoption
+
             p=ROOT.Plot()
             p.SetOption(plot_option)
             #p.hists=ROOT.vector("Hists")([hdata,hsim])
@@ -474,7 +439,7 @@ def SaveDeltaPlotAll(inputpath,outputpath):
             c=ROOT.TCanvas()
             _plotter.DrawSig(p)
             _plotter.DrawPreliminary(c,"Run2")
-            savename=histname.replace("unfoldedafb_afb","deltaafb_")
+            savename=histname.replace("unfoldedafb_afb","dafb_")
             savename=savename.replace("y_m","y").replace("pt_m","pt")
             _plotter.SaveCanvas(c,region+"_"+savename+".png",False)
             _plotter.SaveCanvas(c,region+"_"+savename+".pdf")
@@ -500,9 +465,79 @@ def SaveTableCovAll(inputpath,outputpath):
             m=reduce(lambda x,y:x%y,ms)
             m.SaveCov(outputpath+"/"+region+"/"+histname+"_cov.tex")
 
+def SaveCombineScheme(inputpath,outputpath):
+    region="nbjet"
+    gss=[]
+    for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
+    #for histname in ["unfoldedafb_afbm"]:
+        ms=[]
+        for channel in ["ee","mm"]:
+            for era in ["2016a","2016b","2017","2018"]:
+                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+        m0=reduce(lambda x,y:x%y,ms)
+
+        ms=[]
+        for channel in ["ee","mm"]:
+            for era in ["Run2"]:
+                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+        m1=reduce(lambda x,y:x%y,ms)
+
+        ms=[]
+        for channel in ["ll"]:
+            for era in ["2016a","2016b","2017","2018"]:
+                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+        m2=reduce(lambda x,y:x%y,ms)
+    
+        m3=AFBMeasurements(inputpath,"llRun2/"+region+"/"+histname)
+
+        gs=[ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors()]
+        gs[0].SetLineColor(2)
+        gs[1].SetLineColor(1)
+        gs[2].SetLineColor(4)
+        gs[3].SetLineColor(6)
+        gs[4+0].SetLineColor(2)
+        gs[4+1].SetLineColor(1)
+        gs[4+2].SetLineColor(4)
+        gs[4+3].SetLineColor(6)
+        for i in range(1,len(m0)-1):
+            vals=np.array([m0.GetValue(i),m1.GetValue(i),m2.GetValue(i),m3.GetValue(i)])
+            errs=np.array([m0.GetTotalError(i),m1.GetTotalError(i),m2.GetTotalError(i),m3.GetTotalError(i)])
+            errs_stat=np.array([m0.GetStatError(i),m1.GetStatError(i),m2.GetStatError(i),m3.GetStatError(i)])
+            if errs[1]==0: continue
+            vals,errs,errs_stat=(vals-vals[1])/errs[1],errs/errs[1],errs_stat/errs[1]
+            for j in range(4):
+                gs[j].SetPoint(i-1,i-0.35+0.1*j,vals[j])
+                gs[j].SetPointError(i-1,0,errs[j])
+                gs[4+j].SetPoint(i-1,i-0.35+0.1*j,vals[j])
+                gs[4+j].SetPointError(i-1,0,errs_stat[j])
+        gss+=[gs]
+    c=ROOT.TCanvas()
+    c.hists=[]
+    c.Divide(1,9)
+    for i in range(len(gss)):
+        c.cd(i+1)
+        ROOT.gPad.SetTopMargin(0)
+        ROOT.gPad.SetBottomMargin(0)
+        n=gss[i][0].GetN()
+        sigma=ROOT.TH1D("sigma","sigma",n,0,n)
+        for ib in range(sigma.GetNcells()):
+            sigma.SetBinError(ib,1)
+        sigma.SetFillStyle(3001)
+        sigma.SetFillColor(ROOT.kGreen)
+        sigma.GetYaxis().SetTickLength(0)
+        sigma.GetYaxis().SetRangeUser(-1.99,1.99)
+        sigma.Draw("e2")
+        sigma.SetStats(0)
+        sigma.SetDirectory(0)
+        c.hists+=[sigma]
+        for g in gss[i]:
+            g.Draw("p same")
+    raw_input()
+
 if __name__=="__main__":
     #SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
     #SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
+    SaveCombineScheme("AFBResult/final.root","fig/AFBMeasurements")
     pass
 
     # hists=ROOT.vector("Hists")()

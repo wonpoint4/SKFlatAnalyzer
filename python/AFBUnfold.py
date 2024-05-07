@@ -9,6 +9,7 @@ ROOT.TH1.SetDefaultSumw2(1)
 ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
 SystematicSuffixes=dict(ROOT.AFBSystPlotter("").GetSystematicSuffixes("totalsys"))
 DEBUG=0
+grid_mbin=ROOT.AFBAnalyzer.grid_mbin
 
 class Config(object):
     def __init__(self,histname,suffix="",data=None,sim=None):
@@ -54,9 +55,9 @@ class Config(object):
 
         if data==None:
             if self.region=="0bjet":
-                data="data-tau_mi-vv-wjets-tt-st-qcdss-aa"
+                data="data-tau_mi-vv-wjets-tt-st-qcd-aa"
             elif self.region=="nbjet":
-                data="data-mi-tau_mi-vv-wjets-ttlj-st-qcdss-aa"
+                data="data-mi-tau_mi-vv-wjets-ttlj-st-qcd-aa"
             else:
                 print "[Config::Init] Unknown region"
                 exit(1)
@@ -268,36 +269,65 @@ def Unfold(matrix_orig,hist_orig,savecov=False):
         raw_input()
     return unfolded
 
-def GetUnfoldedHist(config):
+def GetInputHist(config):
     histname=config.histname
     str_project=" project:x "
+    if "dirap" in histname: str_project+=" absx "
     str_rebin= " rebin:{"+",".join(map(str,config.bins_reco))+"} "
-    print histname, config.option, str_project,str_rebin
+    print "[GetInputHist]",histname, config.option, str_project,str_rebin
     forward=config.plotter.GetHist(0,histname,config.option+" Ymin:0 Ymax:1 "+str_project+str_rebin)
     backward=config.plotter.GetHist(0,histname,config.option+" Ymin:-1 Ymax:0 "+str_project+str_rebin)
-    hist_input=ROOT.TH1D(forward.GetName(),forward.GetTitle(),2*config.nbin_reco,1,2*config.nbin_reco+1)
+    input_hist=ROOT.TH1D(forward.GetName(),forward.GetTitle(),2*config.nbin_reco,1,2*config.nbin_reco+1)
     for i in range(1,forward.GetNbinsX()+1):
         ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.nbin_reco,config.bins_reco,forward.GetBinCenter(i),0.5)
-        hist_input.SetBinContent(ibin,forward.GetBinContent(i)+hist_input.GetBinContent(ibin))
-        hist_input.SetBinError(ibin,(forward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
+        input_hist.SetBinContent(ibin,forward.GetBinContent(i)+input_hist.GetBinContent(ibin))
+        input_hist.SetBinError(ibin,(forward.GetBinError(i)**2+input_hist.GetBinError(ibin)**2)**0.5)
         ibin=ROOT.AFBAnalyzer.GetUnfoldBin(config.nbin_reco,config.bins_reco,backward.GetBinCenter(i),-0.5)
-        hist_input.SetBinContent(ibin,backward.GetBinContent(i)+hist_input.GetBinContent(ibin))
-        hist_input.SetBinError(ibin,(backward.GetBinError(i)**2+hist_input.GetBinError(ibin)**2)**0.5)
-        
+        input_hist.SetBinContent(ibin,backward.GetBinContent(i)+input_hist.GetBinContent(ibin))
+        input_hist.SetBinError(ibin,(backward.GetBinError(i)**2+input_hist.GetBinError(ibin)**2)**0.5)
+    config.input_hist=input_hist
+    return input_hist
+
+def GetMatrix(config):
     matrixname=config.matrixname
     print matrixname, config.option+" noproject"
     matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
     matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
-    hist_unfolded=Unfold(matrix,hist_input,config.suffix=="")
-    hist_unfolded.SetName(matrixname.replace("response","unfolded")+config.suffix)
-    hist_unfolded.SetTitle(matrixname.replace("response","unfolded")+config.suffix)
-    if hasattr(hist_unfolded,"cov"):
-        hist_unfolded.cov.SetName(hist_unfolded.GetName()+"_cov")
-        hist_unfolded.cov.SetTitle(hist_unfolded.GetTitle()+"_cov")
-    config.unfolded_hist=hist_unfolded
+    config.matrix=matrix
+    return matrix
+
+def GetUnfoldedHist(config):
+    matrix=config.matrix
+    input_hist=config.input_hist
+    histname=config.matrixname.replace("response","unfolded")
+    unfolded_hist=Unfold(matrix,input_hist,config.suffix=="")
+    unfolded_hist.SetName(histname+config.suffix)
+    unfolded_hist.SetTitle(histname+config.suffix)
+    if hasattr(unfolded_hist,"cov"):
+        unfolded_hist.cov.SetName(unfolded_hist.GetName()+"_cov")
+        unfolded_hist.cov.SetTitle(unfolded_hist.GetTitle()+"_cov")
+    config.unfolded_hist=unfolded_hist
     config.plotter.pdir=ROOT.TDirectory("plotdir","plotdir")
     config.hists+=[config.unfolded_hist]
     return config.unfolded_hist
+
+def GetGenAFBHist(config):
+    matrixX=config.matrix.ProjectionX()
+    histname=config.matrixname.replace("response_","gen_")+config.suffix
+    gen_afb_hist=ROOT.TH1D(histname,histname,len(config.bins_gen)-1,config.bins_gen)
+    n=gen_afb_hist.GetNbinsX()
+    for i in range(1,n+1):
+        nf=matrixX.GetBinContent(i+n)
+        nb=matrixX.GetBinContent(i)
+        gen_afb_hist.SetBinContent(i,(nf-nb)/(nf+nb))
+        ef2=matrixX.GetBinError(i+n)**2
+        eb2=matrixX.GetBinError(i)**2
+        efeb=0.
+        gen_afb_hist.SetBinError(i,2./(nf+nb)**2*(ef2*nb**2+eb2*nf**2-2*nf*nb*efeb)**0.5)
+                
+    config.gen_afb_hist=gen_afb_hist
+    config.hists+=[gen_afb_hist]
+    return gen_afb_hist
 
 def Fluctuate(hist,name=""):
     rt=hist.Clone(name)
@@ -360,7 +390,7 @@ def GetHist4D(config):
 
 def WriteHist(hist):
     histname=hist.GetName()
-    dirname=os.path.dirname(histname)
+    dirname=os.path.dirname(histname).replace("201[678][ab]?","Run2")
     basename=os.path.basename(histname)
     if not ROOT.gFile.Get(dirname):
         ROOT.gFile.mkdir(dirname)
@@ -374,6 +404,7 @@ def WriteHists(config,outfilename):
     for h in config.hists:
         print h.GetName()
         WriteHist(h)
+    f.Close()
 
 def Run(suffix):
     if suffix=="nominal": suffix=""
@@ -382,8 +413,9 @@ def Run(suffix):
         os.remove(outfilename)
 
     histnames=[]
-    for channel in ["ee","mm"]:
-        for era in ["2016a","2016b","2017","2018"]:
+    for channel in ["ee","mm","ll"]:
+        for era in ["2016a","2016b","2017","2018","201[678][ab]?"]:
+            #if channel=="ll" and era!="201[678][ab]?": continue
             for region in ["/0bjet","/nbjet"]:
                 histnames+=[channel+era+region+"/dimass"]
                 histnames+=[channel+era+region+"/dirap_m0"]
@@ -397,8 +429,11 @@ def Run(suffix):
 
     for histname in histnames:
         config=Config(histname,suffix)
+        GetInputHist(config)
+        GetMatrix(config)
         GetUnfoldedHist(config)
         GetUnfoldedAFBHist(config)
+        GetGenAFBHist(config)
         #GetHist4D(config)
         if not os.path.exists(os.path.dirname(outfilename)):
             os.makedirs(os.path.dirname(outfilename))
@@ -413,7 +448,80 @@ def Run(suffix):
     #     hist_bias_std.Fill(config.bias[key].GetStdDev())
     # WriteHist(hist_bias_mean)
     # WriteHist(hist_bias_std)
-         
+
+def AssertSame(hist1,hist2,check_error=True):
+    for i in range(1,hist1.GetNbinsX()+1):
+        val1=hist1.GetBinContent(i)
+        err1=hist1.GetBinError(i)
+        val2=hist2.GetBinContent(i)
+        err2=hist2.GetBinError(i)
+        if err1==0 or err2==0:
+            print "[Warning] bin",i,"zero error"
+            exit(1)
+        if abs((val1-val2)/val2)>1e-6:
+            print "[Warning] bin",i,"different value",val1,val2
+            exit(1)
+        if check_error:
+            if abs((err1-err2)/err2)>1e-6:
+                print "[Warning] bin",i,"different error",err1,err2
+                exit(1)
+    return
+
+def TestClosure(suffix):
+    if suffix=="nominal": suffix=""
+    outfilename=os.environ["SKFlat_WD"]+"/AFBResult/result"+suffix+".root"
+    if os.path.exists(outfilename):
+        os.remove(outfilename)
+
+    histnames=[]
+    for channel in ["ee","mm"]:
+        for era in ["2016a","2016b","2017","2018","201[678][ab]?"]:
+            for region in ["/0bjet","/nbjet"]:
+                histnames+=[channel+era+region+"/dimass"]
+                histnames+=[channel+era+region+"/dirap_m0"]
+                histnames+=[channel+era+region+"/dirap_m1"]
+                histnames+=[channel+era+region+"/dirap_m2"]
+                histnames+=[channel+era+region+"/dirap_m3"]
+                histnames+=[channel+era+region+"/dipt_m0"]
+                histnames+=[channel+era+region+"/dipt_m1"]
+                histnames+=[channel+era+region+"/dipt_m2"]
+                histnames+=[channel+era+region+"/dipt_m3"]
+
+    for histname in histnames:
+        toydata="mi" if "0bjet" in histname else "ttll"
+        config=Config(histname,suffix,data=toydata)
+        GetInputHist(config)
+        GetMatrix(config)
+        GetUnfoldedHist(config)
+        GetUnfoldedAFBHist(config)
+        GetGenAFBHist(config)
+        if not os.path.exists(os.path.dirname(outfilename)):
+            os.makedirs(os.path.dirname(outfilename))
+        WriteHists(config,outfilename)
+
+        ## input test
+        matrixY=config.matrix.ProjectionY()
+        # matrixY.SetOption("e2")
+        # matrixY.SetLineColor(2)
+        # matrixY.SetFillStyle(3002)
+        # matrixY.SetFillColor(3)
+        # matrixY.SetDirectory(0)
+        #hists=[config.input_hist,matrixY]
+        #c=config.plotter.DrawPlot(hists)
+        #raw_input()
+        AssertSame(config.input_hist,matrixY)
+
+        ## Closure test
+        # config.gen_afb_hist.SetOption("e2")
+        # config.gen_afb_hist.SetLineColor(2)
+        # config.gen_afb_hist.SetFillStyle(3002)
+        # config.gen_afb_hist.SetFillColor(3)
+        # config.gen_afb_hist.SetDirectory(0)
+        # hists=[config.unfolded_afb_hist,config.gen_afb_hist]
+        # c=config.plotter.DrawPlot(hists)
+        # raw_input()
+        AssertSame(config.unfolded_afb_hist,config.gen_afb_hist,check_error=False)
+
 def RunCondor(arg):
     os.system('condor_submit $SKFlat_WD/AFBResult/condor.jds -a arguments={} > /dev/null'.format(arg))
 
@@ -464,7 +572,8 @@ def Merge():
 def SaveResponseAll(path):
     histnames=[]
     for channel in ["ee","mm"]:
-        for era in ["2016a","2016b","2017","2018"]:
+        for era in ["2016a","2016b","2017","2018","201[678][ab]?"]:
+        #for era in ["201[678][ab]?"]:
             for region in ["/0bjet","/nbjet"]:
                 histnames+=[channel+era+region+"/dimass"]
                 histnames+=[channel+era+region+"/dirap_m0"]
@@ -493,17 +602,19 @@ def SaveResponseAll(path):
         c=ROOT.gROOT.MakeDefCanvas()
         h=ROOT.TH2D(response)
         h.SetStats(0)
-        dilepton="#mu#mu" if "mm201" in histname else "ee"
+        dilepton="#mu#mu" if "mm" in histname else "ee"
         variable="m("+dilepton+")"
         if "dirap" in histname: variable="y("+dilepton+")"
         elif "dipt" in histname: variable="p_{T}("+dilepton+")"
         h.GetYaxis().SetTitle("GEN "+variable+" bin index")
         h.GetXaxis().SetTitle("RECO "+variable+" bin index")
+        h.SetMinimum(-1e-2)
         h.Draw("colz")
         if "2016a" in histname: era="2016preVFP"
         elif "2016b" in histname: era="2016postVFP"
         elif "2017" in histname: era="2017"
         elif "2018" in histname: era="2018"
+        elif "201[678][ab]?" in histname: era="Run2"
         config.plotter.DrawPreliminary(c,era,"","nolumi")
         latex=ROOT.TLatex()
         latex.SetNDC()
@@ -514,24 +625,24 @@ def SaveResponseAll(path):
             latex.DrawLatex(0.17,0.8,"t#bar{t}")
         cut=""
         if "_m0" in histname:
-            latex.DrawLatex(0.17,0.75,"52 #leq m < 77 GeV")
+            latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[0],grid_mbin[1]))
         elif "_m1" in histname:
-            latex.DrawLatex(0.17,0.75,"77 #leq m < 106 GeV")
+            latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[1],grid_mbin[2]))
         elif "_m2" in histname:
-            latex.DrawLatex(0.17,0.75,"106 #leq m < 280 GeV")
+            latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[2],grid_mbin[3]))
         elif "_m3" in histname:
-            latex.DrawLatex(0.17,0.75,"280 #leq m < 3000 GeV")
+            latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[3],grid_mbin[4]))
             
         print histname
         #raw_input()
-        c.SaveAs(path+"/"+histname.replace("/","_")+".png")
-        c.SaveAs(path+"/"+histname.replace("/","_")+".pdf")
+        c.SaveAs(path+"/"+histname.replace("/","_").replace("201[678][ab]?","Run2")+".png")
+        c.SaveAs(path+"/"+histname.replace("/","_").replace("201[678][ab]?","Run2")+".pdf")
     
 
 if __name__=="__main__":
     # SaveResponseAll("")
     # exit()
-    #ClosureTest(Config("mm2017/nbjet/genfid_dirapRecoil_dressed"))
+    # TestClosure("nominal")
 
     if len(sys.argv)>1:
         if sys.argv[1]=="merge":
