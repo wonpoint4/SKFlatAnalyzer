@@ -525,7 +525,25 @@ def TestClosure(suffix):
 def RunCondor(arg):
     os.system('condor_submit $SKFlat_WD/AFBResult/condor.jds -a arguments={} > /dev/null'.format(arg))
 
-def PrintCondition():
+def GetConditionNumber(histname):
+    config=Config(histname)
+    matrixname=config.matrixname
+    matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
+    matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+    proj=matrix.ProjectionX("proj",1,matrix.GetNbinsY())    
+    response=ROOT.TMatrixD(1,matrix.GetNbinsX(),1,matrix.GetNbinsY())
+    for i in range(1,matrix.GetNbinsX()+1):
+        for j in range(1,matrix.GetNbinsY()+1):
+            if proj.GetBinContent(i):
+                response[i][j]=matrix.GetBinContent(i,j)/proj.GetBinContent(i)
+            else:
+                print histname,i
+                response[i][j]=0.
+    response.T()
+    svd=ROOT.TDecompSVD(response)
+    return svd.Condition()
+
+def PrintConditionNumberAll():
     histnames=[]
     for channel in ["ee","mm"]:
         for era in ["2016a","2016b","2017","2018"]:
@@ -541,23 +559,7 @@ def PrintCondition():
                 histnames+=[channel+era+region+"/dipt_m3"]
 
     for histname in histnames:
-        config=Config(histname)
-        matrixname=config.matrixname
-        matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
-        matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
-        proj=matrix.ProjectionX("proj",1,matrix.GetNbinsY())    
-        response=ROOT.TMatrixD(1,matrix.GetNbinsX(),1,matrix.GetNbinsY())
-        for i in range(1,matrix.GetNbinsX()+1):
-            for j in range(1,matrix.GetNbinsY()+1):
-                if proj.GetBinContent(i):
-                    response[i][j]=matrix.GetBinContent(i,j)/proj.GetBinContent(i)
-                else:
-                    print histname,i
-                    response[i][j]=0.
-        response.T()
-        svd=ROOT.TDecompSVD(response)
-        #response.Print()
-        print histname,svd.Condition()
+        print histname,GetConditionNumber(histname)
     
 def Merge():
     files=os.listdir(os.environ["SKFlat_WD"]+"/AFBResult")

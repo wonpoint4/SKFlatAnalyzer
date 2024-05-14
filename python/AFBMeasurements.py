@@ -8,6 +8,7 @@ ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
 _plotter=ROOT.AFBSystPlotter("mi ttll")
 SystematicSuffixes=dict(_plotter.GetSystematicSuffixes("totalsys")).keys()
 Systematics=dict(_plotter.systematics)
+grid_mbin=ROOT.AFBAnalyzer.grid_mbin
 
 def Variation2Suffix(variation):
     return str(ROOT.Plotter.Variation2Suffix(variation))
@@ -207,17 +208,18 @@ class AFBMeasurements:
                 if other.GetStatError(i)==0:
                     ws=[1.,0.]
                 else:
-                    cov=AFBMeasurements.CalcCov(self.default_syst,[self.measurements[i],other.measurements[i]])
-                    cov[0][0]+=self.cov_stat[i][i]
-                    cov[1][1]+=other.cov_stat[i][i]
-                    try:
-                        covI=np.linalg.inv(cov)
-                    except:
-                        print cov
-                        print self.GetValue(i), self.GetStatError(i), other.GetValue(i), other.GetStatError(i)
-                        exit()
-                    ws=np.matmul(covI,np.ones((2,1)))
-                    ws=ws.T[0]
+                    ws=[1/self.cov_stat[i][i],1/other.cov_stat[i][i]]
+                    # cov=AFBMeasurements.CalcCov(self.default_syst,[self.measurements[i],other.measurements[i]])
+                    # cov[0][0]+=self.cov_stat[i][i]
+                    # cov[1][1]+=other.cov_stat[i][i]
+                    # try:
+                    #     covI=np.linalg.inv(cov)
+                    # except:
+                    #     print cov
+                    #     print self.GetValue(i), self.GetStatError(i), other.GetValue(i), other.GetStatError(i)
+                    #     exit()
+                    # ws=np.matmul(covI,np.ones((2,1)))
+                    # ws=ws.T[0]
                     ws/=sum(ws)
             rt.measurements[i]=self.measurements[i]*ws[0]+other.measurements[i]*ws[1]
             cov_stat0[i,:]*=ws[0]
@@ -450,7 +452,8 @@ def SaveTableAll(inputpath,outputpath):
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             ms=[]
             for channel in ["ee","mm"]:
-                for era in ["2016a","2016b","2017","2018"]:
+                for era in ["Run2"]:
+                #for era in ["2016a","2016b","2017","2018"]:
                     ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
             m=reduce(lambda x,y:x%y,ms)
             m.Save(outputpath+"/"+region+"/"+histname+".tex")
@@ -460,56 +463,230 @@ def SaveTableCovAll(inputpath,outputpath):
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             ms=[]
             for channel in ["ee","mm"]:
-                for era in ["2016a","2016b","2017","2018"]:
+                for era in ["Run2"]:
+                #for era in ["2016a","2016b","2017","2018"]:
                     ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
             m=reduce(lambda x,y:x%y,ms)
             m.SaveCov(outputpath+"/"+region+"/"+histname+"_cov.tex")
 
-def SaveCombineScheme(inputpath,outputpath):
+def SaveCorrelationAll(inputpath,outputpath):
+    _plotter.plotdir=outputpath
+    for region in ["0bjet","nbjet"]:
+        for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
+            ms=[]
+            for channel in ["ee","mm"]:
+                for era in ["Run2"]:
+                #for era in ["2016a","2016b","2017","2018"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m=reduce(lambda x,y:x%y,ms)
+            cov=[[m.GetCov(i,j) for i in range(len(m))] for j in range(len(m))]
+            h=ROOT.TH2D("correlation","correlation",len(m)-2,1,len(m)-1,len(m)-2,1,len(m)-1)
+            for i in range(1,len(m)-1):
+                for j in range(1,len(m)-1):
+                    h.SetBinContent(i,j,m.GetCov(i,j)/(m.GetCov(i,i)*m.GetCov(j,j))**0.5)
+            c=ROOT.gROOT.MakeDefCanvas()
+            h.SetStats(0)
+            variable="m(ll)"
+            if "dirap" in histname: variable="y(ll)"
+            elif "dipt" in histname: variable="p_{T}(ll)"
+            h.GetYaxis().SetTitle(variable+" bin index")
+            h.GetXaxis().SetTitle(variable+" bin index")
+            h.SetMaximum(1.01)
+            h.SetMinimum(-1.01)
+            h.Draw("colz")
+            _plotter.DrawPreliminary(c,"Run2")
+            latex=ROOT.TLatex()
+            latex.SetNDC()
+            latex.SetTextColor(ROOT.kWhite)
+            if "0bjet" in histname:
+                latex.DrawLatex(0.17,0.8,"A_{FB}^{CS}")
+            else:
+                latex.DrawLatex(0.17,0.8,"A_{FB}^{Recoil}")
+            cut=""
+            if "_m0" in histname:
+                latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[0],grid_mbin[1]))
+            elif "_m1" in histname:
+                latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[1],grid_mbin[2]))
+            elif "_m2" in histname:
+                latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[2],grid_mbin[3]))
+            elif "_m3" in histname:
+                latex.DrawLatex(0.17,0.75,"{} #leq m < {} GeV".format(grid_mbin[3],grid_mbin[4]))
+            savename=histname.replace("unfoldedafb_afb","afb_")
+            savename=savename.replace("y_m","y").replace("pt_m","pt")
+            savename+="_correlation"
+            _plotter.SaveCanvas(c,region+"_"+savename+".png",False)
+            _plotter.SaveCanvas(c,region+"_"+savename+".pdf")
+    return
+
+def Compare(mss,base=0):
+    N=len(mss)
+    gss=[]
+    for ms in mss:
+        n=len(ms)
+        gs=[ROOT.TGraphErrors() for _ in range(n*2)]
+        colors=[1,2,4,6,7,8,9]
+        for i in range(n):
+            gs[i].SetLineColor(colors[i])
+            gs[i+n].SetLineColor(colors[i])
+        for i in range(1,len(ms[0])-1):
+            vals=np.array([m.GetValue(i) for m in ms])
+            errs=np.array([m.GetTotalError(i) for m in ms])
+            errs_stat=np.array([m.GetStatError(i) for m in ms])
+            if errs[1]==0: continue
+            vals,errs,errs_stat=(vals-vals[base])/errs[base],errs/errs[base],errs_stat/errs[base]
+            width=0.5/(n-1) if n>0 else 0
+            start=width/2
+            for j in range(n):
+                gs[j].SetPoint(i-1,i-start+width*j,vals[j])
+                gs[j].SetPointError(i-1,0,errs[j])
+                gs[n+j].SetPoint(i-1,i-start+width*j,vals[j])
+                gs[n+j].SetPointError(i-1,0,errs_stat[j])
+        gss+=[gs]
+    c=ROOT.TCanvas()
+    c.hists=[]
+    c.Divide(1,N)
+    top=0.9
+    margin=0.03
+    hight=(0.8-3*margin)/N
+    for i in range(N):
+        c.cd(i+1)
+        ROOT.gPad.SetPad(0,top,1,top-hight-margin)
+        ROOT.gPad.SetTopMargin(0)
+        ROOT.gPad.SetBottomMargin(margin/(hight+margin))
+        ROOT.gPad.SetFillStyle(0)
+        n=gss[i][0].GetN()
+        sigma=ROOT.TH1D("sigma","",100,0.1,n+0.9)
+        for ib in range(sigma.GetNcells()):
+            sigma.SetBinError(ib,1)
+        sigma.SetFillStyle(3001)
+        sigma.SetFillColor(ROOT.kGreen)
+        sigma.GetYaxis().SetTickLength(0.003)
+        sigma.GetYaxis().SetRangeUser(-2.99,2.99)
+        sigma.GetYaxis().SetNdivisions(205)
+        sigma.GetYaxis().SetLabelSize(0.2)
+        sigma.GetXaxis().SetLabelSize(0.2)
+        sigma.Draw("e2")
+        sigma.SetStats(0)
+        sigma.SetDirectory(0)
+        n_next=-1 
+        if i+1<N: 
+            n_next=gss[i+1][0].GetN()
+        if n!=n_next:
+            top-=hight+margin
+        else:
+            top-=hight
+            sigma.GetXaxis().SetLabelSize(0)
+        c.hists+=[sigma]
+        for g in gss[i]:
+            g.Draw("p same")
+    c.gss=gss
+    latex=ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextSize(0.03)
+    latex.SetTextFont(42)
+    c.cd()
+    latex.DrawLatex(0.8,0.05,"Bin index")
+    return c
+
+def SaveCombineSchemeAll(inputpath,outputpath):
+    histnames=["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]
+    for region in ["0bjet","nbjet"]:
+        mss=[]
+        for histname in histnames:
+        #for histname in ["unfoldedafb_afbm"]:
+            ms=[]
+            for channel in ["ee","mm"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m0=reduce(lambda x,y:x%y,ms)
+            
+            ms=[]
+            for channel in ["ll"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m1=reduce(lambda x,y:x%y,ms)
+
+            ms=[]
+            for channel in ["ee","mm"]:
+                for era in ["Run2"]:
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+            m2=reduce(lambda x,y:x%y,ms)
+    
+            m3=AFBMeasurements(inputpath,"llRun2/"+region+"/"+histname)
+
+            #ms=[m0,m1,m2,m3,AFBMeasurements(inputpath,"eeRun2/"+region+"/"+histname),AFBMeasurements(inputpath,"mmRun2/"+region+"/"+histname)]
+            #ms=[m1,AFBMeasurements(inputpath,"ll2016a/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2016b/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2017/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2018/"+region+"/"+histname),m2]
+            mss+=[[m0,m1,m2,m3]]
+        c=Compare(mss,base=2)
+        ROOT.Plotter.DrawPreliminary(c,"Run2")
+        latex=ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextFont(42)
+        for i in range(len(mss)):
+            c.cd(i+1)
+            mass_range=""
+            if "_m0" in histnames[i]:
+                mass_range=";52#leq m_{ll}<77 GeV"
+            if "_m1" in histnames[i]:
+                mass_range=";77#leq m_{ll}<106 GeV"
+            if "_m2" in histnames[i]:
+                mass_range=";106#leq m_{ll}<200 GeV"
+            if "_m3" in histnames[i]:
+                mass_range=";200#leq m_{ll}<3000 GeV"
+
+            variable="m_{ll}"
+            if "afby" in histnames[i]:
+                variable="|y_{ll}|"
+            if "afbpt" in histnames[i]:
+                variable="p_{T}^{ll}"                
+            latex.SetTextAlign(13)
+            latex.SetTextSize(0.12)
+            latex.DrawLatex(0.16,0.99,"A_{FB}("+variable+mass_range+")")
+        c.cd()
+        latex.SetTextSize(0.03)
+        latex.SetTextAlign(11)
+        latex.SetTextAngle(90)
+        latex.DrawLatex(0.05,0.5,"#frac{A_{FB}-A_{FB}^{nominal}}{#sigma(A_{FB}^{nominal})}")
+        leg=ROOT.TLegend(0.13,0.03,0.77,0.1)
+        leg.SetBorderSize(0)
+        leg.SetNColumns(2)
+        leg.AddEntry(c.gss[0][0],"era/channel-dependent unfolding","l")
+        leg.AddEntry(c.gss[0][1],"era-dependent unfolding","l")
+        leg.AddEntry(c.gss[0][2],"channel-dependent unfolding (nominal)","l")
+        leg.AddEntry(c.gss[0][3],"merged unfolding","l")
+        leg.Draw()
+        c.leg=leg
+        #raw_input()
+        _plotter.plotdir=outputpath
+        _plotter.SaveCanvas(c,region+"_combine.png",False)
+        _plotter.SaveCanvas(c,region+"_combine.pdf")
+    return
+
+def CompareGen(inputpath,outputpath):
     region="nbjet"
     gss=[]
-    for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
+    for histname in ["gen_afbm","gen_afby_m0","gen_afby_m1","gen_afby_m2","gen_afby_m3","gen_afbpt_m0","gen_afbpt_m1","gen_afbpt_m2","gen_afbpt_m3"]:
     #for histname in ["unfoldedafb_afbm"]:
-        ms=[]
-        for channel in ["ee","mm"]:
-            for era in ["2016a","2016b","2017","2018"]:
-                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
-        m0=reduce(lambda x,y:x%y,ms)
-
-        ms=[]
-        for channel in ["ee","mm"]:
-            for era in ["Run2"]:
-                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
-        m1=reduce(lambda x,y:x%y,ms)
-
-        ms=[]
-        for channel in ["ll"]:
-            for era in ["2016a","2016b","2017","2018"]:
-                ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
-        m2=reduce(lambda x,y:x%y,ms)
-    
-        m3=AFBMeasurements(inputpath,"llRun2/"+region+"/"+histname)
-
-        gs=[ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors(),ROOT.TGraphErrors()]
-        gs[0].SetLineColor(2)
-        gs[1].SetLineColor(1)
-        gs[2].SetLineColor(4)
-        gs[3].SetLineColor(6)
-        gs[4+0].SetLineColor(2)
-        gs[4+1].SetLineColor(1)
-        gs[4+2].SetLineColor(4)
-        gs[4+3].SetLineColor(6)
-        for i in range(1,len(m0)-1):
-            vals=np.array([m0.GetValue(i),m1.GetValue(i),m2.GetValue(i),m3.GetValue(i)])
-            errs=np.array([m0.GetTotalError(i),m1.GetTotalError(i),m2.GetTotalError(i),m3.GetTotalError(i)])
-            errs_stat=np.array([m0.GetStatError(i),m1.GetStatError(i),m2.GetStatError(i),m3.GetStatError(i)])
+        ms=[AFBMeasurements(inputpath,"eeRun2/"+region+"/"+histname),AFBMeasurements(inputpath,"mmRun2/"+region+"/"+histname)]
+        
+        base=0
+        n=len(ms)
+        gs=[ROOT.TGraphErrors() for _ in range(len(ms)*2)]
+        colors=[1,2,4,6,7,8,9]
+        for i in range(n):
+            gs[i].SetLineColor(colors[i])
+            gs[i+n].SetLineColor(colors[i])
+        for i in range(1,len(ms[0])-1):
+            vals=np.array([m.GetValue(i) for m in ms])
+            errs=np.array([m.GetTotalError(i) for m in ms])
+            errs_stat=np.array([m.GetStatError(i) for m in ms])
             if errs[1]==0: continue
-            vals,errs,errs_stat=(vals-vals[1])/errs[1],errs/errs[1],errs_stat/errs[1]
-            for j in range(4):
-                gs[j].SetPoint(i-1,i-0.35+0.1*j,vals[j])
+            vals,errs,errs_stat=(vals-vals[base])/errs[base],errs/errs[base],errs_stat/errs[base]
+            for j in range(n):
+                gs[j].SetPoint(i-1,i-0.2+0.1*j,vals[j])
                 gs[j].SetPointError(i-1,0,errs[j])
-                gs[4+j].SetPoint(i-1,i-0.35+0.1*j,vals[j])
-                gs[4+j].SetPointError(i-1,0,errs_stat[j])
+                gs[n+j].SetPoint(i-1,i-0.2+0.1*j,vals[j])
+                gs[n+j].SetPointError(i-1,0,errs_stat[j])
         gss+=[gs]
     c=ROOT.TCanvas()
     c.hists=[]
@@ -525,7 +702,7 @@ def SaveCombineScheme(inputpath,outputpath):
         sigma.SetFillStyle(3001)
         sigma.SetFillColor(ROOT.kGreen)
         sigma.GetYaxis().SetTickLength(0)
-        sigma.GetYaxis().SetRangeUser(-1.99,1.99)
+        sigma.GetYaxis().SetRangeUser(-2.99,2.99)
         sigma.Draw("e2")
         sigma.SetStats(0)
         sigma.SetDirectory(0)
@@ -537,7 +714,14 @@ def SaveCombineScheme(inputpath,outputpath):
 if __name__=="__main__":
     #SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
     #SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
-    SaveCombineScheme("AFBResult/final.root","fig/AFBMeasurements")
+    #SaveCombineSchemeAll("AFBResult/final.root","fig/AFBMeasurements")
+    #CompareGen("AFBResult/final.root","fig/AFBMeasurements")
+    SaveCorrelationAll("AFBResult/final.root","fig/AFBMeasurements")
+    # syst="triggerSF_mode1 triggerSF_interpolation".split()
+    # m=AFBMeasurements("AFBResult/final.root","ll2018/0bjet/unfoldedafb_afby_m0")
+    # print m.__str__(syst)
+    # m=AFBMeasurements("AFBResult/final.root","mmRun2/nbjet/unfoldedafb_afby_m1")
+    # print m.__str__(syst)
     pass
 
     # hists=ROOT.vector("Hists")()
