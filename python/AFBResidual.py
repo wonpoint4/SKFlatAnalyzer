@@ -50,20 +50,24 @@ def GetChi2(h1,h2):
 
 def MoveOverflow(h4d):
     nx=h4d.GetXaxis().GetNbins()
-    ny=h4d.GetXaxis().GetNbins()
-    nz=h4d.GetXaxis().GetNbins()
-    nu=h4d.GetXaxis().GetNbins()
+    ny=h4d.GetYaxis().GetNbins()
+    nz=h4d.GetZaxis().GetNbins()
+    nu=h4d.GetUaxis().GetNbins()
     for iy,iz,iu in [(iy,iz,iu) for iy in range(ny+2) for iz in range(nz+2) for iu in range(nu+2)]:
         val0=h4d.GetBinContent(0,iy,iz,iu)
         err0=h4d.GetBinError(0,iy,iz,iu)
         val1=h4d.GetBinContent(1,iy,iz,iu)
         err1=h4d.GetBinError(1,iy,iz,iu)
+        h4d.SetBinContent(0,iy,iz,iu,0)
+        h4d.SetBinError(0,iy,iz,iu,0)
         h4d.SetBinContent(1,iy,iz,iu,val0+val1)
         h4d.SetBinError(1,iy,iz,iu,(err0**2+err1**2)**0.5)
         val0=h4d.GetBinContent(nx+1,iy,iz,iu)
         err0=h4d.GetBinError(nx+1,iy,iz,iu)
         val1=h4d.GetBinContent(nx,iy,iz,iu)
         err1=h4d.GetBinError(nx,iy,iz,iu)
+        h4d.SetBinContent(nx+1,iy,iz,iu,0)
+        h4d.SetBinError(nx+1,iy,iz,iu,0)
         h4d.SetBinContent(nx,iy,iz,iu,val0+val1)
         h4d.SetBinError(nx,iy,iz,iu,(err0**2+err1**2)**0.5)
     for ix,iz,iu in [(ix,iz,iu) for ix in range(nx+2) for iz in range(nz+2) for iu in range(nu+2)]:
@@ -71,12 +75,16 @@ def MoveOverflow(h4d):
         err0=h4d.GetBinError(ix,0,iz,iu)
         val1=h4d.GetBinContent(ix,1,iz,iu)
         err1=h4d.GetBinError(ix,1,iz,iu)
+        h4d.SetBinContent(ix,0,iz,iu,0)
+        h4d.SetBinError(ix,0,iz,iu,0)
         h4d.SetBinContent(ix,1,iz,iu,val0+val1)
         h4d.SetBinError(ix,1,iz,iu,(err0**2+err1**2)**0.5)
         val0=h4d.GetBinContent(ix,ny+1,iz,iu)
         err0=h4d.GetBinError(ix,ny+1,iz,iu)
         val1=h4d.GetBinContent(ix,ny,iz,iu)
         err1=h4d.GetBinError(ix,ny,iz,iu)
+        h4d.SetBinContent(ix,ny+1,iz,iu,0)
+        h4d.SetBinError(ix,ny+1,iz,iu,0)
         h4d.SetBinContent(ix,ny,iz,iu,val0+val1)
         h4d.SetBinError(ix,ny,iz,iu,(err0**2+err1**2)**0.5)
     for ix,iy,iu in [(ix,iy,iu) for ix in range(nx+2) for iy in range(ny+2) for iu in range(nu+2)]:
@@ -84,12 +92,16 @@ def MoveOverflow(h4d):
         err0=h4d.GetBinError(ix,iy,0,iu)
         val1=h4d.GetBinContent(ix,iy,1,iu)
         err1=h4d.GetBinError(ix,iy,1,iu)
+        h4d.SetBinContent(ix,iy,0,iu,0)
+        h4d.SetBinError(ix,iy,0,iu,0)
         h4d.SetBinContent(ix,iy,1,iu,val0+val1)
         h4d.SetBinError(ix,iy,1,iu,(err0**2+err1**2)**0.5)
         val0=h4d.GetBinContent(ix,iy,nz+1,iu)
         err0=h4d.GetBinError(ix,iy,nz+1,iu)
         val1=h4d.GetBinContent(ix,iy,nz,iu)
         err1=h4d.GetBinError(ix,iy,nz,iu)
+        h4d.SetBinContent(ix,iy,nz+1,iu,0)
+        h4d.SetBinError(ix,iy,nz+1,iu,0)
         h4d.SetBinContent(ix,iy,nz,iu,val0+val1)
         h4d.SetBinError(ix,iy,nz,iu,(err0**2+err1**2)**0.5)
     for ix,iy,iz in [(ix,iy,iz) for ix in range(nx+2) for iy in range(ny+2) for iz in range(nz+2)]:
@@ -97,12 +109,16 @@ def MoveOverflow(h4d):
         err0=h4d.GetBinError(ix,iy,iz,0)
         val1=h4d.GetBinContent(ix,iy,iz,1)
         err1=h4d.GetBinError(ix,iy,iz,1)
+        h4d.SetBinContent(ix,iy,iz,0,0)
+        h4d.SetBinError(ix,iy,iz,0,0)
         h4d.SetBinContent(ix,iy,iz,1,val0+val1)
         h4d.SetBinError(ix,iy,iz,1,(err0**2+err1**2)**0.5)
         val0=h4d.GetBinContent(ix,iy,iz,nu+1)
         err0=h4d.GetBinError(ix,iy,iz,nu+1)
         val1=h4d.GetBinContent(ix,iy,iz,nu)
         err1=h4d.GetBinError(ix,iy,iz,nu)
+        h4d.SetBinContent(ix,iy,iz,nu+1,0)
+        h4d.SetBinError(ix,iy,iz,nu+1,0)
         h4d.SetBinContent(ix,iy,iz,nu,val0+val1)
         h4d.SetBinError(ix,iy,iz,nu,(err0**2+err1**2)**0.5)
 
@@ -171,8 +187,8 @@ def addResidual(infilename):
             this_hsf.SetBinError(j,0)
         Apply(hsim4d,this_hsf)
         hsf.Multiply(this_hsf)
-        if (chi2_old-chi2)/chi2_old<0.2:
-            break
+        # if (chi2_old-chi2)/chi2_old<0.2:
+        #     break
         chi2_old=chi2
 
     ## fluctuataion
@@ -195,7 +211,11 @@ def addResidual(infilename):
     f=ROOT.TFile(outfilename,"update")
     hsim=f.Get("sim")
     hdata=Multiply(hsf,f.Get("data"))
-    hsf=Multiply(hsf,f.Get("sf"))
+    hsf_nominal=f.Get("sf")
+    hsf=Multiply(hsf,hsf_nominal)
+    hsf.SetOption(hsf_nominal.GetOption())
+    hsf.GetXaxis().SetTitle(hsf_nominal.GetXaxis().GetTitle())
+    hsf.GetYaxis().SetTitle(hsf_nominal.GetYaxis().GetTitle())
     f.cd()
     for h in [hdata, hsim, hsf]:
         h.SetStats(0)
