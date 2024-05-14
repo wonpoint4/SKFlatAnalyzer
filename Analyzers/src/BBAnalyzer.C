@@ -32,12 +32,11 @@ void BBAnalyzer::executeEvent(){
     }
   }
 }
-
 void BBAnalyzer::EvalDefaultWeight(Parameter& p){
-  p.default_weight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.CFSF*p.w.btagSF*p.w.zptweight*p.w.weakweight*p.w.topptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+  SMPAnalyzerCore::EvalDefaultWeight(p);
+  p.default_weight/=p.w.bchargeSF;
   p.weight=p.default_weight;
 }
-
 SMPAnalyzerCore::Variations BBAnalyzer::MakeVariations(const Parameter& p){
   Variations v;
   AddVariationWeight(v,"",p.default_weight);

@@ -116,7 +116,7 @@ def DrawAccuracy(channels):
         # g.SetPoint(2*i+1+4*len(channel),value[1],2*i+1+0.5+0.24)
         # g.SetPointError(2*i+1+4*len(channel),cov[1][1]**0.5,0)
     
-    hframe=ROOT.TH2D("hframe","",100,0.60,0.65,len(channels)*2+1,0,len(channels)*2+1);
+    hframe=ROOT.TH2D("hframe","",100,0.60,0.67,len(channels)*2+1,0,len(channels)*2+1);
     for i in range(len(channels)):
         title=channels[i]
         title=title.replace("201[678][ab]?"," Run2")
@@ -208,9 +208,9 @@ def DrawAccuracyByType(channels,types):
     raw_input()
 
 if __name__=="__main__":
-    #value,cov=GetAccuracy(0,"me201[678][ab]?")
-    #value,cov=GetAccuracy(1,"me201[678][ab]?")
-    DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
+    value,cov=GetAccuracy(0,"me201[678][ab]?")
+    value,cov=GetAccuracy(1,"me201[678][ab]?")
+    #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
     #DrawAccuracy(["ee201[678][ab]?","mm201[678][ab]?","me201[678][ab]?"])
     #DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
     #DrawAccuracy([channel+era for channel in ["[me]n","[me][me]"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])

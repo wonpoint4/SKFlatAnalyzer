@@ -1470,8 +1470,8 @@ bool SMPAnalyzerCore::PassID(const Lepton* lep,TString id){
 	if(el->ecalPFClusterIso()>(0.5+0.29*el->Rho())*el->Et()) return false;
 	if(el->hcalPFClusterIso()>(0.3+0.2*el->Rho())*el->Et()) return false;
 	if(!el->PassConversionVeto()) return false;
-	if(el->dEtaSeed()>0.01) return false;
-	if(el->dPhiIn()>0.07) return false;
+	if(fabs(el->dEtaSeed())>0.01) return false;
+	if(fabs(el->dPhiIn())>0.07) return false;
 	if(el->TrkIso()>0.2*el->Et()) return false;						
       }else{
 	if(el->Full5x5_sigmaIetaIeta()>0.035) return false;
@@ -1479,8 +1479,8 @@ bool SMPAnalyzerCore::PassID(const Lepton* lep,TString id){
 	if(el->ecalPFClusterIso()>(0.5+0.21*el->Rho())*el->Et()) return false;
 	if(el->hcalPFClusterIso()>(0.3+0.25*el->Rho())*el->Et()) return false;
 	if(!el->PassConversionVeto()) return false;
-	if(el->dEtaSeed()>0.015) return false;
-	if(el->dPhiIn()>0.1) return false;
+	if(fabs(el->dEtaSeed())>0.015) return false;
+	if(fabs(el->dPhiIn())>0.1) return false;
 	if(el->TrkIso()>0.2*el->Et()) return false;
       }
       return true;
@@ -1489,6 +1489,19 @@ bool SMPAnalyzerCore::PassID(const Lepton* lep,TString id){
       return true;
     }else if(id=="FakeAllID"){
       if( !el->passVetoID() && el->MVAIso()<-0.999 ) return false;
+      return true;
+    }else if(id=="SoftElectronID"){
+      if(fabs(el->scEta())<=1.479){
+	if(el->Full5x5_sigmaIetaIeta()>0.0126) return false;
+	if(!el->PassConversionVeto()) return false;
+	if(fabs(el->dEtaSeed())>0.00463) return false;
+	if(fabs(el->dPhiIn())>0.148) return false;
+      }else{
+	if(el->Full5x5_sigmaIetaIeta()>0.0457) return false;
+	if(!el->PassConversionVeto()) return false;
+	if(fabs(el->dEtaSeed())>0.00814) return false;
+	if(fabs(el->dPhiIn())>0.19) return false;
+      }
       return true;
     }else{
       cout<<"[SMPAnalyzerCore::PassID] unknown electron id '"<<id<<"'"<<endl;
@@ -2128,7 +2141,98 @@ void SMPAnalyzerCore::AddVariationJES(Variations& v,TString suffix,int direction
 void SMPAnalyzerCore::AddVariationJER(Variations& v,TString suffix,int direction){
   v[suffix]=std::make_unique<VariationJER>(direction);
 }
+void SMPAnalyzerCore::EvalAFBCharge(Parameter& p){
+  vector<Muon> allmuons=GetAllMuons();
+  std::sort(allmuons.begin(),allmuons.end(),PtComparing);
+  vector<Electron> allelectrons=GetAllElectrons();
+  std::sort(allelectrons.begin(),allelectrons.end(),PtComparing);
+  for(auto& jet:p.jets){
+    bool isB=false;
+    if(jet.GetTaggerResult(p.jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(p.jtp.j_Tagger, p.jtp.j_WP))
+      isB=true;
+    jet.userFloat["isB"]=isB;      
 
+    double jetCharge = jet.Charge();
+    if(fabs(jetCharge-1)<1e-4) jetCharge=0.999;
+    if(fabs(jetCharge+1)<1e-4) jetCharge=-0.999;
+
+    vector<Muon> bmuon;
+    vector<Electron> belectron;
+
+    if(p.option.Contains("AFBCharge_old")){
+      for(int l=0,n=allmuons.size(); l<n; l++){
+	if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(jet.Vect())) <0.6) continue; // original, 1GeV
+	if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
+	if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
+	if(jet.DeltaR(allmuons.at(l))<0.4) bmuon.push_back(allmuons.at(l));
+      }
+      
+      //belectron Trial
+      for(unsigned int l=0; l<allelectrons.size(); l++){
+	if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(jet.Vect())) <0.6) continue;
+	if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
+	if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
+	if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
+	if(jet.DeltaR(allelectrons.at(l))<0.4) belectron.push_back(allelectrons.at(l));
+      }
+    }else{
+      for(int l=0,n=allmuons.size(); l<n; l++){
+	if(!allmuons.at(l).IsType(Muon::Type::PFMuon)) continue;
+	if(!p.option.Contains("AFBCharge_no_pperpcut"))
+	  if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(jet.Vect())) <1) continue; // original, 1GeV
+	// if(!p.option.Contains("AFBCharge_no_isocut"))
+	// 	if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
+	// if(!p.option.Contains("AFBCharge_no_ipcut"))
+	// 	if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
+	if(!p.option.Contains("AFBCharge_no_drcut")){
+	  if(jet.DeltaR(allmuons.at(l))<0.3) bmuon.push_back(allmuons.at(l));
+	}else{
+	  if(jet.DeltaR(allmuons.at(l))<0.8) bmuon.push_back(allmuons.at(l));
+	}
+      }
+      
+      //belectron Trial
+      for(unsigned int l=0; l<allelectrons.size(); l++){
+	//if(!allelectrons.at(l).PassSelector(Electron::Selector::POG_MVA_NOISO_WPLOOSE)) continue;
+	if(!PassID(&allelectrons.at(l),"SoftElectronID")) continue;
+	if(!p.option.Contains("AFBCharge_no_pperpcut"))
+	  if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(jet.Vect())) <1) continue;
+	//if(!p.option.Contains("AFBCharge_no_isocut"))      
+	//  if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
+	// if(!p.option.Contains("AFBCharge_no_ipcut"))
+	// 	if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
+	if(!p.option.Contains("AFBCharge_no_3chargecut"))
+	  if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
+	if(!p.option.Contains("AFBCharge_no_drcut")){
+	  if(jet.DeltaR(allelectrons.at(l))<0.3) belectron.push_back(allelectrons.at(l));
+	}else{
+	  if(jet.DeltaR(allelectrons.at(l))<0.8) belectron.push_back(allelectrons.at(l));	
+	}
+      }
+    }
+
+    //The jet has soft muon inside, and its charge will determine the jet charge
+    if(bmuon.size() > 0){
+      jetCharge += 2 * bmuon.at(0).Charge();
+      jet.userFloat["AFBCharge_softlepton_pt"]=bmuon.at(0).Pt();
+      jet.userFloat["AFBCharge_softlepton_pperp"]=bmuon.at(0).P()*sin(bmuon.at(0).Angle(jet.Vect()));
+      jet.userFloat["AFBCharge_softlepton_riso"]=bmuon.at(0).TrkIso()/bmuon.at(0).Pt();
+      jet.userFloat["AFBCharge_softlepton_sip"]=abs(bmuon.at(0).IP3D())/bmuon.at(0).IP3Derr();
+      jet.userFloat["AFBCharge_softlepton_dr"]=jet.DeltaR(bmuon.at(0));
+      jet.userFloat["AFBCharge_softlepton_3charge"]=1;
+    }else if(belectron.size() > 0){
+      jetCharge += 4 * belectron.at(0).Charge();
+      jet.userFloat["AFBCharge_softlepton_pt"]=belectron.at(0).Pt();
+      jet.userFloat["AFBCharge_softlepton_pperp"]=belectron.at(0).P()*sin(belectron.at(0).Angle(jet.Vect()));
+      jet.userFloat["AFBCharge_softlepton_riso"]=belectron.at(0).hcalPFClusterIso()/belectron.at(0).Pt();
+      jet.userFloat["AFBCharge_softlepton_sip"]=abs(belectron.at(0).IP3D())/belectron.at(0).IP3Derr();
+      jet.userFloat["AFBCharge_softlepton_dr"]=jet.DeltaR(belectron.at(0));
+      jet.userFloat["AFBCharge_softlepton_3charge"]=belectron.at(0).IsGsfCtfScPixChargeConsistent();
+    }
+    jet.userFloat["AFBCharge"]=jetCharge;
+  }
+ 
+}
 SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TString option){
   Parameter p;
   p.SetChannel(channel);
@@ -2480,54 +2584,20 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
     p.jets=SelectJets(GetAllJets(),"tightLepVeto",p.c.jetpt*0.8,2.4);
   }    
   std::sort(p.jets.begin(),p.jets.end(),PtComparing);
-  JetTagging::Parameters jtp;
+
   if(p.option.Contains("DeepCSV::Medium")){
-    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+    p.jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
   }else if(p.option.Contains("DeepCSV")){
-    jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+    p.jtp=JetTagging::Parameters(JetTagging::DeepCSV,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
   }else if(p.option.Contains("DeepJet::Medium")){
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+    p.jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
   }else if(p.option.Contains("DeepJet::Tight::mujets")){
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets);
+    p.jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets);
   }else{
-    jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+    p.jtp=JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
   }
 
-  //AFBCharge calculation
-  vector<Muon> allmuons=GetAllMuons();
-  vector<Electron> allelectrons=GetAllElectrons();
-  for(auto& jet:p.jets){
-    bool isB=false;
-    if(jet.GetTaggerResult(jtp.j_Tagger) > mcCorr->GetJetTaggingCutValue(jtp.j_Tagger, jtp.j_WP))
-      isB=true;
-    jet.userFloat["isB"]=isB;      
-
-    double jetCharge = jet.Charge();
-
-    vector<Muon> bmuon;
-    vector<Electron> belectron;
-
-    for(int l=0,n=allmuons.size(); l<n; l++){
-      if(allmuons.at(l).P()*sin(allmuons.at(l).Angle(jet.Vect())) <0.6) continue; // original, 1GeV
-      if(allmuons.at(l).TrkIso()/allmuons.at(l).Pt() <0.05) continue; // original, 0.1
-      if(abs(allmuons.at(l).IP3D())/allmuons.at(l).IP3Derr() <2.) continue; // original, 2.5
-      if(jet.DeltaR(allmuons.at(l))<0.4) bmuon.push_back(allmuons.at(l));
-    }
-
-    //belectron Trial
-    for(unsigned int l=0; l<allelectrons.size(); l++){
-      if(allelectrons.at(l).P()*sin(allelectrons.at(l).Angle(jet.Vect())) <0.6) continue;
-      if(allelectrons.at(l).ecalPFClusterIso()/allelectrons.at(l).Pt() == 0.) continue;
-      if(abs(allelectrons.at(l).IP3D())/allelectrons.at(l).IP3Derr() <2.0) continue;
-      if(!allelectrons.at(l).IsGsfCtfScPixChargeConsistent()) continue;
-      if(jet.DeltaR(allelectrons.at(l))<0.4) belectron.push_back(allelectrons.at(l));
-    }
-
-    //The jet has soft muon inside, and its charge will determine the jet charge
-    if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
-    else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
-    jet.userFloat["AFBCharge"]=jetCharge;
-  }
+  EvalAFBCharge(p);
   p.SetBjets();
 
   p.w.btagSF=1.;
@@ -2540,15 +2610,15 @@ SMPAnalyzerCore::Parameter SMPAnalyzerCore::MakeParameter(TString channel,TStrin
   p.w.btagSF_lcorr=1.;
   p.w.btagSF_luncorr=1.;
   if(!IsDATA){
-    p.w.btagSF=mcCorr->GetBTaggingReweight_1a(p.jets,jtp);
-    p.w.btagSF_hup=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpHTag");
-    p.w.btagSF_hdown=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystDownHTag");
-    p.w.btagSF_hcorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpHTagCorr");
-    p.w.btagSF_huncorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpHTagUnCorr");
-    p.w.btagSF_lup=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTag");
-    p.w.btagSF_ldown=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystDownLTag");
-    p.w.btagSF_lcorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTagCorr");
-    p.w.btagSF_luncorr=mcCorr->GetBTaggingReweight_1a(p.jets,jtp,"SystUpLTagUnCorr");
+    p.w.btagSF=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp);
+    p.w.btagSF_hup=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpHTag");
+    p.w.btagSF_hdown=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystDownHTag");
+    p.w.btagSF_hcorr=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpHTagCorr");
+    p.w.btagSF_huncorr=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpHTagUnCorr");
+    p.w.btagSF_lup=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpLTag");
+    p.w.btagSF_ldown=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystDownLTag");
+    p.w.btagSF_lcorr=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpLTagCorr");
+    p.w.btagSF_luncorr=mcCorr->GetBTaggingReweight_1a(p.jets,p.jtp,"SystUpLTagUnCorr");
     //cout<<p.w.btagSF<<" "<<p.w.btagSF_hup<<" "<<p.w.btagSF_hcorr<<" "<<p.w.btagSF_huncorr<<endl;
     p.w.bchargeSF=GetBchargeSF(p);
     p.w.bchargeSF_s0m0=GetBchargeSF(p,0,0);
@@ -3080,23 +3150,17 @@ double SMPAnalyzerCore::GetBchargeSF(const Jet& bjet,int set,int mem) const {
   int origin=bjet.GenHFHadronMatcherOrigin();
   if(flavour!=5) return sf;
   if(origin==-999) return sf;
-  double data_m_accuracy=0.615651;
-  double data_p_accuracy=0.629591;
-  //data (BB SS method (mm)): 0.619894+-0.004496
-  //data - (BB SS method (me)): 0.615651+-0.003372
-  //data + (BB SS method (me)): 0.629591+-0.003385
-  double sim_m_accuracy=0.632788;
-  double sim_p_accuracy=0.645423;
-  //sim (BB SS method): 0.639483+-0.000594
-  //sim - (BB SS method (me)): 0.632788+-0.000486
-  //sim + (BB SS method (me)): 0.645423+-0.000485
+  double data_m_accuracy=0.62062727;
+  double data_p_accuracy=0.63597127;
+  double sim_m_accuracy=0.63993788;
+  double sim_p_accuracy=0.65465339;
   if(set==0){
     if(mem==0){
-      data_m_accuracy+=-0.001086;
-      data_p_accuracy+=0.001081;
+      data_m_accuracy+=-0.00107671;
+      data_p_accuracy+=0.00107148;
     }else if(mem==1){
-      data_m_accuracy+=-0.003192;
-      data_p_accuracy+=-0.003208;
+      data_m_accuracy+=-0.00303157;
+      data_p_accuracy+=-0.00304636;
     }
   }
   if(origin*charge<0){

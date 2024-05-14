@@ -74,6 +74,7 @@ public:
     vector<TString> triggers;
     vector<Gen> gens;
     vector<Jet> jets;
+    JetTagging::Parameters jtp;
     vector<Jet> bjets;
     vector<Muon> muons;
     vector<Electron> electrons;
@@ -187,6 +188,7 @@ public:
   virtual void EvalVariationsElectronEnergy(const Parameter& p,Variations& variations);
   virtual void EvalVariationsJetCorrection(const Parameter& p,Variations& variations);
   virtual bool PassSelection(Parameter& p,bool cutflow=false);
+  virtual void EvalAFBCharge(Parameter& p);
   virtual Parameter MakeParameter(TString channel,TString option="");
 
   std::map< TString, TH4D* > maphist_TH4D;

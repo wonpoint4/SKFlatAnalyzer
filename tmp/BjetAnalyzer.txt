@@ -1,4 +1,4 @@
-SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2016a
-SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 20 -e 2016b
-SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 30 -e 2017
-SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 40 -e 2018
+SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 50 -e 2016a
+SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 50 -e 2016b
+SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 100 -e 2017
+SKFlat.py -a BjetAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 100 -e 2018

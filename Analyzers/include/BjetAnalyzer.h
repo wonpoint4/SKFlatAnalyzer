@@ -9,6 +9,8 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
+  virtual void EvalDefaultWeight(Parameter& p);
+  virtual Parameter MakeParameter(TString key,TString option="");
   Variations MakeVariations(const Parameter& p);
   void FillHists(Parameter& p);
 
