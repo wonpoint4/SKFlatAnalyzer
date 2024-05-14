@@ -16,14 +16,14 @@ void ZptWeight::executeEvent(){
     }
   }
 
-  if(!IsDATA||DataStream.Contains("SingleMuon")) 
-    executeEventWithParameter(MakeParameter("mu"));
   if(!IsDATA||DataStream.Contains("DoubleMuon")) 
     executeEventWithParameter(MakeParameter("mm"));
-  if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")) 
-    executeEventWithParameter(MakeParameter("el"));
   if(!IsDATA||DataStream.Contains("DoubleEG")||DataStream.Contains("EGamma")) 
     executeEventWithParameter(MakeParameter("ee"));
+  // if(!IsDATA||DataStream.Contains("SingleMuon")) 
+  //   executeEventWithParameter(MakeParameter("mu"));
+  // if(!IsDATA||DataStream.Contains("SingleElectron")||DataStream.Contains("EGamma")) 
+  //   executeEventWithParameter(MakeParameter("el"));
 }
 SMPAnalyzerCore::Parameter ZptWeight::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
@@ -36,8 +36,11 @@ SMPAnalyzerCore::Variations ZptWeight::MakeVariations(const Parameter& p){
   TLorentzVector genZ=(gen_l0+gen_l1);
   AddVariationWeight(v,"",p.default_weight);
   if(!IsDATA){
-    AddVariationWeight(v,"_zptg",p.default_weight/p.w.zptweight*fZptCorrection->GetZptWeight(genZ.Pt()));
-    AddVariationWeight(v,"_zptgy",p.default_weight/p.w.zptweight*fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity()));
+    if(IsDYSample){
+      AddVariationWeight(v,"_zptg",p.default_weight/p.w.zptweight*fZptCorrection->GetZptWeight(genZ.Pt()));
+      AddVariationWeight(v,"_zptgy",p.default_weight/p.w.zptweight*fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity()));
+      AddVariationWeight(v,"_zptgym",p.default_weight/p.w.zptweight*fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity(),genZ.M()));
+    }
     AddVariationWeight(v,"_nozptweight",p.default_weight/p.w.zptweight);
     if(p.channel[0]=='e'){
       int set=p.w.electronIDSF_sys.size()-1;
@@ -49,8 +52,13 @@ SMPAnalyzerCore::Variations ZptWeight::MakeVariations(const Parameter& p){
       AddVariationWeight(v,"_nozptweight_effresidual",p.default_weight/p.w.zptweight/p.w.muonIDSF*p.w.muonIDSF_sys[set][0]);
     }
     if(IsDYSample){
+      // for(unsigned int i=0;i<weight_Scale->size();i++){
+      // 	AddVariationWeight(v,Form("_scalevariation%d",i),p.default_weight*weight_Scale->at(i));
+      // }
       for(unsigned int i=0;i<weight_Scale->size();i++){
-	AddVariationWeight(v,Form("_scalevariation%d",i),p.default_weight*weight_Scale->at(i));
+	double scale=1.;
+	if(isnormal(weight_Scale->at(i))) scale=weight_Scale->at(i);
+	AddVariationWeight(v,Form("_nozptweight_scalevariation%d",i),p.default_weight/p.w.zptweight*scale);
       }
     }
   }
@@ -70,6 +78,8 @@ void ZptWeight::FillHists(Parameter& p){
 
   if(dimass>77&&dimass<106){
     FillHist(pre+"pt"+suf,dipt,p.weight,ptbinnum,ptbin);
+    FillHist(pre+"lpt"+suf,p.lepton0->Pt(),p.weight,ptbinnum,ptbin);
+    FillHist(pre+"lpt"+suf,p.lepton1->Pt(),p.weight,ptbinnum,ptbin);
     FillHist(pre+"leta"+suf,p.lepton0->Eta(),p.weight,50,-2.5,2.5);
     FillHist(pre+"leta"+suf,p.lepton1->Eta(),p.weight,50,-2.5,2.5);    
   }

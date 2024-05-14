@@ -27,7 +27,7 @@ def GetHist(args,ientry,mrange=None,yrange=None,zptweight=False,gen=False):
                 h.Delete()
 
     if mrange is None:
-        mrange=[rt.ZptWeight.massbin[0],rt.ZptWeight.massbin[rt.ZptWeight.massbinnum]]
+        mrange=[rt.ZptWeight.massbin[0],rt.ZptWeight.massbin[len(rt.ZptWeight.massbin)-1]]
     if yrange is None:
         yrange=[rt.ZptWeight.ybin[0],rt.ZptWeight.ybin[rt.ZptWeight.ybinnum]]
     ixmin=hist.GetXaxis().FindBin(mrange[0])
@@ -172,7 +172,7 @@ def SetupZptWeight(args):
     if args.input:
         args.maxis=args.input.Get("maxis")
     else:
-        mbins=[52,77,106,280,3000]
+        mbins=[52,77,106,150]
         args.maxis=rt.TAxis(len(mbins)-1,array("d",mbins))
         args.maxis.SetName("maxis")
     args.zptweight_m=[None]*(args.maxis.GetNbins()+2)
@@ -187,7 +187,7 @@ def SetupZptWeight(args):
         #args.zptweight_m[i].FixParameter(args.npar_m-1,0)
 
 def CheckZptWeight(args):
-    ms=[52,80,100,150]
+    ms=[52,77,106,150,200]
     ys=[0,0.8,1.6,2.4]
     for im in range(len(ms)):
         c=rt.TCanvas()
@@ -227,8 +227,8 @@ def CheckZptWeight(args):
 
 def CheckResidue(args,prefix=""):
     ## global
-    hdata=GetHist(args,0,mrange=[80,100],yrange=[0,2.4])
-    hdy=GetHist(args,1,mrange=[80,100],yrange=[0,2.4],zptweight=True)
+    hdata=GetHist(args,0,mrange=[77,106],yrange=[0,2.4])
+    hdy=GetHist(args,1,mrange=[77,106],yrange=[0,2.4],zptweight=True)
     hdata.Scale(1/hdata.Integral())
     hdy.Scale(1/hdy.Integral())
     hdata.Divide(hdy)
@@ -239,8 +239,8 @@ def CheckResidue(args,prefix=""):
     ## rapidity
     yaxis=args.yaxis
     for iy in range(1,yaxis.GetNbins()+1):
-        hdata=GetHist(args,0,mrange=[80,100],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)])
-        hdy=GetHist(args,1,mrange=[80,100],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)],zptweight=True)
+        hdata=GetHist(args,0,mrange=[77,106],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)])
+        hdy=GetHist(args,1,mrange=[77,106],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)],zptweight=True)
         hdata.Scale(1/hdata.Integral())
         hdy.Scale(1/hdy.Integral())
         hdata.Divide(hdy)
@@ -341,8 +341,8 @@ def EvalZptWeight(args):
 def EvalZptWeightG(args,iteration=1):
     for it in range(iteration):
         print "[EvalZptWeightG] iter {}".format(it)
-        hdata=GetHist(args,0,mrange=[80,100],yrange=[0,2.4])
-        hdy=GetHist(args,1,mrange=[80,100],yrange=[0,2.4],zptweight=True)
+        hdata=GetHist(args,0,mrange=[77,106],yrange=[0,2.4])
+        hdy=GetHist(args,1,mrange=[77,106],yrange=[0,2.4],zptweight=True)
         hdata.Scale(1/hdata.Integral())
         hdy.Scale(1/hdy.Integral())
         hdata.Divide(hdy)
@@ -372,8 +372,8 @@ def EvalZptWeightG(args,iteration=1):
     normsf=hdy_nozptweight.Integral()/hdy.Integral()
     print "[EvalZptWeightG] norm sf={}".format(normsf)
     Scale(args.zptweight_g,normsf)
-    hdata=GetHist(args,0,mrange=[80,100],yrange=[0,2.4])
-    hdy=GetHist(args,1,mrange=[80,100],yrange=[0,2.4],zptweight=True)
+    hdata=GetHist(args,0,mrange=[77,106],yrange=[0,2.4])
+    hdy=GetHist(args,1,mrange=[77,106],yrange=[0,2.4],zptweight=True)
     hdata.Scale(1/hdata.Integral())
     hdy.Scale(1/hdy.Integral())
     hdata.Divide(hdy)
@@ -386,8 +386,8 @@ def EvalZptWeightY(args,iteration=1):
     for it in range(iteration):
         for iy in range(1,yaxis.GetNbins()+1):
             print "[EvalZptWeightY] iter {} y {}".format(it,iy)
-            hdata=GetHist(args,0,mrange=[80,100],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)])
-            hdy=GetHist(args,1,mrange=[80,100],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)],zptweight=True)
+            hdata=GetHist(args,0,mrange=[77,106],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)])
+            hdy=GetHist(args,1,mrange=[77,106],yrange=[yaxis.GetBinLowEdge(iy),yaxis.GetBinUpEdge(iy)],zptweight=True)
             hdata.Scale(1/hdata.Integral())
             hdy.Scale(1/hdy.Integral())
             hdata.Divide(hdy)
