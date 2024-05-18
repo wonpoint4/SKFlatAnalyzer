@@ -6,7 +6,9 @@ ROOT.TH1.SetDefaultSumw2(1)
 ROOT.gROOT.ProcessLine('#include"AFBSystPlotter.cc"')
 
 _plotter=ROOT.AFBSystPlotter("mi ttll")
-SystematicSuffixes=dict(_plotter.GetSystematicSuffixes("totalsys")).keys()
+SYSNAME="totalsys"
+#SYSNAME="dypdf"
+SystematicSuffixes=dict(_plotter.GetSystematicSuffixes(SYSNAME)).keys()
 Systematics=dict(_plotter.systematics)
 grid_mbin=ROOT.AFBAnalyzer.grid_mbin
 
@@ -55,9 +57,9 @@ class AFBMeasurement:
 
 
 class AFBMeasurements:
-    def __init__(self,filename,histname):
-        self.default_syst="totalsys"
-        #self.default_syst="z0weight"
+    def __init__(self,filename,histname,combine="blue"):
+        self.combine=combine
+        self.default_syst=SYSNAME
         self.histname=histname
         f=ROOT.TFile(filename)
         h=f.Get(histname)
@@ -85,6 +87,9 @@ class AFBMeasurements:
             for i in range(ncells):
                 self.measurements[i].SetSystError(suffix,h.GetBinContent(i),isValue=True)
         self.syst={}
+        self.dist=None
+        if "unfoldedafb" in histname:
+            self.dist=AFBMeasurements(filename,histname.replace("unfoldedafb","unfolded"),combine=combine)
         return
 
     def __len__(self):
@@ -98,6 +103,45 @@ class AFBMeasurements:
         for i in range(len(self.measurements)):
             out+=[ "\t".join( map(str,[i,self.GetValue(i),self.GetStatError(i)]+[self.GetSystError(i,key) for key in syst]) ) ]
         return "\n".join(out)
+
+    def Dist2AFB(self):
+        if not self.dist:
+            print "No distribution"
+            return
+        ncells=len(self.measurements)
+        n=ncells-2
+        self.measurements=[AFBMeasurement(0,0) for i in range(ncells)]
+        for i in range(1,n+1):
+            nf=self.dist.GetValue(i+n)
+            nb=self.dist.GetValue(i)
+            afb=(nf-nb)/(nf+nb)
+            self.measurements[i].value=afb
+            ef2=self.dist.cov_stat[i+n,i+n]
+            eb2=self.dist.cov_stat[i,i]
+            efeb=self.dist.cov_stat[i+n,i]
+            for j in range(i,n+1):
+                nfj=self.dist.GetValue(j+n)
+                nbj=self.dist.GetValue(j)
+                efefj=self.dist.cov_stat[i+n,j+n]
+                efebj=self.dist.cov_stat[i+n,j]
+                ebefj=self.dist.cov_stat[i,j+n]
+                ebebj=self.dist.cov_stat[i,j]
+                self.cov_stat[i,j]=4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj)
+                if i!=j:
+                    self.cov_stat[j,i]=4./(nf+nb)**2/(nfj+nbj)**2*(nb*nbj*efefj-nb*nfj*efebj-nf*nbj*ebefj+nf*nfj*ebebj)
+                else:
+                    self.measurements[i].error=self.cov_stat[i,i]**0.5
+        for suffix in SystematicSuffixes:
+            for i in range(ncells):
+                if i==0 or i==ncells-1:
+                    afb=0
+                else:
+                    nf=self.dist.measurements[i+n].value+self.dist.measurements[i+n].syst[suffix]
+                    nb=self.dist.measurements[i].value+self.dist.measurements[i].syst[suffix]
+                    afb=(nf-nb)/(nf+nb)
+                self.measurements[i].SetSystError(suffix,afb,isValue=True)
+        self.syst={}
+        return
 
     def EvalSystError(self,key):
         key=str(key)
@@ -191,6 +235,13 @@ class AFBMeasurements:
         rt.syst={}
         return rt
 
+    def __add__(self,other):
+        rt=copy.deepcopy(self)
+        rt.measurements=[rt.measurements[i]+other.measurements[i] for i in range(len(rt.measurements))]
+        rt.cov_stat+=other.cov_stat
+        rt.syst={}
+        return rt
+
     def __mod__(self,other):
         rt=copy.deepcopy(self)
         n=len(rt.measurements)
@@ -208,18 +259,23 @@ class AFBMeasurements:
                 if other.GetStatError(i)==0:
                     ws=[1.,0.]
                 else:
-                    ws=[1/self.cov_stat[i][i],1/other.cov_stat[i][i]]
-                    # cov=AFBMeasurements.CalcCov(self.default_syst,[self.measurements[i],other.measurements[i]])
-                    # cov[0][0]+=self.cov_stat[i][i]
-                    # cov[1][1]+=other.cov_stat[i][i]
-                    # try:
-                    #     covI=np.linalg.inv(cov)
-                    # except:
-                    #     print cov
-                    #     print self.GetValue(i), self.GetStatError(i), other.GetValue(i), other.GetStatError(i)
-                    #     exit()
-                    # ws=np.matmul(covI,np.ones((2,1)))
-                    # ws=ws.T[0]
+                    if self.combine=="simple":
+                        ws=[1/self.cov_stat[i][i],1/other.cov_stat[i][i]]
+                    elif self.combine=="blue":
+                        cov=AFBMeasurements.CalcCov(self.default_syst,[self.measurements[i],other.measurements[i]])
+                        cov[0][0]+=self.cov_stat[i][i]
+                        cov[1][1]+=other.cov_stat[i][i]
+                        try:
+                            covI=np.linalg.inv(cov)
+                        except:
+                            print cov
+                            print self.GetValue(i), self.GetStatError(i), other.GetValue(i), other.GetStatError(i)
+                            exit()
+                        ws=np.matmul(covI,np.ones((2,1)))
+                        ws=ws.T[0]
+                    else:
+                        print "Unknown combine method",self.combine
+                        exit(1)
                     ws/=sum(ws)
             rt.measurements[i]=self.measurements[i]*ws[0]+other.measurements[i]*ws[1]
             cov_stat0[i,:]*=ws[0]
@@ -228,6 +284,12 @@ class AFBMeasurements:
             cov_stat1[:,i]*=ws[1]
         rt.cov_stat=cov_stat0+cov_stat1
         rt.syst={}
+        if rt.dist:
+            if other.dist:
+                rt.dist+=other.dist
+            else:
+                print "[Error] [AFBMeasurements::Combined] there is self.dist but no other.dist"
+                exit(1)
         return rt
         
     def Compare(self,other):
@@ -330,8 +392,8 @@ def SaveUnfoldedPlotAll(inputpath,outputpath):
             mdatas=[]
             msims=[]
             for channel in ["ee","mm"]:
-                #for era in ["2016a","2016b","2017","2018"]:
-                for era in ["Run2"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                #for era in ["Run2"]:
                     mdatas+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
                     msims+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname.replace("unfoldedafb_","gen_"))]
             mdata=reduce(lambda x,y:x%y,mdatas)
@@ -396,8 +458,8 @@ def SaveDeltaPlotAll(inputpath,outputpath):
             for channel in ["ee","mm"]:
                 mdatass=[]
                 msimss=[]
-                #for era in ["2016a","2016b","2017","2018"]:
-                for era in ["Run2"]:
+                for era in ["2016a","2016b","2017","2018"]:
+                #for era in ["Run2"]:
                     mdatass+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
                     msimss+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname.replace("unfoldedafb_","gen_"))]
                 mdatas+=[reduce(lambda x,y:x%y,mdatass)]
@@ -452,8 +514,8 @@ def SaveTableAll(inputpath,outputpath):
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             ms=[]
             for channel in ["ee","mm"]:
-                for era in ["Run2"]:
-                #for era in ["2016a","2016b","2017","2018"]:
+                #for era in ["Run2"]:
+                for era in ["2016a","2016b","2017","2018"]:
                     ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
             m=reduce(lambda x,y:x%y,ms)
             m.Save(outputpath+"/"+region+"/"+histname+".tex")
@@ -463,8 +525,8 @@ def SaveTableCovAll(inputpath,outputpath):
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             ms=[]
             for channel in ["ee","mm"]:
-                for era in ["Run2"]:
-                #for era in ["2016a","2016b","2017","2018"]:
+                #for era in ["Run2"]:
+                for era in ["2016a","2016b","2017","2018"]:
                     ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
             m=reduce(lambda x,y:x%y,ms)
             m.SaveCov(outputpath+"/"+region+"/"+histname+"_cov.tex")
@@ -475,8 +537,8 @@ def SaveCorrelationAll(inputpath,outputpath):
         for histname in ["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]:
             ms=[]
             for channel in ["ee","mm"]:
-                for era in ["Run2"]:
-                #for era in ["2016a","2016b","2017","2018"]:
+                #for era in ["Run2"]:
+                for era in ["2016a","2016b","2017","2018"]:
                     ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
             m=reduce(lambda x,y:x%y,ms)
             cov=[[m.GetCov(i,j) for i in range(len(m))] for j in range(len(m))]
@@ -588,7 +650,7 @@ def Compare(mss,base=0):
     latex.DrawLatex(0.8,0.05,"Bin index")
     return c
 
-def SaveCombineSchemeAll(inputpath,outputpath):
+def SaveCombineSchemeAll(inputpath,outputpath,combine="blue",dist2afb=False):
     histnames=["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]
     for region in ["0bjet","nbjet"]:
         mss=[]
@@ -597,27 +659,29 @@ def SaveCombineSchemeAll(inputpath,outputpath):
             ms=[]
             for channel in ["ee","mm"]:
                 for era in ["2016a","2016b","2017","2018"]:
-                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname,combine=combine)]
             m0=reduce(lambda x,y:x%y,ms)
             
             ms=[]
             for channel in ["ll"]:
                 for era in ["2016a","2016b","2017","2018"]:
-                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname,combine=combine)]
             m1=reduce(lambda x,y:x%y,ms)
 
             ms=[]
             for channel in ["ee","mm"]:
                 for era in ["Run2"]:
-                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname)]
+                    ms+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname,combine=combine)]
             m2=reduce(lambda x,y:x%y,ms)
     
-            m3=AFBMeasurements(inputpath,"llRun2/"+region+"/"+histname)
+            m3=AFBMeasurements(inputpath,"llRun2/"+region+"/"+histname,combine=combine)
 
-            #ms=[m0,m1,m2,m3,AFBMeasurements(inputpath,"eeRun2/"+region+"/"+histname),AFBMeasurements(inputpath,"mmRun2/"+region+"/"+histname)]
-            #ms=[m1,AFBMeasurements(inputpath,"ll2016a/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2016b/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2017/"+region+"/"+histname),AFBMeasurements(inputpath,"ll2018/"+region+"/"+histname),m2]
-            mss+=[[m0,m1,m2,m3]]
-        c=Compare(mss,base=2)
+            ms=[m0,m1,m2,m3]
+            if dist2afb:
+                for m in ms:
+                    m.Dist2AFB()
+            mss+=[ms]
+        c=Compare(mss,base=0)
         ROOT.Plotter.DrawPreliminary(c,"Run2")
         latex=ROOT.TLatex()
         latex.SetNDC()
@@ -650,73 +714,145 @@ def SaveCombineSchemeAll(inputpath,outputpath):
         leg=ROOT.TLegend(0.13,0.03,0.77,0.1)
         leg.SetBorderSize(0)
         leg.SetNColumns(2)
-        leg.AddEntry(c.gss[0][0],"era/channel-dependent unfolding","l")
+        leg.AddEntry(c.gss[0][0],"era/channel-dependent unfolding (nominal)","l")
         leg.AddEntry(c.gss[0][1],"era-dependent unfolding","l")
-        leg.AddEntry(c.gss[0][2],"channel-dependent unfolding (nominal)","l")
-        leg.AddEntry(c.gss[0][3],"merged unfolding","l")
+        leg.AddEntry(c.gss[0][2],"channel-dependent unfolding","l")
+        leg.AddEntry(c.gss[0][3],"unfolding at once","l")
         leg.Draw()
         c.leg=leg
         #raw_input()
         _plotter.plotdir=outputpath
-        _plotter.SaveCanvas(c,region+"_combine.png",False)
-        _plotter.SaveCanvas(c,region+"_combine.pdf")
+        _plotter.SaveCanvas(c,region+"_combine_scheme.png",False)
+        _plotter.SaveCanvas(c,region+"_combine_scheme.pdf")
+    return
+
+def SaveCombineMethodAll(inputpath,outputpath,channels=["ee","mm"],eras=["2016a","2016b","2017","2018"]):
+    histnames=["unfoldedafb_afbm","unfoldedafb_afby_m0","unfoldedafb_afby_m1","unfoldedafb_afby_m2","unfoldedafb_afby_m3","unfoldedafb_afbpt_m0","unfoldedafb_afbpt_m1","unfoldedafb_afbpt_m2","unfoldedafb_afbpt_m3"]
+    for region in ["0bjet","nbjet"]:
+        mss=[]
+        for histname in histnames:
+        #for histname in ["unfoldedafb_afbm"]:
+            ms=[]
+            for combine,dist2afb in [("simple",False),("blue",False),("blue",True)]:
+                m=[]
+                for channel in channels:
+                    for era in eras:
+                        m+=[AFBMeasurements(inputpath,channel+era+"/"+region+"/"+histname,combine=combine)]
+                m=reduce(lambda x,y:x%y,m)
+                if dist2afb:
+                    m.Dist2AFB()
+                ms+=[m]
+            mss+=[ms]
+        c=Compare(mss,base=1)
+        ROOT.Plotter.DrawPreliminary(c,"Run2")
+        latex=ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextFont(42)
+        for i in range(len(mss)):
+            c.cd(i+1)
+            mass_range=""
+            if "_m0" in histnames[i]:
+                mass_range=";52#leq m_{ll}<77 GeV"
+            if "_m1" in histnames[i]:
+                mass_range=";77#leq m_{ll}<106 GeV"
+            if "_m2" in histnames[i]:
+                mass_range=";106#leq m_{ll}<200 GeV"
+            if "_m3" in histnames[i]:
+                mass_range=";200#leq m_{ll}<3000 GeV"
+
+            variable="m_{ll}"
+            if "afby" in histnames[i]:
+                variable="|y_{ll}|"
+            if "afbpt" in histnames[i]:
+                variable="p_{T}^{ll}"                
+            latex.SetTextAlign(13)
+            latex.SetTextSize(0.12)
+            latex.DrawLatex(0.16,0.99,"A_{FB}("+variable+mass_range+")")
+        c.cd()
+        latex.SetTextSize(0.03)
+        latex.SetTextAlign(11)
+        latex.SetTextAngle(90)
+        latex.DrawLatex(0.05,0.5,"#frac{A_{FB}-A_{FB}^{nominal}}{#sigma(A_{FB}^{nominal})}")
+        leg=ROOT.TLegend(0.13,0.03,0.77,0.1)
+        leg.SetBorderSize(0)
+        leg.SetNColumns(2)
+        leg.AddEntry(c.gss[0][0],"stat. weighted average","l")
+        leg.AddEntry(c.gss[0][1],"BLUE method (nominal)","l")
+        leg.AddEntry(c.gss[0][2],"stacked","l")
+        leg.Draw()
+        c.leg=leg
+        #raw_input()
+        _plotter.plotdir=outputpath
+        _plotter.SaveCanvas(c,region+"_combine_method.png",False)
+        _plotter.SaveCanvas(c,region+"_combine_method.pdf")
     return
 
 def CompareGen(inputpath,outputpath):
-    region="nbjet"
-    gss=[]
-    for histname in ["gen_afbm","gen_afby_m0","gen_afby_m1","gen_afby_m2","gen_afby_m3","gen_afbpt_m0","gen_afbpt_m1","gen_afbpt_m2","gen_afbpt_m3"]:
-    #for histname in ["unfoldedafb_afbm"]:
-        ms=[AFBMeasurements(inputpath,"eeRun2/"+region+"/"+histname),AFBMeasurements(inputpath,"mmRun2/"+region+"/"+histname)]
-        
-        base=0
-        n=len(ms)
-        gs=[ROOT.TGraphErrors() for _ in range(len(ms)*2)]
-        colors=[1,2,4,6,7,8,9]
-        for i in range(n):
-            gs[i].SetLineColor(colors[i])
-            gs[i+n].SetLineColor(colors[i])
-        for i in range(1,len(ms[0])-1):
-            vals=np.array([m.GetValue(i) for m in ms])
-            errs=np.array([m.GetTotalError(i) for m in ms])
-            errs_stat=np.array([m.GetStatError(i) for m in ms])
-            if errs[1]==0: continue
-            vals,errs,errs_stat=(vals-vals[base])/errs[base],errs/errs[base],errs_stat/errs[base]
-            for j in range(n):
-                gs[j].SetPoint(i-1,i-0.2+0.1*j,vals[j])
-                gs[j].SetPointError(i-1,0,errs[j])
-                gs[n+j].SetPoint(i-1,i-0.2+0.1*j,vals[j])
-                gs[n+j].SetPointError(i-1,0,errs_stat[j])
-        gss+=[gs]
-    c=ROOT.TCanvas()
-    c.hists=[]
-    c.Divide(1,9)
-    for i in range(len(gss)):
-        c.cd(i+1)
-        ROOT.gPad.SetTopMargin(0)
-        ROOT.gPad.SetBottomMargin(0)
-        n=gss[i][0].GetN()
-        sigma=ROOT.TH1D("sigma","sigma",n,0,n)
-        for ib in range(sigma.GetNcells()):
-            sigma.SetBinError(ib,1)
-        sigma.SetFillStyle(3001)
-        sigma.SetFillColor(ROOT.kGreen)
-        sigma.GetYaxis().SetTickLength(0)
-        sigma.GetYaxis().SetRangeUser(-2.99,2.99)
-        sigma.Draw("e2")
-        sigma.SetStats(0)
-        sigma.SetDirectory(0)
-        c.hists+=[sigma]
-        for g in gss[i]:
-            g.Draw("p same")
-    raw_input()
+    histnames=["gen_afbm","gen_afby_m0","gen_afby_m1","gen_afby_m2","gen_afby_m3","gen_afbpt_m0","gen_afbpt_m1","gen_afbpt_m2","gen_afbpt_m3"]
+    for region in ["0bjet","nbjet"]:
+        mss=[]
+        for histname in histnames:
+            ms=[AFBMeasurements(inputpath,"eeRun2/"+region+"/"+histname),AFBMeasurements(inputpath,"mmRun2/"+region+"/"+histname)]
+            mss+=[ms]
+        c=Compare(mss)
+        ROOT.Plotter.DrawPreliminary(c,"","","nolumi noera")
+        latex=ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextFont(42)
+        for i in range(len(mss)):
+            c.cd(i+1)
+            mass_range=""
+            if "_m0" in histnames[i]:
+                mass_range=";52#leq m_{ll}<77 GeV"
+            if "_m1" in histnames[i]:
+                mass_range=";77#leq m_{ll}<106 GeV"
+            if "_m2" in histnames[i]:
+                mass_range=";106#leq m_{ll}<200 GeV"
+            if "_m3" in histnames[i]:
+                mass_range=";200#leq m_{ll}<3000 GeV"
+
+            variable="m_{ll}"
+            if "afby" in histnames[i]:
+                variable="|y_{ll}|"
+            if "afbpt" in histnames[i]:
+                variable="p_{T}^{ll}"                
+            latex.SetTextAlign(13)
+            latex.SetTextSize(0.12)
+            latex.DrawLatex(0.16,0.99,"A_{FB}("+variable+mass_range+")")
+        c.cd()
+        latex.SetTextSize(0.03)
+        latex.SetTextAlign(11)
+        latex.SetTextAngle(90)
+        latex.DrawLatex(0.05,0.5,"#frac{A_{FB}-A_{FB}^{nominal}}{#sigma(A_{FB}^{nominal})}")
+        leg=ROOT.TLegend(0.13,0.03,0.77,0.1)
+        leg.SetBorderSize(0)
+        leg.SetNColumns(2)
+        leg.AddEntry(c.gss[0][0],"gen ee","l")
+        leg.AddEntry(c.gss[0][1],"gen #mu#mu","l")
+        leg.Draw()
+        c.leg=leg
+        #raw_input()
+        _plotter.plotdir=outputpath
+        _plotter.SaveCanvas(c,region+"_compare_gen.png",False)
+        _plotter.SaveCanvas(c,region+"_compare_gen.pdf")
+    return
 
 if __name__=="__main__":
+    # a=AFBMeasurements("AFBResult/final.root","mm2018/0bjet/unfoldedafb_afbm")
+    # print a
+    # a.Dist2AFB()
+    # print a
+
     #SaveCompareEraAll("AFBResult/final.root","fig/AFBMeasurements/diff")
     #SaveUnfoldedPlotAll("AFBResult/final.root","fig/AFBMeasurements")
-    #SaveCombineSchemeAll("AFBResult/final.root","fig/AFBMeasurements")
-    #CompareGen("AFBResult/final.root","fig/AFBMeasurements")
-    SaveCorrelationAll("AFBResult/final.root","fig/AFBMeasurements")
+    # SaveCombineSchemeAll("AFBResult/final.root","test_simple0",combine="simple",dist2afb=False)
+    # SaveCombineSchemeAll("AFBResult/final.root","test_simple1",combine="simple",dist2afb=True)
+    # SaveCombineSchemeAll("AFBResult/final.root","test_blue0",combine="blue",dist2afb=False)
+    # SaveCombineSchemeAll("AFBResult/final.root","test_blue1",combine="blue",dist2afb=True)
+    #SaveCombineMethodAll("AFBResult/final.root","test_method")
+    #SaveCombineMethodAll("AFBResult/final.root","test_method_eradep",eras=["2016a","2016b","2017","2018"])
+    CompareGen("AFBResult/final.root","fig/AFBMeasurements")
+    #SaveCorrelationAll("AFBResult/final.root","fig/AFBMeasurements")
     # syst="triggerSF_mode1 triggerSF_interpolation".split()
     # m=AFBMeasurements("AFBResult/final.root","ll2018/0bjet/unfoldedafb_afby_m0")
     # print m.__str__(syst)
