@@ -53,7 +53,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
     prefireweight = L1PrefireReweight_Central;
   }
   //p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.btagSF*p.w.topptweight*p.w.pujetSF;
-  map_weight[""] = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
+  map_weight["_noEffSF"] = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
 
   if(MCSample.Contains("MiNNLO")){
     for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
@@ -67,6 +67,13 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Weak"   , lumiweight * PUweight * prefireweight * zptweight * weakweight);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt"  , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight);
 
+  FillHist(prefix+hprefix+"weight_Lumi",    lumiweight,    map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_PU",      PUweight,      map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_Prefire", prefireweight, map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_Zpt",     zptweight,     map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_Weak",    weakweight,    map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_Toppt",   topptweight,   map_weight[""], 200,-5,5);
+
   // Trigger
   if(!IsFiredTriggers(channel)) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
@@ -78,12 +85,54 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   // Dilepton + pT + OS + Mass
   if(!HasDileptons(channel)) return;
 
+  // Lepton Efficiency Correction
+  leptonTrackingSF = 1.;
+  leptonRECOSF = 1.;
+  leptonIDSF = 1.;
+  leptonTriggerSF = 1.;
+
+  if(!IsDATA){
+    TString DZSF = "";
+    if(channel.Contains("mm")){
+      for(const Lepton* lepton:leptons){
+        leptonTrackingSF *= fEff->GetEfficiencySF("Muon_Tracking", lepton, 0,0);
+        leptonRECOSF *= fEff->GetEfficiencySF("Muon_RECO", lepton, 0,0);
+        leptonIDSF *= fEff->GetEfficiencySF("Muon_MediumID_trkIsoLoose", lepton, 0,0);
+      }
+      if(GetEraShort() !="2016a") DZSF = "DZ_MediumID_trkIsoLoose";
+      leptonTriggerSF *= GetDileptonTriggerSF("Mu17Leg1_MediumID_trkIsoLoose", "Mu8Leg2_MediumID_trkIsoLoose", DZSF, leptons, 0,0);
+    }else if(channel.Contains("ee")){
+      for(const Lepton* lepton:leptons){
+        leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton, 0,0);
+        leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton, 0,0);
+      }
+      if(GetEraShort().Contains("2016")) DZSF = "DZ_MediumID";
+      leptonTriggerSF *= GetDileptonTriggerSF("Ele23Leg1_MediumID", "Ele12Leg2_MediumID", DZSF, leptons, 0,0);
+    }
+  }
+
+  map_weight[""] = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight * leptonTrackingSF * leptonRECOSF * leptonIDSF * leptonTriggerSF;
+
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF"  , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight * leptonTrackingSF);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF"      , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight * leptonTrackingSF * leptonRECOSF);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF"        , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight * leptonTrackingSF * leptonRECOSF * leptonIDSF);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF"   , lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight * leptonTrackingSF * leptonRECOSF * leptonIDSF * leptonTriggerSF);
+
+  FillHist(prefix+hprefix+"weight_TrackingSF", leptonTrackingSF, map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_RECOSF",     leptonRECOSF,     map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_IDSF",       leptonIDSF,       map_weight[""], 200,-5,5);
+  FillHist(prefix+hprefix+"weight_TriggerSF",  leptonTriggerSF,  map_weight[""], 200,-5,5);
+
   // Inclusive DY
   double dimass = (*lepton0 + *lepton1).M();
   double dirap = (*lepton0 + *lepton1).Rapidity();
   double dipt = (*lepton0 + *lepton1).Pt();
   double costhetaCS = GetCosThetaCS(lepton0, lepton1);
-  FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+  FillHist(prefix+hprefix+"mll_incDY", dimass, map_weight[""], 80,70,110);
+  FillHist(prefix+hprefix+"yll_incDY", dirap, map_weight[""], 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_incDY", dipt, map_weight[""], 100,0,100);
+  FillHist(prefix+hprefix+"costhetaCS_incDY"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   // Jets
   vector<Jet> alljets = SelectJets(GetAllJets(), "tightLepVeto", 20, 2.4);
@@ -222,12 +271,14 @@ bool dybAnalyzer::HasDileptons(TString channel){
   double l0pt = 20., l1pt = 10.;
   if(channel.Contains("mm")){
     muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4), 0,0,0);
+    //muons = SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) lepton1 = &muons.at(1);
   }else if(channel.Contains("ee")){
     l0pt = 25.;
     l1pt = 15.;
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
+    //electrons = SMPGetElectrons("passMediumID", 8.0,2.5);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) lepton1 = &electrons.at(1);
   }
@@ -240,6 +291,10 @@ bool dybAnalyzer::HasDileptons(TString channel){
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Charge", map_weight[""]);
   if((*lepton0 + *lepton1).M() < 52) return false;                      // Mass 52
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Mass52", map_weight[""]);
+
+  leptons ={};
+  leptons.push_back(lepton0);
+  leptons.push_back(lepton1);
 
   return true;
 }

@@ -37,6 +37,7 @@ public:
   vector<Gen> gens;
   vector<Jet> jets;
   vector<Jet> bjets;
+  vector<Lepton*> leptons;
   vector<Muon> muons;
   vector<Electron> electrons;
   Lepton* lepton0 = NULL;
@@ -44,6 +45,11 @@ public:
   Jet* jet0 = NULL;
   double bcharge = 0;
   std::map<TString,double> map_weight;
+
+  double leptonTrackingSF =1.;
+  double leptonRECOSF =1.;
+  double leptonIDSF =1.;
+  double leptonTriggerSF =1.;
 
   double lumiweight = 1.;
   double PUweight = 1.;
