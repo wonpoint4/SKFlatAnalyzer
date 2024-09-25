@@ -6,9 +6,6 @@ FakeAnalyzer::~FakeAnalyzer(){
 }
 void FakeAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0
-  jtp = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
-  vector<JetTagging::Parameters> jtps={jtp};
-  mcCorr->SetJetTaggingParameters(jtps);
 }
 void FakeAnalyzer::executeEvent(){
   if(GetSkimName()=="Dilepton") executeDileptonEvent();
@@ -129,11 +126,11 @@ void FakeAnalyzer::FillHists(Parameter& p){
     TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
     double dimass=dilepton.M();
     if(dimass>52){
-      if(p.bjets.size()) FillDileptonHists(p,"nbjet/");
+      if(p.bjets.size()&&p.bjets.at(0).Pt()>p.c.jetpt) FillDileptonHists(p,"nbjet/");
       else FillDileptonHists(p,"0bjet/");
       FillDileptonHists(p,"");
       if(dimass<76||dimass>106){
-	if(p.bjets.size()) FillDileptonHists(p,"nbjet/noZ/");
+	if(p.bjets.size()&&p.bjets.at(0).Pt()>p.c.jetpt) FillDileptonHists(p,"nbjet/noZ/");
 	else FillDileptonHists(p,"0bjet/noZ/");
 	FillDileptonHists(p,"noZ/");
       }
@@ -142,131 +139,132 @@ void FakeAnalyzer::FillHists(Parameter& p){
     std::vector<Jet> jets30=GetJets("tightLepVeto",30,2.4);
     std::sort(jets30.begin(),jets30.end(),PtComparing);
     if(jets30.size()&&fabs(jets30.at(0).DeltaPhi(*p.lepton0))>TMath::Pi()*2/3&&(jets30.at(0)+*p.lepton0).M()>50){
-      if(p.bjets.size()) FillLeptonHists(p,"nbjet/");
+      if(p.bjets.size()&&p.bjets.at(0).Pt()>p.c.jetpt) FillLeptonHists(p,"nbjet/");
       else FillLeptonHists(p,"0bjet/");
       FillLeptonHists(p,"");
     }
   }
 }
 void FakeAnalyzer::FillLeptonHists(Parameter& p,TString region){
-  for(auto [suf,weight]:p.weightmap){
-    double eta=fabs(p.leptons.at(0)->Eta());
-    double pt=p.leptons.at(0)->Pt();
-    double riso=p.leptons.at(0)->RelIso();
-    double energy=p.leptons.at(0)->E();
-    FillHist(p.prefix+region+p.hprefix+"l0pt"+p.suffix+suf,pt,weight,nptbin,ptbins);
-    FillHist(p.prefix+region+p.hprefix+"l0eta"+p.suffix+suf,eta,weight,netabin,etabins);
-    FillHist(p.prefix+region+p.hprefix+"l0etapt"+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-    FillHist(p.prefix+region+p.hprefix+"l0etae"+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
-    FillHist(p.prefix+region+p.hprefix+"l0riso"+p.suffix+suf,riso,weight,100,0,2);
-  }
+  double weight=p.weight;
+  TString suf=p.suffix+p.vsuffix;
+
+  double eta=fabs(p.leptons.at(0)->Eta());
+  double pt=p.leptons.at(0)->Pt();
+  double riso=p.leptons.at(0)->RelIso();
+  double energy=p.leptons.at(0)->E();
+  FillHist(p.prefix+region+p.hprefix+"l0pt"+suf,pt,weight,nptbin,ptbins);
+  FillHist(p.prefix+region+p.hprefix+"l0eta"+suf,eta,weight,netabin,etabins);
+  FillHist(p.prefix+region+p.hprefix+"l0etapt"+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+  FillHist(p.prefix+region+p.hprefix+"l0etae"+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+  FillHist(p.prefix+region+p.hprefix+"l0riso"+suf,riso,weight,100,0,2);
 }
 void FakeAnalyzer::FillDileptonHists(Parameter& p,TString region){
-  for(auto [suf,weight]:p.weightmap){
-    TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
-    FillHist(p.prefix+region+p.hprefix+"dimass"+p.suffix+suf,dilepton.M(),weight,98,52,150);
-    FillHist(p.prefix+region+p.hprefix+"dimass_wide"+p.suffix+suf,dilepton.M(),weight,nmbin,mbins);
-    FillHist(p.prefix+region+p.hprefix+"dipt"+p.suffix+suf,dilepton.Pt(),weight,100,0,100);
-    FillHist(p.prefix+region+p.hprefix+"dirap"+p.suffix+suf,dilepton.Rapidity(),weight,60,-3,3);
-    if(p.bjets.size()){
-      FillHist(p.prefix+region+p.hprefix+"b0pt"+p.suffix+suf,p.bjets.at(0).Pt(),weight,100,0,200);
-      FillHist(p.prefix+region+p.hprefix+"b0eta"+p.suffix+suf,p.bjets.at(0).Eta(),weight,60,-3,3);
-      FillHist(p.prefix+region+p.hprefix+"drbl"+p.suffix+suf,TMath::Min(p.bjets.at(0).DeltaR(*p.lepton0),p.bjets.at(0).DeltaR(*p.lepton1)),weight,60,-3,3);      
+  double weight=p.weight;
+  TString suf=p.suffix+p.vsuffix;
+  TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
+  FillHist(p.prefix+region+p.hprefix+"dimass"+suf,dilepton.M(),weight,98,52,150);
+  FillHist(p.prefix+region+p.hprefix+"dimass_wide"+suf,dilepton.M(),weight,nmbin,mbins);
+  FillHist(p.prefix+region+p.hprefix+"dipt"+suf,dilepton.Pt(),weight,100,0,100);
+  FillHist(p.prefix+region+p.hprefix+"dirap"+suf,dilepton.Rapidity(),weight,60,-3,3);
+  if(p.bjets.size()&&p.bjets.at(0).Pt()>p.c.jetpt){
+    FillHist(p.prefix+region+p.hprefix+"b0pt"+suf,p.bjets.at(0).Pt(),weight,100,0,200);
+    FillHist(p.prefix+region+p.hprefix+"b0eta"+suf,p.bjets.at(0).Eta(),weight,60,-3,3);
+    FillHist(p.prefix+region+p.hprefix+"drbl"+suf,TMath::Min(p.bjets.at(0).DeltaR(*p.lepton0),p.bjets.at(0).DeltaR(*p.lepton1)),weight,60,-3,3);      
+  }
+  if(p.jets.size()&&p.jets.at(0).Pt()>p.c.jetpt){
+    FillHist(p.prefix+region+p.hprefix+"j0pt"+suf,p.jets.at(0).Pt(),weight,100,0,200);
+    FillHist(p.prefix+region+p.hprefix+"j0eta"+suf,p.jets.at(0).Eta(),weight,60,-3,3);
+    FillHist(p.prefix+region+p.hprefix+"drjl"+suf,TMath::Min(p.jets.at(0).DeltaR(*p.lepton0),p.jets.at(0).DeltaR(*p.lepton1)),weight,60,-3,3);
+  }      
+  for(int i=0,n=p.leptons.size();i<n;i++){
+    double eta=fabs(p.leptons.at(i)->Eta());
+    double pt=p.leptons.at(i)->Pt();
+    double riso=p.leptons.at(i)->RelIso();
+    double energy=p.leptons.at(i)->E();
+    FillHist(p.prefix+region+p.hprefix+Form("l%detapt",i)+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
+    FillHist(p.prefix+region+p.hprefix+Form("l%detae",i)+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
+    FillHist(p.prefix+region+p.hprefix+Form("l%driso",i)+suf,riso,weight,100,0,2);
+    FillHist(p.prefix+region+p.hprefix+"lpt"+suf,pt,weight,nptbin,ptbins);
+    FillHist(p.prefix+region+p.hprefix+Form("l%dpt",i)+suf,pt,weight,nptbin,ptbins);
+    FillHist(p.prefix+region+p.hprefix+"leta"+suf,eta,weight,netabin,etabins);
+    FillHist(p.prefix+region+p.hprefix+Form("l%deta",i)+suf,eta,weight,netabin,etabins);
+  }
+  if((p.channel=="EE"||p.channel=="MM")&&p.prefix.Contains("cpt/")){
+    TString prefix=p.prefix+region;
+    prefix.ReplaceAll("EE","ee");
+    prefix.ReplaceAll("MM","mm");
+    prefix.ReplaceAll("cpt/","");
+    map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
+    for(auto [fakesuf,sys]:map_fakesuf){
+      double tf=GetFakeTF(p,"cpt "+region,sys);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"dimass"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"dimass_wide"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"dipt"+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"dirap"+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"l0pt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"l1pt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"l0eta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakecpt_"+p.hprefix+"l1eta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
     }
-    if(p.jets.size()){
-      FillHist(p.prefix+region+p.hprefix+"j0pt"+p.suffix+suf,p.jets.at(0).Pt(),weight,100,0,200);
-      FillHist(p.prefix+region+p.hprefix+"j0eta"+p.suffix+suf,p.jets.at(0).Eta(),weight,60,-3,3);
-      FillHist(p.prefix+region+p.hprefix+"drjl"+p.suffix+suf,TMath::Min(p.jets.at(0).DeltaR(*p.lepton0),p.jets.at(0).DeltaR(*p.lepton1)),weight,60,-3,3);
-    }      
-    for(int i=0,n=p.leptons.size();i<n;i++){
-      double eta=fabs(p.leptons.at(i)->Eta());
-      double pt=p.leptons.at(i)->Pt();
-      double riso=p.leptons.at(i)->RelIso();
-      double energy=p.leptons.at(i)->E();
-      FillHist(p.prefix+region+p.hprefix+Form("l%detapt",i)+p.suffix+suf,eta,pt,weight,netabin,etabins,nptbin,ptbins);
-      FillHist(p.prefix+region+p.hprefix+Form("l%detae",i)+p.suffix+suf,eta,energy,weight,netabin,etabins,nptbin,ptbins);
-      FillHist(p.prefix+region+p.hprefix+Form("l%driso",i)+p.suffix+suf,riso,weight,100,0,2);
-      FillHist(p.prefix+region+p.hprefix+"lpt"+p.suffix+suf,pt,weight,nptbin,ptbins);
-      FillHist(p.prefix+region+p.hprefix+Form("l%dpt",i)+p.suffix+suf,pt,weight,nptbin,ptbins);
-      FillHist(p.prefix+region+p.hprefix+"leta"+p.suffix+suf,eta,weight,netabin,etabins);
-      FillHist(p.prefix+region+p.hprefix+Form("l%deta",i)+p.suffix+suf,eta,weight,netabin,etabins);
+  }else if((p.channel=="EE"||p.channel=="MM")&&p.prefix.Contains("mpt/")){
+    TString prefix=p.prefix+region;
+    prefix.ReplaceAll("EE","ee");
+    prefix.ReplaceAll("MM","mm");
+    prefix.ReplaceAll("mpt/","");
+    map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
+    for(auto [fakesuf,sys]:map_fakesuf){
+      double tf=GetFakeTF(p,"mpt "+region,sys);
+      FillHist(prefix+"fakempt_"+p.hprefix+"dimass"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
+      FillHist(prefix+"fakempt_"+p.hprefix+"dimass_wide"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"dipt"+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
+      FillHist(prefix+"fakempt_"+p.hprefix+"dirap"+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
+      FillHist(prefix+"fakempt_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"l0pt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"l1pt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"l0eta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakempt_"+p.hprefix+"l1eta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
     }
-    if((p.channel=="EE"||p.channel=="MM")&&p.prefix.Contains("cpt/")){
-      TString prefix=p.prefix+region;
-      prefix.ReplaceAll("EE","ee");
-      prefix.ReplaceAll("MM","mm");
-      prefix.ReplaceAll("cpt/","");
-      map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
-      for(auto [fakesuf,sys]:map_fakesuf){
-	double tf=GetFakeTF(p,"cpt "+region,sys);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"dimass"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"dimass_wide"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"dipt"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"dirap"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"l0pt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"l1pt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"l0eta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakecpt_"+p.hprefix+"l1eta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-      }
-    }else if((p.channel=="EE"||p.channel=="MM")&&p.prefix.Contains("mpt/")){
-      TString prefix=p.prefix+region;
-      prefix.ReplaceAll("EE","ee");
-      prefix.ReplaceAll("MM","mm");
-      prefix.ReplaceAll("mpt/","");
-      map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
-      for(auto [fakesuf,sys]:map_fakesuf){
-	double tf=GetFakeTF(p,"mpt "+region,sys);
-	FillHist(prefix+"fakempt_"+p.hprefix+"dimass"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
-	FillHist(prefix+"fakempt_"+p.hprefix+"dimass_wide"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"dipt"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
-	FillHist(prefix+"fakempt_"+p.hprefix+"dirap"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
-	FillHist(prefix+"fakempt_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"l0pt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"l1pt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"l0eta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakempt_"+p.hprefix+"l1eta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-      }
-    }else if((p.channel=="EE"||p.channel=="MM")){
-      TString prefix=p.prefix+region;
-      prefix.ReplaceAll("EE","ee");
-      prefix.ReplaceAll("MM","mm");
-      map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
-      for(auto [fakesuf,sys]:map_fakesuf){
-	double tf=GetFakeTF(p,region,sys);
-	FillHist(prefix+"fake_"+p.hprefix+"dimass"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
-	FillHist(prefix+"fake_"+p.hprefix+"dimass_wide"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
-	FillHist(prefix+"fake_"+p.hprefix+"dipt"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
-	FillHist(prefix+"fake_"+p.hprefix+"dirap"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
-	FillHist(prefix+"fake_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fake_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fake_"+p.hprefix+"l0pt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fake_"+p.hprefix+"l1pt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fake_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fake_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fake_"+p.hprefix+"l0eta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fake_"+p.hprefix+"l1eta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-
-	tf=GetFakeTF(p,"lj",sys);
-	FillHist(prefix+"fakelj_"+p.hprefix+"dimass"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
-	FillHist(prefix+"fakelj_"+p.hprefix+"dimass_wide"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"dipt"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
-	FillHist(prefix+"fakelj_"+p.hprefix+"dirap"+p.suffix+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
-	FillHist(prefix+"fakelj_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"lpt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"l0pt"+p.suffix+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"l1pt"+p.suffix+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"leta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"l0eta"+p.suffix+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
-	FillHist(prefix+"fakelj_"+p.hprefix+"l1eta"+p.suffix+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
-      }
+  }else if((p.channel=="EE"||p.channel=="MM")){
+    TString prefix=p.prefix+region;
+    prefix.ReplaceAll("EE","ee");
+    prefix.ReplaceAll("MM","mm");
+    map<TString,int> map_fakesuf={{"",0},{"_faketf_up",1},{"_faketf_down",-1}};
+    for(auto [fakesuf,sys]:map_fakesuf){
+      double tf=GetFakeTF(p,region,sys);
+      FillHist(prefix+"fake_"+p.hprefix+"dimass"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
+      FillHist(prefix+"fake_"+p.hprefix+"dimass_wide"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
+      FillHist(prefix+"fake_"+p.hprefix+"dipt"+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
+      FillHist(prefix+"fake_"+p.hprefix+"dirap"+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
+      FillHist(prefix+"fake_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fake_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fake_"+p.hprefix+"l0pt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fake_"+p.hprefix+"l1pt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fake_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fake_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fake_"+p.hprefix+"l0eta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fake_"+p.hprefix+"l1eta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
+      
+      tf=GetFakeTF(p,"lj",sys);
+      FillHist(prefix+"fakelj_"+p.hprefix+"dimass"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,98,52,150);
+      FillHist(prefix+"fakelj_"+p.hprefix+"dimass_wide"+suf+fakesuf,(*p.lepton0+*p.lepton1).M(),weight*tf,nmbin,mbins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"dipt"+suf+fakesuf,(*p.lepton0+*p.lepton1).Pt(),weight*tf,100,0,100);
+      FillHist(prefix+"fakelj_"+p.hprefix+"dirap"+suf+fakesuf,(*p.lepton0+*p.lepton1).Rapidity(),weight*tf,60,-3,3);
+      FillHist(prefix+"fakelj_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"lpt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"l0pt"+suf+fakesuf,p.lepton0->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"l1pt"+suf+fakesuf,p.lepton1->Pt(),weight*tf,nptbin,ptbins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"leta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"l0eta"+suf+fakesuf,fabs(p.lepton0->Eta()),weight*tf,netabin,etabins);
+      FillHist(prefix+"fakelj_"+p.hprefix+"l1eta"+suf+fakesuf,fabs(p.lepton1->Eta()),weight*tf,netabin,etabins);
     }
   }
 }

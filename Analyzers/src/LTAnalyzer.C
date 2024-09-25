@@ -66,15 +66,20 @@ void LTAnalyzer::ResetRecoWeights(Parameter& p){
   p.w.prefireweight=1.; p.w.prefireweight_up=1.; p.w.prefireweight_down=1.;
   p.w.z0weight=1.;
   p.w.electronRECOSF=1.;
-  p.w.electronRECOSF_sys=fEff->GetStructure(p.k.electronRECOSF);
+  p.w.electronRECOSF_sys=Make2DWeights(fEff->GetStructure(p.k.electronRECOSF));
   p.w.electronIDSF=1.;
-  p.w.electronIDSF_sys=fEff->GetStructure(p.k.electronIDSF);
+  p.w.electronIDSF_sys=Make2DWeights(fEff->GetStructure(p.k.electronIDSF));
+  p.w.muonTrackingSF=1.;
+  p.w.muonTrackingSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonTrackingSF));
+  p.w.muonRECOSF=1.;
+  p.w.muonRECOSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonRECOSF));
   p.w.muonIDSF=1.;
-  p.w.muonIDSF_sys=fEff->GetStructure(p.k.muonIDSF);
+  p.w.muonIDSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonIDSF));
   p.w.muonISOSF=1.;
-  p.w.muonISOSF_sys=fEff->GetStructure(p.k.muonISOSF);
+  p.w.muonISOSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonISOSF));
   p.w.triggerSF=1.;
-  p.w.triggerSF_sys=fEff->GetStructure(p.k.triggerSF[0]);
+  p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
+  p.w.CFSF=1.; p.w.CFSF_up=1.; p.w.CFSF_down=1.;
   p.w.btagSF=1.; p.w.btagSF_hup=1.; p.w.btagSF_hdown=1.; p.w.btagSF_lup=1.; p.w.btagSF_ldown=1.;
 }
 int LTAnalyzer::GetUnfoldBin(int njet,double mass,double pt,double cost,double phi){
@@ -93,8 +98,7 @@ int LTAnalyzer::GetUnfoldBin(int njet,double mass,double pt,double cost,double p
 
   return nphibin*(ncostbin*(nptbin*ijet+ipt)+icost)+iphi;
 }
-void LTAnalyzer::executeEventWithParameter(Parameter& p){
-  SMPAnalyzerCore::executeEventWithParameter(p);
+void LTAnalyzer::FillHistsUnfold(Parameter& preco,Parameter& pgen){
   if(!IsDYSample) return;
   TLorentzVector gen_dilepton=gen_l0+gen_l1;
   double gen_mass=gen_dilepton.M();
@@ -114,24 +118,22 @@ void LTAnalyzer::executeEventWithParameter(Parameter& p){
     gen_njet++;
   }
 
-  int igen=-1;
-  if(p.channel=="ee"){
-    if(abs(lhe_l0.ID())==11&&abs(lhe_l1.ID())==11)
-      igen=GetUnfoldBin(gen_njet,gen_mass,gen_pt,gen_cost,gen_phi);
-  }else if(p.channel=="mm"){
-    if(abs(lhe_l0.ID())==13&&abs(lhe_l1.ID())==13)
-      igen=GetUnfoldBin(gen_njet,gen_mass,gen_pt,gen_cost,gen_phi);
-  }
+  TString gen_channel="";
+  if(abs(lhe_l0.ID())==11&&abs(lhe_l1.ID())==11) gen_channel="ee";
+  else if(abs(lhe_l0.ID())==13&&abs(lhe_l1.ID())==13) gen_channel="mm";
 
-  Parameter pgen=p;
-  ResetRecoWeights(pgen);
-  EvalWeights(pgen);
+  int igen=-1;
+  double genweight=0;
+  if(preco.channel==gen_channel){
+    igen=GetUnfoldBin(gen_njet,gen_mass,gen_pt,gen_cost,gen_phi);
+    genweight=pgen.weight;
+  }
 
   TLorentzVector dilepton;
   pair<double,double> costphi=make_pair(0.,0.);
-  if(p.lepton0&&p.lepton1){
-    dilepton=*p.lepton0+*p.lepton1;
-    costphi=GetCostAndPhiCS(p.lepton0,p.lepton1);
+  if(preco.lepton0&&preco.lepton1){
+    dilepton=*preco.lepton0+*preco.lepton1;
+    costphi=GetCostAndPhiCS(preco.lepton0,preco.lepton1);
   }
   double mass=dilepton.M();
   double pt=dilepton.Pt();
@@ -142,24 +144,23 @@ void LTAnalyzer::executeEventWithParameter(Parameter& p){
   int njet=0;
   vector<Jet> jets=GetJets("tightLepVeto",20,5.0);
   for(int i=0,n=jets.size();i<n;i++){
-    if(p.lepton0&&jets[i].DeltaR(*p.lepton0)<0.4) continue;
-    if(p.lepton1&&jets[i].DeltaR(*p.lepton1)<0.4) continue;
+    if(preco.lepton0&&jets[i].DeltaR(*preco.lepton0)<0.4) continue;
+    if(preco.lepton1&&jets[i].DeltaR(*preco.lepton1)<0.4) continue;
     njet++;
   }
-  for(auto [wname,genweight]:pgen.weightmap){
-    double recoweight=0;
-    int ireco=-1;
-    if(p.weightmap.find(wname)!=p.weightmap.end()){
-      recoweight=p.weightmap[wname];
-      ireco=GetUnfoldBin(njet,mass,pt,cost,phi);
-    }
-    if(igen>=0){
-      FillHist(p.prefix+p.hprefix+"response"+p.suffix+wname,igen,ireco,recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);
-      FillHist(p.prefix+p.hprefix+"response"+p.suffix+wname,igen,-1,genweight-recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);
-    }else if(ireco>=0){
-      FillHist(p.prefix+p.hprefix+"response"+p.suffix+wname,igen,ireco,recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);      
-    }
-  } 
+
+  double recoweight=0;
+  int ireco=-1;
+  if(PassSelection(preco)){
+    recoweight=preco.weight;
+    ireco=GetUnfoldBin(njet,mass,pt,cost,phi);
+  }
+  if(igen>=0){
+    FillHist(preco.prefix+preco.hprefix+"response"+preco.suffix+preco.vsuffix,igen,ireco,recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);
+    FillHist(preco.prefix+preco.hprefix+"response"+preco.suffix+preco.vsuffix,igen,-1,genweight-recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);
+  }else if(ireco>=0){
+    FillHist(preco.prefix+preco.hprefix+"response"+preco.suffix+preco.vsuffix,igen,ireco,recoweight,nresponsebin,0,nresponsebin,nresponsebin,0,nresponsebin);
+  }
 }
 
 
@@ -241,90 +242,34 @@ pair<double,double> LTAnalyzer::GetCostAndPhiCS(Particle* l0,Particle* l1){
 
 SMPAnalyzerCore::Parameter LTAnalyzer::MakeParameter(TString key,TString option){
   Parameter p=SMPAnalyzerCore::MakeParameter(key,option);
-  p.weightbit|=EfficiencyWeight;
+  p.variationbits=NominalWeight|SystematicWeight|EfficiencyWeight;
   return p;
 }
-void LTAnalyzer::EvalWeights(Parameter& p){
-  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-  if(!IsDATA&&p.suffix==""&&!p.hprefix.Contains("ss_")){
-    p.weightmap["_noweight"]=p.w.lumiweight;
-    p.weightmap["_noPUweight"]=p.w.lumiweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    p.weightmap["_noprefireweight"]=p.w.lumiweight*p.w.PUweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    p.weightmap["_nozptweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    p.weightmap["_z0weight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*p.w.z0weight;
-    p.weightmap["_noweakweight"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    /*
-    for(int j=0,nj=fEff->nreplica;j<nj;j++){
-      double electronRECOSF=p.w.electronRECOSF_sys.size() ? p.w.electronRECOSF_sys[0][j] : 1.;
-      double electronIDSF=p.w.electronIDSF_sys.size() ? p.w.electronIDSF_sys[0][j] : 1.;
-      double muonTrackingSF=p.w.muonTrackingSF_sys.size() ? p.w.muonTrackingSF_sys[0][j] : 1.;
-      double muonRECOSF=p.w.muonRECOSF_sys.size() ? p.w.muonRECOSF_sys[0][j] : 1.;
-      double muonIDSF=p.w.muonIDSF_sys.size() ? p.w.muonIDSF_sys[0][j] : 1.;
-      double triggerSF=p.w.triggerSF_sys.size() ? p.w.triggerSF_sys[0][j] : 1.;
-      p.weightmap[Form("_efficiencySF_stat%d",j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*electronRECOSF*electronIDSF*muonTrackingSF*muonRECOSF*muonIDSF*p.w.muonISOSF*triggerSF*p.w.CFSF;
+void LTAnalyzer::FillHistsSyst(Parameter p,Variations& vs){
+  Parameter pgen=p.Clone();
+  ResetRecoWeights(pgen);
+  Variations genvariations=MakeVariations(pgen);
+  for(auto& [vsuf,variation]:vs){
+    Apply(p,vsuf,variation);
+    Apply(pgen,vsuf,genvariations[vsuf]);
+    FillHistsUnfold(p,pgen);
+
+    if(!PassSelection(p,p.vsuffix=="")) continue;
+
+    TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
+    double mass=dilepton.M();
+    double pt=dilepton.Pt();
+    pair<double,double> costphi=GetCostAndPhiCS(p.lepton0,p.lepton1);
+    double cost=costphi.first;
+    double phi=costphi.second;
+    int njet=0;
+    vector<Jet> jets=GetJets("tightLepVeto",20,5.0);
+    for(int i=0,n=jets.size();i<n;i++){
+      if(jets[i].DeltaR(*p.lepton0)<0.4) continue;
+      if(jets[i].DeltaR(*p.lepton1)<0.4) continue;
+      njet++;
     }
-
-    p.weightmap["_noelectronRECOSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=1,ni=p.w.electronRECOSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.electronRECOSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_electronRECOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF_sys[i][j]*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      }
-    }	
-    
-    p.weightmap["_noelectronIDSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=1,ni=p.w.electronIDSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.electronIDSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_electronIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF_sys[i][j]*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      }
-    }	
-
-    p.weightmap["_nomuonTrackingSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=1,ni=p.w.muonTrackingSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.muonTrackingSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_muonTrackingSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF_sys[i][j]*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      }
-    }	
-
-    p.weightmap["_nomuonRECOSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=1,ni=p.w.muonRECOSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.muonRECOSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_muonRECOSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF_sys[i][j]*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      }
-    }	
-
-    p.weightmap["_nomuonIDSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-    for(int i=1,ni=p.w.muonIDSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.muonIDSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_muonIDSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF_sys[i][j]*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-      }
-    }	
-    
-    p.weightmap["_notriggerSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.CFSF;
-    for(int i=1,ni=p.w.triggerSF_sys.size();i<ni;i++){
-      for(int j=0,nj=p.w.triggerSF_sys[i].size();j<nj;j++){
-	p.weightmap[Form("_triggerSF_s%d_m%d",i,j)]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF_sys[i][j]*p.w.CFSF;
-      }
-    }
-        
-    p.weightmap["_noefficiencySF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.CFSF;
-    */
-    p.weightmap["_noCFSF"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonTrackingSF*p.w.muonRECOSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF;
+    int ireco=GetUnfoldBin(njet,mass,pt,cost,phi);
+    FillHist(p.prefix+p.hprefix+"reco"+p.suffix+p.vsuffix,ireco,p.weight,nresponsebin,0,nresponsebin);
   }
-}
-void LTAnalyzer::FillHists(Parameter& p){
-  TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
-  double mass=dilepton.M();
-  double pt=dilepton.Pt();
-  pair<double,double> costphi=GetCostAndPhiCS(p.lepton0,p.lepton1);
-  double cost=costphi.first;
-  double phi=costphi.second;
-  int njet=0;
-  vector<Jet> jets=GetJets("tightLepVeto",20,5.0);
-  for(int i=0,n=jets.size();i<n;i++){
-    if(jets[i].DeltaR(*p.lepton0)<0.4) continue;
-    if(jets[i].DeltaR(*p.lepton1)<0.4) continue;
-    njet++;
-  }
-  int ireco=GetUnfoldBin(njet,mass,pt,cost,phi);
-  FillHist(p.prefix+p.hprefix+"reco"+p.suffix,ireco,p.weightmap,nresponsebin,0,nresponsebin);
 }

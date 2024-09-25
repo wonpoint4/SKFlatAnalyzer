@@ -9,7 +9,7 @@ public:
 
   void initializeAnalyzer();
   void executeEvent();
-  void EvalWeights(Parameter& p);
+  Variations MakeVariations(const Parameter& p);
   void FillHists(Parameter& p);
 
   ZpeakAnalyzer();

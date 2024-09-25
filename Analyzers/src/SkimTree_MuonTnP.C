@@ -32,6 +32,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("probe_isTight",&probe_isTight);
   newtree->Branch("probe_isMedium",&probe_isMedium);
   newtree->Branch("probe_isMedium2016a",&probe_isMedium2016a);
+  newtree->Branch("probe_isLoose",&probe_isLoose);
   newtree->Branch("probe_TkIsoLoose",&probe_TkIsoLoose);
   newtree->Branch("probe_PFIsoTight",&probe_PFIsoTight);
   newtree->Branch("probe_IsoMu24",&probe_IsoMu24);
@@ -50,6 +51,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("tag_isTight",&tag_isTight);
   newtree->Branch("tag_isMedium",&tag_isMedium);
   newtree->Branch("tag_isMedium2016a",&tag_isMedium2016a);
+  newtree->Branch("tag_isLoose",&tag_isLoose);
   newtree->Branch("tag_TkIsoLoose",&tag_TkIsoLoose);
   newtree->Branch("tag_PFIsoTight",&tag_PFIsoTight);
 
@@ -143,6 +145,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       probe_isTight=probe.isPOGTight();
       probe_isMedium=probe.isPOGMedium_nohip();
       probe_isMedium2016a=probe.isPOGMedium_hip();
+      probe_isLoose=probe.isPOGLoose();
       probe_TkIsoLoose=probe.PassSelector(Muon::Selector::TkIsoLoose);
       probe_PFIsoTight=probe.PassSelector(Muon::Selector::PFIsoTight);
       probe_IsoMu24=PassSLT1(&probe);
@@ -161,6 +164,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       tag_isTight=tag.isPOGTight();
       tag_isMedium=tag.isPOGMedium_nohip();
       tag_isMedium2016a=tag.isPOGMedium_hip();
+      tag_isLoose=tag.isPOGLoose();
       tag_TkIsoLoose=tag.PassSelector(Muon::Selector::TkIsoLoose);
       tag_PFIsoTight=tag.PassSelector(Muon::Selector::PFIsoTight);
       tag_pt=tag.MiniAODPt();

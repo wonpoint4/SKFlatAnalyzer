@@ -131,7 +131,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
 
   FillHist(prefix+hprefix+"mll_incDY", dimass, map_weight[""], 80,70,110);
   FillHist(prefix+hprefix+"yll_incDY", dirap, map_weight[""], 96,-2.4,2.4);
-  FillHist(prefix+hprefix+"ptll_incDY", dipt, map_weight[""], 100,0,100);
+  FillHist(prefix+hprefix+"ptll_incDY", dipt, map_weight[""], AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+  FillHist(prefix+hprefix+"ptl_incDY", lepton0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etal_incDY", lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptl_incDY", lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etal_incDY", lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"costhetaCS_incDY"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   // Jets
@@ -263,6 +267,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   map_weight["_toppt"]   = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
 
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
+
+  FillHist(prefix+hprefix+"mll", dimass, map_weight[""], 80,70,110);
+  FillHist(prefix+hprefix+"yll", dirap, map_weight[""], 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll", dipt, map_weight[""], AFBAnalyzer::unfold_nbjet_ptbinnum_reco,AFBAnalyzer::unfold_nbjet_ptbin_reco);
+  FillHist(prefix+hprefix+"ptl", lepton0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etal", lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptl", lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etal", lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 }
 //// END
@@ -446,7 +458,7 @@ void dybAnalyzer::executeEventGen(){
 
     if(abs(lhe_l0.ID()) == 11 || abs(lhe_l0.ID()) == 13){
       TLorentzVector genZ = (gen_l0 + gen_l1);
-      zptweight = GetZptWeight(genZ.M(), genZ.Rapidity(), genZ.Pt());
+      zptweight = fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity(),genZ.M());
       weakweight = GetDYWeakWeight(genZ.M());
 
       // Only qqbar collisions (LO DY)

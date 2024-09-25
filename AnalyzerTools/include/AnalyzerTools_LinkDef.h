@@ -19,5 +19,6 @@
 #pragma link C++ class Efficiency;
 #pragma link C++ class EfficiencyTool;
 #pragma link C++ class RocPFProb;
+#pragma link C++ class ZptCorrection;
 
 #endif

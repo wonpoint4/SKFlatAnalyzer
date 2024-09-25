@@ -11,6 +11,8 @@
 #include "TH4D.h"
 #include "EfficiencyTool.h"
 #include "RocPFProb.h"
+#include "Weight.h"
+#include "ZptCorrection.h"
 
 class SMPAnalyzerCore : public AnalyzerCore {
 
@@ -20,12 +22,55 @@ public:
     SystematicWeight=1<<1,
     PDFWeight=1<<2,
     EfficiencyWeight=1<<3,
+    LeptonCorrection=1<<4,
   };
+
+  class Variation{
+    virtual TString ClassName()=0;
+  };
+  class VariationWeight: public Variation{
+  public:
+  VariationWeight(double w):weight(w){}
+    double weight=1.;
+    virtual TString ClassName(){return "VariationWeight";}
+  };
+  class VariationMuonMomentum: public Variation{
+  public:
+  VariationMuonMomentum(int s,int m):set(s),mem(m){}
+    int set=0;
+    int mem=0;
+    virtual TString ClassName(){return "VariationMuonMomentum";}
+  };
+  class VariationElectronEnergy: public Variation{
+  public:
+  VariationElectronEnergy(int s,int m):set(s),mem(m){}
+    int set=0;
+    int mem=0;
+    virtual TString ClassName(){return "VariationElectronEnergy";}
+  };
+  class VariationJES: public Variation{
+  public:
+  VariationJES(int d):direction(d){}
+    int direction=0;
+    virtual TString ClassName(){return "VariationJES";}
+  };
+  class VariationJER: public Variation{
+  public:
+  VariationJER(int d):direction(d){}
+    int direction=0;
+    virtual TString ClassName(){return "VariationJER";}
+  };
+  typedef std::map<TString,std::unique_ptr<SMPAnalyzerCore::Variation>> Variations;
+  void AddVariationWeight(Variations& v,TString suffix,double weight);
+  void AddVariationMuonMomentum(Variations& v,TString suffix,int set,int mem);
+  void AddVariationElectronEnergy(Variations& v,TString suffix,int set,int mem);
+  void AddVariationJES(Variations& v,TString suffix,int direction);
+  void AddVariationJER(Variations& v,TString suffix,int direction);
 
   class Parameter{
   public:
     TString channel;
-    TString prefix,hprefix,suffix;
+    TString prefix,hprefix,suffix,vsuffix;
     vector<TString> triggers;
     vector<Gen> gens;
     vector<Jet> jets;
@@ -39,39 +84,53 @@ public:
     Lepton* lepton1=NULL;
     Gen truth_lepton0;
     Gen truth_lepton1;
-    std::map<TString,double> weightmap;
     std::map<TString,double> doublemap;
     std::map<TString,int> intmap;
-    int weightbit=NominalWeight;
+    int variationbits=NominalWeight;
+    Weight default_weight;
+    Weight weight;
+    int muonmomentum_set=0;
+    int default_muonmomentum_set=0;
+    int muonmomentum_mem=0;
+    int default_muonmomentum_mem=0;
+    int electronenergy_set=0;
+    int default_electronenergy_set=0;
+    int electronenergy_mem=0;
+    int default_electronenergy_mem=0;
+    int JES_direction=0;
+    int default_JES_direction=0;
+    int JER_direction=0;
+    int default_JER_direction=0;
+
     TString option;
     struct Key{
       TString electronRECOSF,electronIDSF,electronIDSF2,muonTrackingSF,muonRECOSF,muonIDSF,muonISOSF,DZSF;
       vector<TString> triggerSF;
     };
-    struct Weight{
-      double lumiweight=1;
-      double PUweight=1,PUweight_up=1,PUweight_down=1;
-      double prefireweight=1,prefireweight_up=1,prefireweight_down=1;
-      double z0weight=1;
-      double zptweight=1;
-      double topptweight=1;
-      double weakweight=1;
-      double electronRECOSF=1;
-      vector<vector<double>> electronRECOSF_sys;
-      double electronIDSF=1;
-      vector<vector<double>> electronIDSF_sys;
-      double muonTrackingSF=1;
-      vector<vector<double>> muonTrackingSF_sys;
-      double muonRECOSF=1;
-      vector<vector<double>> muonRECOSF_sys;
-      double muonIDSF=1;
-      vector<vector<double>> muonIDSF_sys;
-      double muonISOSF=1;
-      vector<vector<double>> muonISOSF_sys;
-      double triggerSF=1,triggerSF_up=1,triggerSF_down=1,triggerSF_mode1=1,triggerSF_interpolation=1;
-      vector<vector<double>> triggerSF_sys;
-      double CFSF=1,CFSF_up=1,CFSF_down=1;
-      double btagSF=1,btagSF_hup=1,btagSF_hdown=1,btagSF_lup=1,btagSF_ldown=1;
+    struct Weights{
+      Weight lumiweight;
+      Weight PUweight,PUweight_up,PUweight_down;
+      Weight prefireweight,prefireweight_up,prefireweight_down;
+      Weight z0weight;
+      Weight zptweight,zptweight_g,zptweight_gy,zptweight_gym;
+      Weight topptweight;
+      Weight weakweight;
+      Weight electronRECOSF;
+      vector<vector<Weight>> electronRECOSF_sys;
+      Weight electronIDSF;
+      vector<vector<Weight>> electronIDSF_sys;
+      Weight muonTrackingSF;
+      vector<vector<Weight>> muonTrackingSF_sys;
+      Weight muonRECOSF;
+      vector<vector<Weight>> muonRECOSF_sys;
+      Weight muonIDSF;
+      vector<vector<Weight>> muonIDSF_sys;
+      Weight muonISOSF;
+      vector<vector<Weight>> muonISOSF_sys;
+      Weight triggerSF,triggerSF_up,triggerSF_down,triggerSF_mode1,triggerSF_interpolation;
+      vector<vector<Weight>> triggerSF_sys;
+      Weight CFSF,CFSF_up,CFSF_down;
+      Weight btagSF,btagSF_hup,btagSF_hdown,btagSF_lup,btagSF_ldown,btagSF_hcorr,btagSF_huncorr,btagSF_lcorr,btagSF_luncorr;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -79,15 +138,17 @@ public:
       double electron0pt=-1,electron1pt=-1;
       double amuon0pt=-1,amuon1pt=-1;
       double aelectron0pt=-1,aelectron1pt=-1;
+      double jetpt=40.;
       int nelectronmax=-1,nmuonmax=-1;
       int nleptonmin=2;
     };
     Key k;
-    Weight w;
+    Weights w;
     Cut c;
 
     Parameter();
     ~Parameter();
+    Parameter Clone(){ Parameter p=*this; p.SetLeptons(); return p; }
     void SetChannel(TString ch);
     void SetElectronKeys(TString elID,vector<TString> trig);
     void SetElectronKeys(TString elID,TString elID2,vector<TString> trig);
@@ -101,14 +162,26 @@ public:
     void SetAMuons(vector<Muon> mus);
   };
 
+  virtual void Apply(Parameter& p,TString vsuf,unique_ptr<Variation>& v);
   virtual void initializeAnalyzer();
   virtual void beginEvent();
   virtual void executeEventWithParameter(Parameter& p);
   virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
-  virtual void EvalWeights(Parameter& p);
-  virtual bool PassSelection(Parameter& p);
+  virtual void EvalDefaultWeight(Parameter& p);
+  virtual Variations MakeVariations(const Parameter& p);
+  virtual void EvalVariationsPUweight(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsPrefireweight(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsCF(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsBtag(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsEtc(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsEfficiency(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsPDF(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsMuonMomentum(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsElectronEnergy(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsJetCorrection(const Parameter& p,Variations& variations);
+  virtual bool PassSelection(Parameter& p,bool cutflow=false);
   virtual Parameter MakeParameter(TString channel,TString option="");
 
   std::map< TString, TH4D* > maphist_TH4D;
@@ -186,6 +259,7 @@ public:
 		int n_binz, const double *zbins,
                 int n_binu, double u_min, double u_max);
   virtual void FillHists(Parameter& p);
+  virtual void FillHistsSyst(Parameter p,Variations& v);
 
   void FillGenHists(TString pre,TString suf,TLorentzVector genl0,TLorentzVector genl1,TLorentzVector genfsr,double w);
   void FillDileptonHists(TString pre,TString suf,Particle* l0,Particle* l1,double w);
@@ -250,13 +324,8 @@ public:
 
   // ZptWeight
   void SetupZptWeight();
-  double GetZptWeight(double mass,double rapidity,double pt,TString opt="GYM");
   void DeleteZptWeight();
-  TF1* fZptWeightG=NULL;
-  vector<TF1*> fZptWeightY;
-  TAxis* fZptWeightYaxis=NULL;
-  vector<TF1*> fZptWeightM;
-  TAxis* fZptWeightMaxis=NULL;
+  ZptCorrection* fZptCorrection=NULL;
 
   // L1PrefiringWeight
   virtual void SetupL1PrefiringWeight();
@@ -288,8 +357,8 @@ public:
   RoccoR* roc=NULL;
   Aepcor* rocele=NULL;
 
-  std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0);
-  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0);
+  std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0,bool sort=true);
+  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0,bool sort=true);
 
   double GetPFMET_T1Smear() const;
   TString GetSkimName() const;
@@ -298,6 +367,8 @@ public:
   bool PassSLT2(const Lepton* lep) const;
   bool PassDLT1(const Lepton* lep) const;
   bool PassDLT2(const Lepton* lep) const;
+
+  static vector<vector<Weight>> Make2DWeights(const vector<int>& structure);
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

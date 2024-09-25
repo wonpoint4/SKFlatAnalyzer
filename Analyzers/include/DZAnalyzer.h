@@ -9,7 +9,7 @@ public:
 
   virtual void initializeAnalyzer();
   virtual void executeEvent();
-  virtual void EvalWeights(Parameter& p);
+  virtual Variations MakeVariations(const Parameter& p);
   virtual void FillHists(Parameter& p);
   virtual void FillHistsDZ(Parameter& p,TString suffix);
   virtual bool PassSelection(Parameter& p);

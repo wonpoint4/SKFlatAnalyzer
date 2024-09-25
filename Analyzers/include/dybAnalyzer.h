@@ -3,6 +3,7 @@
 
 #include "TKey.h"
 #include "SMPAnalyzerCore.h"
+#include "AFBAnalyzer.h"
 #include "LHAPDF/Reweighting.h"
 
 class dybAnalyzer : public SMPAnalyzerCore {
