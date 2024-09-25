@@ -376,7 +376,7 @@ void AFBAnalyzer::FillHistsSyst(Parameter p,Variations& vs){
     }
     if(vsuf==""||vsuf.Contains("z0weight"))
       FillHist(p.prefix+p.hprefix+"z0"+p.suffix+vsuf,dimass,dirap,dipt,vertex_Z,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-    if(vsuf.Contains("PUWeight")){
+    if(vsuf==""||vsuf.Contains("PUweight")){
       FillHist(p.prefix+p.hprefix+"nPV"+p.suffix+vsuf,dimass,dirap,dipt,nPV,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
       FillHist(p.prefix+p.hprefix+"rho"+p.suffix+vsuf,dimass,dirap,dipt,Rho,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
       FillHist(p.prefix+p.hprefix+"met"+p.suffix+vsuf,dimass,dirap,dipt,pfMET_Type1_pt,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);

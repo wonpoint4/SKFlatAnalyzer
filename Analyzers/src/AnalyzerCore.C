@@ -184,6 +184,7 @@ std::vector<Electron> AnalyzerCore::GetAllElectrons() const {
     el.SetPtEtaPhiE( el_pt, electron_eta->at(i), electron_phi->at(i), electron_Energy->at(i));
 
     el.SetUncorrE(electron_EnergyUnCorr->at(i));
+    el.userFloat["pogE"]=el.E();
     el.SetSC(electron_scEta->at(i), electron_scPhi->at(i), electron_scEnergy->at(i));
     el.SetCharge(electron_charge->at(i));
     el.SetdXY(electron_dxyVTX->at(i), electron_dxyerrVTX->at(i));

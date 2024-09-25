@@ -34,5 +34,5 @@
 #pragma link C++ class BjetAnalyzer+;
 #pragma link C++ class BBAnalyzer+;
 #pragma link C++ class Chi2Analyzer+;
-
+#pragma link C++ class GenTest+;
 #endif

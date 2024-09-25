@@ -1155,6 +1155,9 @@ void MCCorrection::SetupMCJetTagEff(){
 
   TString datapath=getenv("DATA_DIR");
   TString mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_TTLL_TTLJ_hadded.root";
+  if(MCSample.Contains("MiNNLO")){
+    mcjetpath=datapath+"/"+DataEra+"/BTag/MeasureJetTaggingEfficiency_DY_MiNNLO.root";
+  }
   ifstream fcheck(mcjetpath);
   if(!fcheck.good()){
     cout<<"[MCCorrection::SetupMCJetTagEff] no "+mcjetpath<<endl;

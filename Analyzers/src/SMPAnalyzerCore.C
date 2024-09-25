@@ -1794,6 +1794,8 @@ std::vector<Muon> SMPAnalyzerCore::MuonMomentumCorrection(const vector<Muon>& mu
     if(set>=0){
       double rc=MuonMomentumCorrection(muon,set,member);
       muon.SetPtEtaPhiM(muon.MiniAODPt()*rc,muon.Eta(),muon.Phi(),muon.M());
+    }else if(set==-1){
+      muon.SetPtEtaPhiM(muon.MiniAODPt(),muon.Eta(),muon.Phi(),muon.M());
     }else if(set==-2){
       double rc=MuonMomentumCorrection(muon,0,0);
       if(fRoccorResidual.find("muon_scale")!=fRoccorResidual.end() && fRoccorResidual["muon_scale"]){
@@ -1865,6 +1867,8 @@ std::vector<Electron> SMPAnalyzerCore::ElectronEnergyCorrection(const vector<Ele
       electron*=ElectronEnergyCorrection(electron,set,member);
     }else if(set==-1){ //no energe cor
       electron*=electron.UncorrE()/electron.E();
+    }else if(set==-3){
+      electron*=electron.userFloat["pogE"]/electron.E();
     }else if(set==-2){ //residual energe cor
       electron*=ElectronEnergyCorrection(electron,0,0);
       if(fRoccorResidual.find("electron_scale")!=fRoccorResidual.end() && fRoccorResidual["electron_scale"]){

@@ -8,6 +8,7 @@ class AFBAnalyzerSyst : public AFBAnalyzer {
 public:
   virtual void initializeAnalyzer();
   virtual void executeEvent();
+  virtual void executeEventGen();
   virtual Parameter MakeParameter(TString key,TString option="");
   virtual Variations MakeVariations(const Parameter& p);
   virtual void FillHistsSyst(Parameter p,Variations& vs);

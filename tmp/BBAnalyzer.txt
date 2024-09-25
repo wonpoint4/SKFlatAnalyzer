@@ -53,6 +53,7 @@ SKFlat.py -a BBAnalyzer -i EGamma --skim SkimTree_Dilepton -n 20 -e 2018
 SKFlat.py -a BBAnalyzer -i DoubleMuon --skim SkimTree_Dilepton -n 20 -e 2018
 SKFlat.py -a BBAnalyzer -i SingleMuon --skim SkimTree_Dilepton -n 10 -e 2018
 SKFlat.py -a BBAnalyzer -i DYJetsToMuMu_MiNNLO --skim SkimTree_Dilepton -n 100 -e 2018
+SKFlat.py -a BBAnalyzer -i DYJetsToEE_MiNNLO --skim SkimTree_Dilepton -n 100 -e 2018
 SKFlat.py -a BBAnalyzer -i DYJetsToTauTau_MiNNLO --skim SkimTree_Dilepton -n 5 -e 2018
 SKFlat.py -a BBAnalyzer -i WW_pythia --skim SkimTree_Dilepton -n 5 -e 2018
 SKFlat.py -a BBAnalyzer -i WZ_pythia --skim SkimTree_Dilepton -n 5 -e 2018

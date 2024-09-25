@@ -157,7 +157,7 @@ def addResidual(infilename):
     if "Electron" in infilename:
         channel="el"
     elif "Muon" in infilename:
-        channel="mu"
+        channel="mm"
 
     os.system("cp {} {}".format(infilename,outfilename));
 

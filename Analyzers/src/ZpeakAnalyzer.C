@@ -78,11 +78,14 @@ SMPAnalyzerCore::Variations ZpeakAnalyzer::MakeVariations(const Parameter& p){
   if(p.channel[0]=='e'){
     //int ie=p.w.electronIDSF_sys.size()-1;
     //AddVariationWeight(v,"_efficiency_residual",p.default_weight/p.w.electronIDSF*p.w.electronIDSF_sys[ie][0]);      
+    AddVariationElectronEnergy(v,"_noroccor",-1,0);
     AddVariationElectronEnergy(v,"_roccor_residual",-2,0);
+    AddVariationElectronEnergy(v,"_pogcor",-3,0);
     //AddVariationElectronEnergy(v,"_residual",-2,0,p.default_weight/p.w.electronIDSF*p.w.electronIDSF_sys[ie][0]);
   }else if(p.channel[0]=='m'){
     //int im=p.w.muonIDSF_sys.size()-1;
     //AddVariationWeight(v,"_efficiency_residual",p.default_weight/p.w.muonIDSF*p.w.muonIDSF_sys[im][0]);
+    AddVariationMuonMomentum(v,"_noroccor",-1,0);
     AddVariationMuonMomentum(v,"_roccor_residual",-2,0);
     //AddVariationMuonMomentum(v,"_residual",-2,0,p.default_weight/p.w.muonIDSF*p.w.muonIDSF_sys[im][0]);
   }

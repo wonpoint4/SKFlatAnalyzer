@@ -2,6 +2,7 @@
 
 import array,os,sys,re
 import ROOT,ctypes
+import cppyy
 
 ROOT.TH1.AddDirectory(0)
 ROOT.TH1.SetDefaultSumw2(1)
@@ -293,6 +294,7 @@ def GetMatrix(config):
     print matrixname, config.option+" noproject"
     matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
     matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+    matrix.SetDirectory(ROOT.nullptr)
     config.matrix=matrix
     return matrix
 
@@ -589,10 +591,10 @@ def SaveResponseAll(path):
 
     for histname in histnames:
         config=Config(histname)
-        matrixname=config.matrixname
-        matrix=config.plotter.GetHist(1,matrixname,config.option+" noproject")
-        matrix=RebinResponseMatrix(matrix,config.bins_matrix,config.bins_matrix,config.bins_gen,config.bins_reco)
+        config.plotter.pdir=cppyy.bind_object(0,ROOT.TDirectory)
+        matrix=GetMatrix(config)
         proj=matrix.ProjectionX("proj",1,matrix.GetNbinsY())    
+        proj.SetDirectory(ROOT.nullptr)
         response=ROOT.TMatrixD(1,matrix.GetNbinsX(),1,matrix.GetNbinsY())
         for i in range(1,matrix.GetNbinsX()+1):
             for j in range(1,matrix.GetNbinsY()+1):
@@ -617,7 +619,7 @@ def SaveResponseAll(path):
         elif "2017" in histname: era="2017"
         elif "2018" in histname: era="2018"
         elif "201[678][ab]?" in histname: era="Run2"
-        config.plotter.DrawPreliminary(c,era,"","nolumi")
+        config.plotter.DrawCMS(c,era,"","cmssimwip nolumi")
         latex=ROOT.TLatex()
         latex.SetNDC()
         latex.SetTextColor(ROOT.kGray)
