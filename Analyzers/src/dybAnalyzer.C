@@ -1,7 +1,7 @@
 #include "dybAnalyzer.h"
 
 void dybAnalyzer::initializeAnalyzer(){
-  SMPAnalyzerCore::initializeAnalyzer(); //setup zpt roc z0 
+  SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
   
   IsSkimmed = GetSkimName() != ""? true: false;
   IsNominalRun =! HasFlag("SYS") && !HasFlag("PDFSYS") && IsSkimmed;
@@ -9,15 +9,16 @@ void dybAnalyzer::initializeAnalyzer(){
   PDFbase = LHAPDF::mkPDF(306000);
   PDFnf4 = LHAPDF::mkPDF(325500);
 
-  vector<JetTagging::Parameters> jtps = {JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
-                                         JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
-                                         JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
-                                         JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets)};
-
-                                         //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
-                                         //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
-                                         //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
-                                         //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm)};
+  vector<JetTagging::Parameters> jtps = {
+    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
+    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
+    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
+    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets)
+  };
+    //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+    //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
+    //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
+    //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm)};
   mcCorr->SetJetTaggingParameters(jtps);
   SetupPUJetWeight();
 }
@@ -383,6 +384,7 @@ bool dybAnalyzer::HasDileptons(TString channel){
 }
 bool dybAnalyzer::IsFiredTriggers(TString channel){
   vector<TString> triggers = {};
+  // Dilepton for DY
   if(DataYear == 2016 && channel.Contains("mm")){
     triggers = {
       "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v",
@@ -395,9 +397,23 @@ bool dybAnalyzer::IsFiredTriggers(TString channel){
   }else if(DataYear == 2017 && channel.Contains("mm")) triggers = {"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v"};
   else if(DataYear == 2018 && channel.Contains("mm")) triggers = {"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v"};
   else if(DataYear == 2016 && channel.Contains("ee")) triggers = {"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"};
-  else if(DataYear == 2017 && channel.Contains("ee")) triggers = {"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
-  else if(DataYear == 2018 && channel.Contains("ee")) triggers = {"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
-  else{
+  else if(DataYear >= 2017 && channel.Contains("ee")) triggers = {"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
+
+  // Single lepton for TTLJ
+  else if(DataYear == 2016 && channel.Contains("m")){
+    triggers = {
+      "HLT_IsoMu24_v",
+      "HLT_IsoTkMu24_v"
+    };
+  }else if(DataYear == 2017 && channel.Contains("m")) triggers = {"HLT_IsoMu27_v"};
+  else if(DataYear == 2018 && channel.Contains("m")) triggers = {"HLT_IsoMu24_v"};
+  else if(DataYear == 2016 && channel.Contains("e")) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
+  else if(DataYear >= 2017 && channel.Contains("e")){
+    triggers = {
+      "HLT_Ele27_WPTight_Gsf_v",
+      "HLT_Ele32_WPTight_Gsf_v"
+    };
+  }else{
     cout<<"[dybAnalyzer::IsFiredTriggers] something channel is wrong"<<endl;
     exit(EXIT_FAILURE);
   }

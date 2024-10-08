@@ -10,14 +10,14 @@ class dybAnalyzer : public SMPAnalyzerCore {
 
 public:
 
-  void initializeAnalyzer();
-  void executeEventWithParameter(TString channel);
-  void executeEventGen();
-  void executeEvent();
-  bool IsFiredTriggers(TString channel);
-  bool HasDileptons(TString channel);
-  double jetCharge(const Jet& jet);
-  double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+  virtual void initializeAnalyzer();
+  virtual void executeEventWithParameter(TString channel);
+  virtual void executeEventGen();
+  virtual void executeEvent();
+  virtual bool IsFiredTriggers(TString channel);
+  virtual bool HasDileptons(TString channel);
+  virtual double jetCharge(const Jet& jet);
+  virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
 
   // PUJetID, SF
   void SetupPUJetWeight();
