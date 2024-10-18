@@ -15,17 +15,16 @@ class ExampleRun_kinFitter : public dybAnalyzer {
   virtual void executeEvent();
   virtual bool Hasleptons(TString channel);
 
-  bool RunSyst;
-  bool RunNewPDF;
-  bool RunXSecSyst;
-
-  vector<TString> MuonIDs, MuonIDSFKeys, MuonTrigSFKeys;
-  vector<Muon> AllMuons;
-  vector<Jet> AllJets;
-
+  Lepton* lepton0 = NULL;
+  Jet* bjet0 = NULL;
+  Jet* bjet1 = NULL;
+  Jet* ajet0 = NULL;
+  Jet* ajet1 = NULL;
+  double bcharge0 = 0;
+  double bcharge1 = 0;
+  double acharge0 = 0;
+  double acharge1 = 0;
   TLorentzVector met;
-  double weight_Prefire;
-  double btagweight;
 
   ExampleRun_kinFitter();
   ~ExampleRun_kinFitter();
