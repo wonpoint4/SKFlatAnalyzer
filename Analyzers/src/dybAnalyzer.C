@@ -54,10 +54,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
     prefireweight = L1PrefireReweight_Central;
   }
 
-  if(MCSample.Contains("MiNNLO")){
-    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
-  }
-
   map_weight[""] = lumiweight;
   FillHist(prefix+hprefix+"weight_Lumi", lumiweight, map_weight[""], 200,-5,5);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight[""]);
@@ -252,6 +248,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   FillHist(prefix+hprefix+"weight_btagSF", btagSF, map_weight[""], 200,-5,5);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
 
+  if(MCSample.Contains("MiNNLO")){
+    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
+  }
+
   FillHist(prefix+hprefix+"mll_Tight1b", dimass, map_weight[""], 80,70,110);
   FillHist(prefix+hprefix+"yll_Tight1b", dirap, map_weight[""], 96,-2.4,2.4);
   FillHist(prefix+hprefix+"ptll_Tight1b", dipt, map_weight[""], AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
@@ -334,16 +334,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   FillHist(prefix+hprefix+"bjetCharge_ZbpT60"+suffix, bcharge, map_weight[""], 200,-5,5);
   //FillHist(prefix+hprefix+"costhetaRecoil_ZbpT60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
-  FillHist(prefix+hprefix+"ZbpT60_pTll", (*lepton0 +*lepton1).Pt(), map_weight[""], 200,0,200);
-
   if((*lepton0 + *lepton1).Pt() < 15) return;
-  map_weight["_lumi"]    = lumiweight;
-  map_weight["_pu"]      = lumiweight * PUweight;
-  map_weight["_prefire"] = lumiweight * PUweight * prefireweight;
-  map_weight["_zpt"]     = lumiweight * PUweight * prefireweight * zptweight;
-  map_weight["_weak"]    = lumiweight * PUweight * prefireweight * zptweight * weakweight;
-  map_weight["_toppt"]   = lumiweight * PUweight * prefireweight * zptweight * weakweight * topptweight;
-
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
   FillHist(prefix+hprefix+"mll", dimass, map_weight[""], 80,70,110);
   FillHist(prefix+hprefix+"yll", dirap, map_weight[""], 96,-2.4,2.4);
