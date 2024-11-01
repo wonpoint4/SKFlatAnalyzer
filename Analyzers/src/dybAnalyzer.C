@@ -425,21 +425,29 @@ double dybAnalyzer::jetCharge(const Jet& jet){
   vector<Electron> allels = GetAllElectrons(); // Need Aepcor too?
   std::sort(allels.begin(),allels.end(),PtComparing);
 
+  // Selections from Hyonsan's AN (AN-20-216 v3)
   vector<Muon> bmuon;
-  for(unsigned int l=0; l<allmus.size(); l++){
-    if(allmus.at(l).P()*sin(allmus.at(l).Angle(jet.Vect())) <0.6) continue;
-    if(allmus.at(l).TrkIso()/allmus.at(l).Pt() <0.05) continue;
-    if(abs(allmus.at(l).IP3D())/allmus.at(l).IP3Derr() <2.) continue;
-    if(jet.DeltaR(allmus.at(l))<0.4) bmuon.push_back(allmus.at(l));
+  for(const auto& mu:allmus){
+    if(jet.DeltaR(mu) > 0.3) continue;
+    if(mu.P() * sin(mu.Angle(jet.Vect())) < 1.0) continue;
+    if(mu.IsType(5)) bmuon.push_back(mu); // PFMuon
   }
 
   vector<Electron> belectron;
-  for(unsigned int l=0; l<allels.size(); l++){
-    if(allels.at(l).P()*sin(allels.at(l).Angle(jet.Vect())) <0.6) continue;
-    if(allels.at(l).ecalPFClusterIso()/allels.at(l).Pt() == 0.) continue;
-    if(abs(allels.at(l).IP3D())/allels.at(l).IP3Derr() <2.0) continue;
-    if(!allels.at(l).IsGsfCtfScPixChargeConsistent()) continue;
-    if(jet.DeltaR(allels.at(l))<0.4) belectron.push_back(allels.at(l));
+  for(const auto& el:allels){
+    if(jet.DeltaR(el) > 0.3) continue;
+    if(el.P() * sin(el.Angle(jet.Vect())) < 1.0) continue;
+    if(fabs(el.scEta()) <= 1.479){
+      if(el.Full5x5_sigmaIetaIeta() > 0.0126) continue ;
+      if(fabs(el.dEtaSeed()) > 0.00463) continue ;
+      if(fabs(el.dPhiIn()) > 0.148) continue;
+    }else{
+      if(el.Full5x5_sigmaIetaIeta() > 0.0457) continue ;
+      if(fabs(el.dEtaSeed()) > 0.00814) continue ;
+      if(fabs(el.dPhiIn()) > 0.19) continue;
+    }
+    if(!el.PassConversionVeto()) continue;
+    if(el.IsGsfCtfScPixChargeConsistent()) belectron.push_back(el);
   }
 
   //The jet has soft muon inside, and its charge will determine the jet charge

@@ -126,7 +126,7 @@ void Plots_1D_chi2(TString inputfile, TString suffix){
   c_AFB->SaveAs("1D_AFBrecoil_plots"+suffix+".png");
 }
 
-void Plots_2D_chi2(TString inputfile="sintheta.root"){
+void Plots_2D_chi2(TString inputfile){
 
   TFile *file_AFB = new TFile(inputfile);
 
