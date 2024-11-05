@@ -287,7 +287,9 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     double match_dR = 0.4;
     bool Gen_kinFit_match_onlyb = false;
     bool Gen_kinFit_match_full = false;
-    //chargeEasy => 0:negative, 1:positive
+    // chargeEasy => 0:negative, 1:positive
+    // purity => -1:UnMatched_, 0:Wrong_, 1:Correct_ in TTLJ
+    // correct => 0:Wrong_, 1:Correct_ in TTLJ
 
     //When lepb = b, hadb = bbar -> lep+
     if(gen_b0.DeltaR(lepb) < match_dR && gen_b1.DeltaR(hadb) < match_dR){
@@ -299,10 +301,14 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
       if(lepton0->Charge() > 0){
         FillHist(prefix+"kinFit_purity", 1, map_weight[""], 4,-2,2);
         FillHist(prefix+"kinFit_correct", 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"kinFit_purity_Lp", 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"kinFit_correct_Lp", 1, map_weight[""], 2,0,2);
         prefix += "Correct_"; // lep+
       }else{
         FillHist(prefix+"kinFit_purity", 0, map_weight[""], 4,-2,2);
         FillHist(prefix+"kinFit_correct", 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"kinFit_purity_Lm", 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"kinFit_correct_Lm", 0, map_weight[""], 2,0,2);
         prefix +="Wrong_"; // lep-
       }
 
@@ -349,10 +355,14 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
       if(lepton0->Charge() < 0){
         FillHist(prefix+"kinFit_purity", 1, map_weight[""], 4,-2,2);
         FillHist(prefix+"kinFit_correct", 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"kinFit_purity_Lm", 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"kinFit_correct_Lm", 1, map_weight[""], 2,0,2);
         prefix += "Correct_"; // lep-
       }else{
         FillHist(prefix+"kinFit_purity", 0, map_weight[""], 4,-2,2);
         FillHist(prefix+"kinFit_correct", 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"kinFit_purity_Lp", 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"kinFit_correct_Lp", 0, map_weight[""], 2,0,2);
         prefix +="Wrong_"; // lep+
       }
 
@@ -391,6 +401,8 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     }
     else{
       FillHist(prefix+"kinFit_purity", -1, map_weight[""], 4,-2,2);
+      if(lepton0->Charge() > 0) FillHist(prefix+"kinFit_purity_Lp", -1, map_weight[""], 4,-2,2);
+      if(lepton0->Charge() < 0) FillHist(prefix+"kinFit_purity_Lm", -1, map_weight[""], 4,-2,2);
       prefix +="UnMatched_";
     }
 
@@ -492,50 +504,50 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(lepton0->Charge() < 0){
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetcharge%d_Lminus",i-1), lepb.Charge(), map_weight[""], 200,-2,2);
-        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lminus",i-1), lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
-        FillHist(Form(prefix+"lepbjetCharge%d_Lminus",i-1), lepb_charge, map_weight[""], 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lminus",i-1), lepb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"lepbjetcharge%d_Lm",i-1), lepb.Charge(), map_weight[""], 200,-2,2);
+        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lm",i-1), lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lm",i-1), lepb_charge, map_weight[""], 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm",i-1), lepb_charge<0?0:1, map_weight[""], 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetcharge%d_Lminus",i-1), hadb.Charge(), map_weight[""], 200,-2,2);
-        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lminus",i-1), hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
-        FillHist(Form(prefix+"hadbjetCharge%d_Lminus",i-1), hadb_charge, map_weight[""], 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lminus",i-1), hadb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"hadbjetcharge%d_Lm",i-1), hadb.Charge(), map_weight[""], 200,-2,2);
+        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lm",i-1), hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lm",i-1), hadb_charge, map_weight[""], 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm",i-1), hadb_charge<0?0:1, map_weight[""], 2,0,2);
       }
     }else{
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetcharge%d_Lplus",i-1), lepb.Charge(), map_weight[""], 200,-2,2);
-        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lplus",i-1), lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
-        FillHist(Form(prefix+"lepbjetCharge%d_Lplus",i-1), lepb_charge, map_weight[""], 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lplus",i-1), lepb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"lepbjetcharge%d_Lp",i-1), lepb.Charge(), map_weight[""], 200,-2,2);
+        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lp",i-1), lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lp",i-1), lepb_charge, map_weight[""], 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp",i-1), lepb_charge<0?0:1, map_weight[""], 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetcharge%d_Lplus",i-1), hadb.Charge(), map_weight[""], 200,-2,2);
-        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lplus",i-1), hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
-        FillHist(Form(prefix+"hadbjetCharge%d_Lplus",i-1), hadb_charge, map_weight[""], 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lplus",i-1), hadb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"hadbjetcharge%d_Lp",i-1), hadb.Charge(), map_weight[""], 200,-2,2);
+        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lp",i-1), hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lp",i-1), hadb_charge, map_weight[""], 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp",i-1), hadb_charge<0?0:1, map_weight[""], 2,0,2);
       }
     }
   }
   if(lepton0->Charge() < 0){
-    FillHist(prefix+"lepbjetcharge_Lminus", lepb.Charge(), map_weight[""], 200,-2,2);
-    FillHist(prefix+"lepbjetchargeEasy_Lminus", lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"hadbjetcharge_Lminus", hadb.Charge(), map_weight[""], 200,-2,2);
-    FillHist(prefix+"hadbjetchargeEasy_Lminus", hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"lepbjetCharge_Lminus", lepb_charge, map_weight[""], 200,-5,5);
-    FillHist(prefix+"lepbjetChargeEasy_Lminus", lepb_charge<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"hadbjetCharge_Lminus", hadb_charge, map_weight[""], 200,-5,5);
-    FillHist(prefix+"hadbjetChargeEasy_Lminus", hadb_charge<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"lepbjetcharge_Lm", lepb.Charge(), map_weight[""], 200,-2,2);
+    FillHist(prefix+"lepbjetchargeEasy_Lm", lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"hadbjetcharge_Lm", hadb.Charge(), map_weight[""], 200,-2,2);
+    FillHist(prefix+"hadbjetchargeEasy_Lm", hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"lepbjetCharge_Lm", lepb_charge, map_weight[""], 200,-5,5);
+    FillHist(prefix+"lepbjetChargeEasy_Lm", lepb_charge<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"hadbjetCharge_Lm", hadb_charge, map_weight[""], 200,-5,5);
+    FillHist(prefix+"hadbjetChargeEasy_Lm", hadb_charge<0?0:1, map_weight[""], 2,0,2);
   }else{
-    FillHist(prefix+"lepbjetcharge_Lplus", lepb.Charge(), map_weight[""], 200,-2,2);
-    FillHist(prefix+"lepbjetchargeEasy_Lplus", lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"hadbjetcharge_Lplus", hadb.Charge(), map_weight[""], 200,-2,2);
-    FillHist(prefix+"hadbjetchargeEasy_Lplus", hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"lepbjetCharge_Lplus", lepb_charge, map_weight[""], 200,-5,5);
-    FillHist(prefix+"lepbjetChargeEasy_Lplus", lepb_charge<0?0:1, map_weight[""], 2,0,2);
-    FillHist(prefix+"hadbjetCharge_Lplus", hadb_charge, map_weight[""], 200,-5,5);
-    FillHist(prefix+"hadbjetChargeEasy_Lplus", hadb_charge<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"lepbjetcharge_Lp", lepb.Charge(), map_weight[""], 200,-2,2);
+    FillHist(prefix+"lepbjetchargeEasy_Lp", lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"hadbjetcharge_Lp", hadb.Charge(), map_weight[""], 200,-2,2);
+    FillHist(prefix+"hadbjetchargeEasy_Lp", hadb.Charge()<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"lepbjetCharge_Lp", lepb_charge, map_weight[""], 200,-5,5);
+    FillHist(prefix+"lepbjetChargeEasy_Lp", lepb_charge<0?0:1, map_weight[""], 2,0,2);
+    FillHist(prefix+"hadbjetCharge_Lp", hadb_charge, map_weight[""], 200,-5,5);
+    FillHist(prefix+"hadbjetChargeEasy_Lp", hadb_charge<0?0:1, map_weight[""], 2,0,2);
   }
   FillHist(prefix+"lepbjetcharge", lepb.Charge(), map_weight[""], 200,-2,2);
   FillHist(prefix+"lepbjetchargeEasy", lepb.Charge()<0?0:1, map_weight[""], 2,0,2);
