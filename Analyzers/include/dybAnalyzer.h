@@ -27,6 +27,7 @@ public:
   TH2F *hmistag_mc=NULL;
   bool PUJetIDPass(Jet jet, TString ID);
   double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys);
+  double GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys);
 
   dybAnalyzer();
   ~dybAnalyzer();

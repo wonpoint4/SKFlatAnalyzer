@@ -931,3 +931,46 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys)
 
   return Prob_DATA/Prob_MC;
 }
+
+double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys){
+  sys = 0;
+  double weight = 1.;
+  if(IsDATA) return weight;
+
+  vector<Gen> gens=GetGens();
+  double alpha_plus_DATA_eff = 0.6326;
+  double alpha_minus_DATA_eff = 0.6124;
+  double alpha_plus_MC_eff = 0.6571;
+  double alpha_minus_MC_eff = 0.6391;
+
+  for(const auto& jet:jets){
+    int genpid = 0;
+    double dR = 99.;
+
+    for(int i=0; i<gens.size(); i++){
+      if(!gens.at(i).isPrompt()) continue;
+      if(!gens.at(i).isHardProcess()) continue;
+      if(fabs(gens.at(i).PID()) != 5) continue;
+      if(gens.at(i).DeltaR(jet) > dR) continue;
+      dR = gens.at(i).DeltaR(jet);
+      if(dR < 0.4) genpid = gens.at(i).PID();
+    }
+    if(genpid == 0) continue; // No matched b-partons
+
+    bool isChargeCorrect = false;
+    isChargeCorrect = ((jetCharge(jet) * genpid) <= 0? true: false);
+    if(isChargeCorrect){
+      if(mode != 2){
+        if(genpid > 0 ) weight *= alpha_minus_DATA_eff / alpha_minus_MC_eff;
+        else weight *= alpha_plus_DATA_eff / alpha_plus_MC_eff;
+      }
+    }else{
+      if(mode != 1){
+        if(genpid > 0 ) weight *= (1. - alpha_minus_DATA_eff) / (1. - alpha_minus_MC_eff);
+        else weight *= (1. - alpha_plus_DATA_eff) / (1. - alpha_plus_MC_eff);
+      }
+    }
+  }
+
+  return weight;
+}
