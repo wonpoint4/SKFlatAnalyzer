@@ -44,7 +44,7 @@ void Hists_1D_AFB(TString channel, TString suffix){
   }
 }
 
-vector<TString> chargebins = {"0", "0.1", "0.2", "0.6", "1", "3", "5"};
+vector<TString> chargebins = {"0", "0.1", "0.2", "0.6", "1", "3", "5"}; // should be equal with dybAnalyzer::afb_chbin
 
 void Hists_2D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/", TString frame="AFBrecoil"){
   for(unsigned int ch=0; ch<chargebins.size()-1; ch++){

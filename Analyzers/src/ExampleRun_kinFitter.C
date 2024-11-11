@@ -162,12 +162,10 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   FillHist(prefix+hprefix+"weight_btagSF", btagSF, map_weight[""], 200,-5,5);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
 
-  map_weight["_bChargeSF"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
-  FillHist(prefix+hprefix+"weight_bChargeSF", GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
+  map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
+  FillHist(prefix+hprefix+"weight_bChargeSF0", GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
   map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
   FillHist(prefix+hprefix+"weight_bChargeSF1", GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
-  map_weight["_bChargeSF2"] = map_weight[""] * GetbChargeSFWeight(bjets, 2, 0);
-  FillHist(prefix+hprefix+"weight_bChargeSF2", GetbChargeSFWeight(bjets, 2, 0), map_weight[""], 200,-5,5);
 
   //=======================
   //==== Kinematic Fitter
