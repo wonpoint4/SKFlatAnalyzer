@@ -11,3 +11,6 @@
 [submodule "external/RocPFProb"]
 	path = external/RocPFProb
 	url = https://gitlab.cern.ch/hyseo/RocPFProb.git
+[submodule "external/ZptCorrection"]
+	path = external/ZptCorrection
+	url = https://github.com/sansan9401/ZptCorrection

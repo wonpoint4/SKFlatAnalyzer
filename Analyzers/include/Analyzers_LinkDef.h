@@ -20,6 +20,7 @@
 #pragma link C++ class SMPAnalyzerCore+;
 #pragma link C++ class SkimTree_GEN+;
 #pragma link C++ class AFBAnalyzer+;
+#pragma link C++ class AFBAnalyzerSyst+;
 #pragma link C++ class EfficiencyValidation+;
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
@@ -30,5 +31,8 @@
 #pragma link C++ class EMuAnalyzer+;
 #pragma link C++ class L1PrefireAnalyzer+;
 #pragma link C++ class LTAnalyzer+;
-
+#pragma link C++ class BjetAnalyzer+;
+#pragma link C++ class BBAnalyzer+;
+#pragma link C++ class Chi2Analyzer+;
+#pragma link C++ class GenTest+;
 #endif

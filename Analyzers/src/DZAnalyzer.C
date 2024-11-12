@@ -112,23 +112,26 @@ void DZAnalyzer::executeEvent(){
     }
   }
 }
-void DZAnalyzer::EvalWeights(Parameter& p){
-  p.weightmap[""]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF;
-  p.weightmap["_dzsf"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetDZSF(p.lepton0)*GetDZSF(p.lepton1);
-  p.weightmap["_dzsf_dz"]=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight*p.w.weakweight*p.w.electronRECOSF*p.w.electronIDSF*p.w.muonIDSF*p.w.muonISOSF*p.w.triggerSF*p.w.CFSF*GetDZSF_DZ(p.lepton0,p.lepton1);
+SMPAnalyzerCore::Variations DZAnalyzer::MakeVariations(const Parameter& p){
+  Variations v;
+  AddVariationWeight(v,"",p.default_weight);
+  AddVariationWeight(v,"_dzsf",p.default_weight*GetDZSF(p.lepton0)*GetDZSF(p.lepton1));
+  AddVariationWeight(v,"_dzsf_dz",p.default_weight*GetDZSF_DZ(p.lepton0,p.lepton1));
+  return v;
 }
 void DZAnalyzer::FillHists(Parameter& p){
   TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
   double dimass=dilepton.M();
+
   if(dimass>=76&&dimass<106){
-    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m76to106",p.weightmap[""]);
+    FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"m76to106",p.weight);
     FillHistsDZ(p,"_den");
     FillHistsDZ(p,"_test_den");
     if(p.channel=="ee"){
       if(((Electron*)p.lepton0)->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter")
 	 && ((Electron*)p.lepton1)->PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter")){
 	FillHistsDZ(p,"_num");
-	FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"passDZ",p.weightmap[""]);
+	FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"passDZ",p.weight);
       }else{
 	FillHistsDZ(p,"_fail");
       }	
@@ -140,7 +143,7 @@ void DZAnalyzer::FillHists(Parameter& p){
 	      
       if(((Muon*)p.lepton0)->PassFilter(dzfilter) && ((Muon*)p.lepton1)->PassFilter(dzfilter)){
 	FillHistsDZ(p,"_num");
-	FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"passDZ",p.weightmap[""]);
+	FillCutflow(p.prefix+p.hprefix+"cutflow"+p.suffix,"passDZ",p.weight);
       }else{
 	FillHistsDZ(p,"_fail");
       }
@@ -155,106 +158,103 @@ void DZAnalyzer::FillHists(Parameter& p){
 
 void DZAnalyzer::FillHistsDZ(Parameter& p,TString suffix){
   TString pre=p.prefix+p.hprefix;
-  for(const auto& [wname,w]:p.weightmap){
-    TString suf=p.suffix+suffix+wname;
+  TString suf=p.suffix+suffix+p.vsuffix;
+  double w=p.weight;
     
-    //for leptons
-    for(int i=0;i<(int)p.leptons.size();i++){
-      double pt=p.leptons.at(i)->Pt();
-      double eta=p.leptons.at(i)->Eta();
-      double dz=p.leptons.at(i)->dZ();
-      double dze=p.leptons.at(i)->dZerr();
-      TString charge=p.leptons.at(i)->Charge()>0?"p":"m";
-      FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),pt,w,fineptbinnum,fineptbin);
-      FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),eta,w,fineetabinnum,fineetabin);
-      FillHist(Form("%sl%ddz%s",pre.Data(),i,suf.Data()),fabs(dz),w,1000,0,1);
-      FillHist(Form("%sl%ddze%s",pre.Data(),i,suf.Data()),dze,w,1000,0,1);
-      FillHist(Form("%sl%ipz%s",pre.Data(),i,suf.Data()),fabs(dz)/dze,w,1000,0,100);
-      
-      FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,fineptbinnum,fineptbin);
-      FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,fineetabinnum,fineetabin);
-      FillHist(Form("%sldz%s",pre.Data(),suf.Data()),fabs(dz),w,1000,0,1);
-      FillHist(Form("%sldze%s",pre.Data(),suf.Data()),dze,w,1000,0,1);
-      FillHist(Form("%slipz%s",pre.Data(),suf.Data()),fabs(dz)/dze,w,1000,0,100);
-      FillHist(Form("%setapt%s",pre.Data(),suf.Data()),p.leptons.at(i)->Eta(),p.leptons.at(i)->Pt(),w,etabinnum,etabin,ptbinnum,ptbin);
-      FillHist(Form("%setaptfine%s",pre.Data(),suf.Data()),p.leptons.at(i)->Eta(),p.leptons.at(i)->Pt(),w,fineetabinnum,fineetabin,fineptbinnum,fineptbin);
-
-    }
-
-    double lldzmin=999;
-    if(p.channel=="ee"){
-      vector<Electron> electrons=GetAllElectrons();
-      vector<Electron> leg1s,leg2s;
-      for(int i=0,n=electrons.size();i<n;i++){
-	if(electrons.at(i).PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter"))
-	  leg1s.push_back(electrons.at(i));
-	if(electrons.at(i).PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter"))
-	  leg2s.push_back(electrons.at(i));
-      }
-      for(auto leg1:leg1s){
-	for(auto leg2:leg2s){
-	  if(leg1.DeltaR(leg2)<0.001) continue;
-	  double temp_dz=leg2.dZ()-leg1.dZ();
-	  if(fabs(lldzmin)>fabs(temp_dz)){
-	    lldzmin=temp_dz;
-	  }
-	}
-      }
-    }else if(p.channel=="mm"){
-      vector<Muon> muons=GetAllMuons();
-      vector<Muon> leg1s,leg2s;
-      for(int i=0,n=muons.size();i<n;i++){
-	if(muons.at(i).PassFilter("hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17")&&muons.at(i).PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))
-	  leg1s.push_back(muons.at(i));
-	if(muons.at(i).PassFilter("hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8")&&muons.at(i).PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))
-	  leg2s.push_back(muons.at(i));
-      }
-      for(auto leg1:leg1s){
-	for(auto leg2:leg2s){
-	  if(leg1.DeltaR(leg2)<0.001) continue;
-	  double temp_dz=leg2.dZ()-leg1.dZ();
-	  if(fabs(lldzmin)>fabs(temp_dz)){
-	    lldzmin=temp_dz;
-	  }
-	}
-      }
-    }
-    FillHist(Form("%slldzmin%s",pre.Data(),suf.Data()),fabs(lldzmin),w,1000,0,1);
-    FillHist(Form("%slldz%s",pre.Data(),suf.Data()),fabs(p.lepton1->dZ()-p.lepton0->dZ()),w,1000,0,1);
-    Lepton *lepton0,*lepton1;
-    if(p.lepton0->Charge()>0&&p.lepton1->Charge()<0){
-      lepton0=p.lepton1;
-      lepton1=p.lepton0;
-    }else if(p.lepton0->Charge()<0&&p.lepton1->Charge()>0){
-      lepton0=p.lepton0;
-      lepton1=p.lepton1;
-    }else if(p.lepton0->Phi()>p.lepton1->Phi()){
-      lepton0=p.lepton1;
-      lepton1=p.lepton0;
-    }else{
-      lepton0=p.lepton0;
-      lepton1=p.lepton1;      
-    }
-    FillHist(Form("%sepep%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton0->Pt(),lepton1->Eta(),lepton1->Pt(),w,etabinnum,etabin,ptbinnum,ptbin,etabinnum,etabin,ptbinnum,ptbin);
-    FillHist(Form("%sepepfine%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton0->Pt(),lepton1->Eta(),lepton1->Pt(),w,fineetabinnum,fineetabin,fineptbinnum,fineptbin,fineetabinnum,fineetabin,fineptbinnum,fineptbin);
-
-    FillHist(Form("%sptpt%s",pre.Data(),suf.Data()),lepton0->Pt(),lepton1->Pt(),w,fineptbinnum,fineptbin,fineptbinnum,fineptbin);
-    FillHist(Form("%setaeta%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton1->Eta(),w,fineetabinnum,fineetabin,fineetabinnum,fineetabin);
-      
+  //for leptons
+  for(int i=0;i<(int)p.leptons.size();i++){
+    double pt=p.leptons.at(i)->Pt();
+    double eta=p.leptons.at(i)->Eta();
+    double dz=p.leptons.at(i)->dZ();
+    double dze=p.leptons.at(i)->dZerr();
+    TString charge=p.leptons.at(i)->Charge()>0?"p":"m";
+    FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),pt,w,fineptbinnum,fineptbin);
+    FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),eta,w,fineetabinnum,fineetabin);
+    FillHist(Form("%sl%ddz%s",pre.Data(),i,suf.Data()),fabs(dz),w,1000,0,1);
+    FillHist(Form("%sl%ddze%s",pre.Data(),i,suf.Data()),dze,w,1000,0,1);
+    FillHist(Form("%sl%ipz%s",pre.Data(),i,suf.Data()),fabs(dz)/dze,w,1000,0,100);
     
-    TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
-    double dimass=dilepton.M();
-    double dipt=dilepton.Pt();
-    double dirap=dilepton.Rapidity();
-    FillHist(pre+"dimass"+suf,dimass,w,196,52,150);
-    FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
-    FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
-    FillHist(pre+"z0"+suf,vertex_Z,w,100,-20,20);
-    FillHist(pre+"nPV"+suf,nPV,w,100,0,100);
-
-    if(wname!="") continue;
-
+    FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,fineptbinnum,fineptbin);
+    FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,fineetabinnum,fineetabin);
+    FillHist(Form("%sldz%s",pre.Data(),suf.Data()),fabs(dz),w,1000,0,1);
+    FillHist(Form("%sldze%s",pre.Data(),suf.Data()),dze,w,1000,0,1);
+    FillHist(Form("%slipz%s",pre.Data(),suf.Data()),fabs(dz)/dze,w,1000,0,100);
+    FillHist(Form("%setapt%s",pre.Data(),suf.Data()),p.leptons.at(i)->Eta(),p.leptons.at(i)->Pt(),w,etabinnum,etabin,ptbinnum,ptbin);
+    FillHist(Form("%setaptfine%s",pre.Data(),suf.Data()),p.leptons.at(i)->Eta(),p.leptons.at(i)->Pt(),w,fineetabinnum,fineetabin,fineptbinnum,fineptbin);
+    
   }
+
+  double lldzmin=999;
+  if(p.channel=="ee"){
+    vector<Electron> electrons=GetAllElectrons();
+    vector<Electron> leg1s,leg2s;
+    for(int i=0,n=electrons.size();i<n;i++){
+      if(electrons.at(i).PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter"))
+	leg1s.push_back(electrons.at(i));
+      if(electrons.at(i).PassFilter("hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter"))
+	leg2s.push_back(electrons.at(i));
+    }
+    for(auto leg1:leg1s){
+      for(auto leg2:leg2s){
+	if(leg1.DeltaR(leg2)<0.001) continue;
+	double temp_dz=leg2.dZ()-leg1.dZ();
+	if(fabs(lldzmin)>fabs(temp_dz)){
+	  lldzmin=temp_dz;
+	}
+      }
+    }
+  }else if(p.channel=="mm"){
+    vector<Muon> muons=GetAllMuons();
+    vector<Muon> leg1s,leg2s;
+    for(int i=0,n=muons.size();i<n;i++){
+      if(muons.at(i).PassFilter("hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17")&&muons.at(i).PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))
+	leg1s.push_back(muons.at(i));
+      if(muons.at(i).PassFilter("hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8")&&muons.at(i).PassFilter("hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4"))
+	leg2s.push_back(muons.at(i));
+    }
+    for(auto leg1:leg1s){
+      for(auto leg2:leg2s){
+	if(leg1.DeltaR(leg2)<0.001) continue;
+	double temp_dz=leg2.dZ()-leg1.dZ();
+	if(fabs(lldzmin)>fabs(temp_dz)){
+	  lldzmin=temp_dz;
+	}
+      }
+    }
+  }
+  FillHist(Form("%slldzmin%s",pre.Data(),suf.Data()),fabs(lldzmin),w,1000,0,1);
+  FillHist(Form("%slldz%s",pre.Data(),suf.Data()),fabs(p.lepton1->dZ()-p.lepton0->dZ()),w,1000,0,1);
+  Lepton *lepton0,*lepton1;
+  if(p.lepton0->Charge()>0&&p.lepton1->Charge()<0){
+    lepton0=p.lepton1;
+    lepton1=p.lepton0;
+  }else if(p.lepton0->Charge()<0&&p.lepton1->Charge()>0){
+    lepton0=p.lepton0;
+    lepton1=p.lepton1;
+  }else if(p.lepton0->Phi()>p.lepton1->Phi()){
+    lepton0=p.lepton1;
+    lepton1=p.lepton0;
+  }else{
+    lepton0=p.lepton0;
+    lepton1=p.lepton1;      
+  }
+  FillHist(Form("%sepep%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton0->Pt(),lepton1->Eta(),lepton1->Pt(),w,etabinnum,etabin,ptbinnum,ptbin,etabinnum,etabin,ptbinnum,ptbin);
+  FillHist(Form("%sepepfine%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton0->Pt(),lepton1->Eta(),lepton1->Pt(),w,fineetabinnum,fineetabin,fineptbinnum,fineptbin,fineetabinnum,fineetabin,fineptbinnum,fineptbin);
+  
+  FillHist(Form("%sptpt%s",pre.Data(),suf.Data()),lepton0->Pt(),lepton1->Pt(),w,fineptbinnum,fineptbin,fineptbinnum,fineptbin);
+  FillHist(Form("%setaeta%s",pre.Data(),suf.Data()),lepton0->Eta(),lepton1->Eta(),w,fineetabinnum,fineetabin,fineetabinnum,fineetabin);
+  
+  
+  TLorentzVector dilepton=(*p.lepton0)+(*p.lepton1);
+  double dimass=dilepton.M();
+  double dipt=dilepton.Pt();
+  double dirap=dilepton.Rapidity();
+  FillHist(pre+"dimass"+suf,dimass,w,196,52,150);
+  FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
+  FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
+  FillHist(pre+"z0"+suf,vertex_Z,w,100,-20,20);
+  FillHist(pre+"nPV"+suf,nPV,w,100,0,100);
+  
 }
 
 bool DZAnalyzer::PassSelection(Parameter& p){

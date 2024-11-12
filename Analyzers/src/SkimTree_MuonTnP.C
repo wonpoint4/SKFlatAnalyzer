@@ -32,6 +32,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("probe_isTight",&probe_isTight);
   newtree->Branch("probe_isMedium",&probe_isMedium);
   newtree->Branch("probe_isMedium2016a",&probe_isMedium2016a);
+  newtree->Branch("probe_isLoose",&probe_isLoose);
   newtree->Branch("probe_TkIsoLoose",&probe_TkIsoLoose);
   newtree->Branch("probe_PFIsoTight",&probe_PFIsoTight);
   newtree->Branch("probe_IsoMu24",&probe_IsoMu24);
@@ -44,12 +45,14 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("probe_eta",&probe_eta);
   newtree->Branch("probe_phi",&probe_phi);
   newtree->Branch("probe_q",&probe_q);
+  newtree->Branch("probe_rtkiso",&probe_rtkiso);
 
   newtree->Branch("tag_IsoMu24",&tag_IsoMu24);
   newtree->Branch("tag_IsoMu27",&tag_IsoMu27);
   newtree->Branch("tag_isTight",&tag_isTight);
   newtree->Branch("tag_isMedium",&tag_isMedium);
   newtree->Branch("tag_isMedium2016a",&tag_isMedium2016a);
+  newtree->Branch("tag_isLoose",&tag_isLoose);
   newtree->Branch("tag_TkIsoLoose",&tag_TkIsoLoose);
   newtree->Branch("tag_PFIsoTight",&tag_PFIsoTight);
 
@@ -58,6 +61,7 @@ void SkimTree_MuonTnP::initializeAnalyzer(){
   newtree->Branch("tag_eta",&tag_eta);
   newtree->Branch("tag_phi",&tag_phi);
   newtree->Branch("tag_q",&tag_q);
+  newtree->Branch("tag_rtkiso",&tag_rtkiso);
   
   newtree->Branch("pair_mass",&pair_mass);
   newtree->Branch("pair_mass_cor",&pair_mass_cor);
@@ -81,7 +85,7 @@ void SkimTree_MuonTnP::executeEvent(){
     Parameter p=MakeParameter("mu");
     p.triggers={"HLT_IsoMu24_v","HLT_IsoTkMu24_v","HLT_IsoMu27_v"};
     p.SetMuonKeys("Default","Default",{"Default"});
-    p.SetMuons(MuonMomentumCorrection(GetAllMuons(),0,0,0));
+    p.SetMuons(MuonMomentumCorrection(GetAllMuons()));
     executeEventWithParameter(p);
   }
 }
@@ -143,6 +147,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       probe_isTight=probe.isPOGTight();
       probe_isMedium=probe.isPOGMedium_nohip();
       probe_isMedium2016a=probe.isPOGMedium_hip();
+      probe_isLoose=probe.isPOGLoose();
       probe_TkIsoLoose=probe.PassSelector(Muon::Selector::TkIsoLoose);
       probe_PFIsoTight=probe.PassSelector(Muon::Selector::PFIsoTight);
       probe_IsoMu24=PassSLT1(&probe);
@@ -154,6 +159,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       probe_eta=probe.Eta();
       probe_phi=probe.Phi();
       probe_q=probe.Charge();
+      probe_rtkiso=probe.TrkIso()/probe.Pt();
       
       tag_IsoMu24=PassSLT1(&tag);
       tag_IsoMu27=PassSLT2(&tag);
@@ -161,6 +167,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       tag_isTight=tag.isPOGTight();
       tag_isMedium=tag.isPOGMedium_nohip();
       tag_isMedium2016a=tag.isPOGMedium_hip();
+      tag_isLoose=tag.isPOGLoose();
       tag_TkIsoLoose=tag.PassSelector(Muon::Selector::TkIsoLoose);
       tag_PFIsoTight=tag.PassSelector(Muon::Selector::PFIsoTight);
       tag_pt=tag.MiniAODPt();
@@ -168,6 +175,7 @@ void SkimTree_MuonTnP::FillHists(Parameter& p){
       tag_eta=tag.Eta();
       tag_phi=tag.Phi();
       tag_q=tag.Charge();
+      tag_rtkiso=tag.TrkIso()/tag.Pt();
 	
       TLorentzVector pair_cor=tag+probe;
       TLorentzVector pair=tag.MiniAODPt()/tag.Pt()*tag+probe.MiniAODPt()/probe.Pt()*probe;

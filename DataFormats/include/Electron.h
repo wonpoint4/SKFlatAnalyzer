@@ -45,7 +45,9 @@ public:
     IB, OB, GAP, EC
   };
   inline EtaRegion etaRegion() const {
-    double sceta = fabs(scEta());
+    //double sceta = fabs(scEta());
+    // for AFB analysis efficiencies are measured with eta, not scEta, because Rochester ntuple don't have scEta...
+    double sceta = fabs(Eta());
     if( sceta < 0.8 ) return IB;
     else if( sceta < 1.444 ) return OB;
     else if( sceta < 1.566 ) return GAP;

@@ -16,5 +16,6 @@
 #pragma link C++ class Jet+;
 #pragma link C++ class FatJet+;
 #pragma link C++ class Tau+;
+#pragma link C++ class Weight+;
 
 #endif

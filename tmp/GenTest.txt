@@ -1,0 +1,8 @@
+SKFlat.py -a GenTest -i DYJetsToEE_MiNNLO -n 150 -e 2018
+SKFlat.py -a GenTest -i DYJetsToMuMu_MiNNLO -n 150 -e 2018
+SKFlat.py -a GenTest -i DYJetsToEE_MiNNLO -n 150 -e 2017
+SKFlat.py -a GenTest -i DYJetsToMuMu_MiNNLO -n 150 -e 2017
+SKFlat.py -a GenTest -i DYJetsToEE_MiNNLO -n 150 -e 2016b
+SKFlat.py -a GenTest -i DYJetsToMuMu_MiNNLO -n 150 -e 2016b
+SKFlat.py -a GenTest -i DYJetsToEE_MiNNLO -n 150 -e 2016a
+SKFlat.py -a GenTest -i DYJetsToMuMu_MiNNLO -n 150 -e 2016a

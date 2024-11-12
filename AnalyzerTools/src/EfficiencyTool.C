@@ -450,14 +450,15 @@ double EfficiencyTool::GetDataEfficiency(TString key,const Lepton* lep,int set,i
   int charge=0;
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
-    eta=el->Eta();
+    if(key.Contains("RECO")) eta=el->scEta();
+    else eta=el->Eta();
     if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
     else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
     eta=mu->Eta();
-    pt=mu->MiniAODPt();    
+    pt=mu->Pt();
     charge=mu->Charge();
   }
   return GetDataEfficiency(key,eta,pt,charge,set,mem,option);
@@ -478,14 +479,15 @@ double EfficiencyTool::GetSimEfficiency(TString key,const Lepton* lep,int set,in
   int charge=0;
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
-    eta=el->Eta();
+    if(key.Contains("RECO")) eta=el->scEta();
+    else eta=el->Eta();
     if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
     else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
     eta=mu->Eta();
-    pt=mu->MiniAODPt();    
+    pt=mu->Pt();    
     charge=mu->Charge();
   }
   return GetSimEfficiency(key,eta,pt,charge,set,mem,option);
@@ -506,20 +508,21 @@ double EfficiencyTool::GetEfficiencySF(TString key,const Lepton* lep,int set,int
   int charge=0;
   if(lep->InheritsFrom("Electron")){
     const Electron* el=(const Electron*)lep;
-    eta=el->Eta();
+    if(key.Contains("RECO")) eta=el->scEta();
+    else eta=el->Eta();
     if(key.Contains("_v12")||key.Contains("RECO")) pt=el->UncorrPt();
     else pt=el->Pt();
     charge=el->Charge();
   }else if(lep->InheritsFrom("Muon")){
     const Muon* mu=(const Muon*)lep;
     eta=mu->Eta();
-    pt=mu->MiniAODPt();    
+    pt=mu->Pt();    
     charge=mu->Charge();
   }
   return GetEfficiencySF(key,eta,pt,charge,set,mem,option);
 }
-vector<vector<double>> EfficiencyTool::GetStructure(TString key) const{
-  vector<vector<double>> out;
+vector<int> EfficiencyTool::GetStructure(TString key) const{
+  vector<int> out;
   if(key==""||key=="Default") return out;
   const Efficiency* eff=Get(key);
   if(!eff){
@@ -528,7 +531,7 @@ vector<vector<double>> EfficiencyTool::GetStructure(TString key) const{
   }
   int nset=eff->fDataPlus.size();
   for(int i=0;i<nset;i++)
-    out.push_back(vector<double>(eff->fDataPlus.at(i).size(),1.));
+    out.push_back(eff->fDataPlus.at(i).size());
   return out;
 }
 bool EfficiencyTool::IsPlus(TString path){

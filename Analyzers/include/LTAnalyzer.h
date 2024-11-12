@@ -9,14 +9,12 @@ public:
 
   virtual void initializeAnalyzer();
   virtual void executeEvent();
-  virtual void executeEventWithParameter(Parameter& p);
-  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
   virtual pair<double,double> GetCostAndPhiCS(Particle* l0,Particle* l1);
   virtual Parameter MakeParameter(TString key,TString option="");
-  virtual void EvalWeights(Parameter& p);
   virtual void ResetRecoWeights(Parameter& p);
-  virtual void FillHists(Parameter& p);
   static int GetUnfoldBin(int njet,double mass,double pt,double cost,double phi);
+  void FillHistsUnfold(Parameter& preco,Parameter& pgen);
+  void FillHistsSyst(Parameter p,Variations& vs);
 
   LTAnalyzer();
   ~LTAnalyzer();

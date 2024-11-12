@@ -16,7 +16,11 @@ void SkimTree_EgammaTnP::initializeAnalyzer(){
   if(!IsDATA){
     newtree->Branch("weight",&weight);
     newtree->Branch("PUweight",&PUweight);
+    newtree->Branch("PUweight_up",&PUweight_up);
+    newtree->Branch("PUweight_down",&PUweight_down);
     newtree->Branch("prefireweight",&prefireweight);
+    newtree->Branch("prefireweight_up",&prefireweight_up);
+    newtree->Branch("prefireweight_down",&prefireweight_down);
     newtree->Branch("zptweight",&zptweight);
     newtree->Branch("z0weight",&z0weight);
     newtree->Branch("totWeight",&totWeight);
@@ -25,6 +29,9 @@ void SkimTree_EgammaTnP::initializeAnalyzer(){
   newtree->Branch("event_met_pfphi",&pfMET_Type1_phi);
   newtree->Branch("L1ThresholdHLTEle23Ele12CaloIdLTrackIdLIsoVL",&L1ThresholdHLTEle23Ele12CaloIdLTrackIdLIsoVL);
 
+  newtree->Branch("passingDLTSafe",&passingDLTSafe);
+  newtree->Branch("passingCutBasedVeto94XV2",&passingCutBasedVeto94XV2);
+  newtree->Branch("passingCutBasedLoose94XV2",&passingCutBasedLoose94XV2);
   newtree->Branch("passingCutBasedMedium94XV2",&passingCutBasedMedium94XV2);
   newtree->Branch("passingCutBasedTight94XV2",&passingCutBasedTight94XV2);
   newtree->Branch("passEGL1SingleEGOr",&passEGL1SingleEGOr);
@@ -55,6 +62,9 @@ void SkimTree_EgammaTnP::initializeAnalyzer(){
   newtree->Branch("tag_passHltEle32WPTightGsf",&tag_passHltEle32WPTightGsf);
   newtree->Branch("tag_passHltEle32DoubleEGWPTightGsf",&tag_passHltEle32DoubleEGWPTightGsf);
   newtree->Branch("tag_passHltEle35WPTightGsf",&tag_passHltEle35WPTightGsf);
+  newtree->Branch("tag_passingDLTSafe",&tag_passingDLTSafe);
+  newtree->Branch("tag_passingCutBasedVeto94XV2",&tag_passingCutBasedVeto94XV2);
+  newtree->Branch("tag_passingCutBasedLoose94XV2",&tag_passingCutBasedLoose94XV2);
   newtree->Branch("tag_passingCutBasedMedium94XV2",&tag_passingCutBasedMedium94XV2);
   newtree->Branch("tag_passingCutBasedTight94XV2",&tag_passingCutBasedTight94XV2);
   newtree->Branch("tag_Ele_IsoMVA94XV2",&tag_Ele_IsoMVA94XV2);
@@ -124,7 +134,11 @@ void SkimTree_EgammaTnP::FillHists(Parameter& p){
 
     weight=p.w.lumiweight;
     PUweight=p.w.PUweight;
+    PUweight_up=p.w.PUweight_up;
+    PUweight_down=p.w.PUweight_down;
     prefireweight=p.w.prefireweight;
+    prefireweight_up=p.w.prefireweight_up;
+    prefireweight_down=p.w.prefireweight_down;
     zptweight=p.w.zptweight;
     z0weight=p.w.z0weight;
     totWeight=p.w.lumiweight*p.w.PUweight*p.w.prefireweight*p.w.zptweight*p.w.z0weight;
@@ -137,6 +151,9 @@ void SkimTree_EgammaTnP::FillHists(Parameter& p){
       if(&tag==&probe) continue;
       if((tag+probe).M()<40) continue;
 
+      passingDLTSafe=PassID(&probe,"passDLTSafe");
+      passingCutBasedVeto94XV2=probe.passVetoID();
+      passingCutBasedLoose94XV2=probe.passLooseID();
       passingCutBasedMedium94XV2=probe.passMediumID();
       passingCutBasedTight94XV2=probe.passTightID();
       passEGL1SingleEGOr=probe.PassFilter("hltEGL1SingleEGOrFilter");
@@ -168,6 +185,9 @@ void SkimTree_EgammaTnP::FillHists(Parameter& p){
       tag_passHltEle32DoubleEGWPTightGsf=tag.PassPath("HLT_Ele32_WPTight_Gsf_L1DoubleEG_v");
       tag_passHltEle35WPTightGsf=tag.PassPath("HLT_Ele35_WPTight_Gsf_v");
       if(!(tag_passHltEle27WPTightGsf|tag_passHltEle28WPTightGsf|tag_passHltEle32WPTightGsf|tag_passHltEle32DoubleEGWPTightGsf|tag_passHltEle35WPTightGsf)) continue;
+      tag_passingDLTSafe=PassID(&tag,"passDLTSafe");
+      tag_passingCutBasedVeto94XV2=tag.passVetoID();
+      tag_passingCutBasedLoose94XV2=tag.passLooseID();
       tag_passingCutBasedMedium94XV2=tag.passMediumID();
       tag_passingCutBasedTight94XV2=tag.passTightID();
       tag_Ele_IsoMVA94XV2=tag.MVAIso();      

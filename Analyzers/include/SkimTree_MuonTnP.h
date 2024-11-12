@@ -30,6 +30,7 @@ public:
   bool probe_isTight;
   bool probe_isMedium;
   bool probe_isMedium2016a;
+  bool probe_isLoose;
   bool probe_TkIsoLoose;
   bool probe_PFIsoTight;
   bool probe_IsoMu24;
@@ -42,12 +43,14 @@ public:
   float probe_eta;
   float probe_phi;
   int probe_q;
+  float probe_rtkiso;
 
   bool tag_IsoMu24;
   bool tag_IsoMu27;
   bool tag_isTight;
   bool tag_isMedium;
   bool tag_isMedium2016a;
+  bool tag_isLoose;
   bool tag_TkIsoLoose;
   bool tag_PFIsoTight;
 
@@ -56,6 +59,7 @@ public:
   float tag_eta;
   float tag_phi;
   float tag_q;
+  float tag_rtkiso;
 
   float pair_mass;
   float pair_mass_cor;
