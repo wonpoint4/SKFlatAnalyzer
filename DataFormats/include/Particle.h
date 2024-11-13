@@ -29,6 +29,7 @@ public:
   ~Particle();
 
   map<TString,double> userFloat;
+  double GetUserFloat(TString key) const { return userFloat.find(key)->second; }
 
   void SetCharge(double q);
   inline double Charge() const {return j_Charge;}

@@ -21,14 +21,17 @@ public:
 
   TTree* newtree;
   float weight;
-  float PUweight;
-  float prefireweight;
+  float PUweight,PUweight_up,PUweight_down;
+  float prefireweight,prefireweight_up,prefireweight_down;
   float zptweight;
   float z0weight;
   float totWeight;
   
   float L1ThresholdHLTEle23Ele12CaloIdLTrackIdLIsoVL;
 
+  bool passingDLTSafe;
+  bool passingCutBasedVeto94XV2;
+  bool passingCutBasedLoose94XV2;
   bool passingCutBasedMedium94XV2;
   bool passingCutBasedTight94XV2;
   bool passEGL1SingleEGOr;
@@ -59,6 +62,9 @@ public:
   bool tag_passHltEle32WPTightGsf;
   bool tag_passHltEle32DoubleEGWPTightGsf;
   bool tag_passHltEle35WPTightGsf;
+  bool tag_passingDLTSafe;
+  bool tag_passingCutBasedVeto94XV2;
+  bool tag_passingCutBasedLoose94XV2;
   bool tag_passingCutBasedMedium94XV2;
   bool tag_passingCutBasedTight94XV2;
   float tag_Ele_IsoMVA94XV2;

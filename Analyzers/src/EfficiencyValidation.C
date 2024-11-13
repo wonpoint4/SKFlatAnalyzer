@@ -195,7 +195,7 @@ SMPAnalyzerCore::Parameter EfficiencyValidation::MakeParameter(TString key,TStri
       p.SetElectrons(ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ",0.0,2.5),-1,0));
     }
     else if(p.channel[0]=='m'){
-      p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),0,-1,0));
+      p.SetMuons(MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso",0.0,2.4),-1,0));
     }
   }
   return p;
@@ -246,22 +246,17 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
     double pt=p.leptons.at(i)->Pt();
     double eta=p.leptons.at(i)->Eta();
     TString charge=p.leptons.at(i)->Charge()>0?"p":"m";
-    FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),pt,w,500,0,500);
-    FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),eta,w,120,-3,3);
+    FillHist(Form("%sl%dpt%s",pre.Data(),i,suf.Data()),pt,w,100,0,100);
+    FillHist(Form("%sl%deta%s",pre.Data(),i,suf.Data()),eta,w,100,-2.5,2.5);
     
-    FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,500,0,500);
-    //// For prefirieweight check
-    if(eta<-2.0) FillHist(Form("%slpt_eta0%s",pre.Data(),suf.Data()),pt,w,100,0,100);
-    else if(eta<2.0) FillHist(Form("%slpt_eta1%s",pre.Data(),suf.Data()),pt,w,100,0,100);
-    else FillHist(Form("%slpt_eta2%s",pre.Data(),suf.Data()),pt,w,100,0,100);
-    
-    FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,120,-3,3);
+    FillHist(Form("%slpt%s",pre.Data(),suf.Data()),pt,w,100,0,100);    
+    FillHist(Form("%sleta%s",pre.Data(),suf.Data()),eta,w,100,-2.5,2.5);
     
     if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::MUON){
       FillHist(Form("%sletapt%s",pre.Data(),suf.Data()),eta,pt,w,netabin_muonID,etabins_muonID,nptbin_muonID,ptbins_muonID);
     }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
-      Electron* el=(Electron*)p.leptons.at(i);
-      FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,120,-3,3);
+      //Electron* el=(Electron*)p.leptons.at(i);
+      //FillHist(Form("%slsceta%s",pre.Data(),suf.Data()),el->scEta(),w,100,-2.5,2.5);
       FillHist(Form("%sletapt%s",pre.Data(),suf.Data()),eta,pt,w,netabin_electronID,etabins_electronID,nptbin_electronID,ptbins_electronID);
     }
   }
@@ -270,11 +265,11 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
   double dimass=dilepton.M();
   double dipt=dilepton.Pt();
   double dirap=dilepton.Rapidity();
-  FillHist(pre+"dimass"+suf,dimass,w,196,52,150);
-  FillHist(pre+"dipt"+suf,dipt,w,400,0,400);
-  FillHist(pre+"dirap"+suf,dirap,w,120,-3,3);
-  FillHist(pre+"cost"+suf,GetCosThetaCS(p.lepton0,p.lepton1),w,100,-1,1);
-  FillHist(pre+"z0"+suf,vertex_Z,w,100,-20,20);
+  FillHist(pre+"dimass"+suf,dimass,w,98,52,150);
+  FillHist(pre+"dipt"+suf,dipt,w,200,0,400);
+  FillHist(pre+"dirap"+suf,dirap,w,50,-2.5,2.5);
+  FillHist(pre+"cost"+suf,GetCosThetaCS(p.lepton0,p.lepton1),w,50,-1,1);
+  FillHist(pre+"z0"+suf,vertex_Z,w,50,-20,20);
   
   if(p.vsuffix!="") return;
 
@@ -285,30 +280,35 @@ void EfficiencyValidation::FillHistsEfficiency(Parameter& p,TString region){
     double eta=p.leptons.at(i)->Eta();
     TString charge=p.leptons.at(i)->Charge()>0?"p":"m";
     
-    FillHist(Form("%sl%d%spt%s",pre.Data(),i,charge.Data(),suf.Data()),pt,w,500,0,500);
-    FillHist(Form("%sl%d%seta%s",pre.Data(),i,charge.Data(),suf.Data()),eta,w,120,-3,3);
+    FillHist(Form("%sl%d%spt%s",pre.Data(),i,charge.Data(),suf.Data()),pt,w,100,0,100);
+    FillHist(Form("%sl%d%seta%s",pre.Data(),i,charge.Data(),suf.Data()),eta,w,100,-2.5,2.5);
     
-    FillHist(Form("%sl%spt%s",pre.Data(),charge.Data(),suf.Data()),pt,w,500,0,500);
-    FillHist(Form("%sl%seta%s",pre.Data(),charge.Data(),suf.Data()),eta,w,120,-3,3);
+    FillHist(Form("%sl%spt%s",pre.Data(),charge.Data(),suf.Data()),pt,w,100,0,100);
+    FillHist(Form("%sl%seta%s",pre.Data(),charge.Data(),suf.Data()),eta,w,100,-2.5,2.5);
       
+    //// For prefirieweight check
+    if(eta<-2.0) FillHist(Form("%slpt_eta0%s",pre.Data(),suf.Data()),pt,w,100,0,100);
+    else if(eta<2.0) FillHist(Form("%slpt_eta1%s",pre.Data(),suf.Data()),pt,w,100,0,100);
+    else FillHist(Form("%slpt_eta2%s",pre.Data(),suf.Data()),pt,w,100,0,100);
+
     FillHist(Form("%slriso%s",pre.Data(),suf.Data()),p.leptons.at(i)->RelIso(),w,30,0,0.3);
     if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::MUON){
       double rtrkiso=((Muon*)p.leptons.at(i))->TrkIso()/pt;
       FillHist(Form("%slrtrkiso%s",pre.Data(),suf.Data()),rtrkiso,w,40,0,0.2);
     }else if(p.leptons.at(i)->LeptonFlavour()==Lepton::Flavour::ELECTRON){
       //Electron* el=(Electron*)p.leptons.at(i);
-      //FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,500,0,500);
+      //FillHist(Form("%slrawpt%s",pre.Data(),suf.Data()),el->UncorrPt(),w,100,0,100);
       //FillProfile(pre+"leta_energyscale"+suf,el->scEta(),el->Pt()/el->UncorrPt(),w,60,-3,3);
       //FillProfile(pre+"leta_energyscale2"+suf,el->scEta(),el->Energy()/el->scE(),w,60,-3,3);
     }
     //int iphi=(p.leptons.at(i)->Phi()/TMath::Pi()+1)*4;      
-    //FillHist(Form("%sleta%s_phi%d",pre.Data(),suf.Data(),iphi),eta,w,120,-3,3);
+    //FillHist(Form("%sleta%s_phi%d",pre.Data(),suf.Data(),iphi),eta,w,100,-2.5,2.5);
     if(vertex_Z<-4){
-      //FillHist(Form("%sleta%s_z0",pre.Data(),suf.Data()),eta,w,120,-3,3);
+      //FillHist(Form("%sleta%s_z0",pre.Data(),suf.Data()),eta,w,100,-2.5,2.5);
     }else if(vertex_Z<4){
-      //FillHist(Form("%sleta%s_z1",pre.Data(),suf.Data()),eta,w,120,-3,3);
+      //FillHist(Form("%sleta%s_z1",pre.Data(),suf.Data()),eta,w,100,-2.5,2.5);
     }else{
-      //FillHist(Form("%sleta%s_z2",pre.Data(),suf.Data()),eta,w,120,-3,3);
+      //FillHist(Form("%sleta%s_z2",pre.Data(),suf.Data()),eta,w,100,-2.5,2.5);
     }
   }
   //if(p.truth_lepton0.Pt()) FillProfile(pre+"leta_deta"+suf,p.lepton0->Eta(),p.lepton0->Eta()-p.truth_lepton0.Eta(),w,60,-3,3);

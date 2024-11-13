@@ -74,6 +74,7 @@ public:
     vector<TString> triggers;
     vector<Gen> gens;
     vector<Jet> jets;
+    JetTagging::Parameters jtp;
     vector<Jet> bjets;
     vector<Muon> muons;
     vector<Electron> electrons;
@@ -130,7 +131,9 @@ public:
       Weight triggerSF,triggerSF_up,triggerSF_down,triggerSF_mode1,triggerSF_interpolation;
       vector<vector<Weight>> triggerSF_sys;
       Weight CFSF,CFSF_up,CFSF_down;
+      Weight fakeTF,fakeTF_up,fakeTF_down;
       Weight btagSF,btagSF_hup,btagSF_hdown,btagSF_lup,btagSF_ldown,btagSF_hcorr,btagSF_huncorr,btagSF_lcorr,btagSF_luncorr;
+      Weight bchargeSF,bchargeSF_s0m0,bchargeSF_s0m1;
     };
     struct Cut{
       double lepton0pt=-1,lepton1pt=-1;
@@ -155,6 +158,7 @@ public:
     void SetMuonKeys(TString muID,TString muISO,vector<TString> trig);
     void SetLeptonPtCut(double l0pt,double l1pt);
     void SetLeptons();
+    void SetBjets();
     void SetGens(vector<Gen> gs);
     void SetElectrons(vector<Electron> els);
     void SetMuons(vector<Muon> mus);
@@ -166,7 +170,7 @@ public:
   virtual void initializeAnalyzer();
   virtual void beginEvent();
   virtual void executeEventWithParameter(Parameter& p);
-  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p;executeEventWithParameter(pp);}
+  virtual void executeEventWithParameter(Parameter&& p){Parameter pp=p.Clone();executeEventWithParameter(pp);}
   virtual void EvalIDSF(Parameter& p);
   virtual void EvalTriggerSF(Parameter& p);
   virtual void EvalDefaultWeight(Parameter& p);
@@ -174,7 +178,9 @@ public:
   virtual void EvalVariationsPUweight(const Parameter& p,Variations& variations);
   virtual void EvalVariationsPrefireweight(const Parameter& p,Variations& variations);
   virtual void EvalVariationsCF(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsFake(const Parameter& p,Variations& variations);
   virtual void EvalVariationsBtag(const Parameter& p,Variations& variations);
+  virtual void EvalVariationsBcharge(const Parameter& p,Variations& v);
   virtual void EvalVariationsEtc(const Parameter& p,Variations& variations);
   virtual void EvalVariationsEfficiency(const Parameter& p,Variations& variations);
   virtual void EvalVariationsPDF(const Parameter& p,Variations& variations);
@@ -182,6 +188,7 @@ public:
   virtual void EvalVariationsElectronEnergy(const Parameter& p,Variations& variations);
   virtual void EvalVariationsJetCorrection(const Parameter& p,Variations& variations);
   virtual bool PassSelection(Parameter& p,bool cutflow=false);
+  virtual void EvalAFBCharge(Parameter& p);
   virtual Parameter MakeParameter(TString channel,TString option="");
 
   std::map< TString, TH4D* > maphist_TH4D;
@@ -272,11 +279,14 @@ public:
 
   void SetupCFRate();
   double GetCFSF(const Lepton* l,int sys=0);
+  double GetCFData(const Lepton* l,int sys=0);
+  double GetCFSim(const Lepton* l,int sys=0);
   double GetCFSF(const Parameter& p,int sys=0);
   void DeleteCFRate();
   TH2* hcfrate_data=NULL;
   TH2* hcfrate_mc=NULL;
   TH2* hcfsf=NULL;
+  TH2* hcfscale=NULL;
 
   void SetupMuonTrackingSF();
   double GetMuonTrackingSF(double eta,int sys=0);
@@ -306,9 +316,10 @@ public:
   static double GetBinContentUser(TH1* hist,double valx,int sys);
   static double GetBinContentUser(TH2* hist,double valx,double valy,int sys);
   static double GetBinContentUser(TH3* hist,double valx,double valy,double valz,int sys);
-  void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
-  void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
+  virtual void GetAFBLHEParticles(const vector<LHE>& lhes,LHE& p0,LHE& p1,LHE& l0,LHE& l1,LHE& j0);
+  virtual void GetAFBGenParticles(const vector<Gen>& gens,Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,int mode);
   static Gen SMPGetGenMatchedLepton(const Lepton& lep, const std::vector<Gen>& gens, int mode=0);
+  bool PassID(const Lepton* lep,TString id);
   std::vector<Electron> SMPGetElectrons(TString id, double ptmin, double fetamax);
   std::vector<Muon> SMPGetMuons(TString id,double ptmin,double fetamax);
   void FillCutflow(TString histname,TString label,double weight);
@@ -356,9 +367,12 @@ public:
 
   RoccoR* roc=NULL;
   Aepcor* rocele=NULL;
+  map<TString,TH1*> fRoccorResidual;
 
-  std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int sys,int set=0,int member=0,bool sort=true);
-  std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0,bool sort=true);
+  virtual double MuonMomentumCorrection(const Muon& muon,int set=0,int member=0);
+  virtual std::vector<Muon> MuonMomentumCorrection(const vector<Muon>& muons,int set=0,int member=0,bool sort=true);
+  virtual double ElectronEnergyCorrection(const Electron& electron,int set=0,int member=0);
+  virtual std::vector<Electron> ElectronEnergyCorrection(const vector<Electron>& electrons,int set=0,int member=0,bool sort=true);
 
   double GetPFMET_T1Smear() const;
   TString GetSkimName() const;
@@ -369,6 +383,9 @@ public:
   bool PassDLT2(const Lepton* lep) const;
 
   static vector<vector<Weight>> Make2DWeights(const vector<int>& structure);
+
+  virtual double GetBchargeSF(const Jet& bjet,int set=-1,int mem=-1) const;
+  virtual double GetBchargeSF(const Parameter& p,int set=-1,int mem=-1) const;
 
   SMPAnalyzerCore();
   ~SMPAnalyzerCore();

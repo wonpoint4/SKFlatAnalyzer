@@ -344,9 +344,11 @@ void AFBAnalyzer::ResetRecoWeights(Parameter& p){
   p.w.muonISOSF=1.;
   p.w.muonISOSF_sys=Make2DWeights(fEff->GetStructure(p.k.muonISOSF));
   p.w.triggerSF=1.;
-  p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
+  if(p.k.triggerSF.size())
+    p.w.triggerSF_sys=Make2DWeights(fEff->GetStructure(p.k.triggerSF[0]));
   p.w.CFSF=1.; p.w.CFSF_up=1.; p.w.CFSF_down=1.;
   p.w.btagSF=1.; p.w.btagSF_hup=1.; p.w.btagSF_hdown=1.; p.w.btagSF_lup=1.; p.w.btagSF_ldown=1.;
+  p.w.bchargeSF=1.; p.w.bchargeSF_s0m0=1.; p.w.bchargeSF_s0m1=1.;
 }
 void AFBAnalyzer::FillHistsSyst(Parameter p,Variations& vs){
   if(!IsSkimmed) return;
@@ -374,7 +376,7 @@ void AFBAnalyzer::FillHistsSyst(Parameter p,Variations& vs){
     }
     if(vsuf==""||vsuf.Contains("z0weight"))
       FillHist(p.prefix+p.hprefix+"z0"+p.suffix+vsuf,dimass,dirap,dipt,vertex_Z,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,120,-15,15);
-    if(vsuf.Contains("PUWeight")){
+    if(vsuf==""||vsuf.Contains("PUweight")){
       FillHist(p.prefix+p.hprefix+"nPV"+p.suffix+vsuf,dimass,dirap,dipt,nPV,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,100);
       FillHist(p.prefix+p.hprefix+"rho"+p.suffix+vsuf,dimass,dirap,dipt,Rho,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,50,0,50);
       FillHist(p.prefix+p.hprefix+"met"+p.suffix+vsuf,dimass,dirap,dipt,pfMET_Type1_pt,p.weight,grid_mbinnum,(double*)grid_mbin,grid_ybinnum,(double*)grid_ybin,grid_ptbinnum,(double*)grid_ptbin,100,0,200);

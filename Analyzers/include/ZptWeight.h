@@ -15,8 +15,8 @@ public:
   ZptWeight();
   ~ZptWeight();
 
-  static const int massbinnum=12;
-  static constexpr const double massbin[massbinnum+1]={52,60,70,77,86,96,106,120,150,280,400,800,3000};
+  static const int massbinnum=13;
+  static constexpr const double massbin[massbinnum+1]={52,60,70,77,86,96,106,120,150,200,280,400,800,3000};
   static const int ybinnum=14;
   static constexpr const double ybin[ybinnum+1]={0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.8,4.8};
   static const int ptbinnum=52;

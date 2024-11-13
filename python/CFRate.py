@@ -1,39 +1,56 @@
 import os,sys
-import math
+import math,ctypes
 from array import array
 import ROOT as rt
 rt.gROOT.LoadMacro("./Plotter/ZpeakPlotter.cc")
 from ROOT import ZpeakPlotter
+rt.gROOT.SetBatch(True)
+
+def calc_eff(valp,valf,errp=None,errf=None):
+    if valp+valf==0: return 0.,0.
+    eff=valp/(valp+valf)
+    if errp is None and errf is None:
+        return eff
+    err = 1/(valp+valf)**2*math.sqrt(errp*errp*valf*valf+errf*errf*valp*valp)
+    return eff,err
 
 def evaluate(args):
-    plotter=ZpeakPlotter("data "+args.dykey)
+    plotter=ZpeakPlotter("data-tau_mi"+" "+args.dykey)
     rt.Verbosity=0
 
-    ptbins=[10,30,40,50,70,90,200]
-    #ptbins=[10,200]
-    etabins=[0.0,1.0,1.5,1.7,2.0,2.5]
-    #etabins=[0,1.5,2.5]
+    #ptbins=[10,30,40,50,70,90,200]
+    ptbins=[10,200]
+    #etabins=[0.0,1.0,1.5,1.7,2.0,2.5]
+    etabins=[round(0.1*i,1) for i in range(-25,26)]
     cfdata=rt.TH2D("cfdata","cfdata",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
     cfmc=rt.TH2D("cfmc","cfmc",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
+    cfscale=rt.TH2D("cfscale","cfscale",len(etabins)-1,array('d',etabins),len(ptbins)-1,array('d',ptbins));
 
     rt.RooMsgService.instance().setGlobalKillBelow(rt.RooFit.WARNING)
     Import=getattr(rt.RooWorkspace,"import")
 
     if not os.path.exists("fig/CFRate"):
         os.makedirs("fig/CFRate")
-
     for ip in range(len(ptbins)-1):
         for ie in range(len(etabins)-1):
-            binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absy".format(ptbins[ip],ptbins[ip+1],etabins[ie],etabins[ie+1])
-            hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_even","xmin:52 xmax:150 prject:z "+binstring)
-            hdatass=plotter.GetHist(0,"ee"+args.eras+"/ss_dimass_even","xmin:52 xmax:150 prject:z "+binstring)
-            hmcos=plotter.GetHist(1,"ee"+args.eras+"/dimass_even","xmin:52 xmax:150 prject:z "+binstring)
-            hmcss=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass_even","xmin:52 xmax:150 prject:z "+binstring)
+            #binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absX project:z ".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
+            binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} project:z ".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
+            hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hdatass=plotter.GetHist(0,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hmcos=plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+            hmcss=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
 
-            hmcsscf=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass_cf_even","xmin:52 xmax:150 prject:z "+binstring)
+            hmcsscf=plotter.GetHist(1,"ee"+args.eras+"/ss_dimass_cf","xmin:76 xmax:106 prject:z rebin:2 "+binstring)
+
+            for h in [hdataos,hdatass,hmcos,hmcss]:
+                for i in range(h.GetNcells()):
+                    if h.GetBinContent(i)<=0:
+                        h.SetBinContent(i,0)
+                        h.SetBinError(i,0)
 
             w=rt.RooWorkspace("w")
-            x=w.factory("x[52,150]")
+            x=w.factory("x[75,107]")
+            x.setRange("fit_range",76,106)
             dataos=rt.RooDataHist("dataos","dataos",rt.RooArgList(x),rt.RooFit.Import(hdataos))
             datass=rt.RooDataHist("datass","datass",rt.RooArgList(x),rt.RooFit.Import(hdatass))
             mcos=rt.RooDataHist("mcos","mcos",rt.RooArgList(x),hmcos)
@@ -43,14 +60,24 @@ def evaluate(args):
             Import(w,mcospdf)
             Import(w,mcsspdf)
     
-            bgos=w.factory("CMSShape::bgos(x,alphaos[70,30,100],betaos[0.05,0.0,0.1],gammaos[0,0.2],peak[90])")
-            modelos=w.factory("SUM::modelos(fsigos[0.8,0.1,1]*mcospdf,bgos)")
+            #bgos=w.factory("CMSShape::bgos(x,alphaos[50,40,80],betaos[0.1,0.01,0.25],gammaos[0.05,0.0001,0.2],peak[90])")
+            bgos=w.factory("Exponential::bgos(x,alphaos[-0.02,-1,0.5])")
+            modelos=w.factory("SUM::modelos(fsigos[0.95,0.8,1]*mcospdf,bgos)")
 
-            bgss=w.factory("CMSShape::bgss(x,alphass[70,30,100],betass[0.05,0.0,0.1],gammass[0,0.2],peak[90])")
-            modelss=w.factory("SUM::modelss(fsigss[0.8,0.1,1]*mcsspdf,bgss)")
+            #bgss=w.factory("CMSShape::bgss(x,alphass[50,40,80],betass[0.1,0.01,0.25],gammass[0.05,0.0001,0.2],peak[90])")
+            bgss=w.factory("Exponential::bgss(x,alphass[-0.02,-1,0.5])")
+            modelss=w.factory("SUM::modelss(fsigss[0.95,0.8,1]*mcsspdf,bgss)")
 
             cos=rt.TCanvas("cos")
-            modelos.fitTo(dataos)
+            for i in range(5):
+                result=modelos.fitTo(dataos,rt.RooFit.Range("fit_range"),rt.RooFit.Save(True),rt.RooFit.PrintLevel(-1),rt.RooFit.Minimizer("Minuit2","minimize"),rt.RooFit.Strategy(2),rt.RooFit.SumW2Error(True))
+                print "ie",ie,"modelos status",result.status()
+                if result.status()==0:
+                    break
+                else:
+                    for p in result.floatParsFinal():
+                        w.var(p.GetName()).randomize()
+
             plotos=x.frame(rt.RooFit.Title("os "+binstring))
             dataos.plotOn(plotos)
             modelos.plotOn(plotos)
@@ -59,7 +86,15 @@ def evaluate(args):
             cos.SaveAs("fig/CFRate/pt{}to{}_eta{}to{}_OS".format(ptbins[ip],ptbins[ip+1],etabins[ie],etabins[ie+1]).replace(".","p")+".png")
 
             css=rt.TCanvas("css")
-            modelss.fitTo(datass)
+            for i in range(5):
+                result=modelss.fitTo(datass,rt.RooFit.Range("fit_range"),rt.RooFit.Save(True),rt.RooFit.PrintLevel(-1),rt.RooFit.Minimizer("Minuit2","minimize"),rt.RooFit.Strategy(2),rt.RooFit.SumW2Error(True))
+                print "ie",ie,"modelss status",result.status()
+                if result.status()==0:
+                    break
+                else:
+                    for p in result.floatParsFinal():
+                        w.var(p.GetName()).randomize()
+
             plotss=x.frame(rt.RooFit.Title("ss "+binstring)).Clone()
             datass.plotOn(plotss)
             modelss.plotOn(plotss)
@@ -67,26 +102,34 @@ def evaluate(args):
             plotss.Draw()
             css.SaveAs("fig/CFRate/pt{}to{}_eta{}to{}_SS".format(ptbins[ip],ptbins[ip+1],etabins[ie],etabins[ie+1]).replace(".","p")+".png")
             
-            hdataoserr=rt.Double(0.)
+            hdataoserr=ctypes.c_double(0.)
             hdataosval=hdataos.IntegralAndError(hdataos.GetXaxis().GetFirst(),hdataos.GetXaxis().GetLast(),hdataoserr)
-            hdatasserr=rt.Double(0.)
+            hdataoserr=hdataoserr.value
+            hdatasserr=ctypes.c_double(0.)
             hdatassval=hdatass.IntegralAndError(hdatass.GetXaxis().GetFirst(),hdatass.GetXaxis().GetLast(),hdatasserr)
+            hdatasserr=hdatasserr.value
             fsigosval=w.var("fsigos").getVal()
             fsigoserr=w.var("fsigos").getError()
             fsigssval=w.var("fsigss").getVal()
             fsigsserr=w.var("fsigss").getError()
 
-            hmcoserr=rt.Double(0.)
+            hmcoserr=ctypes.c_double(0.)
             hmcosval=hmcos.IntegralAndError(hmcos.GetXaxis().GetFirst(),hmcos.GetXaxis().GetLast(),hmcoserr)
-            hmcsserr=rt.Double(0.)
+            hmcoserr=hmcoserr.value
+            hmcsserr=ctypes.c_double(0.)
             hmcssval=hmcss.IntegralAndError(hmcss.GetXaxis().GetFirst(),hmcss.GetXaxis().GetLast(),hmcsserr)
-            hmcsscferr=rt.Double(0.)
+            hmcsserr=hmcsserr.value
+            hmcsscferr=ctypes.c_double(0.)
             hmcsscfval=hmcsscf.IntegralAndError(hmcsscf.GetXaxis().GetFirst(),hmcsscf.GetXaxis().GetLast(),hmcsscferr)
+            hmcsscferr=hmcsscferr.value
 
-            this_cfdata=hdatassval*fsigssval/hdataosval/fsigosval*hmcsscfval/hmcssval
-            this_cfdata_err=this_cfdata*math.sqrt((hdatasserr/hdatassval)**2+(fsigsserr/fsigssval)**2+(hdataoserr/hdataosval)**2+(fsigoserr/fsigosval)**2+(hmcsscferr/hmcsscfval)**2+(hmcsserr/hmcssval)**2)
-            this_cfmc=hmcsscfval/hmcosval
-            this_cfmc_err=this_cfmc*math.sqrt((hmcsscferr/hmcsscfval)**2+(hmcoserr/hmcosval)**2)
+            this_cfdata,this_cfdata_err=calc_eff(hdatassval*fsigssval,hdataosval*fsigosval,((hdatassval*fsigsserr)**2+(hdatasserr*fsigssval)**2)**0.5,((hdataosval*fsigoserr)**2+(hdataoserr*fsigosval)**2)**0.5)
+            this_cfdata*=hmcsscfval/hmcssval
+            this_cfdata_err*=hmcsscfval/hmcssval
+            
+            this_cfmc,this_cfmc_err=calc_eff(hmcssval,hmcosval,hmcsserr,hmcoserr)
+            this_cfmc*=hmcsscfval/hmcssval
+            this_cfmc_err*=hmcsscfval/hmcssval
             
             if this_cfdata==this_cfdata:
                 cfdata.SetBinContent(ie+1,ip+1,this_cfdata)
@@ -94,6 +137,22 @@ def evaluate(args):
             if this_cfmc==this_cfmc: 
                 cfmc.SetBinContent(ie+1,ip+1,this_cfmc)
                 cfmc.SetBinError(ie+1,ip+1,this_cfmc_err)
+            
+            
+            hdatamean=hdatass.Clone()
+            hdatamean.GetXaxis().SetRangeUser(86,96)
+            hmcmean=hmcss.Clone()
+            hmcmean.GetXaxis().SetRangeUser(86,96)
+            scale=hdatamean.GetMean()/hmcmean.GetMean()
+            scaleerr=( (hdatamean.GetMeanError()/hdatamean.GetMean())**2 + (hmcmean.GetMeanError()/hmcmean.GetMean())**2 )**0.5*scale
+
+            scaleerr=2*scale*scaleerr
+            scale=scale**2
+
+            print scale,scaleerr
+            cfscale.SetBinContent(ie+1,ip+1,scale)
+            cfscale.SetBinError(ie+1,ip+1,scaleerr)
+
 
             #r=raw_input()
 
@@ -103,8 +162,10 @@ def evaluate(args):
     cfsf.Divide(cfmc)
     cfsf_this=cfsf.Clone("cfsf_this")
     cfsf_this.SetTitle("cfsf_this")
+    cfscale_this=cfscale.Clone("cfscale_this")
     cffilepath=os.getenv("SKFlat_WD")+"/data/"+os.getenv("SKFlatV")+"/"+args.era+"/SMP/CFRate.root"
     cfsf_old=None
+    cfscale_old=None
     if os.path.exists(cffilepath):
         fold=rt.TFile(cffilepath)
         cfsf_old=fold.Get("cfsf")
@@ -115,9 +176,19 @@ def evaluate(args):
             for i in range(h.GetNcells()):
                 h.SetBinError(i,0)
             cfsf.Multiply(h)
+            cfmc.Divide(h)
+        cfscale_old=fold.Get("cfscale")
+        if cfscale_old:
+            cfscale_old.SetNameTitle("cfscale_old","cfscale_old")
+            cfscale_old.SetDirectory(0)
+            h=cfscale_old.Clone()
+            for i in range(h.GetNcells()):
+                h.SetBinError(i,0)
+            cfscale.Multiply(h)            
         fold.Close()
 
-    f=rt.TFile("CFRate.root","recreate")
+    this_cffilepath="CFRate{}.root".format(args.eras)
+    f=rt.TFile(this_cffilepath,"recreate")
 
     cfdata.SetOption("colz text e")
     cfdata.Write("cfdata")
@@ -127,10 +198,16 @@ def evaluate(args):
     cfsf.Write("cfsf")
     cfsf_this.SetOption("colz text e")
     cfsf_this.Write("cfsf_this")
+    cfscale.SetOption("colz text e")
+    cfscale.Write("cfscale")
+    cfscale_this.SetOption("colz text e")
+    cfscale_this.Write("cfscale_this")
     if cfsf_old:
         cfsf_old.SetOption("colz text e")
         cfsf_old.Write("cfsf_old")
-
+    if cfscale_old:
+        cfscale_old.SetOption("colz text e")
+        cfscale_old.Write("cfscale_old")
 
     cgcf_eta=rt.TCanvas("cgcf_eta")
     for i in range(len(ptbins)-1):
@@ -208,74 +285,84 @@ def evaluate(args):
 
 
 def validate(args):
-    plotter=ZpeakPlotter("data ^{}+tau_{}+vv+wjets+tttw".format(args.dykey,args.dykey))
-    rt.Verbosity=0
+    plotter=ZpeakPlotter("data ^{}+{}".format(args.dykey,args.bgkey))
+    #rt.Verbosity=0
 
     ptbins=[10,30,40,50,70,100,200]
     etabins=[0.0,1.0,1.4,1.7,2.0,2.5]
 
     binstring=""
-    hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring)
-    hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring))
+    hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring)
+    hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring))
     normsf=hdataos.Integral()/hmcos.Integral()
     plotter.entries[1].weight=normsf
-    plotter.DrawPlot("ee"+args.eras+"/dimass_odd","xmin:54 xmax:150 prject:z rebin:2 2:widewidey "+binstring)
-    plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
-    plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd_noCFSF","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
+    plotter.DrawPlot("ee"+args.eras+"/dimass","xmin:54 xmax:150 project:z rebin:2 2:widewidey "+binstring)
+    plotter.DrawPlot("ee"+args.eras+"/ss_dimass","xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
+    plotter.DrawPlot("ee"+args.eras+"/ss_dimass","suffix:_noCFSF:sim xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
     plotter.entries[1].weight=1.
+
+    print normsf
+    plotter2=ZpeakPlotter("{}*data-{}-{}".format(1/normsf,args.dykey,args.bgkey.replace("+","-")))
+    plotter2.DrawPlot("ee"+args.eras+"/ss_dimass","xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
     r=raw_input()
 
     for ip in range(len(ptbins)-1):
-        binstring="Xmin:{} Xmax:{}".format(ptbins[ip],ptbins[ip+1])
+        binstring="Ymin:{} Ymax:{}".format(ptbins[ip],ptbins[ip+1])
         print binstring
-        hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring)
-        hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring))
+        hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring)
+        hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring))
         normsf=hdataos.Integral()/hmcos.Integral()
         plotter.entries[1].weight=normsf
-        plotter.DrawPlot("ee"+args.eras+"/dimass_odd","xmin:54 xmax:150 prject:z rebin:2 2:widewidey "+binstring)
-        plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
+        plotter.DrawPlot("ee"+args.eras+"/dimass","xmin:54 xmax:150 project:z rebin:2 2:widewidey "+binstring)
+        plotter.DrawPlot("ee"+args.eras+"/ss_dimass","xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
         plotter.entries[1].weight=1.
         r=raw_input()
 
     for ie in range(len(etabins)-1):
-        binstring="Ymin:{} Ymax:{} absy".format(etabins[ie],etabins[ie+1])
+        binstring="Xmin:{} Xmax:{} absX".format(etabins[ie],etabins[ie+1])
         print binstring
-        hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring)
-        hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring))
+        hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring)
+        hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring))
         normsf=hdataos.Integral()/hmcos.Integral()
         plotter.entries[1].weight=normsf
-        plotter.DrawPlot("ee"+args.eras+"/dimass_odd","xmin:54 xmax:150 prject:z rebin:2 2:widewidey "+binstring)
-        plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
+        plotter.DrawPlot("ee"+args.eras+"/dimass","xmin:54 xmax:150 project:z rebin:2 2:widewidey "+binstring)
+        plotter.DrawPlot("ee"+args.eras+"/ss_dimass","xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
         plotter.entries[1].weight=1.
         r=raw_input()
 
-    for ip in range(len(ptbins)-1):
-        for ie in range(len(etabins)-1):
-            binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absy".format(ptbins[ip],ptbins[ip+1],etabins[ie],etabins[ie+1])
-            print binstring
-            hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring)
-            hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass_odd","xmin:52 xmax:150 prject:z "+binstring))
-            normsf=hdataos.Integral()/hmcos.Integral()
-            plotter.entries[1].weight=normsf
-            plotter.DrawPlot("ee"+args.eras+"/dimass_odd","xmin:54 xmax:150 prject:z rebin:2 2:widewidey "+binstring)
-            plotter.DrawPlot("ee"+args.eras+"/ss_dimass_odd","xmin:54 xmax:150 prject:z rebin:4 2:widewidey "+binstring)
-            plotter.entries[1].weight=1.
+    # for ip in range(len(ptbins)-1):
+    #     for ie in range(len(etabins)-1):
+    #         binstring="Xmin:{} Xmax:{} Ymin:{} Ymax:{} absX".format(etabins[ie],etabins[ie+1],ptbins[ip],ptbins[ip+1])
+    #         print binstring
+    #         hdataos=plotter.GetHist(0,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring)
+    #         hmcos=plotter.GetTH1(plotter.GetHist(1,"ee"+args.eras+"/dimass","xmin:52 xmax:150 project:z "+binstring))
+    #         normsf=hdataos.Integral()/hmcos.Integral()
+    #         plotter.entries[1].weight=normsf
+    #         plotter.DrawPlot("ee"+args.eras+"/dimass","xmin:54 xmax:150 project:z rebin:2 2:widewidey "+binstring)
+    #         plotter.DrawPlot("ee"+args.eras+"/ss_dimass","xmin:54 xmax:150 project:z rebin:4 2:widewidey "+binstring)
+    #         plotter.entries[1].weight=1.
 
-            r=raw_input()
+    #         r=raw_input()
 
 def iterate(args):
     for i in range(args.maxiter):
         print "[CFRate] Iteration {}".format(i)
         if i==0:
             cmd=""
-            for sample in args.samples_dy+args.samples_data:
-                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
+            for sample in args.samples_dy+args.samples_data+args.samples_bg:
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & sleep 3; ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
             cmd+="wait;"
             os.system(cmd)
+        # elif i==1:
+        #     cmd=""
+        #     for sample in args.samples_dy+args.samples_bg:
+        #         cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} --nmax {} & sleep 3; ".format(sample,args.era,60 if "DY" in sample else 30,args.nmax)
+        #     cmd+="wait;"
+        #     os.system(cmd)
         else:
             cmd=""
             for sample in args.samples_dy:
-                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} & ".format(sample,args.era,args.nmax)
+                cmd+="SKFlat.py -a ZpeakAnalyzer --skim SkimTree_Dilepton -i {} -e {} -n {} & sleep 3; ".format(sample,args.era,args.nmax)
             cmd+="wait;"
             os.system(cmd)
 
@@ -288,7 +375,9 @@ def iterate(args):
                 index+=1
             newpath=cffilepath.replace(".root","_old{}.root".format(index))
             os.system("mv {} {}".format(cffilepath,newpath))
-        os.system("mv CFRate.root "+cffilepath)
+
+        this_cffilepath="CFRate{}.root".format(args.eras)
+        os.system("mv "+this_cffilepath+" "+cffilepath)
 
         if stop:
             print "[CFRate] Stop at iteration {}".format(i)
@@ -301,23 +390,20 @@ if __name__=="__main__":
     parser.add_argument("action",help="evaluate(eval), validate(val), iterate(iter)")
     parser.add_argument("era",help="2016preVFP(2016a), 2016postVFP(2016b), 2017, 2018")
     parser.add_argument("--maxiter",type=int,default=5,help="maximum iteration")
-    parser.add_argument("--nmax",type=int,default=150,help="condor concurrency limit")
+    parser.add_argument("--nmax",type=int,default=300,help="condor concurrency limit")
     args=parser.parse_args()
 
     args.samples_data=["DoubleEG"]
-    args.samples_dy=["DYJets_MG"]
-    args.samples_bg=["WW_pythia","WZ_pythia","ZZ_pythia","WJets_MG","TTLL_powheg","SingleTop_tW_top_NoFullyHad","SingleTop_tW_antitop_NoFullyHad"]
-    args.dykey="mg"
+    args.samples_dy=["DYJetsToEE_MiNNLO"]
+    args.samples_bg=["DYJetsToTauTau_MiNNLO","WW_pythia","WZ_pythia","ZZ_pythia","WJets_MG","TTLL_powheg","SingleTop_tW_top_NoFullyHad","SingleTop_tW_antitop_NoFullyHad","SingleTop_tch_top_Incl","SingleTop_tch_antitop_Incl","SingleTop_sch_Lep","GGToLL"]
+    args.dykey="mi"
+    args.bgkey="tau_mi+vv+wjets+tt+st+aa"
     if args.era in ["2016preVFP","2016a"]:
         args.era="2016preVFP"
         args.eras="2016a"
-        args.samples_dy=["DYJetsToEE_MiNNLO"]
-        args.dykey="minnlo"
     elif args.era in ["2016postVFP","2016b"]:
         args.era="2016postVFP"
         args.eras="2016b"
-        args.samples_dy=["DYJetsToEE_MiNNLO"]
-        args.dykey="minnlo"
     elif args.era=="2017":
         args.era="2017"
         args.eras="2017"
