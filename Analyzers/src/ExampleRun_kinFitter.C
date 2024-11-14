@@ -22,6 +22,7 @@ void ExampleRun_kinFitter::executeEvent(){
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
+    executeEventWithParameter("E"+GetEraShort());
   }
 }
 
@@ -60,7 +61,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     lepvetojets.push_back(jet);
   }
   for(const auto jet:lepvetojets){
-    //if(!PUJetIDPass(jet, "Loose")) continue;
+    if(!PUJetIDPass(jet, "Loose")) continue;
     realjets.push_back(jet);
   }
 
@@ -81,7 +82,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
 
   // Jet related weights
   if(!IsDATA){
-    pujetSF = 1.;//GetPUJetWeight(lepvetojets, "Loose", 0);
+    pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
     btagSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "central");
   }
 
@@ -98,7 +99,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   ajet0 = &ajets.at(0); acharge0 = jetCharge(*ajet0);
   ajet1 = &ajets.at(1); acharge1 = jetCharge(*ajet1);
 
-  //map_weight["_noWts"] = map_weight[""];
+  map_weight["_noWts"] = map_weight[""];
   // Weights
   map_weight[""] *= PUweight;
   FillHist(prefix+hprefix+"weight_PU", PUweight, map_weight[""], 200,-5,5);
@@ -113,7 +114,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
 
   // Lepton Efficiency Correction
-  //map_weight["_noEffSF"] = map_weight[""];
+  map_weight["_noEffSF"] = map_weight[""];
   leptonTrackingSF = 1.;
   leptonRECOSF = 1.;
   leptonIDSF = 1.;
@@ -132,6 +133,12 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
       leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton0, 0,0);
       trigSFkey = "Ele27_MediumID";
       if(DataYear == 2017) trigSFkey = "Ele32_MediumID";
+      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+    }else if(channel.Contains("E")){
+      leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
+      leptonIDSF *= fEff->GetEfficiencySF("Electron_SelQ_MediumID", lepton0, 0,0);
+      trigSFkey = "Ele27_SelQ_MediumID";
+      if(DataYear == 2017) trigSFkey = "Ele32_SelQ_MediumID";
       leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
     }
   }
@@ -553,6 +560,12 @@ bool ExampleRun_kinFitter::Hasleptons(TString channel){
     l0pt = 30.;
     if(DataYear > 2016) l0pt = 35.;
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
+    if(electrons.size() > 0) lepton0 = &electrons.at(0);
+    if(electrons.size() > 1) moreleptons = true;
+  }else if(channel.Contains("E")){
+    l0pt = 30.;
+    if(DataYear > 2016) l0pt = 35.;
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0,2.5), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }

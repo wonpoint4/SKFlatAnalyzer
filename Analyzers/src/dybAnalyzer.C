@@ -420,8 +420,8 @@ bool dybAnalyzer::IsFiredTriggers(TString channel){
     };
   }else if(DataYear == 2017 && channel.Contains("m")) triggers = {"HLT_IsoMu27_v"};
   else if(DataYear == 2018 && channel.Contains("m")) triggers = {"HLT_IsoMu24_v"};
-  else if(DataYear == 2016 && channel.Contains("e")) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
-  else if(DataYear >= 2017 && channel.Contains("e")){
+  else if(DataYear == 2016 && (channel.Contains("e") || channel.Contains("E"))) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
+  else if(DataYear >= 2017 && (channel.Contains("e") || channel.Contains("E"))){
     triggers = {
       "HLT_Ele27_WPTight_Gsf_v",
       "HLT_Ele32_WPTight_Gsf_v"
