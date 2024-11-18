@@ -178,23 +178,30 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   //==== Kinematic Fitter
   //=======================
   std::vector<TLorentzVector> jet_vector{};
+  std::vector<double> jet_pt_resolution_vector{};
   TLorentzVector lepton{};
   for(auto& jet : realjets){
     jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
+    jet_pt_resolution_vector.push_back((jet.EnShift(1) - jet.EnShift(-1)) / 2);
   }
   if(jet_vector.size() != btag_vector.size()){
     cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
     exit(1);
   }
   lepton = (TLorentzVector)(*lepton0);
-  fitter->SetAllObjects(jet_vector, btag_vector, lepton, met);
+  fitter->SetAllObjects(jet_vector, btag_vector, jet_pt_resolution_vector, lepton, met);
   fitter->FindBestChi2Fit();
   auto fitter_results = fitter->GetResults();
 
-  FillHist(prefix+"kinFit_Nresults", fitter_results->size(), map_weight[""], 20,0,20);
-  FillHist(prefix+"kinFit_efficiency", fitter_results->size()<1?0:1, map_weight[""], 2,0,2);
+  FillHist(prefix+"kinFit_Nresults", fitter_results->size(), map_weight, 20,0,20);
+  FillHist(prefix+"kinFit_efficiency", fitter_results->size()<1?0:1, map_weight, 2,0,2);
   if(fitter_results->size() < 1) return;
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "kinFit", map_weight[""]);
+
+  FillHist(prefix+"kinFit_chi2", fitter_results->at(0).chi2, map_weight, 500,0,250);
+  FillHist(prefix+"kinFit_chi2_lep", fitter_results->at(0).chi2_lep, map_weight, 500,0,250);
+  FillHist(prefix+"kinFit_chi2_had", fitter_results->at(0).chi2_had, map_weight, 500,0,250);
+  FillHist(prefix+"kinFit_chi2_mass", fitter_results->at(0).chi2_mass, map_weight, 500,0,250);
 
   // Before Fit variables
   int lepb_idx = fitter_results->at(0).leptonic_top_b_jet_idx;

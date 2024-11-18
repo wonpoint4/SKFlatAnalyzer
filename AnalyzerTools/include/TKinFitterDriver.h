@@ -35,11 +35,7 @@ class TKinFitterDriver{
 
   void SetAllObjects(std::vector<TLorentzVector> jet_vector_,
                      std::vector<bool> btag_vector_,
-                     TLorentzVector lepton_,
-                     TLorentzVector met_);
-  void SetAllObjects(std::vector<TLorentzVector> jet_vector_,
-                     std::vector<double> btag_csv_vector_,
-                     double btag_cut_,
+                     std::vector<double> jet_pt_resolution_vector_,
                      TLorentzVector lepton_,
                      TLorentzVector met_);
   void SetHadronicTopBJets(TLorentzVector jet_); // it doesn't check tagging status
@@ -136,6 +132,7 @@ class TKinFitterDriver{
     double hadronic_top_pt;
     double leptonic_top_M;
     double leptonic_top_pt;
+    double hadronic_W_M;
     double leptonic_W_M;
     bool IsRealNeuPz;
 
@@ -170,14 +167,23 @@ class TKinFitterDriver{
     // F from constraints
     double hadronic_top_mass_F;
     double leptonic_top_mass_F;
+    double hadronic_w_mass_F;
     double leptonic_w_mass_F;
     double currS;
     double deltaS;
     double chi2;
     double chi2_lep;
     double chi2_had;
+    double chi2_mass;
     double lambda;
   };
+
+  // top mass = 177.77 \pm 0.38 GeV (see https://cms.cern/news/cms-collaboration-measures-mass-top-quark-unparalleled-accuracy)
+  // W mass = 80360.2 \pm 9.9 MeV (see https://cms-info.web.cern.ch/cms-delivers-the-best-precision-measurement-of-the-w-boson-mass-at-the-lhc)
+  const double Mtop = 171.77; // 172.5
+  const double Mtop_error = 0.38; // 1.5
+  const double Mw = 80.3602; // 80.4
+  const double Mw_error = 0.099; //2.085
 
  private:
 
@@ -202,7 +208,6 @@ class TKinFitterDriver{
   void SetCurrentPermutationJets();
   bool Check_BJet_Assignment();
   bool Kinematic_Cut();
-  bool Quality_Cut();
   bool NextPermutation(bool UseLeading4Jets=false);
 
   void Sol_Neutrino_Pz();
@@ -263,19 +268,20 @@ class TKinFitterDriver{
   TMatrixD error_lepton;
   TMatrixD error_neutrino_pxpypz;
 
-  TFitConstraintM *constrain_hadronic_top_M;
-  //TFitConstraintMGaus_mod *constrain_hadronic_top_MGaus;
-  TFitConstraintM *constrain_leptonic_top_M;
-  //TFitConstraintMGaus_mod *constrain_leptonic_top_MGaus;
-  TFitConstraintM *constrain_leptonic_W_M;
-  //TFitConstraintMGaus_mod *constrain_leptonic_W_MGaus;
-  TFitConstraintM *constrain_hadronic_W_M;
+  //TFitConstraintM *constrain_hadronic_top_M;
+  //TFitConstraintM *constrain_leptonic_top_M;
+  //TFitConstraintM *constrain_hadronic_W_M;
+  //TFitConstraintM *constrain_leptonic_W_M;
+  TFitConstraintMGaus_mod *constrain_hadronic_top_MGaus;
+  TFitConstraintMGaus_mod *constrain_leptonic_top_MGaus;
+  TFitConstraintMGaus_mod *constrain_hadronic_W_MGaus;
+  TFitConstraintMGaus_mod *constrain_leptonic_W_MGaus;
 
   TKinFitterDriver::ResultContainer fit_result;
 
   std::vector<TKinFitterDriver::ResultContainer> fit_result_vector;
   static bool Chi2Comparing(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
-  static bool HadTopMComparing(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
+  bool HadTopMComparing(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
   static bool HighMassFitter(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
   static bool HadTopPtComparing(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
   static bool LepTopPtComparing(const TKinFitterDriver::ResultContainer& rc1, const TKinFitterDriver::ResultContainer& rc2);
