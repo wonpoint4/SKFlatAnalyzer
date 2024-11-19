@@ -178,12 +178,12 @@ class TKinFitterDriver{
     double lambda;
   };
 
-  // top mass = 177.77 \pm 0.38 GeV (see https://cms.cern/news/cms-collaboration-measures-mass-top-quark-unparalleled-accuracy)
-  // W mass = 80360.2 \pm 9.9 MeV (see https://cms-info.web.cern.ch/cms-delivers-the-best-precision-measurement-of-the-w-boson-mass-at-the-lhc)
-  const double Mtop = 171.77; // 172.5
-  const double Mtop_error = 0.38; // 1.5
-  const double Mw = 80.3602; // 80.4
-  const double Mw_error = 0.099; //2.085
+  // Top quark mass, width. See here https://pdg.lbl.gov/2024/reviews/rpp2024-rev-top-quark.pdf
+  // W boson mass, width. See here https://pdg.lbl.gov/2024/listings/rpp2024-list-w-boson.pdf
+  const double Mtop = 172.5;
+  const double Mtop_error = 1.326;
+  const double Mw = 80.3692;
+  const double Mw_error = 2.085;
 
  private:
 
@@ -252,9 +252,7 @@ class TKinFitterDriver{
   TFitParticlePt *fit_extra_jet;
   //std::vector<TFitParticlePt*> fit_extra_jets;
   TFitParticlePt *fit_lepton;
-  //TFitParticleEtPhi *fit_neutrino_etphi;
   TFitParticleMCCart *fit_neutrino_pxpypz;
-  //TFitParticlePz *fit_neutrino_pz;
 
   int hadronic_top_b_jet_idx;
   int leptonic_top_b_jet_idx;
@@ -268,10 +266,6 @@ class TKinFitterDriver{
   TMatrixD error_lepton;
   TMatrixD error_neutrino_pxpypz;
 
-  //TFitConstraintM *constrain_hadronic_top_M;
-  //TFitConstraintM *constrain_leptonic_top_M;
-  //TFitConstraintM *constrain_hadronic_W_M;
-  //TFitConstraintM *constrain_leptonic_W_M;
   TFitConstraintMGaus_mod *constrain_hadronic_top_MGaus;
   TFitConstraintMGaus_mod *constrain_leptonic_top_MGaus;
   TFitConstraintMGaus_mod *constrain_hadronic_W_MGaus;

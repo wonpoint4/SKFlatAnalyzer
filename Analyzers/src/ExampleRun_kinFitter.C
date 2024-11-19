@@ -182,7 +182,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   TLorentzVector lepton{};
   for(auto& jet : realjets){
     jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
-    jet_pt_resolution_vector.push_back((jet.EnShift(1) - jet.EnShift(-1)) / 2);
+    jet_pt_resolution_vector.push_back((jet.EnShift(1) - jet.EnShift(-1)) * 2);
   }
   if(jet_vector.size() != btag_vector.size()){
     cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
