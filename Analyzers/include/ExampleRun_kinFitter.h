@@ -4,6 +4,7 @@
 #include "SMPAnalyzerCore.h"
 #include "dybAnalyzer.h"
 #include "TKinFitterDriver.h"
+#include "JetMETCorrections/Modules/interface/JetResolution.h"
 
 class ExampleRun_kinFitter : public dybAnalyzer {
 
@@ -14,6 +15,9 @@ class ExampleRun_kinFitter : public dybAnalyzer {
   virtual void executeEventWithParameter(TString channel);
   virtual void executeEvent();
   virtual bool Hasleptons(TString channel);
+  void SetupJetResolution();
+  JME::JetResolution jet_resolution;
+  JME::JetResolutionScaleFactor jet_resolution_sf;
 
   Lepton* lepton0 = NULL;
   Jet* bjet0 = NULL;

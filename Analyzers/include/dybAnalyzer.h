@@ -18,6 +18,7 @@ public:
   virtual bool HasDileptons(TString channel);
   virtual double jetCharge(const Jet& jet);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+  double GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys);
 
   // PUJetID, SF
   void SetupPUJetWeight();
@@ -27,7 +28,6 @@ public:
   TH2F *hmistag_mc=NULL;
   bool PUJetIDPass(Jet jet, TString ID);
   double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys);
-  double GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys);
 
   dybAnalyzer();
   ~dybAnalyzer();

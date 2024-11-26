@@ -7,6 +7,7 @@ void ExampleRun_kinFitter::initializeAnalyzer(){
     JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb)
   };
   mcCorr->SetJetTaggingParameters(jtps);
+  SetupJetResolution();
   SetupPUJetWeight();
 
   fitter = new TKinFitterDriver(DataYear);
@@ -182,7 +183,16 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   TLorentzVector lepton{};
   for(auto& jet : realjets){
     jet_vector.emplace_back(jet.Px(),jet.Py(),jet.Pz(),jet.E());
-    jet_pt_resolution_vector.push_back((jet.EnShift(1) - jet.EnShift(-1)) * 2);
+    double jet_pt_resolution = jet_resolution.getResolution({{JME::Binning::JetPt, jet.Pt()}, {JME::Binning::JetEta, jet.Eta()}, {JME::Binning::Rho, Rho}});
+    double jet_pt_resolution_sf = jet_resolution_sf.getScaleFactor({{JME::Binning::JetPt, jet.Pt()}, {JME::Binning::JetEta, jet.Eta()}}, ::Variation::NOMINAL);
+    jet_pt_resolution_vector.push_back(jet_pt_resolution * jet_pt_resolution_sf); //SF is already applied when smearing is done in GetAllJets, so resolutions of both data, MC should be sigma_mc * SF
+
+    FillHist(prefix+"jetpt", jet.Pt(), map_weight[""], 500,0,1000);
+    FillHist(prefix+"jetpt_resolution", jet_pt_resolution, map_weight[""], 300,0,3);
+    FillHist(prefix+"jetpt_resolutionSF", jet_pt_resolution_sf, map_weight[""], 200,0.5,2.5);
+    FillHist(prefix+"jetpt_resolution_afterSF", jet_pt_resolution * jet_pt_resolution_sf, map_weight[""], 300,0,3);
+    FillHist(prefix+"jetpt_resolution2D", jet.Pt(), jet_pt_resolution, map_weight[""], 200,0,1000, 150,0,3);
+    FillHist(prefix+"jetpt_resolution2D_afterSF", jet.Pt(), jet_pt_resolution * jet_pt_resolution_sf, map_weight[""], 200,0,1000, 150,0,3);
   }
   if(jet_vector.size() != btag_vector.size()){
     cout << " ExampleRun_kinFitter, jet_vector.size() != btag_vector.size()" << endl;
@@ -438,6 +448,11 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   //==== Now reco fill histograms
   //==========================
 
+  FillHist(prefix+"kinFit_chi3", fitter_results->at(0).chi2, map_weight, 600,0,300);
+  FillHist(prefix+"kinFit_chi3_lep", fitter_results->at(0).chi2_lep, map_weight, 600,0,300);
+  FillHist(prefix+"kinFit_chi3_had", fitter_results->at(0).chi2_had, map_weight, 600,0,300);
+  FillHist(prefix+"kinFit_chi3_mass", fitter_results->at(0).chi2_mass, map_weight, 600,0,300);
+
   FillHist(prefix+"W_had_Mass", hadronic_W_M, map_weight, 40,0,200);
   FillHist(prefix+"W_had_FitMass", fitted_hadronic_W_M, map_weight, 80,60,100);
   FillHist(prefix+"W_had_FitMassdiff", fitted_hadronic_W_M-hadronic_W_M, map_weight, 100,-50,50);
@@ -686,6 +701,17 @@ void ExampleRun_kinFitter::GetTTLJGenParticles(const vector<Gen>& gens,Gen& part
       else l1+=*photon;
     }
   }
+}
+
+void ExampleRun_kinFitter::SetupJetResolution(){
+  std::string datapath = std::getenv("DATA_DIR");
+  std::string textNameMC = "Summer19UL17_JRV2_MC_PtResolution_AK4PFchs.txt";
+  std::string textNameSF = "Summer19UL17_JRV2_MC_SF_AK4PFchs.txt";
+
+  jet_resolution = JME::JetResolution(datapath + std::string("/"+GetEra()+"/JME/") + textNameMC);
+  jet_resolution_sf = JME::JetResolutionScaleFactor(datapath + std::string("/"+GetEra()+"/JME/") + textNameSF);
+
+  cout<<"[ExampleRun_kinFitter::SetupJetResolution] setting JetResolution"<<endl;
 }
 
 ExampleRun_kinFitter::ExampleRun_kinFitter(){}

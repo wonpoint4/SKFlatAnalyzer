@@ -218,9 +218,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   ajets.clear(); bjets.clear();jet0 = NULL;
   */
 
+  vector<Jet> addjets = {};
   for(const auto& jet:realjets){
     if(jet.Pt() > 30 && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
     else if(jet.Pt() > 20 && jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) ajets.push_back(jet);
+    else addjets.push_back(jet);
   }
 
   // Jet related weights
@@ -269,6 +271,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   //FillHist(prefix+hprefix+"costhetaRecoil_Tight1b", dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   FillHist(prefix+hprefix+"najets_Tight1b", ajets.size(), map_weight[""], 10,0,10);
+  if(ajets.size() > 0){
+    FillHist(prefix+hprefix+"bajet0_dR_Tight1b", jet0->DeltaR(ajets.at(0)), map_weight[""], 250,0,5);
+    double dRmin = 99.;
+    for(const auto& jet:ajets){
+      if(jet0->DeltaR(jet) < dRmin) dRmin = jet0->DeltaR(jet);
+    }
+    FillHist(prefix+hprefix+"bajets_dRmin_Tight1b", dRmin, map_weight[""], 250,0,5);
+  }
 
   if(ajets.size() > 0) return;
   FillCutflow(prefix+hprefix+"cutflow", "Veto2b", map_weight[""]);
@@ -286,6 +296,15 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
   int n_30jet = 0;
   for(unsigned int k=0; k<realjets.size(); k++){ if(realjets.at(k).Pt() > 30) n_30jet += 1; }
   FillHist(prefix+hprefix+"n30jets_Veto2b", n_30jet, map_weight[""], 10,0,10);
+
+  if(addjets.size() > 0){
+    FillHist(prefix+hprefix+"baddjet0_dR_Veto2b", jet0->DeltaR(addjets.at(0)), map_weight[""], 250,0,5);
+    double dRmin = 99.;
+    for(const auto& jet:addjets){
+      if(jet0->DeltaR(jet) < dRmin) dRmin = jet0->DeltaR(jet);
+    }
+    FillHist(prefix+hprefix+"baddjets_dRmin_Veto2b", dRmin, map_weight[""], 250,0,5);
+  }
 
   if(n_30jet > 1) return;
   FillCutflow(prefix+hprefix+"cutflow", "Veto2j", map_weight[""]);
