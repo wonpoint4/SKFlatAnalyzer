@@ -147,6 +147,7 @@ class TKinFitterDriver{
     TLorentzVector fitted_jet1;
     TLorentzVector fitted_jet2;
     TLorentzVector fitted_lep;
+    TLorentzVector neutrino_pxpypz;
     TLorentzVector fitted_neu;
 
     //idx

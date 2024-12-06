@@ -425,8 +425,10 @@ bool TKinFitterDriver::Kinematic_Cut(){
   TLorentzVector leptonic_top = leptonic_top_b_jet + lepton + neutrino_pxpypz;
   double hadronic_top_mass = hadronic_top.M();
   double leptonic_top_mass = leptonic_top.M();
+  double hadronic_W_mass = (hadronic_w_ch_jet1 + hadronic_w_ch_jet2).M();
 
   return (100 < hadronic_top_mass && hadronic_top_mass < 240) && ((leptonic_top_b_jet+lepton).M() < 170) && (fabs(hadronic_top.DeltaPhi(leptonic_top)) > 1.5);
+  //return (100 < hadronic_top_mass && hadronic_top_mass < 240) && ((leptonic_top_b_jet+lepton).M() < 170) && (fabs(hadronic_top.DeltaPhi(leptonic_top)) > 1.5) && (60 < hadronic_W_mass && hadronic_W_mass < 100);
 }
 
 void TKinFitterDriver::SetConstraint(){
@@ -492,6 +494,7 @@ void TKinFitterDriver::SaveResults(){
   fit_result.hadronic_W_M = hadronic_W.M();
   fit_result.leptonic_W_M = leptonic_W.M();
   fit_result.IsRealNeuPz = IsRealNeuPz;
+  fit_result.neutrino_pxpypz = neutrino_pxpypz;
 
   fit_result.hadronic_top_b_pt = hadronic_top_b_jet.Pt();
   fit_result.leptonic_top_b_pt = leptonic_top_b_jet.Pt();

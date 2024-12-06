@@ -20,10 +20,12 @@ void ExampleRun_kinFitter::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("SingleMuon")){
     executeEventWithParameter("m"+GetEraShort());
+    executeEventWithParameter("m"+GetEraShort()+"_PUjet");
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
     executeEventWithParameter("E"+GetEraShort());
+    executeEventWithParameter("E"+GetEraShort()+"_PUjet");
   }
 }
 
@@ -62,7 +64,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     lepvetojets.push_back(jet);
   }
   for(const auto jet:lepvetojets){
-    if(!PUJetIDPass(jet, "Loose")) continue;
+    if(channel.Contains("PUjet") && !PUJetIDPass(jet, "Loose")) continue;
     realjets.push_back(jet);
   }
 
@@ -160,15 +162,13 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   FillHist(prefix+hprefix+"weight_TriggerSF", leptonTriggerSF, map_weight[""], 200,-5,5);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
 
-  map_weight["_noPUjetSF"] = map_weight[""];
-  map_weight[""] *= pujetSF;
-  FillHist(prefix+hprefix+"weight_PUjetSF", pujetSF, map_weight[""], 200,-5,5);
-  FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
-
   map_weight["_nobtagSF"] = map_weight[""];
   map_weight[""] *= btagSF;
   FillHist(prefix+hprefix+"weight_btagSF", btagSF, map_weight[""], 200,-5,5);
   FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
+
+  map_weight["_PUjetSF"] = map_weight[""] * pujetSF;
+  FillHist(prefix+hprefix+"weight_PUjetSF", pujetSF, map_weight[""], 200,-5,5);
 
   map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
   FillHist(prefix+hprefix+"weight_bChargeSF0", GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
@@ -267,15 +267,17 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
 
     double match_dR = 0.4;
     bool Gen_kinFit_match_onlyb = false;
+    bool Gen_kinFit_match_Whad = false;
     bool Gen_kinFit_match_full = false;
     // chargeEasy => 0:negative, 1:positive
     // purity => -1:UnMatched_, 0:Wrong_, 1:Correct_ in TTLJ
     // correct => 0:Wrong_, 1:Correct_ in TTLJ
 
+    if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_kinFit_match_Whad = true;
     //When lepb = b, hadb = bbar -> lep+
     if(gen_b0.DeltaR(lepb) < match_dR && gen_b1.DeltaR(hadb) < match_dR){
       Gen_kinFit_match_onlyb = true;
-      if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_kinFit_match_full = true;
+      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
 
       FillHist(prefix+"Matched_bjetCharge", lepb_charge, map_weight, 200,-5,5);
       FillHist(prefix+"Matched_bbarjetCharge", hadb_charge, map_weight, 200,-5,5);
@@ -329,7 +331,7 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     //When lepb = bbar, hadb = b => lep-
     else if(gen_b0.DeltaR(hadb) < match_dR && gen_b1.DeltaR(lepb) < match_dR){
       Gen_kinFit_match_onlyb = true;
-      if((gen_j0.DeltaR(W_up_jet) < match_dR && gen_j1.DeltaR(W_down_jet) < match_dR) || (gen_j0.DeltaR(W_down_jet) < match_dR && gen_j1.DeltaR(W_up_jet) < match_dR)) Gen_kinFit_match_full = true;
+      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
 
       FillHist(prefix+"Matched_bbarjetCharge", lepb_charge, map_weight, 200,-5,5);
       FillHist(prefix+"Matched_bjetCharge", hadb_charge, map_weight, 200,-5,5);
@@ -423,10 +425,13 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
     FillHist(prefix+"Gen_l1_pTdiff", gen_l1.Pt()-met.Pt(), map_weight[""], 100,-50,50);
 
     FillHist("Gen_kinFit_match_onlyb", Gen_kinFit_match_onlyb, map_weight[""], 2,0,2);
+    FillHist("Gen_kinFit_match_Whad", Gen_kinFit_match_Whad, map_weight[""], 2,0,2);
     FillHist("Gen_kinFit_match_full", Gen_kinFit_match_full, map_weight[""], 2,0,2);
     FillHist(prefix+"Gen_kinFit_match_onlyb", Gen_kinFit_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_kinFit_match_Whad", Gen_kinFit_match_Whad, map_weight[""], 2,0,2);
     FillHist(prefix+"Gen_kinFit_match_full", Gen_kinFit_match_full, map_weight[""], 2,0,2);
     FillHist(channel+"/Gen_kinFit_match_onlyb", Gen_kinFit_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_kinFit_match_Whad", Gen_kinFit_match_Whad, map_weight[""], 2,0,2);
     FillHist(channel+"/Gen_kinFit_match_full", Gen_kinFit_match_full, map_weight[""], 2,0,2);
 
     FillHist(prefix+"gen_W_had_Mass", (gen_j0+gen_j1).M(), map_weight[""], 50,0,200);
@@ -465,6 +470,8 @@ void ExampleRun_kinFitter::executeEventWithParameter(TString channel){
   FillHist(prefix+"Top_lep_Mass", leptonic_top_M, map_weight, 40,100,300);
   FillHist(prefix+"Top_lep_FitMass", fitted_leptonic_top_M, map_weight, 80,160,200);
   FillHist(prefix+"Top_lep_FitMassdiff", fitted_leptonic_top_M-leptonic_top_M, map_weight, 100,-50,50);
+  FillHist(prefix+"Top_blMET_Mass", (lepb + lepton + met).M(), map_weight, 40,100,300);
+  FillHist(prefix+"Top_bl_Mass", (lepb + lepton).M(), map_weight, 40,0,200);
 
   FillHist(prefix+"lepb_FitpT", fitted_lepb.Pt(), map_weight, 100,0,300);
   FillHist(prefix+"hadb_FitpT", fitted_hadb.Pt(), map_weight, 100,0,300);
