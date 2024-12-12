@@ -1,0 +1,538 @@
+#include "ttljAnalyzer.h"
+
+void ttljAnalyzer::initializeAnalyzer(){
+  SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
+  std::vector<JetTagging::Parameters> jtps = {
+    JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Medium, JetTagging::incl, JetTagging::comb),
+    JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb)
+  };
+  mcCorr->SetJetTaggingParameters(jtps);
+  SetupPUJetWeight();
+}
+
+void ttljAnalyzer::executeEvent(){
+  ///////////////// GEN level /////////////////////
+  if(!IsDATA && MCSample.Contains("TTLJ")) executeEventGen();
+
+  ///////////////// RECO level /////////////////////
+  if(!IsDATA || DataStream.Contains("SingleMuon")){
+    executeEventWithParameter("m"+GetEraShort());
+    executeEventWithParameter("m"+GetEraShort()+"_2mb");
+    executeEventWithParameter("m"+GetEraShort()+"_3b");
+    //executeEventWithParameter("m"+GetEraShort()+"_PUjet");
+  }
+  if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
+    executeEventWithParameter("e"+GetEraShort());
+    executeEventWithParameter("E"+GetEraShort());
+    executeEventWithParameter("E"+GetEraShort()+"_2mb");
+    executeEventWithParameter("E"+GetEraShort()+"_3b");
+    //executeEventWithParameter("E"+GetEraShort()+"_PUjet");
+  }
+}
+
+void ttljAnalyzer::executeEventWithParameter(TString channel){
+
+  lepton0 = NULL;
+  prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
+
+  // Weights Setup
+  if(!IsDATA){
+    lumiweight = reductionweight * MCweight()*_event.GetTriggerLumi("Full");
+    PUweight = mcCorr->GetPileUpWeight(nPileUp,0);
+    prefireweight = L1PrefireReweight_Central;
+  }
+
+  map_weight[""] = lumiweight;
+  FillHist(prefix+hprefix+"weight_Lumi", lumiweight, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight[""]);
+
+  // Trigger
+  if(!IsFiredTriggers(channel)) return;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
+
+  // MET Filter
+  if(!PassMETFilter()) return;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
+
+  // Single Lepton + pT + MET
+  if(!Hasleptons(channel)) return;
+
+  // Jets
+  vector<Jet> alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
+  vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
+  for(const auto jet:alljets){
+    if(lepton0 && jet.DeltaR(*lepton0) < 0.4) continue;
+    lepvetojets.push_back(jet);
+  }
+  for(const auto jet:lepvetojets){
+    if(channel.Contains("PUjet") && !PUJetIDPass(jet, "Loose")) continue;
+    realjets.push_back(jet);
+  }
+
+  // B-tagging
+  JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  JetTagging::Parameters DeepJet_Medium = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
+
+  std::vector<bool> btag_vector = {};
+  for(const auto& jet:realjets){
+    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)){
+      btag_vector.push_back(true);
+      bjets.push_back(jet);
+    }else{
+      btag_vector.push_back(false);
+      ajets.push_back(jet);
+    }
+  }
+
+  // Jet related weights
+  if(!IsDATA){
+    pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
+    btagSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "central");
+  }
+
+  FillHist(prefix+"njets", realjets.size(), map_weight[""], 15,0,15);
+  FillHist(prefix+"nbjets", bjets.size(), map_weight[""], 10,0,10);
+  FillHist(prefix+"najets", ajets.size(), map_weight[""], 10,0,10);
+
+  if(!channel.Contains("b")){
+    if(bjets.size() != 2) return;
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight2b", map_weight[""]);
+  }else if(channel.Contains("2mb")){
+    if(bjets.size() < 2) return;
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight2mb", map_weight[""]);
+  }else if(channel.Contains("3b")){
+    if(bjets.size() < 3) return;
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight3b", map_weight[""]);
+  }
+  if(ajets.size() < 2) return;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "4Jets", map_weight[""]);
+  bjet0 = &bjets.at(0); bcharge0 = jetCharge(*bjet0);
+  bjet1 = &bjets.at(1); bcharge1 = jetCharge(*bjet1);
+  ajet0 = &ajets.at(0); acharge0 = jetCharge(*ajet0);
+  ajet1 = &ajets.at(1); acharge1 = jetCharge(*ajet1);
+
+  map_weight["_noWts"] = map_weight[""];
+  // Weights
+  map_weight[""] *= PUweight;
+  FillHist(prefix+hprefix+"weight_PU", PUweight, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU", map_weight[""]);
+
+  map_weight[""] *= prefireweight;
+  FillHist(prefix+hprefix+"weight_Prefire", prefireweight, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", map_weight[""]);
+
+  map_weight[""] *= topptweight;
+  FillHist(prefix+hprefix+"weight_Toppt", topptweight, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
+
+  // Lepton Efficiency Correction
+  map_weight["_noEffSF"] = map_weight[""];
+  leptonTrackingSF = 1.;
+  leptonRECOSF = 1.;
+  leptonIDSF = 1.;
+  leptonTriggerSF = 1.;
+
+  if(!IsDATA){
+    TString trigSFkey = "IsoMu24_MediumID_trkIsoLoose";
+    if(channel.Contains("m")){
+      leptonTrackingSF *= fEff->GetEfficiencySF("Muon_Tracking", lepton0, 0,0);
+      leptonRECOSF *= fEff->GetEfficiencySF("Muon_RECO", lepton0, 0,0);
+      leptonIDSF *= fEff->GetEfficiencySF("Muon_MediumID_trkIsoLoose", lepton0, 0,0);
+      if(DataYear == 2017) trigSFkey = "IsoMu27_MediumID_trkIsoLoose";
+      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+    }else if(channel.Contains("e")){
+      leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
+      leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton0, 0,0);
+      trigSFkey = "Ele27_MediumID";
+      if(DataYear == 2017) trigSFkey = "Ele32_MediumID";
+      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+    }else if(channel.Contains("E")){
+      leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
+      leptonIDSF *= fEff->GetEfficiencySF("Electron_SelQ_MediumID", lepton0, 0,0);
+      trigSFkey = "Ele27_SelQ_MediumID";
+      if(DataYear == 2017) trigSFkey = "Ele32_SelQ_MediumID";
+      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+    }
+  }
+
+  map_weight[""] *= leptonTrackingSF;
+  FillHist(prefix+hprefix+"weight_TrackingSF", leptonTrackingSF, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF", map_weight[""]);
+
+  map_weight[""] *= leptonRECOSF;
+  FillHist(prefix+hprefix+"weight_RECOSF", leptonRECOSF, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF", map_weight[""]);
+
+  map_weight[""] *= leptonIDSF;
+  FillHist(prefix+hprefix+"weight_IDSF", leptonIDSF, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF", map_weight[""]);
+
+  map_weight[""] *= leptonTriggerSF;
+  FillHist(prefix+hprefix+"weight_TriggerSF", leptonTriggerSF, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
+
+  map_weight["_nobtagSF"] = map_weight[""];
+  map_weight[""] *= btagSF;
+  FillHist(prefix+hprefix+"weight_btagSF", btagSF, map_weight[""], 200,-5,5);
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
+
+  map_weight["_PUjetSF"] = map_weight[""] * pujetSF;
+  FillHist(prefix+hprefix+"weight_PUjetSF", pujetSF, map_weight[""], 200,-5,5);
+
+  map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
+  FillHist(prefix+hprefix+"weight_bChargeSF0", GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
+  map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
+  FillHist(prefix+hprefix+"weight_bChargeSF1", GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
+
+  //==== Making Likelihood
+  if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 0, 0); // ByungHun Oh's method - drop events with ambiguity
+  if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 1, 0); // Charmonium guy's method - match smaller dR < 0.3
+
+}
+
+bool ttljAnalyzer::Hasleptons(TString channel){
+  bool moreleptons = false;
+  double l0pt = 26.;
+  if(channel.Contains("m")){
+    if(DataYear == 2017) l0pt = 29.;
+    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4), 0,0,0);
+    if(muons.size() > 0) lepton0 = &muons.at(0);
+    if(muons.size() > 1) moreleptons = true;
+  }else if(channel.Contains("e")){
+    l0pt = 30.;
+    if(DataYear > 2016) l0pt = 35.;
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
+    if(electrons.size() > 0) lepton0 = &electrons.at(0);
+    if(electrons.size() > 1) moreleptons = true;
+  }else if(channel.Contains("E")){
+    l0pt = 30.;
+    if(DataYear > 2016) l0pt = 35.;
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0,2.5), 0,0);
+    if(electrons.size() > 0) lepton0 = &electrons.at(0);
+    if(electrons.size() > 1) moreleptons = true;
+  }
+
+  if(!lepton0) return false;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Leptons", map_weight[""]);
+  if(lepton0->Pt() < l0pt) return false;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "LepPt", map_weight[""]);
+  if(moreleptons) return false;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Lepton", map_weight[""]);
+  met = GetEvent().GetMETVector();
+  if(met.Pt() < 20.) return false;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET20", map_weight[""]);
+
+  leptons ={};
+  leptons.push_back(lepton0);
+
+  return true;
+}
+
+void ttljAnalyzer::executeEventGen(){
+  FillHist("gen/executeEventGen", 1, 1, 2,0,2);
+  vector<Gen> gens=GetGens();
+  GetTTLJGenParticles(gens, gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1, 3);
+
+  FillHist("gen/Idx_parton0", gen_parton0.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_parton1", gen_parton1.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_b0", gen_b0.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_b1", gen_b1.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_l0", gen_l0.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_l1", gen_l1.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_j0", gen_j0.Index(), 1, 100,0,100);
+  FillHist("gen/Idx_j1", gen_j1.Index(), 1, 100,0,100);
+
+  FillHist("gen/PID_parton0", gen_parton0.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_parton1", gen_parton1.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_b0", gen_b0.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_b1", gen_b1.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_l0", gen_l0.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_l1", gen_l1.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_j0", gen_j0.PID(), 1, 60,-30,30);
+  FillHist("gen/PID_j1", gen_j1.PID(), 1, 60,-30,30);
+
+  FillHist("gen/Pt_parton0", gen_parton0.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_parton1", gen_parton1.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_b0", gen_b0.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_b1", gen_b1.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_l0", gen_l0.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_l1", gen_l1.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_j0", gen_j0.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_j1", gen_j1.Pt(), 1, 100,0,400);
+
+  FillHist("gen/Eta_parton0", gen_parton0.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_parton1", gen_parton1.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_b0", gen_b0.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_b1", gen_b1.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_l0", gen_l0.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_l1", gen_l1.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_j0", gen_j0.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_j1", gen_j1.Eta(), 1, 200,-5,5);
+
+  FillHist("gen/Phi_parton0", gen_parton0.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_parton1", gen_parton1.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_b0", gen_b0.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_b1", gen_b1.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_l0", gen_l0.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_l1", gen_l1.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_j0", gen_j0.Phi(), 1, 64,-3.2,3.2);
+  FillHist("gen/Phi_j1", gen_j1.Phi(), 1, 64,-3.2,3.2);
+
+  FillHist("gen/Mass_Whad", (gen_j0 + gen_j1).M(), 1, 50,0,200);
+  FillHist("gen/Mass_Wlep", (gen_l0 + gen_l1).M(), 1, 50,0,200);
+  FillHist("gen/Mass_Tophad1", (gen_b0 + gen_j0 + gen_j1).M(), 1, 75,0,300);
+  FillHist("gen/Mass_Tophad2", (gen_b1 + gen_j0 + gen_j1).M(), 1, 75,0,300);
+  FillHist("gen/Mass_Toplep1", (gen_b0 + gen_l0 + gen_l1).M(), 1, 75,0,300);
+  FillHist("gen/Mass_Toplep2", (gen_b1 + gen_l0 + gen_l1).M(), 1, 75,0,300);
+  if(gen_l0.PID() < 0){ // lepton is l+, thus lepb, l+ from t
+    gen_lepb = &gen_b0;
+    gen_hadb = &gen_b1;
+  }else{
+    gen_lepb = &gen_b1;
+    gen_hadb = &gen_b0;
+  }
+  FillHist("gen/Mass_Toplep", (*gen_lepb + gen_l0 + gen_l1).M(), 1, 75,0,300);
+  FillHist("gen/Mass_Tophad", (*gen_hadb + gen_j0 + gen_j1).M(), 1, 75,0,300);
+}
+
+void ttljAnalyzer::GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0, Gen& parton1, Gen& b0, Gen& b1, Gen& l0, Gen& l1, Gen& j0, Gen& j1, int mode){
+  //mode 0:bare 1:dressed01 2:dressed04 3:beforeFSR
+  vector<const Gen*> leptons;
+  vector<const Gen*> photons;
+  vector<const Gen*> jets;
+
+  parton0=Gen();
+  parton1=Gen();
+  b0=Gen();
+  b1=Gen();
+  l0=Gen();
+  l1=Gen();
+  j0=Gen();
+  j1=Gen();
+  int ngen=gens.size();
+  for(int i=0;i<ngen;i++){
+    if(!gens.at(i).isPrompt()) continue;
+    int genpid=gens.at(i).PID();
+    if(gens.at(i).isHardProcess()){
+      if(abs(genpid)<7||genpid==21||genpid==22){
+        if(parton0.IsEmpty()) parton0=gens[i];
+        else if(parton1.IsEmpty()) parton1=gens[i];
+      }
+    }
+    if(gens.at(i).Status()==1){
+      if(gens.at(i).PID()==22) photons.push_back(&gens[i]); //photon
+    }
+    if(!gens.at(i).isHardProcess()) continue;
+    if((abs(genpid)>=11 && abs(genpid)<=18) && abs(gens.at(gens.at(i).MotherIndex()).PID()) == 24) leptons.push_back(&gens[i]); //leptons from W
+    // b0 : b from t, b1 : b~ from t~
+    if(genpid==5 && gens.at(gens.at(i).MotherIndex()).PID() == 6) b0=gens[i];
+    else if(genpid==-5 && gens.at(gens.at(i).MotherIndex()).PID() == -6) b1=gens[i];
+    else if((abs(genpid)<=5 || genpid==21) && abs(gens.at(gens.at(i).MotherIndex()).PID()) == 24) jets.push_back(&gens[i]); //jets from W
+  }
+
+  // l0 : charged lepton, l1 : neutrino
+  int nlepton=leptons.size();
+  for(int i=0;i<nlepton;i++){
+    for(int j=i+1;j<nlepton;j++){
+      if(abs(leptons[i]->PID()+leptons[j]->PID()) != 1) continue;
+      if((*leptons[i]+*leptons[j]).M()>(l0+l1).M()){ //leptonic W
+        if(abs(leptons[i]->PID()) < abs(leptons[j]->PID())){
+          l0=*leptons[i]; //charged lepton
+          l1=*leptons[j]; //neutrino
+        }else{
+          l0=*leptons[j];
+          l1=*leptons[i];
+        }
+      }
+    }
+  }
+
+  // j0 : leading jet, j1 : subleading jet from hadronic W
+  int njet=jets.size();
+  for(int i=0;i<njet;i++){
+    for(int j=i+1;j<njet;j++){
+      if(!(abs(jets[i]->PID()+jets[j]->PID()) == 1 || abs(jets[i]->PID()+jets[j]->PID()) == 3)) continue;
+      if((*jets[i]+*jets[j]).M()>(j0+j1).M()){
+        if(jets[i]->Pt() > jets[j]->Pt()){
+          j0=*jets[i];
+          j1=*jets[j];
+        }else{
+          j0=*jets[j];
+          j1=*jets[i];
+        }
+      }
+    }
+  }
+
+  if(mode>=3){
+    if(nlepton>=3){
+      for(int i=0;i<nlepton;i++){
+        if(leptons[i]->Index()==l0.Index()||leptons[i]->Index()==l1.Index()) continue;
+        for(int j=i+1;j<nlepton;j++){
+          if(leptons[j]->Index()==l0.Index()||leptons[j]->Index()==l1.Index()) continue;
+          if(!(leptons[i]->PID()+leptons[j]->PID()==0)) continue;
+          vector<int> history_i=TrackGenSelfHistory(*leptons[i],gens);
+          vector<int> history_j=TrackGenSelfHistory(*leptons[j],gens);
+          if(history_i.at(1)==history_j.at(1)){
+            photons.push_back(leptons[i]);
+            photons.push_back(leptons[j]);
+          }
+        }
+      }
+    }
+    for(const auto& photon:photons){
+      vector<int> history=TrackGenSelfHistory(*photon,gens);
+      if(gens[history.at(1)].PID()==l0.PID()) l0+=*photon;
+      else if(gens[history.at(1)].PID()==23) l0+=*photon; // for minnlo+photos
+    }
+  }else if(mode>=1){
+    double delr=mode==1?0.1:0.4;
+    for(const auto& photon:photons){
+      if(l0.DeltaR(*photon)>delr&&l1.DeltaR(*photon)>delr) continue;
+      if(l0.DeltaR(*photon)<l1.DeltaR(*photon)) l0+=*photon;
+    }
+  }
+}
+
+void ttljAnalyzer::FillingLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, double weight, unsigned int mode1, unsigned int mode2){
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "Preselection", weight);
+  double match_dR = 0.4;
+  if(gen_l0.DeltaR(*lepton0) > match_dR) return;
+  if(mode1 == 1) match_dR = 0.3;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1lep", weight);
+
+  Jet* lepb = NULL;
+  Jet* hadb = NULL;
+  Jet* Wj0 = NULL;
+  Jet* Wj1 = NULL;
+
+  for(auto& bjet : bjets){
+    if(gen_lepb->DeltaR(bjet) < match_dR){
+      if(!lepb) lepb = &bjet;
+      else if(mode1 == 1 && (gen_lepb->DeltaR(bjet) < gen_lepb->DeltaR(*lepb))) lepb = &bjet; // Do matching with mindR (when mode1 == 1) like Charmonium guys
+      else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
+    }
+    if(gen_hadb->DeltaR(bjet) < match_dR){
+      if(!hadb) hadb = &bjet;
+      else if(mode1 == 1 && (gen_hadb->DeltaR(bjet) < gen_hadb->DeltaR(*hadb))) hadb = &bjet; // Do matching with mindR (when mode1 == 1) like Charmonium guys
+      else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
+    }
+  }
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "2b-1gen", weight);
+
+  for(auto& jet : ajets){
+    if(gen_j0.DeltaR(jet) < match_dR){
+      if(!Wj0) Wj0 = &jet;
+      else if(mode1 == 1 && (gen_j0.DeltaR(jet) < gen_j0.DeltaR(*Wj0))) Wj0 = &jet; // Do matching with mindR (when mode1 == 1) like Charmonium guys
+      else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
+    }
+    if(gen_j1.DeltaR(jet) < match_dR){
+      if(!Wj1) Wj1 = &jet;
+      else if(mode1 == 1 && (gen_j1.DeltaR(jet) < gen_j1.DeltaR(*Wj1))) Wj1 = &jet; // Do matching with mindR (when mode1 == 1) like Charmonium guys
+      else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
+    }
+  }
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "2j-1gen", weight);
+
+  if(!lepb) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "nolepb", weight);
+  if(!hadb) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "nohadb", weight);
+  if(!Wj0) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "noWj0", weight);
+  if(!Wj1) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "noWj1", weight);
+
+  if(!lepb || !hadb || !Wj0 || !Wj1) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "4jets", weight);
+
+  if(lepb == hadb) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1b-2gens", weight);
+  if(Wj0 == Wj1) return;
+  FillCutflow(Form(channel+"/cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1j-2gens", weight);
+
+  // Filling Likelihood Histograms
+  // mode2 = 0 (Wrong : wrong && lepb,hadb switched)
+  for(unsigned int a=0; a<bjets.size(); a++){
+    for(unsigned int b=a+1; b<bjets.size(); b++){
+      if(&bjets.at(a) == lepb && &bjets.at(b) == hadb){
+        FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Correct_mode2_0", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Correct_mode2_0", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Wrong_mode2_0", mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Wrong_mode2_0", mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
+        for(unsigned int c=0; c<ajets.size(); c++){
+          for(unsigned int d=c+1; d<ajets.size(); d++){
+            if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Correct_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Correct_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            }
+            else{
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Wrong_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            }
+          }
+        }
+      }else if(&bjets.at(a) == hadb && &bjets.at(b) == lepb){
+        FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Correct_mode2_0", mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Correct_mode2_0", mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Wrong_mode2_0", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Wrong_mode2_0", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+        for(unsigned int c=0; c<ajets.size(); c++){
+          for(unsigned int d=c+1; d<ajets.size(); d++){
+            if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Correct_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Correct_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            }
+            else{
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Wrong_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            }
+          }
+        }
+      }
+    }
+
+    // mode2 = 1 (Wrong : simply wrong)
+    if(&bjets.at(a) == lepb){
+      FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Correct_mode2_1", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+      FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Correct_mode2_1", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+    }else{
+      FillHist(Form(channel+"/likelihood_mode1_%d_Mbl_Wrong_mode2_1", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+      FillHist(Form(channel+"/likelihood_mode1_%d_MblMET_Wrong_mode2_1", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+    }
+
+    if(&bjets.at(a) == hadb){
+      for(unsigned int c=0; c<ajets.size(); c++){
+        for(unsigned int d=c+1; d<ajets.size(); d++){
+          if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Correct_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Correct_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+          }
+          else{
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Wrong_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+          }
+        }
+      }
+    }else{
+      for(unsigned int c=0; c<ajets.size(); c++){
+        for(unsigned int d=c+1; d<ajets.size(); d++){
+	  if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Correct_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+          }
+          else{
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form(channel+"/likelihood_mode1_%d_Mjj_Wrong_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+          }
+        }
+      }
+    }
+  }
+}
+
+
+ttljAnalyzer::ttljAnalyzer(){}
+ttljAnalyzer::~ttljAnalyzer(){
+  //==== Destructor of this Analyzer
+}

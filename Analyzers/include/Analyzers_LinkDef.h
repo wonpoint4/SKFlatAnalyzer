@@ -23,6 +23,7 @@
 #pragma link C++ class AFBAnalyzer+;
 #pragma link C++ class AFBAnalyzerSyst+;
 #pragma link C++ class dybAnalyzer+;
+#pragma link C++ class ttljAnalyzer+;
 #pragma link C++ class EfficiencyValidation+;
 #pragma link C++ class ZptWeight+;
 #pragma link C++ class ZpeakAnalyzer+;
