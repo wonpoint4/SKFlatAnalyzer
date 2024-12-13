@@ -8,6 +8,7 @@ void ttljAnalyzer::initializeAnalyzer(){
   };
   mcCorr->SetJetTaggingParameters(jtps);
   SetupPUJetWeight();
+  SetupLikelihoods(0, 1);
 }
 
 void ttljAnalyzer::executeEvent(){
@@ -185,8 +186,81 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   FillHist(prefix+hprefix+"weight_bChargeSF1", GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
 
   //==== Making Likelihood
-  if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 0, 0); // ByungHun Oh's method - drop events with ambiguity
-  if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 1, 0); // Charmonium guy's method - match smaller dR < 0.3
+  //if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 0, 0); // ByungHun Oh's method - drop events with ambiguity
+  //if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 1, 0); // Charmonium guy's method - match smaller dR < 0.3
+
+  //==== Finding the correct bbjj combination
+  vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
+  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, 0);
+
+  Jet lepb = bjets.at(idx_bbjj.at(0));
+  Jet hadb = bjets.at(idx_bbjj.at(1));
+  Jet Wj0 = ajets.at(idx_bbjj.at(2));
+  Jet Wj1 = ajets.at(idx_bbjj.at(3));
+
+  if(!IsDATA && MCSample.Contains("TTLJ")){
+    double match_dR = 0.4;
+    bool Gen_kinFit_match_onlyb = false;
+    bool Gen_kinFit_match_Whad = false;
+    bool Gen_kinFit_match_full = false;
+    // chargeEasy => 0:negative, 1:positive
+    // purity => -1:UnMatched_, 0:Wrong_, 1:Correct_ in TTLJ
+    // correct => 0:Wrong_, 1:Correct_ in TTLJ
+
+    if((gen_j0.DeltaR(Wj0) < match_dR && gen_j1.DeltaR(Wj1) < match_dR) || (gen_j0.DeltaR(Wj1) < match_dR && gen_j1.DeltaR(Wj0) < match_dR)) Gen_kinFit_match_Whad = true;
+    //When lepb = b, hadb = bbar -> lep+
+    if(gen_b0.DeltaR(lepb) < match_dR && gen_b1.DeltaR(hadb) < match_dR){
+      Gen_kinFit_match_onlyb = true;
+      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
+      if(lepton0->Charge() > 0){
+        FillHist(prefix+"LR_purity", 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct", 1, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lp", 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp", 1, map_weight, 2,0,2);
+        prefix += "Correct_"; // lep+
+      }else{
+        FillHist(prefix+"LR_purity", 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct", 0, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lm", 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm", 0, map_weight, 2,0,2);
+        prefix +="Wrong_"; // lep-
+      }
+    }
+    //When lepb = bbar, hadb = b => lep-
+    else if(gen_b0.DeltaR(hadb) < match_dR && gen_b1.DeltaR(lepb) < match_dR){
+      Gen_kinFit_match_onlyb = true;
+      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
+      if(lepton0->Charge() < 0){
+        FillHist(prefix+"LR_purity", 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct", 1, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lm", 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm", 1, map_weight, 2,0,2);
+        prefix += "Correct_"; // lep-
+      }else{
+        FillHist(prefix+"LR_purity", 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct", 0, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lp", 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp", 0, map_weight, 2,0,2);
+        prefix +="Wrong_"; // lep+
+      }
+    }
+    else{
+      FillHist(prefix+"LR_purity", -1, map_weight, 4,-2,2);
+      if(lepton0->Charge() > 0) FillHist(prefix+"LR_purity_Lp", -1, map_weight, 4,-2,2);
+      if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm", -1, map_weight, 4,-2,2);
+      prefix +="UnMatched_";
+    }
+  }
+
+  //==========================
+  //==== Now reco fill histograms
+  //==========================
+
+  FillHist(prefix+"Whad_Mass", (Wj0 + Wj1).M(), map_weight, 40,0,200);
+  FillHist(prefix+"Top_had_Mass", (hadb + Wj0 + Wj1).M(), map_weight, 40,100,300);
+  //FillHist(prefix+"Top_lep_Mass", (lepb + lepton0), map_weight, 40,100,300);
+  FillHist(prefix+"Top_blMET_Mass", (lepb + *lepton0 + met).M(), map_weight, 40,100,300);
+  FillHist(prefix+"Top_bl_Mass", (lepb + *lepton0).M(), map_weight, 40,0,200);
 
 }
 
@@ -531,6 +605,132 @@ void ttljAnalyzer::FillingLikelihood(TString channel, vector<Jet> bjets, vector<
   }
 }
 
+void ttljAnalyzer::SetupLikelihoods(unsigned int mode1, unsigned int mode2){
+  TString path = getenv("DATA_DIR")+TString("/")+GetEra()+"/JME/Likelihoods.root";
+  if(IsExists(path)){
+    cout<<"[ttljAnalyzer::SetupLikelihoods] using file "+path<<" for mode1 = "<<mode1<<", mode2 = "<<mode2<<endl;
+  }else{
+    cout<<"[ttljAnalyzer::SetupLikelihoods] no "+path<<endl;
+    return;
+  }
+
+  TFile f(path);
+  hMbl_correct_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mbl_Correct_mode2_%d", mode1, mode2));
+  hMbl_wrong_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mbl_Wrong_mode2_%d", mode1, mode2));
+  hMblMET_correct_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_MblMET_Correct_mode2_%d", mode1, mode2));
+  hMblMET_wrong_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_MblMET_Wrong_mode2_%d", mode1, mode2));
+  hMbjj_correct_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mbjj_Correct_mode2_%d", mode1, mode2));
+  hMbjj_wrong_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_%d", mode1, mode2));
+  hMjj_correct_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mjj_Correct_mode2_%d", mode1, mode2));
+  hMjj_wrong_E = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_Mjj_Wrong_mode2_%d", mode1, mode2));
+  hMbl_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mbl_Correct_mode2_%d", mode1, mode2));
+  hMbl_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mbl_Wrong_mode2_%d", mode1, mode2));
+  hMblMET_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_MblMET_Correct_mode2_%d", mode1, mode2));
+  hMblMET_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_MblMET_Wrong_mode2_%d", mode1, mode2));
+  hMbjj_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mbjj_Correct_mode2_%d", mode1, mode2));
+  hMbjj_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_%d", mode1, mode2));
+  hMjj_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mjj_Correct_mode2_%d", mode1, mode2));
+  hMjj_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mjj_Wrong_mode2_%d", mode1, mode2));
+
+  if(hMbl_correct_E) hMbl_correct_E->SetDirectory(0);
+  if(hMbl_wrong_E) hMbl_wrong_E->SetDirectory(0);
+  if(hMblMET_correct_E) hMblMET_correct_E->SetDirectory(0);
+  if(hMblMET_wrong_E) hMblMET_wrong_E->SetDirectory(0);
+  if(hMbjj_correct_E) hMbjj_correct_E->SetDirectory(0);
+  if(hMbjj_wrong_E) hMbjj_wrong_E->SetDirectory(0);
+  if(hMjj_correct_E) hMjj_correct_E->SetDirectory(0);
+  if(hMjj_wrong_E) hMjj_wrong_E->SetDirectory(0);
+  if(hMbl_correct_m) hMbl_correct_m->SetDirectory(0);
+  if(hMbl_wrong_m) hMbl_wrong_m->SetDirectory(0);
+  if(hMblMET_correct_m) hMblMET_correct_m->SetDirectory(0);
+  if(hMblMET_wrong_m) hMblMET_wrong_m->SetDirectory(0);
+  if(hMbjj_correct_m) hMbjj_correct_m->SetDirectory(0);
+  if(hMbjj_wrong_m) hMbjj_wrong_m->SetDirectory(0);
+  if(hMjj_correct_m) hMjj_correct_m->SetDirectory(0);
+  if(hMjj_wrong_m) hMjj_wrong_m->SetDirectory(0);
+
+  cout<<"[ttljAnalyzer::SetupLikelihoods] All Likelihoods are set "<<endl;
+  f.Close();
+}
+
+vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, unsigned int mode3){
+  unsigned int lb = 0, hb = 0, j0 = 0, j1 = 0;
+  TH1* hMbl_correct = NULL;
+  TH1* hMbl_wrong = NULL;
+  TH1* hMblMET_correct = NULL;
+  TH1* hMblMET_wrong = NULL;
+  TH1* hMbjj_correct = NULL;
+  TH1* hMbjj_wrong = NULL;
+  TH1* hMjj_correct = NULL;
+  TH1* hMjj_wrong = NULL;
+
+  //cout<<"[ttljAnalyzer::Finding_bbjj_byLikelihood] hMbl_correct_E(172.5) = "<<hMbl_correct_E->GetBinContent(hMbl_correct_E->FindBin(172.5))<<endl;
+  if(channel.Contains("E") || channel.Contains("e")){
+    hMbl_correct = hMbl_correct_E;
+    hMbl_wrong = hMbl_wrong_E;
+    hMblMET_correct = hMblMET_correct_E;
+    hMblMET_wrong = hMblMET_wrong_E;
+    hMbjj_correct = hMbjj_correct_E;
+    hMbjj_wrong = hMbjj_wrong_E;
+    hMjj_correct = hMjj_correct_E;
+    hMjj_wrong = hMjj_wrong_E;
+  }else if(channel.Contains("m")){
+    hMbl_correct = hMbl_correct_m;
+    hMbl_wrong = hMbl_wrong_m;
+    hMblMET_correct = hMblMET_correct_m;
+    hMblMET_wrong = hMblMET_wrong_m;
+    hMbjj_correct = hMbjj_correct_m;
+    hMbjj_wrong = hMbjj_wrong_m;
+    hMjj_correct = hMjj_correct_m;
+    hMjj_wrong = hMjj_wrong_m;
+  }else{
+  cout<<"[ttljAnalyzer::Finding_bbjj_byLikelihood] channel seems weird, channel = "+channel<<endl;
+  return {lb, hb, j0, j1};
+  }
+
+  double max_likelihood_ratio = 0;
+  for(unsigned int a=0; a<bjets.size(); a++){
+    for(unsigned int b=0; b<bjets.size(); b++){
+      if(a == b) continue;
+      for(unsigned int c=0; c<ajets.size(); c++){
+        for(unsigned int d=c+1; d<ajets.size(); d++){
+
+          // Let bjets.at(a) = lepb, bjets.at(b) = hadb
+          double Mbl = (bjets.at(a) + *lepton0).M();
+          double MblMET = (bjets.at(a) + *lepton0 + met).M();
+          double Mbjj = (bjets.at(b) + ajets.at(c) + ajets.at(d)).M();
+          double Mjj = (ajets.at(c) + ajets.at(d)).M();
+
+          double Likelihood_Mbl_correct = hMbl_correct->GetBinContent(hMbl_correct->FindBin(Mbl)) / hMbl_correct->Integral();
+          double Likelihood_Mbl_wrong = hMbl_wrong->GetBinContent(hMbl_correct->FindBin(Mbl)) / hMbl_wrong->Integral();
+          double Likelihood_MblMET_correct = hMblMET_correct->GetBinContent(hMblMET_correct->FindBin(MblMET)) / hMblMET_correct->Integral();
+          double Likelihood_MblMET_wrong = hMblMET_wrong->GetBinContent(hMblMET_correct->FindBin(MblMET)) / hMblMET_wrong->Integral();
+          double Likelihood_Mbjj_correct = hMbjj_correct->GetBinContent(hMbjj_correct->FindBin(Mbjj)) / hMbjj_correct->Integral();
+          double Likelihood_Mbjj_wrong = hMbjj_wrong->GetBinContent(hMbjj_correct->FindBin(Mbjj)) / hMbjj_wrong->Integral();
+          double Likelihood_Mjj_correct = hMjj_correct->GetBinContent(hMjj_correct->FindBin(Mjj)) / hMjj_correct->Integral();
+          double Likelihood_Mjj_wrong = hMjj_wrong->GetBinContent(hMjj_correct->FindBin(Mjj)) / hMjj_wrong->Integral();
+
+          double Likelihood_ratio_Mbl = Likelihood_Mbl_correct / (Likelihood_Mbl_correct + Likelihood_Mbl_wrong);
+          double Likelihood_ratio_MblMET = Likelihood_MblMET_correct / (Likelihood_MblMET_correct + Likelihood_MblMET_wrong);
+          double Likelihood_ratio_Mbjj = Likelihood_Mbjj_correct / (Likelihood_Mbjj_correct + Likelihood_Mbjj_wrong);
+          double Likelihood_ratio_Mjj = Likelihood_Mjj_correct / (Likelihood_Mjj_correct + Likelihood_Mjj_wrong);
+
+          double LR = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          if(mode3 == 1) LR = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj;
+          if(LR > max_likelihood_ratio){
+            max_likelihood_ratio = LR;
+            lb = a;
+            hb = b;
+            j0 = c;
+            j1 = d;
+          }
+        }
+      }
+    }
+  }
+
+  return {lb, hb, j0, j1};
+}
 
 ttljAnalyzer::ttljAnalyzer(){}
 ttljAnalyzer::~ttljAnalyzer(){
