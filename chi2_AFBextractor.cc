@@ -4,7 +4,7 @@
 dybPlotter a;
 TH1* AFB;
 vector<double> sth2_values = {0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330 };
-void Hists_1D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/y[0.2,5]/", TString suffix="");
+void Hists_1D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/y[0,5]/", TString suffix="");
 void Hists_2D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/", TString frame="AFBrecoil");
 void Plots_1D_chi2(TString inputfile="1D_sintheta.root", TString suffix="");
 void Plots_2D_chi2(TString inputfile="2D_sintheta.root");
@@ -21,8 +21,8 @@ void chi2_AFBextractor(){
   //Hists_1D_AFB();
   //Hists_2D_AFB();
 
-  //Plots_1D_chi2();
-  Plots_2D_chi2();
+  Plots_1D_chi2();
+  //Plots_2D_chi2();
 
   //Charge_Purity_Calc();
   //Charge_Purity_Calc2();

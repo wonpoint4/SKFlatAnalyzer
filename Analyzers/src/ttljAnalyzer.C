@@ -8,7 +8,7 @@ void ttljAnalyzer::initializeAnalyzer(){
   };
   mcCorr->SetJetTaggingParameters(jtps);
   SetupPUJetWeight();
-  SetupLikelihoods(0, 1);
+  SetupLikelihoods(0, 0);
 }
 
 void ttljAnalyzer::executeEvent(){
@@ -191,7 +191,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
 
   //==== Finding the correct bbjj combination
   vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
-  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, 0);
+  vector<double> LRs = {0, 0, 0, 0};
+  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
 
   Jet lepb = bjets.at(idx_bbjj.at(0));
   Jet hadb = bjets.at(idx_bbjj.at(1));
@@ -200,18 +201,18 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
     double match_dR = 0.4;
-    bool Gen_kinFit_match_onlyb = false;
-    bool Gen_kinFit_match_Whad = false;
-    bool Gen_kinFit_match_full = false;
+    bool Gen_LR_match_onlyb = false;
+    bool Gen_LR_match_Whad = false;
+    bool Gen_LR_match_full = false;
     // chargeEasy => 0:negative, 1:positive
     // purity => -1:UnMatched_, 0:Wrong_, 1:Correct_ in TTLJ
     // correct => 0:Wrong_, 1:Correct_ in TTLJ
 
-    if((gen_j0.DeltaR(Wj0) < match_dR && gen_j1.DeltaR(Wj1) < match_dR) || (gen_j0.DeltaR(Wj1) < match_dR && gen_j1.DeltaR(Wj0) < match_dR)) Gen_kinFit_match_Whad = true;
+    if((gen_j0.DeltaR(Wj0) < match_dR && gen_j1.DeltaR(Wj1) < match_dR) || (gen_j0.DeltaR(Wj1) < match_dR && gen_j1.DeltaR(Wj0) < match_dR)) Gen_LR_match_Whad = true;
     //When lepb = b, hadb = bbar -> lep+
     if(gen_b0.DeltaR(lepb) < match_dR && gen_b1.DeltaR(hadb) < match_dR){
-      Gen_kinFit_match_onlyb = true;
-      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
+      Gen_LR_match_onlyb = true;
+      if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() > 0){
         FillHist(prefix+"LR_purity", 1, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct", 1, map_weight, 2,0,2);
@@ -228,8 +229,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
     }
     //When lepb = bbar, hadb = b => lep-
     else if(gen_b0.DeltaR(hadb) < match_dR && gen_b1.DeltaR(lepb) < match_dR){
-      Gen_kinFit_match_onlyb = true;
-      if(Gen_kinFit_match_Whad) Gen_kinFit_match_full = true;
+      Gen_LR_match_onlyb = true;
+      if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() < 0){
         FillHist(prefix+"LR_purity", 1, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct", 1, map_weight, 2,0,2);
@@ -250,18 +251,33 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
       if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm", -1, map_weight, 4,-2,2);
       prefix +="UnMatched_";
     }
+
+    FillHist("Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
   }
 
   //==========================
   //==== Now reco fill histograms
   //==========================
 
-  FillHist(prefix+"Whad_Mass", (Wj0 + Wj1).M(), map_weight, 40,0,200);
-  FillHist(prefix+"Top_had_Mass", (hadb + Wj0 + Wj1).M(), map_weight, 40,100,300);
-  //FillHist(prefix+"Top_lep_Mass", (lepb + lepton0), map_weight, 40,100,300);
-  FillHist(prefix+"Top_blMET_Mass", (lepb + *lepton0 + met).M(), map_weight, 40,100,300);
-  FillHist(prefix+"Top_bl_Mass", (lepb + *lepton0).M(), map_weight, 40,0,200);
+  FillHist(prefix+"mass_Whad", (Wj0 + Wj1).M(), map_weight, 40,0,200);
+  FillHist(prefix+"mass_Tophad", (hadb + Wj0 + Wj1).M(), map_weight, 40,100,300);
+  //FillHist(prefix+"mass_Toplep", (lepb + *lepton0 + neutrino).M(), map_weight, 40,100,300);
+  FillHist(prefix+"mass_Top_blMET", (lepb + *lepton0 + met).M(), map_weight, 40,100,300);
+  FillHist(prefix+"mass_Top_bl", (lepb + *lepton0).M(), map_weight, 40,0,200);
 
+  FillHist(prefix+"likelihood_ratio", LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 100,0,1);
+  FillHist(prefix+"likelihood_ratio_Mbl", LRs.at(0), map_weight, 100,0,1);
+  FillHist(prefix+"likelihood_ratio_MblMET", LRs.at(1), map_weight, 100,0,1);
+  FillHist(prefix+"likelihood_ratio_Mbjj", LRs.at(2), map_weight, 100,0,1);
+  FillHist(prefix+"likelihood_ratio_Mjj", LRs.at(3), map_weight, 100,0,1);
 }
 
 bool ttljAnalyzer::Hasleptons(TString channel){
@@ -653,7 +669,7 @@ void ttljAnalyzer::SetupLikelihoods(unsigned int mode1, unsigned int mode2){
   f.Close();
 }
 
-vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, unsigned int mode3){
+vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios){
   unsigned int lb = 0, hb = 0, j0 = 0, j1 = 0;
   TH1* hMbl_correct = NULL;
   TH1* hMbl_wrong = NULL;
@@ -664,7 +680,6 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
   TH1* hMjj_correct = NULL;
   TH1* hMjj_wrong = NULL;
 
-  //cout<<"[ttljAnalyzer::Finding_bbjj_byLikelihood] hMbl_correct_E(172.5) = "<<hMbl_correct_E->GetBinContent(hMbl_correct_E->FindBin(172.5))<<endl;
   if(channel.Contains("E") || channel.Contains("e")){
     hMbl_correct = hMbl_correct_E;
     hMbl_wrong = hMbl_wrong_E;
@@ -714,11 +729,11 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
           double Likelihood_ratio_MblMET = Likelihood_MblMET_correct / (Likelihood_MblMET_correct + Likelihood_MblMET_wrong);
           double Likelihood_ratio_Mbjj = Likelihood_Mbjj_correct / (Likelihood_Mbjj_correct + Likelihood_Mbjj_wrong);
           double Likelihood_ratio_Mjj = Likelihood_Mjj_correct / (Likelihood_Mjj_correct + Likelihood_Mjj_wrong);
+          double Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
 
-          double LR = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          if(mode3 == 1) LR = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj;
-          if(LR > max_likelihood_ratio){
-            max_likelihood_ratio = LR;
+          if(Likelihood_ratio > max_likelihood_ratio){
+            max_likelihood_ratio = Likelihood_ratio;
+            Likelihood_ratios = {Likelihood_ratio_Mbl, Likelihood_ratio_MblMET, Likelihood_ratio_Mbjj, Likelihood_ratio_Mjj};
             lb = a;
             hb = b;
             j0 = c;

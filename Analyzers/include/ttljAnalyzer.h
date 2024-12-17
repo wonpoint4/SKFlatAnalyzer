@@ -16,7 +16,7 @@ class ttljAnalyzer : public dybAnalyzer {
   virtual bool Hasleptons(TString channel);
   void FillingLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, double weight, unsigned int mode1=0, unsigned int mode2=0);
   void SetupLikelihoods(unsigned int mode1=0, unsigned int mode2=0);
-  vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, unsigned int mode3=0);
+  vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios);
 
   Gen gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1;
   Gen* gen_lepb = NULL;
