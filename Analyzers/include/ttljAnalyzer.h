@@ -42,6 +42,11 @@ class ttljAnalyzer : public dybAnalyzer {
   TH1* hMbjj_wrong_E = NULL;
   TH1* hMjj_correct_E = NULL;
   TH1* hMjj_wrong_E = NULL;
+  TH1* hdRtt_correct_E = NULL;
+  TH1* hdRtt_wrong_E = NULL;
+  TH1* hdPhitt_correct_E = NULL;
+  TH1* hdPhitt_wrong_E = NULL;
+
   TH1* hMbl_correct_m = NULL;
   TH1* hMbl_wrong_m = NULL;
   TH1* hMblMET_correct_m = NULL;
@@ -50,6 +55,10 @@ class ttljAnalyzer : public dybAnalyzer {
   TH1* hMbjj_wrong_m = NULL;
   TH1* hMjj_correct_m = NULL;
   TH1* hMjj_wrong_m = NULL;
+  TH1* hdRtt_correct_m = NULL;
+  TH1* hdRtt_wrong_m = NULL;
+  TH1* hdPhitt_correct_m = NULL;
+  TH1* hdPhitt_wrong_m = NULL;
 
   ttljAnalyzer();
   ~ttljAnalyzer();
