@@ -432,15 +432,15 @@ bool dybAnalyzer::IsFiredTriggers(TString channel){
   else if(DataYear >= 2017 && channel.Contains("ee")) triggers = {"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v"};
 
   // Single lepton for TTLJ
-  else if(DataYear == 2016 && channel.Contains("m")){
+  else if(DataYear == 2016 && channel.Contains("m"+GetEraShort())){
     triggers = {
       "HLT_IsoMu24_v",
       "HLT_IsoTkMu24_v"
     };
-  }else if(DataYear == 2017 && channel.Contains("m")) triggers = {"HLT_IsoMu27_v"};
-  else if(DataYear == 2018 && channel.Contains("m")) triggers = {"HLT_IsoMu24_v"};
-  else if(DataYear == 2016 && (channel.Contains("e") || channel.Contains("E"))) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
-  else if(DataYear >= 2017 && (channel.Contains("e") || channel.Contains("E"))){
+  }else if(DataYear == 2017 && channel.Contains("m"+GetEraShort())) triggers = {"HLT_IsoMu27_v"};
+  else if(DataYear == 2018 && channel.Contains("m"+GetEraShort())) triggers = {"HLT_IsoMu24_v"};
+  else if(DataYear == 2016 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
+  else if(DataYear >= 2017 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())){
     triggers = {
       "HLT_Ele27_WPTight_Gsf_v",
       "HLT_Ele32_WPTight_Gsf_v"

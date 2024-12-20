@@ -21,6 +21,15 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("m"+GetEraShort()+"_2mb");
     executeEventWithParameter("m"+GetEraShort()+"_3b");
     executeEventWithParameter("m"+GetEraShort()+"_PUjet");
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode1"); // likelihood_mass_bl
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode2"); // likelihood_mass_bl, mass_bjj
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode3"); // likelihood_mass_bl, mass_bjj, mass_jj
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode4"); // likelihood_mass_bl, mass_bjj, mass_blMET
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode5"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode6"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt, dR_tt
+    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode7");
+    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode8");
+    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode9");
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
@@ -28,6 +37,15 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("E"+GetEraShort()+"_2mb");
     executeEventWithParameter("E"+GetEraShort()+"_3b");
     executeEventWithParameter("E"+GetEraShort()+"_PUjet");
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode1"); // likelihood_mass_bl
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode2"); // likelihood_mass_bl, mass_bjj
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode3"); // likelihood_mass_bl, mass_bjj, mass_jj
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode4"); // likelihood_mass_bl, mass_bjj, mass_blMET
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode5"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode6"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt, dR_tt
+    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode7");
+    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode8");
+    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode9");
   }
 }
 
@@ -135,19 +153,19 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
 
   if(!IsDATA){
     TString trigSFkey = "IsoMu24_MediumID_trkIsoLoose";
-    if(channel.Contains("m")){
+    if(channel.Contains("m"+GetEraShort())){
       leptonTrackingSF *= fEff->GetEfficiencySF("Muon_Tracking", lepton0, 0,0);
       leptonRECOSF *= fEff->GetEfficiencySF("Muon_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Muon_MediumID_trkIsoLoose", lepton0, 0,0);
       if(DataYear == 2017) trigSFkey = "IsoMu27_MediumID_trkIsoLoose";
       leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
-    }else if(channel.Contains("e")){
+    }else if(channel.Contains("e"+GetEraShort())){
       leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton0, 0,0);
       trigSFkey = "Ele27_MediumID";
       if(DataYear == 2017) trigSFkey = "Ele32_MediumID";
       leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
-    }else if(channel.Contains("E")){
+    }else if(channel.Contains("E"+GetEraShort())){
       leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Electron_SelQ_MediumID", lepton0, 0,0);
       trigSFkey = "Ele27_SelQ_MediumID";
@@ -198,7 +216,16 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   //==== Finding the correct bbjj combination
   vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
   vector<double> LRs = {0, 0, 0, 0, 0, 0};
-  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
+  if(channel.Contains("LR_mode1")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 1);
+  else if(channel.Contains("LR_mode2")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 2);
+  else if(channel.Contains("LR_mode3")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 3);
+  else if(channel.Contains("LR_mode4")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 4);
+  else if(channel.Contains("LR_mode5")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 5);
+  else if(channel.Contains("LR_mode6")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 6);
+  else if(channel.Contains("LR_mode7")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 7);
+  else if(channel.Contains("LR_mode8")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 8);
+  else if(channel.Contains("LR_mode9")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 9);
+  else idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
 
   Jet lepb = bjets.at(idx_bbjj.at(0));
   Jet hadb = bjets.at(idx_bbjj.at(1));
@@ -404,18 +431,18 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
 bool ttljAnalyzer::Hasleptons(TString channel){
   bool moreleptons = false;
   double l0pt = 26.;
-  if(channel.Contains("m")){
+  if(channel.Contains("m"+GetEraShort())){
     if(DataYear == 2017) l0pt = 29.;
     muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4), 0,0,0);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) moreleptons = true;
-  }else if(channel.Contains("e")){
+  }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
     if(DataYear > 2016) l0pt = 35.;
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
-  }else if(channel.Contains("E")){
+  }else if(channel.Contains("E"+GetEraShort())){
     l0pt = 30.;
     if(DataYear > 2016) l0pt = 35.;
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0,2.5), 0,0);
@@ -758,12 +785,12 @@ void ttljAnalyzer::FillingLikelihood(TString channel, vector<Jet> bjets, vector<
           for(unsigned int d=c+1; d<ajets.size(); d++){
             if(&bjets.at(b) == lepb){
               if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-                FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-                FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+                FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Correct_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+                FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Correct_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
               }
             }else{
-              FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
             }
           }
         }
@@ -784,8 +811,8 @@ void ttljAnalyzer::FillingLikelihood(TString channel, vector<Jet> bjets, vector<
       for(unsigned int b=a+1; b<bjets.size(); b++){
         for(unsigned int c=0; c<ajets.size(); c++){
           for(unsigned int d=c+1; d<ajets.size(); d++){
-            FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-            FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+            FillHist(Form(channel+"/likelihood_mode1_%d_dRtt_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+            FillHist(Form(channel+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
           }
         }
       }
@@ -824,10 +851,10 @@ void ttljAnalyzer::SetupLikelihoods(unsigned int mode1, unsigned int mode2){
   hMbjj_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mbjj_Wrong_mode2_%d", mode1, mode2));
   hMjj_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mjj_Correct_mode2_%d", mode1, mode2));
   hMjj_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_Mjj_Wrong_mode2_%d", mode1, mode2));
-  hdRtt_correct_m = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_dRtt_Correct_mode2_%d", mode1, mode2));
-  hdRtt_wrong_m = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_dRtt_Wrong_mode2_%d", mode1, mode2));
-  hdPhitt_correct_m = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_dPhitt_Correct_mode2_%d", mode1, mode2));
-  hdPhitt_wrong_m = (TH1*)f.Get(Form("E"+GetEra()+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_%d", mode1, mode2));
+  hdRtt_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_dRtt_Correct_mode2_%d", mode1, mode2));
+  hdRtt_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_dRtt_Wrong_mode2_%d", mode1, mode2));
+  hdPhitt_correct_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_dPhitt_Correct_mode2_%d", mode1, mode2));
+  hdPhitt_wrong_m = (TH1*)f.Get(Form("m"+GetEra()+"/likelihood_mode1_%d_dPhitt_Wrong_mode2_%d", mode1, mode2));
 
   if(hMbl_correct_E) hMbl_correct_E->SetDirectory(0);
   if(hMbl_wrong_E) hMbl_wrong_E->SetDirectory(0);
@@ -859,7 +886,7 @@ void ttljAnalyzer::SetupLikelihoods(unsigned int mode1, unsigned int mode2){
   f.Close();
 }
 
-vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios){
+vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios, unsigned int mode3){
   unsigned int lb = 0, hb = 0, j0 = 0, j1 = 0;
   TH1* hMbl_correct = NULL;
   TH1* hMbl_wrong = NULL;
@@ -874,7 +901,7 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
   TH1* hdPhitt_correct = NULL;
   TH1* hdPhitt_wrong = NULL;
 
-  if(channel.Contains("E") || channel.Contains("e")){
+  if(channel.Contains("E"+GetEraShort()) || channel.Contains("e"+GetEraShort())){
     hMbl_correct = hMbl_correct_E;
     hMbl_wrong = hMbl_wrong_E;
     hMblMET_correct = hMblMET_correct_E;
@@ -887,7 +914,7 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
     hdRtt_wrong = hdRtt_wrong_E;
     hdPhitt_correct = hdPhitt_correct_E;
     hdPhitt_wrong = hdPhitt_wrong_E;
-  }else if(channel.Contains("m")){
+  }else if(channel.Contains("m"+GetEraShort())){
     hMbl_correct = hMbl_correct_m;
     hMbl_wrong = hMbl_wrong_m;
     hMblMET_correct = hMblMET_correct_m;
@@ -939,8 +966,21 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
           double Likelihood_ratio_Mjj = Likelihood_Mjj_correct / (Likelihood_Mjj_correct + Likelihood_Mjj_wrong);
           double Likelihood_ratio_dRtt = Likelihood_dRtt_correct / (Likelihood_dRtt_correct + Likelihood_dRtt_wrong);
           double Likelihood_ratio_dPhitt = Likelihood_dPhitt_correct / (Likelihood_dPhitt_correct + Likelihood_dPhitt_wrong);
-          //double Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          double Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj * Likelihood_ratio_dRtt * Likelihood_ratio_dPhitt;
+          double Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          if(mode3 == 1) Likelihood_ratio = Likelihood_ratio_Mbl;
+          else if(mode3 == 2) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj;
+          else if(mode3 == 3) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          else if(mode3 == 4) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_MblMET;
+          else if(mode3 == 5) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj * Likelihood_ratio_MblMET * Likelihood_ratio_dPhitt;
+          else if(mode3 == 6) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj * Likelihood_ratio_MblMET * Likelihood_ratio_dPhitt * Likelihood_ratio_dRtt;
+          //else if(mode3 == 2) Likelihood_ratio = Likelihood_ratio_Mbjj;
+          //else if(mode3 == 3) Likelihood_ratio = Likelihood_ratio_Mjj;
+          //else if(mode3 == 4) Likelihood_ratio = Likelihood_ratio_MblMET;
+          //else if(mode3 == 5) Likelihood_ratio = Likelihood_ratio_dPhitt;
+          //else if(mode3 == 6) Likelihood_ratio = Likelihood_ratio_dRtt;
+          //else if(mode3 == 7) Likelihood_ratio = Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          //else if(mode3 == 8) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          //else if(mode3 == 9) Likelihood_ratio *= Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
 
           if(Likelihood_ratio > max_likelihood_ratio){
             max_likelihood_ratio = Likelihood_ratio;
