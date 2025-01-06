@@ -27,9 +27,14 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("m"+GetEraShort()+"_LR_mode4"); // likelihood_mass_bl, mass_bjj, mass_blMET
     executeEventWithParameter("m"+GetEraShort()+"_LR_mode5"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt
     executeEventWithParameter("m"+GetEraShort()+"_LR_mode6"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt, dR_tt
-    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode7");
-    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode8");
-    //executeEventWithParameter("m"+GetEraShort()+"_LR_mode9");
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode7");
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode8");
+    executeEventWithParameter("m"+GetEraShort()+"_LR_mode9");
+    executeEventWithParameter("m"+GetEraShort()+"_pt30");
+    executeEventWithParameter("m"+GetEraShort()+"_pt30eta5");
+    executeEventWithParameter("m"+GetEraShort()+"_pt25eta5");
+    executeEventWithParameter("m"+GetEraShort()+"_pt20");
+    executeEventWithParameter("m"+GetEraShort()+"_pt20eta5");
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
@@ -43,9 +48,14 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("E"+GetEraShort()+"_LR_mode4"); // likelihood_mass_bl, mass_bjj, mass_blMET
     executeEventWithParameter("E"+GetEraShort()+"_LR_mode5"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt
     executeEventWithParameter("E"+GetEraShort()+"_LR_mode6"); // likelihood_mass_bl, mass_bjj, mass_jj, mass_blMET, dPhi_tt, dR_tt
-    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode7");
-    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode8");
-    //executeEventWithParameter("E"+GetEraShort()+"_LR_mode9");
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode7");
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode8");
+    executeEventWithParameter("E"+GetEraShort()+"_LR_mode9");
+    executeEventWithParameter("E"+GetEraShort()+"_pt30");
+    executeEventWithParameter("E"+GetEraShort()+"_pt30eta5");
+    executeEventWithParameter("E"+GetEraShort()+"_pt25eta5");
+    executeEventWithParameter("E"+GetEraShort()+"_pt20");
+    executeEventWithParameter("E"+GetEraShort()+"_pt20eta5");
   }
 }
 
@@ -77,7 +87,12 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   if(!Hasleptons(channel)) return;
 
   // Jets
-  vector<Jet> alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
+  double ptcut = 25;
+  double etacut = 2.4;
+  if(channel.Contains("pt30")) ptcut = 30;
+  if(channel.Contains("pt20")) ptcut = 20;
+  if(channel.Contains("eta5")) etacut = 5.0;
+  vector<Jet> alljets = SelectJets(GetAllJets(), "tightLepVeto", ptcut, etacut);
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
   for(const auto jet:alljets){
     if(lepton0 && jet.DeltaR(*lepton0) < 0.4) continue;
@@ -94,7 +109,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
 
   std::vector<bool> btag_vector = {};
   for(const auto& jet:realjets){
-    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)){
+    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP) && jet.Pt() > 25 && fabs(jet.Eta()) < 2.4){
       btag_vector.push_back(true);
       bjets.push_back(jet);
     }else{
@@ -207,12 +222,6 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 0, 0); // ByungHun Oh's method - drop events with ambiguity
   if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(channel, bjets, ajets, map_weight[""], 1, 0); // Charmonium guy's method - match smaller dR < 0.3
 
-  bool goodKinematic = false;
-  goodKinematic = Kinematic_Cut(bjets, ajets);
-  FillHist(prefix+"LR_efficiency", goodKinematic?1:0, map_weight[""], 2,0,2);
-  if(!goodKinematic) return;
-  FillCutflow(prefix+hprefix+"cutflow"+suffix, "LR", map_weight[""]);
-
   //==== Finding the correct bbjj combination
   vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
   vector<double> LRs = {0, 0, 0, 0, 0, 0};
@@ -226,6 +235,12 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   else if(channel.Contains("LR_mode8")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 8);
   else if(channel.Contains("LR_mode9")) idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs, 9);
   else idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
+
+  bool goodKinematic = true;
+  if((idx_bbjj.at(0) == idx_bbjj.at(1)) || (idx_bbjj.at(2) == idx_bbjj.at(3))) goodKinematic = false;
+  FillHist(prefix+"LR_efficiency", goodKinematic?1:0, map_weight[""], 2,0,2);
+  if(!goodKinematic) return;
+  FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
 
   Jet lepb = bjets.at(idx_bbjj.at(0));
   Jet hadb = bjets.at(idx_bbjj.at(1));
@@ -417,7 +432,25 @@ void ttljAnalyzer::executeEventWithParameter(TString channel){
   }
 
   FillHist(prefix+hprefix+"ptl", lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb", bjets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb", bjets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb0", bjets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb1", bjets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj", ajets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj", ajets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj0", ajets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj1", ajets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+
   FillHist(prefix+hprefix+"etal", lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"etab", bjets.at(0).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etab", bjets.at(1).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etab0", bjets.at(0).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etab1", bjets.at(1).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj", ajets.at(0).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj", ajets.at(1).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj0", ajets.at(0).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj1", ajets.at(1).Eta(), map_weight, 100,-5,5);
+
   FillHist(prefix+hprefix+"bjetcharge0"+suffix, bjets.at(0).Charge(), map_weight, 200,-2,2);
   FillHist(prefix+hprefix+"bjetcharge1"+suffix, bjets.at(1).Charge(), map_weight, 200,-2,2);
   FillHist(prefix+hprefix+"bjetschargeSum"+suffix, bjets.at(0).Charge() + bjets.at(1).Charge(), map_weight, 400,-4,4);
@@ -495,6 +528,8 @@ void ttljAnalyzer::executeEventGen(){
   FillHist("gen/Pt_b1", gen_b1.Pt(), 1, 100,0,400);
   FillHist("gen/Pt_l0", gen_l0.Pt(), 1, 100,0,400);
   FillHist("gen/Pt_l1", gen_l1.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_j", gen_j0.Pt(), 1, 100,0,400);
+  FillHist("gen/Pt_j", gen_j1.Pt(), 1, 100,0,400);
   FillHist("gen/Pt_j0", gen_j0.Pt(), 1, 100,0,400);
   FillHist("gen/Pt_j1", gen_j1.Pt(), 1, 100,0,400);
 
@@ -504,6 +539,8 @@ void ttljAnalyzer::executeEventGen(){
   FillHist("gen/Eta_b1", gen_b1.Eta(), 1, 200,-5,5);
   FillHist("gen/Eta_l0", gen_l0.Eta(), 1, 200,-5,5);
   FillHist("gen/Eta_l1", gen_l1.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_j", gen_j0.Eta(), 1, 200,-5,5);
+  FillHist("gen/Eta_j", gen_j1.Eta(), 1, 200,-5,5);
   FillHist("gen/Eta_j0", gen_j0.Eta(), 1, 200,-5,5);
   FillHist("gen/Eta_j1", gen_j1.Eta(), 1, 200,-5,5);
 
@@ -545,6 +582,71 @@ void ttljAnalyzer::executeEventGen(){
   FillHist("gen/dPhi_ToplepWlep", (*gen_lepb + gen_l0 + gen_l1).DeltaPhi(gen_l0 + gen_l1), 1, 64,-3.2,3.2);
   FillHist("gen/dPhi_ToplepWhad", (*gen_lepb + gen_l0 + gen_l1).DeltaPhi(gen_j0 + gen_j1), 1, 64,-3.2,3.2);
   FillHist("gen/dPhi_WlepWhad", (gen_l0 + gen_l1).DeltaPhi(gen_j0 + gen_j1), 1, 64,-3.2,3.2);
+
+  bool acceptance_2b = false;
+  bool acceptance_2j = false;
+  bool acceptance_2l = false;
+  if(gen_b0.Pt() > 30 && fabs(gen_b0.Eta()) < 2.4 && gen_b1.Pt() > 30 && fabs(gen_b1.Eta()) < 2.4) acceptance_2b = true;
+  if(gen_j0.Pt() > 30 && fabs(gen_j0.Eta()) < 2.4 && gen_j1.Pt() > 30 && fabs(gen_j1.Eta()) < 2.4) acceptance_2j = true;
+  if(gen_l0.Pt() > 30 && fabs(gen_l0.Eta()) < 2.4 && gen_l1.Pt() > 20) acceptance_2l = true;
+
+  FillHist("gen/acceptance_pteta30_2b", acceptance_2b?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta30_2j", acceptance_2j?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta30_2l", acceptance_2l?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta30_2b2j", (acceptance_2b && acceptance_2j)?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta30_2b2j2l", (acceptance_2b && acceptance_2j && acceptance_2l)?1:0, 1, 2,0,2);
+
+  acceptance_2b = false;
+  acceptance_2j = false;
+  acceptance_2l = false;
+  if(gen_b0.Pt() > 25 && fabs(gen_b0.Eta()) < 2.4 && gen_b1.Pt() > 25 && fabs(gen_b1.Eta()) < 2.4) acceptance_2b = true;
+  if(gen_j0.Pt() > 25 && fabs(gen_j0.Eta()) < 2.4 && gen_j1.Pt() > 25 && fabs(gen_j1.Eta()) < 2.4) acceptance_2j = true;
+  if(gen_l0.Pt() > 25 && fabs(gen_l0.Eta()) < 2.4 && gen_l1.Pt() > 20) acceptance_2l = true;
+
+  FillHist("gen/acceptance_pteta_2b", acceptance_2b?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta_2j", acceptance_2j?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta_2l", acceptance_2l?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta_2b2j", (acceptance_2b && acceptance_2j)?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta_2b2j2l", (acceptance_2b && acceptance_2j && acceptance_2l)?1:0, 1, 2,0,2);
+
+  acceptance_2b = false;
+  acceptance_2j = false;
+  acceptance_2l = false;
+  if(gen_b0.Pt() > 20 && fabs(gen_b0.Eta()) < 2.4 && gen_b1.Pt() > 20 && fabs(gen_b1.Eta()) < 2.4) acceptance_2b = true;
+  if(gen_j0.Pt() > 20 && fabs(gen_j0.Eta()) < 2.4 && gen_j1.Pt() > 20 && fabs(gen_j1.Eta()) < 2.4) acceptance_2j = true;
+  if(gen_l0.Pt() > 20 && fabs(gen_l0.Eta()) < 2.4 && gen_l1.Pt() > 20) acceptance_2l = true;
+
+  FillHist("gen/acceptance_pteta20_2b", acceptance_2b?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta20_2j", acceptance_2j?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta20_2l", acceptance_2l?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta20_2b2j", (acceptance_2b && acceptance_2j)?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pteta20_2b2j2l", (acceptance_2b && acceptance_2j && acceptance_2l)?1:0, 1, 2,0,2);
+
+  acceptance_2b = false;
+  acceptance_2j = false;
+  acceptance_2l = false;
+  if(gen_b0.Pt() > 25 && gen_b1.Pt() > 25) acceptance_2b = true;
+  if(gen_j0.Pt() > 25 && gen_j1.Pt() > 25) acceptance_2j = true;
+  if(gen_l0.Pt() > 25 && gen_l1.Pt() > 20) acceptance_2l = true;
+
+  FillHist("gen/acceptance_pt_2b", acceptance_2b?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pt_2j", acceptance_2j?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pt_2l", acceptance_2l?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pt_2b2j", (acceptance_2b && acceptance_2j)?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_pt_2b2j2l", (acceptance_2b && acceptance_2j && acceptance_2l)?1:0, 1, 2,0,2);
+
+  acceptance_2b = false;
+  acceptance_2j = false;
+  acceptance_2l = false;
+  if(fabs(gen_b0.Eta()) < 2.4 && fabs(gen_b1.Eta()) < 2.4) acceptance_2b = true;
+  if(fabs(gen_j0.Eta()) < 2.4 && fabs(gen_j1.Eta()) < 2.4) acceptance_2j = true;
+  if(fabs(gen_l0.Eta()) < 2.4) acceptance_2l = true;
+
+  FillHist("gen/acceptance_eta_2b", acceptance_2b?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_eta_2j", acceptance_2j?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_eta_2l", acceptance_2l?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_eta_2b2j", (acceptance_2b && acceptance_2j)?1:0, 1, 2,0,2);
+  FillHist("gen/acceptance_eta_2b2j2l", (acceptance_2b && acceptance_2j && acceptance_2l)?1:0, 1, 2,0,2);
 }
 
 void ttljAnalyzer::GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0, Gen& parton1, Gen& b0, Gen& b1, Gen& l0, Gen& l1, Gen& j0, Gen& j1, int mode){
@@ -947,6 +1049,16 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
           double dRtt = (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met);
           double dPhitt = fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met));
 
+          // Kinematic Cuts
+          if(Mbjj < 100 || 240 < Mbjj) continue;
+          if(Mbl > 170) continue;
+          //if(dPhitt < 1.5) continue;
+          if(mode3 > 5){
+            if(fabs(Mjj - 80.4) > 30) continue;
+          }else{
+            if(fabs(Mjj - 80.4) > 45) continue;
+          }
+
           double Likelihood_Mbl_correct = hMbl_correct->GetBinContent(hMbl_correct->FindBin(Mbl)) / hMbl_correct->Integral();
           double Likelihood_Mbl_wrong = hMbl_wrong->GetBinContent(hMbl_wrong->FindBin(Mbl)) / hMbl_wrong->Integral();
           double Likelihood_MblMET_correct = hMblMET_correct->GetBinContent(hMblMET_correct->FindBin(MblMET)) / hMblMET_correct->Integral();
@@ -960,27 +1072,19 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
           double Likelihood_dPhitt_correct = hdPhitt_correct->GetBinContent(hdPhitt_correct->FindBin(dPhitt)) / hdPhitt_correct->Integral();
           double Likelihood_dPhitt_wrong = hdPhitt_wrong->GetBinContent(hdPhitt_wrong->FindBin(dPhitt)) / hdPhitt_wrong->Integral();
 
-          double Likelihood_ratio_Mbl = Likelihood_Mbl_correct / (Likelihood_Mbl_correct + Likelihood_Mbl_wrong);
-          double Likelihood_ratio_MblMET = Likelihood_MblMET_correct / (Likelihood_MblMET_correct + Likelihood_MblMET_wrong);
-          double Likelihood_ratio_Mbjj = Likelihood_Mbjj_correct / (Likelihood_Mbjj_correct + Likelihood_Mbjj_wrong);
-          double Likelihood_ratio_Mjj = Likelihood_Mjj_correct / (Likelihood_Mjj_correct + Likelihood_Mjj_wrong);
-          double Likelihood_ratio_dRtt = Likelihood_dRtt_correct / (Likelihood_dRtt_correct + Likelihood_dRtt_wrong);
-          double Likelihood_ratio_dPhitt = Likelihood_dPhitt_correct / (Likelihood_dPhitt_correct + Likelihood_dPhitt_wrong);
+          double Likelihood_ratio_Mbl = Likelihood_Mbl_correct / Likelihood_Mbl_wrong;// / (Likelihood_Mbl_correct + Likelihood_Mbl_wrong);
+          double Likelihood_ratio_MblMET = Likelihood_MblMET_correct / Likelihood_MblMET_wrong;// / (Likelihood_MblMET_correct + Likelihood_MblMET_wrong);
+          double Likelihood_ratio_Mbjj = Likelihood_Mbjj_correct / Likelihood_Mbjj_wrong;// / (Likelihood_Mbjj_correct + Likelihood_Mbjj_wrong);
+          double Likelihood_ratio_Mjj = Likelihood_Mjj_correct / Likelihood_Mjj_wrong;// / (Likelihood_Mjj_correct + Likelihood_Mjj_wrong);
+          double Likelihood_ratio_dRtt = Likelihood_dRtt_correct / Likelihood_dRtt_wrong;// / (Likelihood_dRtt_correct + Likelihood_dRtt_wrong);
+          double Likelihood_ratio_dPhitt = Likelihood_dPhitt_correct / Likelihood_dPhitt_wrong;// / (Likelihood_dPhitt_correct + Likelihood_dPhitt_wrong);
+
           double Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_MblMET * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          if(mode3 == 1) Likelihood_ratio = Likelihood_ratio_Mbl;
-          else if(mode3 == 2) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj;
-          else if(mode3 == 3) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          else if(mode3 == 4) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_MblMET;
-          else if(mode3 == 5) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj * Likelihood_ratio_MblMET * Likelihood_ratio_dPhitt;
-          else if(mode3 == 6) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj * Likelihood_ratio_MblMET * Likelihood_ratio_dPhitt * Likelihood_ratio_dRtt;
-          //else if(mode3 == 2) Likelihood_ratio = Likelihood_ratio_Mbjj;
-          //else if(mode3 == 3) Likelihood_ratio = Likelihood_ratio_Mjj;
-          //else if(mode3 == 4) Likelihood_ratio = Likelihood_ratio_MblMET;
-          //else if(mode3 == 5) Likelihood_ratio = Likelihood_ratio_dPhitt;
-          //else if(mode3 == 6) Likelihood_ratio = Likelihood_ratio_dRtt;
-          //else if(mode3 == 7) Likelihood_ratio = Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          //else if(mode3 == 8) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
-          //else if(mode3 == 9) Likelihood_ratio *= Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          if(mode3 == 1 || mode3 == 7) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj;
+          else if(mode3 == 2 || mode3 == 8) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_Mjj;
+          else if(mode3 == 3 || mode3 == 9) Likelihood_ratio = Likelihood_ratio_Mbl * Likelihood_ratio_Mbjj * Likelihood_ratio_MblMET;
+          else if(mode3 == 4) Likelihood_ratio *= Likelihood_ratio_dRtt;
+          else if(mode3 == 5) Likelihood_ratio *= Likelihood_ratio_dPhitt;
 
           if(Likelihood_ratio > max_likelihood_ratio){
             max_likelihood_ratio = Likelihood_ratio;
@@ -996,30 +1100,6 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
   }
 
   return {lb, hb, j0, j1};
-}
-
-bool ttljAnalyzer::Kinematic_Cut(vector<Jet> bjets, vector<Jet> ajets){
-
-  bool kinematic_cut = false;
-  for(unsigned int a=0; a<bjets.size(); a++){
-    for(unsigned int b=0; b<bjets.size(); b++){
-      if(a == b) continue;
-      for(unsigned int c=0; c<ajets.size(); c++){
-        for(unsigned int d=c+1; d<ajets.size(); d++){
-
-          TLorentzVector leptonic_top = bjets.at(a) + *lepton0 + met;
-          TLorentzVector hadronic_top = bjets.at(b) + ajets.at(c) + ajets.at(d);
-
-          //if((100 < hadronic_top.M() && hadronic_top.M() < 240) && ((bjets.at(a) + *lepton0).M() < 170) && (fabs(hadronic_top.DeltaPhi(leptonic_top)) > 1.5)){
-          if(((bjets.at(a) + *lepton0).M() < 170) && (fabs(hadronic_top.DeltaPhi(leptonic_top)) > 2.0)){
-            kinematic_cut = true;
-            break;
-          }
-        }
-      }
-    }
-  }
-  return kinematic_cut;
 }
 
 ttljAnalyzer::ttljAnalyzer(){}
