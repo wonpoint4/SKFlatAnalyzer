@@ -874,12 +874,38 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
       }
     }
     else{
-      if(jet.Pt() >= 40){
-        if(jet.PileupJetId() > -0.19) return true;
-      }else if(jet.Pt() >= 30){
-        if(jet.PileupJetId() > -0.63) return true;
-      }else if(jet.Pt() >= 20){
-        if(jet.PileupJetId() > -0.88) return true;
+      if(fabs(jet.Eta()) < 2.5){
+        if(jet.Pt() >= 40){
+          if(jet.PileupJetId() > -0.19) return true;
+        }else if(jet.Pt() >= 30){
+          if(jet.PileupJetId() > -0.63) return true;
+        }else if(jet.Pt() >= 20){
+          if(jet.PileupJetId() > -0.88) return true;
+        }
+      }else if(fabs(jet.Eta()) < 2.75){
+        if(jet.Pt() >= 40){
+          if(jet.PileupJetId() > 0.22) return true;
+        }else if(jet.Pt() >= 30){
+          if(jet.PileupJetId() > -0.18) return true;
+        }else if(jet.Pt() >= 20){
+          if(jet.PileupJetId() > -0.55) return true;
+        }
+      }else if(fabs(jet.Eta()) < 3.0){
+        if(jet.Pt() >= 40){
+          if(jet.PileupJetId() > -0.13) return true;
+        }else if(jet.Pt() >= 30){
+          if(jet.PileupJetId() > -0.43) return true;
+        }else if(jet.Pt() >= 20){
+          if(jet.PileupJetId() > -0.60) return true;
+        }
+      }else{
+        if(jet.Pt() >= 40){
+          if(jet.PileupJetId() > -0.03) return true;
+        }else if(jet.Pt() >= 30){
+          if(jet.PileupJetId() > -0.24) return true;
+        }else if(jet.Pt() >= 20){
+          if(jet.PileupJetId() > -0.43) return true;
+        }
       }
     }
   }
