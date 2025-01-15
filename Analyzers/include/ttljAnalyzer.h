@@ -10,11 +10,11 @@ class ttljAnalyzer : public dybAnalyzer {
 
   virtual void initializeAnalyzer();
   virtual void GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& b0,Gen& b1,Gen& j0,Gen& j1, int mode);
-  virtual void executeEventWithParameter(TString channel);
+  virtual void executeEventWithParameter(TString channel, TString option="");
   virtual void executeEvent();
   virtual void executeEventGen();
   virtual bool Hasleptons(TString channel);
-  void FillingLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, double weight, unsigned int mode1=0, unsigned int mode2=0);
+  void FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, unsigned int mode1=0, unsigned int mode2=0);
   void SetupLikelihoods(unsigned int mode1=0, unsigned int mode2=0);
   vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios, unsigned int mode3=0);
 
@@ -33,31 +33,18 @@ class ttljAnalyzer : public dybAnalyzer {
   TLorentzVector met;
 
   // Likelihoods
-  TH1* hMbl_correct_E = NULL;
-  TH1* hMbl_wrong_E = NULL;
-  TH1* hMblMET_correct_E = NULL;
-  TH1* hMblMET_wrong_E = NULL;
-  TH1* hMbjj_correct_E = NULL;
-  TH1* hMbjj_wrong_E = NULL;
-  TH1* hMjj_correct_E = NULL;
-  TH1* hMjj_wrong_E = NULL;
-  TH1* hdRtt_correct_E = NULL;
-  TH1* hdRtt_wrong_E = NULL;
-  TH1* hdPhitt_correct_E = NULL;
-  TH1* hdPhitt_wrong_E = NULL;
-
-  TH1* hMbl_correct_m = NULL;
-  TH1* hMbl_wrong_m = NULL;
-  TH1* hMblMET_correct_m = NULL;
-  TH1* hMblMET_wrong_m = NULL;
-  TH1* hMbjj_correct_m = NULL;
-  TH1* hMbjj_wrong_m = NULL;
-  TH1* hMjj_correct_m = NULL;
-  TH1* hMjj_wrong_m = NULL;
-  TH1* hdRtt_correct_m = NULL;
-  TH1* hdRtt_wrong_m = NULL;
-  TH1* hdPhitt_correct_m = NULL;
-  TH1* hdPhitt_wrong_m = NULL;
+  TH1* hMbl_correct = NULL;
+  TH1* hMbl_wrong = NULL;
+  TH1* hMblMET_correct = NULL;
+  TH1* hMblMET_wrong = NULL;
+  TH1* hMbjj_correct = NULL;
+  TH1* hMbjj_wrong = NULL;
+  TH1* hMjj_correct = NULL;
+  TH1* hMjj_wrong = NULL;
+  TH1* hdRtt_correct = NULL;
+  TH1* hdRtt_wrong = NULL;
+  TH1* hdPhitt_correct = NULL;
+  TH1* hdPhitt_wrong = NULL;
 
   ttljAnalyzer();
   ~ttljAnalyzer();

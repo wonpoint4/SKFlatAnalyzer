@@ -4,22 +4,15 @@ void dybAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
   
   IsSkimmed = GetSkimName() != ""? true: false;
-  IsNominalRun =! HasFlag("SYS") && !HasFlag("PDFSYS") && IsSkimmed;
+  IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && IsSkimmed;
 
   PDFbase = LHAPDF::mkPDF(306000);
   PDFnf4 = LHAPDF::mkPDF(325500);
 
-  vector<JetTagging::Parameters> jtps = {
+  mcCorr->SetJetTaggingParameters({
     JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb),
-    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb),
     JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb),
-    JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::mujets)
-  };
-    //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
-    //JetTagging::Parameters(JetTagging::DeepJet_CvsB,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm),
-    //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Tight,JetTagging::incl,JetTagging::wcharm),
-    //JetTagging::Parameters(JetTagging::DeepJet_CvsL,JetTagging::Loose,JetTagging::incl,JetTagging::wcharm)};
-  mcCorr->SetJetTaggingParameters(jtps);
+  });
   SetupPUJetWeight();
 }
 
@@ -33,13 +26,23 @@ void dybAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("DoubleMuon")){
     executeEventWithParameter("mm"+GetEraShort());
+    if(HasFlag("SYS")){
+      for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
+        executeEventWithParameter("mm"+GetEraShort(), syst);
+      }
+    }
   }
   if(!IsDATA || DataStream.Contains("DoubleEG") || DataStream.Contains("EGamma")){
     executeEventWithParameter("ee"+GetEraShort());
+    if(HasFlag("SYS")){
+      for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
+        executeEventWithParameter("ee"+GetEraShort(), syst);
+      }
+    }
   }
 }
 
-void dybAnalyzer::executeEventWithParameter(TString channel){
+void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   lepton0 = NULL;
   lepton1 = NULL;
@@ -162,7 +165,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel){
 
   // B-tagging
   JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
-  JetTagging::Parameters DeepJet_Medium = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Medium,JetTagging::incl,JetTagging::comb);
   JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Loose,JetTagging::incl,JetTagging::comb);
 
   /*// test alljets

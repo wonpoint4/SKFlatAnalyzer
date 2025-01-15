@@ -11,7 +11,7 @@ class dybAnalyzer : public SMPAnalyzerCore {
 public:
 
   virtual void initializeAnalyzer();
-  virtual void executeEventWithParameter(TString channel);
+  virtual void executeEventWithParameter(TString channel, TString option="");
   virtual void executeEventGen();
   virtual void executeEvent();
   virtual bool IsFiredTriggers(TString channel);
