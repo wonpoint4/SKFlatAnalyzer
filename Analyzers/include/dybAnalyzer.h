@@ -17,7 +17,7 @@ public:
   virtual bool IsFiredTriggers(TString channel);
   virtual bool HasDileptons(TString channel);
   virtual double jetCharge(const Jet& jet);
-  virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst);
+  virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys);
 
   // PUJetID, SF

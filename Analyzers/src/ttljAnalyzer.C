@@ -4,8 +4,8 @@ void ttljAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
   IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS");
 
-  PDFbase=LHAPDF::mkPDF(306000);
-  PDFnf4=LHAPDF::mkPDF(325500);
+  PDFbase = LHAPDF::mkPDF(306000);
+  PDFnf4 = LHAPDF::mkPDF(325500);
   mcCorr->SetJetTaggingParameters({
     JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb),
   });
@@ -21,8 +21,8 @@ void ttljAnalyzer::executeEvent(){
   if(!IsDATA || DataStream.Contains("SingleMuon")){
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
-        executeEventWithParameter("m"+GetEraShort(), syst);
+      for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
+        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }
   }
@@ -30,9 +30,9 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("e"+GetEraShort());
     executeEventWithParameter("E"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"jet_scale_up","jet_scale_down","jet_smear_up","jet_smear_down"}){
-        executeEventWithParameter("e"+GetEraShort(), syst);
-        executeEventWithParameter("E"+GetEraShort(), syst);
+      for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
+        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
+        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("E"+GetEraShort(), syst);
       }
     }
   }
@@ -46,13 +46,13 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   // Weights Setup
   if(!IsDATA){
     lumiweight = reductionweight * MCweight()*_event.GetTriggerLumi("Full");
-    PUweight = mcCorr->GetPileUpWeight(nPileUp,0);
+    PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
     prefireweight = L1PrefireReweight_Central;
   }
 
   map_weight[""] = lumiweight;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_Lumi", lumiweight, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_Lumi"+suffix, lumiweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight[""]);
   }
   // Trigger
@@ -67,7 +67,24 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   if(!Hasleptons(channel)) return;
 
   // Jets
-  vector<Jet> alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
+  vector<Jet> alljets = {};
+  if(option.Contains("jet_scale_up")){
+    suffix += "_jet_scale_up";
+    alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
+  }else if(option.Contains("jet_scale_down")){
+    suffix += "_jet_scale_down";
+    alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
+  }else if(option.Contains("jet_smear_up")){
+    suffix += "_jet_smear_up";
+    alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
+  }else if(option.Contains("jet_smear_down")){
+    suffix += "_jet_smear_down";
+    alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
+  }else{
+    alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
+  }
+  std::sort(alljets.begin(), alljets.end(), PtComparing);
+
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
   for(const auto jet:alljets){
     if(lepton0 && jet.DeltaR(*lepton0) < 0.4) continue;
@@ -78,8 +95,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     realjets.push_back(jet);
   }
 
-  // B-tagging
-  JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet,JetTagging::Tight,JetTagging::incl,JetTagging::comb);
+  // b-tagging
+  JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb);
   std::vector<bool> btag_vector = {};
   for(const auto& jet:realjets){
     if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)){
@@ -94,42 +111,38 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   // Jet related weights
   if(!IsDATA){
     pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
-    btagSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "central");
+    btagSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight);
   }
 
-  FillHist(prefix+"njets", realjets.size(), map_weight[""], 15,0,15);
-  FillHist(prefix+"nbjets", bjets.size(), map_weight[""], 10,0,10);
-  FillHist(prefix+"najets", ajets.size(), map_weight[""], 10,0,10);
+  FillHist(prefix+"njets"+suffix, realjets.size(), map_weight[""], 15,0,15);
+  FillHist(prefix+"nbjets"+suffix, bjets.size(), map_weight[""], 10,0,10);
+  FillHist(prefix+"najets"+suffix, ajets.size(), map_weight[""], 10,0,10);
 
   if(bjets.size() != 2) return;
   if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight2b", map_weight[""]);
   if(ajets.size() < 2) return;
   if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, ">=2j", map_weight[""]);
-  bjet0 = &bjets.at(0); bcharge0 = jetCharge(*bjet0);
-  bjet1 = &bjets.at(1); bcharge1 = jetCharge(*bjet1);
-  ajet0 = &ajets.at(0); acharge0 = jetCharge(*ajet0);
-  ajet1 = &ajets.at(1); acharge1 = jetCharge(*ajet1);
 
-  map_weight["_noWts"] = map_weight[""];
   // Weights
+  if(!IsDATA && IsNominalRun) map_weight["_noWts"] = map_weight[""];
   map_weight[""] *= PUweight;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_PU", PUweight, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_PU"+suffix, PUweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU", map_weight[""]);
   }
   map_weight[""] *= prefireweight;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_Prefire", prefireweight, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_Prefire"+suffix, prefireweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", map_weight[""]);
   }
   map_weight[""] *= topptweight;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_Toppt", topptweight, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_Toppt"+suffix, topptweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
   }
 
   // Lepton Efficiency Correction
-  if(IsNominalRun) map_weight["_noEffSF"] = map_weight[""];
+  if(!IsDATA && IsNominalRun) map_weight["_noEffSF"] = map_weight[""];
   leptonTrackingSF = 1.;
   leptonRECOSF = 1.;
   leptonIDSF = 1.;
@@ -160,41 +173,61 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   map_weight[""] *= leptonTrackingSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_TrackingSF", leptonTrackingSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_TrackingSF"+suffix, leptonTrackingSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF", map_weight[""]);
   }
   map_weight[""] *= leptonRECOSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_RECOSF", leptonRECOSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_RECOSF"+suffix, leptonRECOSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF", map_weight[""]);
   }
   map_weight[""] *= leptonIDSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_IDSF", leptonIDSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_IDSF"+suffix, leptonIDSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF", map_weight[""]);
   }
   map_weight[""] *= leptonTriggerSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_TriggerSF", leptonTriggerSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_TriggerSF"+suffix, leptonTriggerSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
   }
-  if(IsNominalRun) map_weight["_nobtagSF"] = map_weight[""];
   map_weight[""] *= btagSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_btagSF", btagSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
-  if(IsNominalRun) map_weight["_noPUjetSF"] = map_weight[""];
+  if(!IsDATA && IsNominalRun) map_weight["_noPUjetSF"] = map_weight[""];
   map_weight[""] *= pujetSF;
   if(IsNominalRun){
-    FillHist(prefix+hprefix+"weight_PUjetSF", pujetSF, map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
   }
 
-  map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
-  if(IsNominalRun) FillHist(prefix+hprefix+"weight_bChargeSF0", GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
-  map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
-  if(IsNominalRun) FillHist(prefix+hprefix+"weight_bChargeSF1", GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
+  if(IsNominalRun){
+    if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
+    FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
+    if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
+    FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
+  }
+
+  //==== Weights of Systematics
+  if(!IsDATA && HasFlag("SYS") && option == ""){
+    // PU reweight
+    map_weight["_noPUweight"] =  map_weight[""] / PUweight;
+    map_weight["_PUweight_up"] =  map_weight[""] / PUweight * mcCorr->GetPileUpWeight(nPileUp, 1);
+    map_weight["_PUweight_down"] = map_weight[""] / PUweight * mcCorr->GetPileUpWeight(nPileUp, -1);
+
+    // b-tagging SF
+    map_weight["_nobtagSF"] =  map_weight[""] / btagSF;
+    map_weight["_btagSF_hup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTag");
+    map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownHTag");
+    map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagCorr");
+    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
+    map_weight["_btagSF_lup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTag");
+    map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
+    map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
+    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
+  }
 
   //==== Making Likelihood
   if(IsNominalRun){
@@ -208,7 +241,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   bool goodKinematic = true;
   if((idx_bbjj.at(0) == idx_bbjj.at(1)) || (idx_bbjj.at(2) == idx_bbjj.at(3))) goodKinematic = false;
-  FillHist(prefix+"LR_efficiency", goodKinematic?1:0, map_weight[""], 2,0,2);
+  FillHist(prefix+"LR_efficiency"+suffix, goodKinematic?1:0, map_weight[""], 2,0,2);
   if(!goodKinematic) return;
   if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
 
@@ -218,6 +251,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   Jet Wj1 = ajets.at(idx_bbjj.at(3));
   double lepb_charge = jetCharge(lepb);
   double hadb_charge = jetCharge(hadb);
+  double acharge0 = jetCharge(Wj0);
+  double acharge1 = jetCharge(Wj1);
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
     double match_dR = 0.4;
@@ -235,31 +270,33 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
       Gen_LR_match_onlyb = true;
       if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() > 0){
-        FillHist(prefix+"LR_purity", 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct", 1, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lp", 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lp", 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity_Lp"+suffix, 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp"+suffix, 1, map_weight[""], 2,0,2);
         prefix += "Correct_"; // lep+
       }else{
-        FillHist(prefix+"LR_purity", 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct", 0, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lm", 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lm", 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity_Lm"+suffix, 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm"+suffix, 0, map_weight[""], 2,0,2);
         prefix +="Wrong_"; // lep-
       }
-      FillHist(prefix+"lepbjetCharge_Matched_b", lepb_charge, map_weight[""], 200,-5,5);
-      FillHist(prefix+"lepbjetChargeEasy_Matched_b", lepb_charge<0?0:1, map_weight[""], 2,0,2);
-      FillHist(prefix+"hadbjetCharge_Matched_bbar", hadb_charge, map_weight[""], 200,-5,5);
-      FillHist(prefix+"hadbjetChargeEasy_Matched_bbar", hadb_charge<0?0:1, map_weight[""], 2,0,2);
-      FillHist(prefix+"lcharge_lepb_Matched_b", lepton0->Charge(), map_weight[""], 4,-2,2);
-      FillHist(prefix+"lchargeEasy_lepb_Matched_b", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
-      if(lepb_charge < 0){
-        FillHist(prefix+"lcharge_lepb_negaive_Matched_b", lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_negaive_Matched_b", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
-      }
-      if(0 < hadb_charge){
-        FillHist(prefix+"lcharge_hadb_positive_Matched_bbar", lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_hadb_positive_Matched_bbar", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+      if(IsNominalRun){
+        FillHist(prefix+"lepbjetCharge_Matched_b"+suffix, lepb_charge, map_weight[""], 200,-5,5);
+        FillHist(prefix+"lepbjetChargeEasy_Matched_b"+suffix, lepb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(prefix+"hadbjetCharge_Matched_bbar"+suffix, hadb_charge, map_weight[""], 200,-5,5);
+        FillHist(prefix+"hadbjetChargeEasy_Matched_bbar"+suffix, hadb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(prefix+"lcharge_lepb_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+        FillHist(prefix+"lchargeEasy_lepb_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        if(lepb_charge < 0){
+          FillHist(prefix+"lcharge_lepb_negaive_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+          FillHist(prefix+"lchargeEasy_lepb_negaive_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        }
+        if(0 < hadb_charge){
+          FillHist(prefix+"lcharge_hadb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+          FillHist(prefix+"lchargeEasy_hadb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        }
       }
     }
     //When lepb = bbar, hadb = b => lep-
@@ -267,167 +304,151 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
       Gen_LR_match_onlyb = true;
       if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() < 0){
-        FillHist(prefix+"LR_purity", 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct", 1, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lm", 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lm", 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity_Lm"+suffix, 1, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm"+suffix, 1, map_weight[""], 2,0,2);
         prefix += "Correct_"; // lep-
       }else{
-        FillHist(prefix+"LR_purity", 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct", 0, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lp", 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lp", 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity_Lp"+suffix, 0, map_weight[""], 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp"+suffix, 0, map_weight[""], 2,0,2);
         prefix +="Wrong_"; // lep+
       }
-      FillHist(prefix+"hadbjetCharge_Matched_b", hadb_charge, map_weight[""], 200,-5,5);
-      FillHist(prefix+"hadbjetChargeEasy_Matched_b", hadb_charge<0?0:1, map_weight[""], 2,0,2);
-      FillHist(prefix+"lepbjetCharge_Matched_bbar", lepb_charge, map_weight[""], 200,-5,5);
-      FillHist(prefix+"lepbjetChargeEasy_Matched_bbar", lepb_charge<0?0:1, map_weight[""], 2,0,2);
-      FillHist(prefix+"lcharge_lepb_Matched_bbar", lepton0->Charge(), map_weight[""], 4,-2,2);
-      FillHist(prefix+"lchargeEasy_lepb_Matched_bbar", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
-      if(0 < lepb_charge){
-        FillHist(prefix+"lcharge_lepb_positive_Matched_bbar", lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_positive_Matched_bbar", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
-      }
-      if(hadb_charge < 0){
-        FillHist(prefix+"lcharge_hadb_negative_Matched_b", lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_hadb_negative_Matched_b", lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+      if(IsNominalRun){
+        FillHist(prefix+"hadbjetCharge_Matched_b"+suffix, hadb_charge, map_weight[""], 200,-5,5);
+        FillHist(prefix+"hadbjetChargeEasy_Matched_b"+suffix, hadb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(prefix+"lepbjetCharge_Matched_bbar"+suffix, lepb_charge, map_weight[""], 200,-5,5);
+        FillHist(prefix+"lepbjetChargeEasy_Matched_bbar"+suffix, lepb_charge<0?0:1, map_weight[""], 2,0,2);
+        FillHist(prefix+"lcharge_lepb_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+        FillHist(prefix+"lchargeEasy_lepb_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        if(0 < lepb_charge){
+          FillHist(prefix+"lcharge_lepb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+          FillHist(prefix+"lchargeEasy_lepb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        }
+        if(hadb_charge < 0){
+          FillHist(prefix+"lcharge_hadb_negative_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
+          FillHist(prefix+"lchargeEasy_hadb_negative_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+        }
       }
     }
     else{
-      FillHist(prefix+"LR_purity", -1, map_weight[""], 4,-2,2);
-      if(lepton0->Charge() > 0) FillHist(prefix+"LR_purity_Lp", -1, map_weight[""], 4,-2,2);
-      if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm", -1, map_weight[""], 4,-2,2);
+      FillHist(prefix+"LR_purity"+suffix, -1, map_weight[""], 4,-2,2);
+      if(lepton0->Charge() > 0) FillHist(prefix+"LR_purity_Lp"+suffix, -1, map_weight[""], 4,-2,2);
+      if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm"+suffix, -1, map_weight[""], 4,-2,2);
       prefix +="UnMatched_";
     }
 
-    FillHist("Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist("Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist("Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_onlyb", Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_Whad", Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_full", Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist(prefix+"Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
+    FillHist(channel+"/Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
   }
 
   //==========================
   //==== Now reco fill histograms
   //==========================
-  FillHist(prefix+"mass_jj", (Wj0 + Wj1).M(), map_weight, 40,0,200);
-  FillHist(prefix+"mass_bjj", (hadb + Wj0 + Wj1).M(), map_weight, 40,100,300);
-  //FillHist(prefix+"mass_Toplep", (lepb + *lepton0 + neutrino).M(), map_weight, 40,100,300);
-  FillHist(prefix+"mass_blMET", (lepb + *lepton0 + met).M(), map_weight, 40,100,300);
-  FillHist(prefix+"mass_bl", (lepb + *lepton0).M(), map_weight, 40,0,200);
+  FillHist(prefix+"mass_jj"+suffix, (Wj0 + Wj1).M(), map_weight, 40,0,200);
+  FillHist(prefix+"mass_bjj"+suffix, (hadb + Wj0 + Wj1).M(), map_weight, 40,100,300);
+  //FillHist(prefix+"mass_Toplep"+suffix, (lepb + *lepton0 + neutrino).M(), map_weight, 40,100,300);
+  FillHist(prefix+"mass_blMET"+suffix, (lepb + *lepton0 + met).M(), map_weight, 40,100,300);
+  FillHist(prefix+"mass_bl"+suffix, (lepb + *lepton0).M(), map_weight, 40,0,200);
 
-  FillHist(prefix+"dR_bjj_blMET", (hadb + Wj0 + Wj1).DeltaR(lepb + *lepton0 + met), map_weight, 200,0,10);
-  FillHist(prefix+"dR_bjj_lMET", (hadb + Wj0 + Wj1).DeltaR(*lepton0 + met), map_weight, 200,0,10);
-  FillHist(prefix+"dR_bjj_jj", (hadb + Wj0 + Wj1).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
-  FillHist(prefix+"dR_blMET_lMET", (lepb + *lepton0 + met).DeltaR(*lepton0 + met), map_weight, 200,0,10);
-  FillHist(prefix+"dR_blMET_jj", (lepb + *lepton0 + met).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
-  FillHist(prefix+"dR_lMET_jj", (*lepton0 + met).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
+  FillHist(prefix+"dR_bjj_blMET"+suffix, (hadb + Wj0 + Wj1).DeltaR(lepb + *lepton0 + met), map_weight, 200,0,10);
+  FillHist(prefix+"dR_bjj_lMET"+suffix, (hadb + Wj0 + Wj1).DeltaR(*lepton0 + met), map_weight, 200,0,10);
+  FillHist(prefix+"dR_bjj_jj"+suffix, (hadb + Wj0 + Wj1).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
+  FillHist(prefix+"dR_blMET_lMET"+suffix, (lepb + *lepton0 + met).DeltaR(*lepton0 + met), map_weight, 200,0,10);
+  FillHist(prefix+"dR_blMET_jj"+suffix, (lepb + *lepton0 + met).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
+  FillHist(prefix+"dR_lMET_jj"+suffix, (*lepton0 + met).DeltaR(Wj0 + Wj1), map_weight, 200,0,10);
 
-  FillHist(prefix+"dPhi_bjj_blMET", fabs((hadb + Wj0 + Wj1).DeltaPhi(lepb + *lepton0 + met)), map_weight, 200,0,10);
-  FillHist(prefix+"dPhi_bjj_lMET", fabs((hadb + Wj0 + Wj1).DeltaPhi(*lepton0 + met)), map_weight, 200,0,10);
-  FillHist(prefix+"dPhi_bjj_jj", fabs((hadb + Wj0 + Wj1).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
-  FillHist(prefix+"dPhi_blMET_lMET", fabs((lepb + *lepton0 + met).DeltaPhi(*lepton0 + met)), map_weight, 200,0,10);
-  FillHist(prefix+"dPhi_blMET_jj", fabs((lepb + *lepton0 + met).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
-  FillHist(prefix+"dPhi_lMET_jj", fabs((*lepton0 + met).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_bjj_blMET"+suffix, fabs((hadb + Wj0 + Wj1).DeltaPhi(lepb + *lepton0 + met)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_bjj_lMET"+suffix, fabs((hadb + Wj0 + Wj1).DeltaPhi(*lepton0 + met)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_bjj_jj"+suffix, fabs((hadb + Wj0 + Wj1).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_blMET_lMET"+suffix, fabs((lepb + *lepton0 + met).DeltaPhi(*lepton0 + met)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_blMET_jj"+suffix, fabs((lepb + *lepton0 + met).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
+  FillHist(prefix+"dPhi_lMET_jj"+suffix, fabs((*lepton0 + met).DeltaPhi(Wj0 + Wj1)), map_weight, 200,0,10);
 
-  FillHist(prefix+"likelihood_ratio", LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
-  FillHist(prefix+"likelihood_ratio_Mbl", LRs.at(0), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_MblMET", LRs.at(1), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_Mbjj", LRs.at(2), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_Mjj", LRs.at(3), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_dRtt", LRs.at(4), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_dPhitt", LRs.at(5), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio"+suffix, LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
+  FillHist(prefix+"likelihood_ratio_Mbl"+suffix, LRs.at(0), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_MblMET"+suffix, LRs.at(1), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_Mbjj"+suffix, LRs.at(2), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_Mjj"+suffix, LRs.at(3), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_dRtt"+suffix, LRs.at(4), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_dPhitt"+suffix, LRs.at(5), map_weight, 100,0,5);
 
-  FillHist(prefix+"lepbjetcharge", lepb.Charge(), map_weight, 200,-2,2);
-  FillHist(prefix+"lepbjetchargeEasy", lepb.Charge()<0?0:1, map_weight, 2,0,2);
-  FillHist(prefix+"hadbjetcharge", hadb.Charge(), map_weight, 200,-2,2);
-  FillHist(prefix+"hadbjetchargeEasy", hadb.Charge()<0?0:1, map_weight, 2,0,2);
-  FillHist(prefix+"lepbjetCharge", lepb_charge, map_weight, 200,-5,5);
-  FillHist(prefix+"lepbjetChargeEasy", lepb_charge<0?0:1, map_weight, 2,0,2);
-  FillHist(prefix+"hadbjetCharge", hadb_charge, map_weight, 200,-5,5);
-  FillHist(prefix+"hadbjetChargeEasy", hadb_charge<0?0:1, map_weight, 2,0,2);
+  FillHist(prefix+"lepbjetCharge"+suffix, lepb_charge, map_weight, 200,-5,5);
+  FillHist(prefix+"lepbjetChargeEasy"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+  FillHist(prefix+"hadbjetCharge"+suffix, hadb_charge, map_weight, 200,-5,5);
+  FillHist(prefix+"hadbjetChargeEasy"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+  FillHist(prefix+"ajetCharge0"+suffix, acharge0, map_weight, 200,-5,5);
+  FillHist(prefix+"ajetCharge0Easy"+suffix, acharge0<0?0:1, map_weight, 2,0,2);
+  FillHist(prefix+"ajetCharge1"+suffix, acharge1, map_weight, 200,-5,5);
+  FillHist(prefix+"ajetCharge1Easy"+suffix, acharge1<0?0:1, map_weight, 2,0,2);
   if(lepton0->Charge() < 0){
-    FillHist(prefix+"lepbjetcharge_Lm", lepb.Charge(), map_weight, 200,-2,2);
-    FillHist(prefix+"lepbjetchargeEasy_Lm", lepb.Charge()<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"hadbjetcharge_Lm", hadb.Charge(), map_weight, 200,-2,2);
-    FillHist(prefix+"hadbjetchargeEasy_Lm", hadb.Charge()<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"lepbjetCharge_Lm", lepb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"lepbjetChargeEasy_Lm", lepb_charge<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"hadbjetCharge_Lm", hadb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"hadbjetChargeEasy_Lm", hadb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"lepbjetCharge_Lm"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"lepbjetChargeEasy_Lm"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"hadbjetCharge_Lm"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"hadbjetChargeEasy_Lm"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
   }else{
-    FillHist(prefix+"lepbjetcharge_Lp", lepb.Charge(), map_weight, 200,-2,2);
-    FillHist(prefix+"lepbjetchargeEasy_Lp", lepb.Charge()<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"hadbjetcharge_Lp", hadb.Charge(), map_weight, 200,-2,2);
-    FillHist(prefix+"hadbjetchargeEasy_Lp", hadb.Charge()<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"lepbjetCharge_Lp", lepb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"lepbjetChargeEasy_Lp", lepb_charge<0?0:1, map_weight, 2,0,2);
-    FillHist(prefix+"hadbjetCharge_Lp", hadb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"hadbjetChargeEasy_Lp", hadb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"lepbjetCharge_Lp"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"lepbjetChargeEasy_Lp"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"hadbjetCharge_Lp"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"hadbjetChargeEasy_Lp"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
   }
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(lepton0->Charge() < 0){
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetcharge%d_Lm",i-1), lepb.Charge(), map_weight, 200,-2,2);
-        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lm",i-1), lepb.Charge()<0?0:1, map_weight, 2,0,2);
-        FillHist(Form(prefix+"lepbjetCharge%d_Lm",i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm",i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lm"+suffix,i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm"+suffix,i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetcharge%d_Lm",i-1), hadb.Charge(), map_weight, 200,-2,2);
-        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lm",i-1), hadb.Charge()<0?0:1, map_weight, 2,0,2);
-        FillHist(Form(prefix+"hadbjetCharge%d_Lm",i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm",i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lm"+suffix,i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm"+suffix,i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }else{
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetcharge%d_Lp",i-1), lepb.Charge(), map_weight, 200,-2,2);
-        FillHist(Form(prefix+"lepbjetcharge%dEasy_Lp",i-1), lepb.Charge()<0?0:1, map_weight, 2,0,2);
-        FillHist(Form(prefix+"lepbjetCharge%d_Lp",i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp",i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lp"+suffix,i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp"+suffix,i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetcharge%d_Lp",i-1), hadb.Charge(), map_weight, 200,-2,2);
-        FillHist(Form(prefix+"hadbjetcharge%dEasy_Lp",i-1), hadb.Charge()<0?0:1, map_weight, 2,0,2);
-        FillHist(Form(prefix+"hadbjetCharge%d_Lp",i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp",i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lp"+suffix,i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp"+suffix,i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }
   }
 
-  FillHist(prefix+hprefix+"ptl", lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptb", bjets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptb", bjets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptb0", bjets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptb1", bjets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptj", ajets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptj", ajets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptj0", ajets.at(0).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"ptj1", ajets.at(1).Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptl"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb"+suffix, lepb.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptb"+suffix, hadb.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptlepb"+suffix, lepb.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"pthadb"+suffix, hadb.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj"+suffix, Wj0.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj"+suffix, Wj1.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj0"+suffix, Wj0.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"ptj1"+suffix, Wj1.Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"idxj0"+suffix, idx_bbjj.at(2), map_weight, 15,0,5);
+  FillHist(prefix+hprefix+"idxj1"+suffix, idx_bbjj.at(3), map_weight, 15,0,5);
 
-  FillHist(prefix+hprefix+"etal", lepton0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"etab", bjets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etab", bjets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etab0", bjets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etab1", bjets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etaj", ajets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etaj", ajets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etaj0", ajets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"etaj1", ajets.at(1).Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etal"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"etab"+suffix, lepb.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etab"+suffix, hadb.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etalepb"+suffix, lepb.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etahadb"+suffix, hadb.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj"+suffix, Wj0.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj"+suffix, Wj1.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj0"+suffix, Wj0.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"etaj1"+suffix, Wj1.Eta(), map_weight, 100,-5,5);
 
-  FillHist(prefix+hprefix+"bjetcharge0"+suffix, bjets.at(0).Charge(), map_weight, 200,-2,2);
-  FillHist(prefix+hprefix+"bjetcharge1"+suffix, bjets.at(1).Charge(), map_weight, 200,-2,2);
-  FillHist(prefix+hprefix+"bjetschargeSum"+suffix, bjets.at(0).Charge() + bjets.at(1).Charge(), map_weight, 400,-4,4);
-  FillHist(prefix+hprefix+"bjetschargeAbsSum"+suffix, (bjets.at(0).Charge()<0?-1:1) + (bjets.at(1).Charge()<0?-1:1), map_weight, 8,-4,4);
-  FillHist(prefix+hprefix+"bjetCharge0"+suffix, bcharge0, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"bjetCharge1"+suffix, bcharge1, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"bjetsChargeSum"+suffix, bcharge0 + bcharge1, map_weight, 400,-10,10);
-  FillHist(prefix+hprefix+"bjetsChargeAbsSum"+suffix, (bcharge0<0?-1:1) + (bcharge1<0?-1:1), map_weight, 8,-4,4);
+  FillHist(prefix+hprefix+"ajetsChargeSum"+suffix, acharge0 + acharge1, map_weight, 400,-10,10);
+  FillHist(prefix+hprefix+"ajetsChargeAbsSum"+suffix, (acharge0<0?-1:1) + (acharge1<0?-1:1), map_weight, 8,-4,4);
+  FillHist(prefix+hprefix+"bjetsChargeSum"+suffix, lepb_charge + hadb_charge, map_weight, 400,-10,10);
+  FillHist(prefix+hprefix+"bjetsChargeAbsSum"+suffix, (lepb_charge<0?-1:1) + (hadb_charge<0?-1:1), map_weight, 8,-4,4);
 }
 
 bool ttljAnalyzer::Hasleptons(TString channel){
@@ -854,6 +875,19 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
       for(unsigned int c=0; c<ajets.size(); c++){
         for(unsigned int d=c+1; d<ajets.size(); d++){
           if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj0", mode1), c<d?c:d, weight, 30,0,30);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj1", mode1), c>d?c:d, weight, 30,0,30);
+            double c_ratio = c, d_ratio = d;
+            c_ratio /= ajets.size(); d_ratio /= ajets.size();
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj0", mode1), c<d?c_ratio:d_ratio, weight, 11,0,1.1);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj1", mode1), c>d?c_ratio:d_ratio, weight, 11,0,1.1);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj0", mode1), c<d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj1", mode1), c>d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj0", mode1), c<d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj1", mode1), c>d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj0", mode1), c<d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj1", mode1), c>d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
+
             FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
             FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
           }
@@ -961,6 +995,7 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
           double dPhitt = fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met));
 
           // Kinematic Cuts
+          //if(c > 4 || d > 4) break;
           if(Mbjj < 100 || 240 < Mbjj) continue;
           if(Mbl > 170) continue;
           if(fabs(Mjj - 80.4) > 30) continue;
