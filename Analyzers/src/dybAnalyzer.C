@@ -2,7 +2,6 @@
 
 void dybAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
-  
   IsSkimmed = GetSkimName() != ""? true: false;
   IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && IsSkimmed;
 
@@ -49,6 +48,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   bcharge = 0;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
 
+  if(option.Contains("jet_scale_up")) suffix += "_jet_scale_up";
+  else if(option.Contains("jet_scale_down")) suffix += "_jet_scale_down";
+  else if(option.Contains("jet_smear_up")) suffix += "_jet_smear_up";
+  else if(option.Contains("jet_smear_down")) suffix += "_jet_smear_down";
+  if(IsNominalRun || option != "") IsNominalLike = true;
+  else IsNominalLike = false;
+  map_weight.clear();
+
   // Weights Setup
   if(!IsDATA){
     lumiweight = reductionweight * MCweight()*_event.GetTriggerLumi("Full");
@@ -57,39 +64,29 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   map_weight[""] = lumiweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Lumi"+suffix, lumiweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight[""]);
   }
 
   // Trigger
   if(!IsFiredTriggers(channel)) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
 
   // MET Filter
   if(!PassMETFilter()) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
 
   // Dilepton + pT + OS + Mass
   if(!HasDileptons(channel)) return;
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")){
-    suffix += "_jet_scale_up";
-    alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
-  }else if(option.Contains("jet_scale_down")){
-    suffix += "_jet_scale_down";
-    alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
-  }else if(option.Contains("jet_smear_up")){
-    suffix += "_jet_smear_up";
-    alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
-  }else if(option.Contains("jet_smear_down")){
-    suffix += "_jet_smear_down";
-    alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
-  }else{
-    alljets = SelectJets(GetAllJets(), "tightLepVeto", 20, 2.4);
-  }
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
+  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 20, 2.4);
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
@@ -119,35 +116,35 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Weights
-  if(!IsDATA && IsNominalRun) map_weight["_noWts"] = map_weight[""];
+  if(!IsDATA && IsNominalLike) map_weight["_noWts"] = map_weight[""];
   map_weight[""] *= PUweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PU"+suffix, PUweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU", map_weight[""]);
   }
   map_weight[""] *= prefireweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Prefire"+suffix, prefireweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", map_weight[""]);
   }
   map_weight[""] *= zptweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Zpt"+suffix, zptweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Zpt", map_weight[""]);
   }
   map_weight[""] *= weakweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Weak"+suffix, weakweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Weak", map_weight[""]);
   }
   map_weight[""] *= topptweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Toppt"+suffix, topptweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
   }
 
   // Lepton Efficiency Correction
-  if(!IsDATA && IsNominalRun) map_weight["_noEffSF"] = map_weight[""];
+  if(!IsDATA && IsNominalLike) map_weight["_noEffSF"] = map_weight[""];
   leptonTrackingSF = 1.;
   leptonRECOSF = 1.;
   leptonIDSF = 1.;
@@ -174,45 +171,24 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   map_weight[""] *= leptonTrackingSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_TrackingSF"+suffix, leptonTrackingSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF", map_weight[""]);
   }
   map_weight[""] *= leptonRECOSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_RECOSF"+suffix, leptonRECOSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF", map_weight[""]);
   }
   map_weight[""] *= leptonIDSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_IDSF"+suffix, leptonIDSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF", map_weight[""]);
   }
   map_weight[""] *= leptonTriggerSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_TriggerSF"+suffix, leptonTriggerSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
-  }
-
-  //==== Weights of Systematics
-  if(!IsDATA && HasFlag("SYS") && option == ""){
-    // PU reweight
-    map_weight["_noPUweight"] =  map_weight[""] / PUweight;
-    map_weight["_PUweight_up"] =  map_weight[""] / PUweight * mcCorr->GetPileUpWeight(nPileUp, 1);
-    map_weight["_PUweight_down"] = map_weight[""] / PUweight * mcCorr->GetPileUpWeight(nPileUp, -1);
-
-    // b-tagging SF
-    map_weight["_nobtagSF"] =  map_weight[""] / btagSF;
-    map_weight["_btagSF_hup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTag");
-    map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownHTag");
-    map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
-    map_weight["_btagSF_lup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTag");
-    map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
-    map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
-  }else if(!IsDATA && IsNominalRun && MCSample.Contains("MiNNLO")){
-    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
   }
 
   //==== Inclusive DY
@@ -236,23 +212,23 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"nbjets_IncDY"+suffix, bjets.size(), map_weight[""], 10,0,10);
 
   if(bjets.size() != 1) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
   jet0 = &bjets.at(0);
   bcharge = jetCharge(*jet0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
 
   map_weight[""] *= pujetSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
   }
   map_weight[""] *= btagSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
-  if(IsNominalRun){
+  if(IsNominalLike){
     if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
     FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
     if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
@@ -270,26 +246,49 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if(ajets.size() > 0) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2b", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2b", map_weight[""]);
 
   int n_30jet = 0;
   for(unsigned int k=0; k<realjets.size(); k++){
     if(realjets.at(k).Pt() > 30) n_30jet += 1;
   }
   if(n_30jet > 1) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
 
   if(PuppiMET_Type1_pt > 75) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET75", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET75", map_weight[""]);
 
   if(abs((*lepton0 + *lepton1).DeltaPhi(*jet0)) < 1.6) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbdPhi1p6", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbdPhi1p6", map_weight[""]);
 
   if((*lepton0 + *lepton1 + *jet0).Pt() > 60) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbpT60", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbpT60", map_weight[""]);
 
   if((*lepton0 + *lepton1).Pt() < 15) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
+
+  //==== Weights of Systematics
+  if(!IsDATA && HasFlag("SYS") && option == ""){
+    // PU reweight
+    map_weight["_noPUweight"] =  map_weight[""] / PUweight;
+    map_weight["_PUweight_up"] =  map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
+    map_weight["_PUweight_down"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, -1);
+
+    // b-tagging SF
+    map_weight["_nobtagSF"] =  map_weight[""] / btagSF;
+    map_weight["_btagSF_hup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
+    map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
+    map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
+    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
+    map_weight["_btagSF_lup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
+    map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
+    map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
+    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
+
+    map_weight.erase("");
+  }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
+    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
+  }
 
   FillHist(prefix+hprefix+"mll"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll"+suffix, dirap, map_weight, 96,-2.4,2.4);
@@ -328,13 +327,13 @@ bool dybAnalyzer::HasDileptons(TString channel){
   }
 
   if(!lepton0 || !lepton1) return false;                         // Dilepton
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Dilepton", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Dilepton", map_weight[""]);
   if(lepton0->Pt() < l0pt || lepton1->Pt() < l1pt) return false; // pT cut
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LepPt", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LepPt", map_weight[""]);
   if(lepton0->Charge() * lepton1->Charge() > 0) prefix += "ss_"; // Opposite charge
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Charge", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Charge", map_weight[""]);
   if((*lepton0 + *lepton1).M() < 52) return false;               // Mass 52
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Mass52", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Mass52", map_weight[""]);
 
   leptons ={};
   leptons.push_back(lepton0);

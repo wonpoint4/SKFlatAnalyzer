@@ -42,6 +42,13 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   lepton0 = NULL;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
+  if(option.Contains("jet_scale_up")) suffix += "_jet_scale_up";
+  else if(option.Contains("jet_scale_down")) suffix += "_jet_scale_down";
+  else if(option.Contains("jet_smear_up")) suffix += "_jet_smear_up";
+  else if(option.Contains("jet_smear_down")) suffix += "_jet_smear_down";
+  if(IsNominalRun || option != "") IsNominalLike = true;
+  else IsNominalLike = false;
+  map_weight.clear();
 
   // Weights Setup
   if(!IsDATA){
@@ -51,38 +58,28 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   map_weight[""] = lumiweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Lumi"+suffix, lumiweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Lumi", map_weight[""]);
   }
   // Trigger
   if(!IsFiredTriggers(channel)) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "PassTrig", map_weight[""]);
 
   // MET Filter
   if(!PassMETFilter()) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
 
   // Single Lepton + pT + MET
   if(!Hasleptons(channel)) return;
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")){
-    suffix += "_jet_scale_up";
-    alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
-  }else if(option.Contains("jet_scale_down")){
-    suffix += "_jet_scale_down";
-    alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
-  }else if(option.Contains("jet_smear_up")){
-    suffix += "_jet_smear_up";
-    alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
-  }else if(option.Contains("jet_smear_down")){
-    suffix += "_jet_smear_down";
-    alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
-  }else{
-    alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
-  }
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
+  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
@@ -119,30 +116,30 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+"najets"+suffix, ajets.size(), map_weight[""], 10,0,10);
 
   if(bjets.size() != 2) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight2b", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight2b", map_weight[""]);
   if(ajets.size() < 2) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, ">=2j", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, ">=2j", map_weight[""]);
 
   // Weights
-  if(!IsDATA && IsNominalRun) map_weight["_noWts"] = map_weight[""];
+  if(!IsDATA && IsNominalLike) map_weight["_noWts"] = map_weight[""];
   map_weight[""] *= PUweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PU"+suffix, PUweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PU", map_weight[""]);
   }
   map_weight[""] *= prefireweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Prefire"+suffix, prefireweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Prefire", map_weight[""]);
   }
   map_weight[""] *= topptweight;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_Toppt"+suffix, topptweight, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "Toppt", map_weight[""]);
   }
 
   // Lepton Efficiency Correction
-  if(!IsDATA && IsNominalRun) map_weight["_noEffSF"] = map_weight[""];
+  if(!IsDATA && IsNominalLike) map_weight["_noEffSF"] = map_weight[""];
   leptonTrackingSF = 1.;
   leptonRECOSF = 1.;
   leptonIDSF = 1.;
@@ -172,43 +169,69 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   map_weight[""] *= leptonTrackingSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_TrackingSF"+suffix, leptonTrackingSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF", map_weight[""]);
   }
   map_weight[""] *= leptonRECOSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_RECOSF"+suffix, leptonRECOSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF", map_weight[""]);
   }
   map_weight[""] *= leptonIDSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_IDSF"+suffix, leptonIDSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF", map_weight[""]);
   }
   map_weight[""] *= leptonTriggerSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_TriggerSF"+suffix, leptonTriggerSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
   }
   map_weight[""] *= btagSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
-  if(!IsDATA && IsNominalRun) map_weight["_noPUjetSF"] = map_weight[""];
+  if(!IsDATA && IsNominalLike) map_weight["_noPUjetSF"] = map_weight[""];
   map_weight[""] *= pujetSF;
-  if(IsNominalRun){
+  if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
   }
 
-  if(IsNominalRun){
+  if(IsNominalLike){
     if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
     FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
     if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
     FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
   }
+
+  //==== Making Likelihood
+  if(IsNominalLike){
+    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 0, 0); // ByungHun Oh's method - drop events with ambiguity
+    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
+  }
+
+  //==== Finding the correct bbjj combination
+  vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
+  vector<double> LRs = {0, 0, 0, 0, 0, 0};
+  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
+
+  bool goodKinematic = true;
+  if((idx_bbjj.at(0) == idx_bbjj.at(1)) || (idx_bbjj.at(2) == idx_bbjj.at(3))) goodKinematic = false;
+  if(IsNominalLike) FillHist(prefix+"LR_efficiency"+suffix, goodKinematic?1:0, map_weight[""], 2,0,2);
+  if(!goodKinematic) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
+
+  Jet lepb = bjets.at(idx_bbjj.at(0));
+  Jet hadb = bjets.at(idx_bbjj.at(1));
+  Jet Wj0 = ajets.at(idx_bbjj.at(2));
+  Jet Wj1 = ajets.at(idx_bbjj.at(3));
+  double lepb_charge = jetCharge(lepb);
+  double hadb_charge = jetCharge(hadb);
+  double acharge0 = jetCharge(Wj0);
+  double acharge1 = jetCharge(Wj1);
 
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
@@ -227,32 +250,9 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
     map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
+
+    map_weight.erase("");
   }
-
-  //==== Making Likelihood
-  if(IsNominalRun){
-    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], 0, 0); // ByungHun Oh's method - drop events with ambiguity
-    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], 1, 0); // Charmonium guy's method - match smaller dR < 0.3
-  }
-  //==== Finding the correct bbjj combination
-  vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
-  vector<double> LRs = {0, 0, 0, 0, 0, 0};
-  idx_bbjj = Finding_bbjj_byLikelihood(channel, bjets, ajets, LRs);
-
-  bool goodKinematic = true;
-  if((idx_bbjj.at(0) == idx_bbjj.at(1)) || (idx_bbjj.at(2) == idx_bbjj.at(3))) goodKinematic = false;
-  FillHist(prefix+"LR_efficiency"+suffix, goodKinematic?1:0, map_weight[""], 2,0,2);
-  if(!goodKinematic) return;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
-
-  Jet lepb = bjets.at(idx_bbjj.at(0));
-  Jet hadb = bjets.at(idx_bbjj.at(1));
-  Jet Wj0 = ajets.at(idx_bbjj.at(2));
-  Jet Wj1 = ajets.at(idx_bbjj.at(3));
-  double lepb_charge = jetCharge(lepb);
-  double hadb_charge = jetCharge(hadb);
-  double acharge0 = jetCharge(Wj0);
-  double acharge1 = jetCharge(Wj1);
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
     double match_dR = 0.4;
@@ -270,32 +270,32 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
       Gen_LR_match_onlyb = true;
       if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() > 0){
-        FillHist(prefix+"LR_purity"+suffix, 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct"+suffix, 1, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lp"+suffix, 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lp"+suffix, 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 1, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lp"+suffix, 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp"+suffix, 1, map_weight, 2,0,2);
         prefix += "Correct_"; // lep+
       }else{
-        FillHist(prefix+"LR_purity"+suffix, 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct"+suffix, 0, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lm"+suffix, 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lm"+suffix, 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 0, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lm"+suffix, 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm"+suffix, 0, map_weight, 2,0,2);
         prefix +="Wrong_"; // lep-
       }
-      if(IsNominalRun){
-        FillHist(prefix+"lepbjetCharge_Matched_b"+suffix, lepb_charge, map_weight[""], 200,-5,5);
-        FillHist(prefix+"lepbjetChargeEasy_Matched_b"+suffix, lepb_charge<0?0:1, map_weight[""], 2,0,2);
-        FillHist(prefix+"hadbjetCharge_Matched_bbar"+suffix, hadb_charge, map_weight[""], 200,-5,5);
-        FillHist(prefix+"hadbjetChargeEasy_Matched_bbar"+suffix, hadb_charge<0?0:1, map_weight[""], 2,0,2);
-        FillHist(prefix+"lcharge_lepb_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+      if(IsNominalLike){
+        FillHist(prefix+"lepbjetCharge_Matched_b"+suffix, lepb_charge, map_weight, 200,-5,5);
+        FillHist(prefix+"lepbjetChargeEasy_Matched_b"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"hadbjetCharge_Matched_bbar"+suffix, hadb_charge, map_weight, 200,-5,5);
+        FillHist(prefix+"hadbjetChargeEasy_Matched_bbar"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"lcharge_lepb_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+        FillHist(prefix+"lchargeEasy_lepb_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         if(lepb_charge < 0){
-          FillHist(prefix+"lcharge_lepb_negaive_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-          FillHist(prefix+"lchargeEasy_lepb_negaive_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+          FillHist(prefix+"lcharge_lepb_negaive_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+          FillHist(prefix+"lchargeEasy_lepb_negaive_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         }
         if(0 < hadb_charge){
-          FillHist(prefix+"lcharge_hadb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-          FillHist(prefix+"lchargeEasy_hadb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+          FillHist(prefix+"lcharge_hadb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+          FillHist(prefix+"lchargeEasy_hadb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         }
       }
     }
@@ -304,51 +304,51 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
       Gen_LR_match_onlyb = true;
       if(Gen_LR_match_Whad) Gen_LR_match_full = true;
       if(lepton0->Charge() < 0){
-        FillHist(prefix+"LR_purity"+suffix, 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct"+suffix, 1, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lm"+suffix, 1, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lm"+suffix, 1, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 1, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lm"+suffix, 1, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lm"+suffix, 1, map_weight, 2,0,2);
         prefix += "Correct_"; // lep-
       }else{
-        FillHist(prefix+"LR_purity"+suffix, 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct"+suffix, 0, map_weight[""], 2,0,2);
-        FillHist(prefix+"LR_purity_Lp"+suffix, 0, map_weight[""], 4,-2,2);
-        FillHist(prefix+"LR_correct_Lp"+suffix, 0, map_weight[""], 2,0,2);
+        FillHist(prefix+"LR_purity"+suffix, 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct"+suffix, 0, map_weight, 2,0,2);
+        FillHist(prefix+"LR_purity_Lp"+suffix, 0, map_weight, 4,-2,2);
+        FillHist(prefix+"LR_correct_Lp"+suffix, 0, map_weight, 2,0,2);
         prefix +="Wrong_"; // lep+
       }
-      if(IsNominalRun){
-        FillHist(prefix+"hadbjetCharge_Matched_b"+suffix, hadb_charge, map_weight[""], 200,-5,5);
-        FillHist(prefix+"hadbjetChargeEasy_Matched_b"+suffix, hadb_charge<0?0:1, map_weight[""], 2,0,2);
-        FillHist(prefix+"lepbjetCharge_Matched_bbar"+suffix, lepb_charge, map_weight[""], 200,-5,5);
-        FillHist(prefix+"lepbjetChargeEasy_Matched_bbar"+suffix, lepb_charge<0?0:1, map_weight[""], 2,0,2);
-        FillHist(prefix+"lcharge_lepb_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+      if(IsNominalLike){
+        FillHist(prefix+"hadbjetCharge_Matched_b"+suffix, hadb_charge, map_weight, 200,-5,5);
+        FillHist(prefix+"hadbjetChargeEasy_Matched_b"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"lepbjetCharge_Matched_bbar"+suffix, lepb_charge, map_weight, 200,-5,5);
+        FillHist(prefix+"lepbjetChargeEasy_Matched_bbar"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"lcharge_lepb_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+        FillHist(prefix+"lchargeEasy_lepb_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         if(0 < lepb_charge){
-          FillHist(prefix+"lcharge_lepb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-          FillHist(prefix+"lchargeEasy_lepb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+          FillHist(prefix+"lcharge_lepb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+          FillHist(prefix+"lchargeEasy_lepb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         }
         if(hadb_charge < 0){
-          FillHist(prefix+"lcharge_hadb_negative_Matched_b"+suffix, lepton0->Charge(), map_weight[""], 4,-2,2);
-          FillHist(prefix+"lchargeEasy_hadb_negative_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight[""], 2,0,2);
+          FillHist(prefix+"lcharge_hadb_negative_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
+          FillHist(prefix+"lchargeEasy_hadb_negative_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
         }
       }
     }
     else{
-      FillHist(prefix+"LR_purity"+suffix, -1, map_weight[""], 4,-2,2);
-      if(lepton0->Charge() > 0) FillHist(prefix+"LR_purity_Lp"+suffix, -1, map_weight[""], 4,-2,2);
-      if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm"+suffix, -1, map_weight[""], 4,-2,2);
+      FillHist(prefix+"LR_purity"+suffix, -1, map_weight, 4,-2,2);
+      if(lepton0->Charge() > 0) FillHist(prefix+"LR_purity_Lp"+suffix, -1, map_weight, 4,-2,2);
+      if(lepton0->Charge() < 0) FillHist(prefix+"LR_purity_Lm"+suffix, -1, map_weight, 4,-2,2);
       prefix +="UnMatched_";
     }
 
-    FillHist("Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist("Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist("Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist(prefix+"Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight[""], 2,0,2);
-    FillHist(channel+"/Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight[""], 2,0,2);
+    FillHist("Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight, 2,0,2);
+    FillHist("Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight, 2,0,2);
+    FillHist("Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight, 2,0,2);
+    FillHist(prefix+"Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight, 2,0,2);
+    FillHist(prefix+"Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight, 2,0,2);
+    FillHist(prefix+"Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight, 2,0,2);
+    FillHist(channel+"/Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight, 2,0,2);
+    FillHist(channel+"/Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight, 2,0,2);
+    FillHist(channel+"/Gen_LR_match_full"+suffix, Gen_LR_match_full, map_weight, 2,0,2);
   }
 
   //==========================
@@ -476,14 +476,14 @@ bool ttljAnalyzer::Hasleptons(TString channel){
   }
 
   if(!lepton0) return false;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Leptons", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Leptons", map_weight[""]);
   if(lepton0->Pt() < l0pt) return false;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LepPt", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LepPt", map_weight[""]);
   if(moreleptons) return false;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Lepton", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "1Lepton", map_weight[""]);
   met = GetEvent().GetMETVector();
   if(met.Pt() < 20.) return false;
-  if(IsNominalRun) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET20", map_weight[""]);
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET20", map_weight[""]);
 
   leptons ={};
   leptons.push_back(lepton0);
@@ -750,12 +750,12 @@ void ttljAnalyzer::GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0, Ge
   }
 }
 
-void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, unsigned int mode1, unsigned int mode2){
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "Preselection", weight);
+void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, TString suffix, unsigned int mode1, unsigned int mode2){
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "Preselection", weight);
   double match_dR = 0.4;
   if(gen_l0.DeltaR(*lepton0) > match_dR) return;
   if(mode1 == 1) match_dR = 0.3;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1lep", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "1lep", weight);
 
   Jet* lepb = NULL;
   Jet* hadb = NULL;
@@ -774,7 +774,7 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
       else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
     }
   }
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "2b-1gen", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "2b-1gen", weight);
 
   for(auto& jet : ajets){
     if(gen_j0.DeltaR(jet) < match_dR){
@@ -788,74 +788,74 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
       else if(mode1 == 0) return; // Not use events with ambiguity like ByungHun Oh
     }
   }
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "2j-1gen", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "2j-1gen", weight);
 
   if(!lepb) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "nolepb", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "nolepb", weight);
   if(!hadb) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "nohadb", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "nohadb", weight);
   if(!Wj0) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "noWj0", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "noWj0", weight);
   if(!Wj1) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "noWj1", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "noWj1", weight);
 
   if(!lepb || !hadb || !Wj0 || !Wj1) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "4jets", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "4jets", weight);
 
   if(lepb == hadb) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1b-2gens", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "1b-2gens", weight);
   if(Wj0 == Wj1) return;
-  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood", mode1), "1j-2gens", weight);
+  FillCutflow(Form("cutflow_goodMatching_mode1_%d_ForLikelihood"+suffix, mode1), "1j-2gens", weight);
 
   // Filling Likelihood Histograms
   // mode2 = 0 (Wrong : wrong && lepb,hadb switched)
   for(unsigned int a=0; a<bjets.size(); a++){
     for(unsigned int b=a+1; b<bjets.size(); b++){
       if(&bjets.at(a) == lepb && &bjets.at(b) == hadb){
-        FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_0", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
-        FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_0", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
-        FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_0", mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
-        FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_0", mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_0"+suffix, mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_0"+suffix, mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
         for(unsigned int c=0; c<ajets.size(); c++){
           for(unsigned int d=c+1; d<ajets.size(); d++){
             if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_0", mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_0"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_0"+suffix, mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
             }
             else{
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_0"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
             }
           }
         }
       }else if(&bjets.at(a) == hadb && &bjets.at(b) == lepb){
-        FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_0", mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
-        FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_0", mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
-        FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_0", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
-        FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_0", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_0"+suffix, mode1), (bjets.at(b) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_0"+suffix, mode1), (bjets.at(b) + *lepton0 + met).M(), weight, 50,0,300);
+        FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+        FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_0"+suffix, mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
         for(unsigned int c=0; c<ajets.size(); c++){
           for(unsigned int d=c+1; d<ajets.size(); d++){
             if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_0", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_0", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_0"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_0"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_0"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0"+suffix, mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
             }
             else{
-              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-              FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_0", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
-              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0", mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0", mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+              FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_0"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_0"+suffix, mode1), (bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(a) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_0"+suffix, mode1), fabs((bjets.at(b) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(a) + *lepton0 + met)), weight, 30,0,3);
             }
           }
         }
@@ -864,36 +864,36 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
 
     // mode2 = 1 (Wrong : simply wrong)
     if(&bjets.at(a) == lepb){
-      FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_1", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
-      FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_1", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+      FillHist(Form("likelihood_mode1_%d_Mbl_Correct_mode2_1"+suffix, mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+      FillHist(Form("likelihood_mode1_%d_MblMET_Correct_mode2_1"+suffix, mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
     }else{
-      FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_1", mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
-      FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_1", mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
+      FillHist(Form("likelihood_mode1_%d_Mbl_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + *lepton0).M(), weight, 50,0,200);
+      FillHist(Form("likelihood_mode1_%d_MblMET_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + *lepton0 + met).M(), weight, 50,0,300);
     }
 
     if(&bjets.at(a) == hadb){
       for(unsigned int c=0; c<ajets.size(); c++){
         for(unsigned int d=c+1; d<ajets.size(); d++){
           if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj0", mode1), c<d?c:d, weight, 30,0,30);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj1", mode1), c>d?c:d, weight, 30,0,30);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj0"+suffix, mode1), c<d?c:d, weight, 30,0,30);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxWj1"+suffix, mode1), c>d?c:d, weight, 30,0,30);
             double c_ratio = c, d_ratio = d;
             c_ratio /= ajets.size(); d_ratio /= ajets.size();
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj0", mode1), c<d?c_ratio:d_ratio, weight, 11,0,1.1);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj1", mode1), c>d?c_ratio:d_ratio, weight, 11,0,1.1);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj0", mode1), c<d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj1", mode1), c>d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj0", mode1), c<d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj1", mode1), c>d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj0", mode1), c<d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj1", mode1), c>d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj0"+suffix, mode1), c<d?c_ratio:d_ratio, weight, 11,0,1.1);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_idxratioWj1"+suffix, mode1), c>d?c_ratio:d_ratio, weight, 11,0,1.1);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj0"+suffix, mode1), c<d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_pWj1"+suffix, mode1), c>d?ajets.at(c).P():ajets.at(d).P(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj0"+suffix, mode1), c<d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_ptWj1"+suffix, mode1), c>d?ajets.at(c).Pt():ajets.at(d).Pt(), weight, 50,0,500);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj0"+suffix, mode1), c<d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1_etaWj1"+suffix, mode1), c>d?ajets.at(c).Eta():ajets.at(d).Eta(), weight, 100,-5,5);
 
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-            FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Correct_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_1"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
           }
           else{
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-            FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_1"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
           }
         }
       }
@@ -902,12 +902,12 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
           for(unsigned int d=c+1; d<ajets.size(); d++){
             if(&bjets.at(b) == lepb){
               if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-                FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-                FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+                FillHist(Form("likelihood_mode1_%d_dRtt_Correct_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+                FillHist(Form("likelihood_mode1_%d_dPhitt_Correct_mode2_1"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
               }
             }else{
-              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+              FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+              FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_1"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
             }
           }
         }
@@ -916,20 +916,20 @@ void ttljAnalyzer::FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, doubl
       for(unsigned int c=0; c<ajets.size(); c++){
         for(unsigned int d=c+1; d<ajets.size(); d++){
           if((&ajets.at(c) == Wj0 && &ajets.at(d) == Wj1) || (&ajets.at(c) == Wj1 && &ajets.at(d) == Wj0)){
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-            FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form("likelihood_mode1_%d_Mjj_Correct_mode2_1"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
           }
           else{
-            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
-            FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_1", mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
+            FillHist(Form("likelihood_mode1_%d_Mbjj_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).M(), weight, 50,0,300);
+            FillHist(Form("likelihood_mode1_%d_Mjj_Wrong_mode2_1"+suffix, mode1), (ajets.at(c) + ajets.at(d)).M(), weight, 50,0,200);
           }
         }
       }
       for(unsigned int b=a+1; b<bjets.size(); b++){
         for(unsigned int c=0; c<ajets.size(); c++){
           for(unsigned int d=c+1; d<ajets.size(); d++){
-            FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_1", mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
-            FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_1", mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
+            FillHist(Form("likelihood_mode1_%d_dRtt_Wrong_mode2_1"+suffix, mode1), (bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaR(bjets.at(b) + *lepton0 + met), weight, 60,0,6);
+            FillHist(Form("likelihood_mode1_%d_dPhitt_Wrong_mode2_1"+suffix, mode1), fabs((bjets.at(a) + ajets.at(c) + ajets.at(d)).DeltaPhi(bjets.at(b) + *lepton0 + met)), weight, 30,0,3);
           }
         }
       }

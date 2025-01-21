@@ -64,6 +64,7 @@ public:
 
   bool IsNominalRun = true;
   bool IsSkimmed = false;
+  bool IsNominalLike = true;
 
   LHAPDF::PDF* PDFbase = NULL;
   LHAPDF::PDF* PDFnf4 = NULL;
