@@ -58,7 +58,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // Weights Setup
   if(!IsDATA){
-    lumiweight = reductionweight * MCweight()*_event.GetTriggerLumi("Full");
+    lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
     PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
     prefireweight = L1PrefireReweight_Central;
   }
@@ -284,11 +284,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
     map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
-
-    map_weight.erase("");
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
     for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
   }
+  if(HasFlag("SYS") && option == "") map_weight.erase("");
 
   FillHist(prefix+hprefix+"mll"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll"+suffix, dirap, map_weight, 96,-2.4,2.4);

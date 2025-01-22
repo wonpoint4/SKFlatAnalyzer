@@ -15,7 +15,7 @@ void ttljAnalyzer::initializeAnalyzer(){
 
 void ttljAnalyzer::executeEvent(){
   ///////////////// GEN level /////////////////////
-  if(!IsDATA && MCSample.Contains("TTLJ")) executeEventGen();
+  if(!IsDATA) executeEventGen();
 
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("SingleMuon")){
@@ -52,7 +52,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // Weights Setup
   if(!IsDATA){
-    lumiweight = reductionweight * MCweight()*_event.GetTriggerLumi("Full");
+    lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
     PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
     prefireweight = L1PrefireReweight_Central;
   }
@@ -250,9 +250,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
     map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
-
-    map_weight.erase("");
   }
+  if(HasFlag("SYS") && option == "") map_weight.erase("");
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
     double match_dR = 0.4;
@@ -494,6 +493,9 @@ bool ttljAnalyzer::Hasleptons(TString channel){
 void ttljAnalyzer::executeEventGen(){
   FillHist("gen/executeEventGen", 1, 1, 2,0,2);
   vector<Gen> gens=GetGens();
+  if(IsTTSample) topptweight=mcCorr->GetTopPtReweight(gens);
+  if(!MCSample.Contains("TTLJ")) return;
+
   GetTTLJGenParticles(gens, gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1, 3);
   if(gen_l0.PID() < 0){ // lepton is l+, thus lepb, l+ from t
     gen_lepb = &gen_b0;
