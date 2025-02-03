@@ -242,6 +242,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"etal_Tight1b"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"ptl_Tight1b"+suffix, lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
   FillHist(prefix+hprefix+"etal_Tight1b"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptb_Tight1b"+suffix, jet0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etab_Tight1b"+suffix, jet0->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bjetCharge_Tight1b"+suffix, bcharge, map_weight[""], 200,-5,5);
   FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
@@ -296,6 +298,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"etal"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"ptl"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
   FillHist(prefix+hprefix+"etal"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptb"+suffix, jet0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"etab"+suffix, jet0->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bjetCharge"+suffix, bcharge, map_weight, 200,-5,5);
   FillHist(prefix+hprefix+"bjetChargeEasy"+suffix, bcharge<0?0:1, map_weight, 2,0,2);
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
