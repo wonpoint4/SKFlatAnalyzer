@@ -45,6 +45,11 @@ void Hists_1D_AFB(TString channel, TString suffix){
 }
 
 vector<TString> chargebins = {"0", "0.1", "0.2", "0.6", "1", "3", "5"}; // should be equal with dybAnalyzer::afb_chbin
+vector<TString> systs = {
+  "_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down",
+  "_PUweight_up", "_PUweight_down",
+  "_btagSF_hup", "_btagSF_hdown", "_btagSF_hcorr", "_btagSF_huncorr", "_btagSF_lup", "_btagSF_ldown", "_btagSF_lcorr", "_btagSF_luncorr",
+};
 
 void Hists_2D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/", TString frame="AFBrecoil"){
   for(unsigned int ch=0; ch<chargebins.size()-1; ch++){
@@ -61,6 +66,13 @@ void Hists_2D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/", TString fr
       AFB->SetName(Form("MC_sthw2_%d_ch%d",i,ch));
       AFB->SaveAs(Form("sthw2_%d_ch%d_MC.root",i,ch));
     }
+
+    for(unsigned int i=0; i<systs.size(); i++){
+      AFB = a.GetHist(1, channel+"y["+chargebins.at(ch)+","+chargebins.at(ch+1)+"]/"+frame+"(x)", Form("suffix:_sthw2_%d:dy",i));
+      AFB->SetName(Form("MC_sthw2_%d_ch%d",i,ch));
+      AFB->SaveAs(Form("sthw2_%d_ch%d_MC.root",i,ch));
+    }
+
   }
 }
 
@@ -123,7 +135,7 @@ void Plots_1D_chi2(TString inputfile, TString suffix){
     cout<<chi2_values.at(chi2_index.at(i))<<", ";
   }
   cout<<"])"<<endl;
-  c_AFB->SaveAs("1D_AFBrecoil_plots"+suffix+".png");
+  c_AFB->SaveAs("1D_AFBrecoil_plots"+suffix+".pdf");
 }
 
 void Plots_2D_chi2(TString inputfile){
