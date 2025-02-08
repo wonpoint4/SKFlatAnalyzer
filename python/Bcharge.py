@@ -41,28 +41,33 @@ def GetAccuracy(ientry,channel,option=""):
     return calcWithCov(h.GetBinContent(1),h.GetBinError(1),h.GetBinContent(2),h.GetBinError(2),h.GetBinContent(3),h.GetBinError(3),h.GetBinContent(4),h.GetBinError(4))
 
 ### For Liklihood ratio method
-def getfc(channel):
-    correct = ttlj.GetHist(0, channel+"/lepbjetChargeEasy_Lm").Integral()
-    wrong = ttlj.GetHist(1, channel+"/lepbjetChargeEasy_Lm").Integral()
+def getfc(channel, syst=""):
+    correct = ttlj.GetHist(0, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
+    wrong = ttlj.GetHist(1, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data = forNorm.GetHist(0, channel+"/lepbjetChargeEasy_Lm").Integral()
-    mc = forNorm.GetHist(1, channel+"/lepbjetChargeEasy_Lm").Integral()
+    data = forNorm.GetHist(0, channel+"/lepbjetChargeEasy_Lm"+("" if "jet_scale" not in syst else syst)).Integral()
+    mc = forNorm.GetHist(1, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
 
     return fc, fc_e, data / mc
 
-def calc_withLR(fc, fp_lep, fm_had):
-    ap = (fc * (fp_lep + fc -1) + (1 - fc) * (fm_had + fc -1)) / (2 * fc - 1)
-    am = ((1 - fc) * (fp_lep + fc -1) + fc * (fm_had + fc -1)) / (2 * fc - 1)
+def calc_withLR(fc, flep, fhad):
+    ap = (fc * (flep + fc -1) + (1 - fc) * (fhad + fc -1)) / (2 * fc - 1)
+    am = ((1 - fc) * (flep + fc -1) + fc * (fhad + fc -1)) / (2 * fc - 1)
+
     return ap, am
 
-def calcWithCov_withLR(a0, e0, a1, e1, a2, e2):
+def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
     cov = np.zeros((2,2))
-    nominal = np.array(calc_withLR(a0, a1, a2))
-    stat0 = np.array(calc_withLR(a0 + e0, a1, a2))
-    stat1 = np.array(calc_withLR(a0, a1 + e1, a2))
-    stat2 = np.array(calc_withLR(a0, a1, a2 + e2))
+    print("fc", fcs)
+    fc_nominal = fcs[-1][0]
+    flep_nominal = fleps[-1][0]
+    fhad_nominal = fhads[-1][0]
+    nominal = np.array(calc_withLR(fc_nominal, flep_nominal, fhad_nominal))
+    stat0 = np.array(calc_withLR(fc_nominal + fc_stat, flep_nominal, fhad_nominal))
+    stat1 = np.array(calc_withLR(fc_nominal, flep_nominal + flep_stat, fhad_nominal))
+    stat2 = np.array(calc_withLR(fc_nominal, flep_nominal, fhad_nominal + fhad_stat))
     cov += np.outer(stat0 - nominal, stat0 - nominal)
     cov += np.outer(stat1 - nominal, stat1 - nominal)
     cov += np.outer(stat2 - nominal, stat2 - nominal)
@@ -72,20 +77,58 @@ def calcWithCov_withLR(a0, e0, a1, e1, a2, e2):
     values, vectors= np.linalg.eig(cov)
     vector0 = np.array([vectors[0][0], vectors[1][0]]) * values[0] ** 0.5
     vector1 = np.array([vectors[0][1], vectors[1][1]]) * values[1] ** 0.5
-    print("vect0", vector0)
-    print("vect1", vector1)
+    print("stat vect0", vector0)
+    print("stat vect1", vector1)
     print(np.outer(vector0, vector0) + np.outer(vector1, vector1))
+
+    if len(fcs) == 1: return nominal, cov
+
+    print("\nSystematics")
+    cov_allsysts = np.zeros((2,2))
+    for systs in range(len(fcs) -1):
+        if systs == 0: print("JES up, down")
+        if systs == 1: print("JER up, down")
+        cov_syst_bigger = np.zeros((2,2))
+        for syst in range(len(fcs[systs])):
+            dsyst = np.array(calc_withLR(fcs[systs][syst], fleps[systs][syst], fhads[systs][syst])) - nominal
+            cov_syst = np.outer(dsyst, dsyst)
+            print("cov syst", systs, syst)
+            print(cov_syst)
+            if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
+        cov += cov_syst_bigger
+
+    print("nomianl", nominal, "stat+syst unc", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
+    print("cov", cov)
+
     return nominal, cov
 
 def GetAccuracy_withLR(ientry, channel, option=""):
-    fc, fc_e, norm = getfc(channel)
+    allsysts = [[""]]
+    if option == "syst": allsysts = [["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"], [""]]
 
-    a = ROOT.ttljPlotter("data_sub ttlj", norm)
-    hlep = a.GetHist(ientry, channel+"/lepbjetChargeEasy_Lm", option)
-    hhad = a.GetHist(ientry, channel+"/hadbjetChargeEasy_Lm", option)
-    hlep.Scale(1. / hlep.Integral())
-    hhad.Scale(1. / hhad.Integral())
-    return calcWithCov_withLR(fc, fc_e, hlep.GetBinContent(2), hlep.GetBinError(2), hhad.GetBinContent(1), hhad.GetBinError(1))
+    fc, flep, fhad = 0, 0, 0
+    fc_e, flep_e, fhad_e = -1, -1, -1
+    fcs, fleps, fhads = [[]], [[]], [[]]
+
+    for systs in range(len(allsysts)):
+        for syst in allsysts[systs]:
+            fc, fc_stat, norm = getfc(channel, syst)
+            a = ROOT.ttljPlotter("data_sub ttlj", norm)
+            hlep = a.GetHist(ientry, channel+"/lepbjetChargeEasy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hhad = a.GetHist(ientry, channel+"/hadbjetChargeEasy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hlep.Scale(1. / hlep.Integral())
+            hhad.Scale(1. / hhad.Integral())
+            fcs[systs].append(fc)
+            fleps[systs].append(hlep.GetBinContent(2))
+            flep_stat = hlep.GetBinError(2)
+            fhads[systs].append(hhad.GetBinContent(1))
+            fhad_stat = hhad.GetBinError(1)
+        if systs < len(allsysts) - 1:
+            fcs.append([])
+            fleps.append([])
+            fhads.append([])
+
+    return calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
 
 def calc_eff(valp,valf,errp=None,errf=None):
     if valp+valf==0: return 0.,0.
@@ -260,10 +303,10 @@ def DrawAccuracyByType(channels,types):
 if __name__=="__main__":
     #value,cov=GetAccuracy(0,"me201[678][ab]?")
     #value,cov=GetAccuracy(1,"me201[678][ab]?")
-    print "data started \n"
-    value, cov = GetAccuracy_withLR(0,"[Em]2017")
-    print "simulation started \n"
-    value, cov = GetAccuracy_withLR(1,"[Em]2017")
+    print("\n\n@@@ data started @@@\n")
+    value, cov = GetAccuracy_withLR(0,"[Em]2017", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]2017", "syst")
     #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
     #DrawAccuracy(["ee201[678][ab]?","mm201[678][ab]?","me201[678][ab]?"])
     #DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
