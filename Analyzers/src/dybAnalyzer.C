@@ -110,8 +110,21 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
+  double pujetSF_mode1 = 1.;
+  double pujetSF_mode2 = 1.;
+  double pujetSF_mode3 = 1.;
+  double pujetSF_mode4 = 1.;
+  double pujetSF_mode5 = 1.;
+
   if(!IsDATA){
     pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
+    pujetSF_up = GetPUJetWeight(lepvetojets, "Loose", 1);
+    pujetSF_down = GetPUJetWeight(lepvetojets, "Loose", -1);
+    pujetSF_mode1 = GetPUJetWeight(lepvetojets, "Loose", 0, 1);
+    pujetSF_mode2 = GetPUJetWeight(lepvetojets, "Loose", 0, 2);
+    pujetSF_mode3 = GetPUJetWeight(lepvetojets, "Loose", 0, 3);
+    pujetSF_mode4 = GetPUJetWeight(lepvetojets, "Loose", 0, 4);
+    pujetSF_mode5 = GetPUJetWeight(lepvetojets, "Loose", 0, 5);
     btagSF = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose);
   }
 
@@ -221,7 +234,25 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
+
+    if(!IsDATA){
+      map_weight["_PUjetSF_up"] = map_weight[""] * pujetSF_up / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_up"+suffix, pujetSF_up, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_down"] = map_weight[""] * pujetSF_down / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_down"+suffix, pujetSF_down, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_mode1"] = map_weight[""] * pujetSF_mode1 / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_mode1"+suffix, pujetSF_mode1, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_mode2"] = map_weight[""] * pujetSF_mode2 / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_mode2"+suffix, pujetSF_mode2, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_mode3"] = map_weight[""] * pujetSF_mode3 / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_mode3"+suffix, pujetSF_mode3, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_mode4"] = map_weight[""] * pujetSF_mode4 / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_mode4"+suffix, pujetSF_mode4, map_weight[""], 200,-5,5);
+      map_weight["_PUjetSF_mode5"] = map_weight[""] * pujetSF_mode5 / pujetSF;
+      FillHist(prefix+hprefix+"weight_PUjetSF_mode5"+suffix, pujetSF_mode5, map_weight[""], 200,-5,5);
+    }
   }
+
   map_weight[""] *= btagSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
@@ -728,25 +759,18 @@ double dybAnalyzer::GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTaggi
 
 void dybAnalyzer::SetupPUJetWeight(){
   TString datapath = getenv("DATA_DIR");
-  TFile fPUID(datapath+"/"+GetEra()+"/ID/PUJet/PUID.root");
-  vector<TString> IDs = {"T", "M", "L"};
-  for(unsigned int i=0; i<IDs.size(); i++){
-    cout<<"[dybAnalyzer::SetupPUJetWeight] setting PUJetWeight with ID : "+IDs.at(i)<<endl;
+  TFile fPUID(datapath+"/"+GetEra()+"/ID/PUJet/PUID_106XTraining_ULRun2_EffSFandUncties_v1.root");
 
-    TString era = GetEra();
-    if(era == "2016postVFP") era = "2016";
-    else if(era == "2016preVFP") era = "2016APV";
+  TString era = GetEra();
+  if(era == "2016postVFP") era = "2016";
+  else if(era == "2016preVFP") era = "2016APV";
 
-    heff_data = (TH2F*)fPUID.Get("h2_eff_dataUL"+era+"_"+IDs.at(i));
-    heff_mc   = (TH2F*)fPUID.Get("h2_eff_mcUL"+era+"_"+IDs.at(i));
-    hmistag_data = (TH2F*)fPUID.Get("h2_mistag_dataUL"+era+"_"+IDs.at(i));
-    hmistag_mc   = (TH2F*)fPUID.Get("h2_mistag_mcUL"+era+"_"+IDs.at(i));
+  // Currently, Medium and Tight are not used due to discontinuity at pt = 50 GeV
+  heff_sf = (TH2F*)fPUID.Get("h2_eff_sfUL"+era+"_L");
+  heff_sf_unc = (TH2F*)fPUID.Get("h2_eff_mcUL"+era+"_L");
 
-    heff_data->SetDirectory(0);
-    heff_mc->SetDirectory(0);
-    hmistag_data->SetDirectory(0);
-    hmistag_mc->SetDirectory(0);
-  }
+  heff_sf->SetDirectory(0);
+  heff_sf_unc->SetDirectory(0);
 
   fPUID.Close();
 }
@@ -762,6 +786,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
         if(jet.PileupJetId() > 0.94) return true;
       }else if(jet.Pt() >= 20){
         if(jet.PileupJetId() > 0.87) return true;
+      }else{
+        if(jet.PileupJetId() > 0.71) return true;
       }
     }
     else if(ID == "Medium"){
@@ -771,6 +797,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
         if(jet.PileupJetId() > 0.86) return true;
       }else if(jet.Pt() >= 20){
         if(jet.PileupJetId() > 0.62) return true;
+      }else{
+        if(jet.PileupJetId() > 0.20) return true;
       }
     }
     else{
@@ -780,11 +808,13 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
         if(jet.PileupJetId() > -0.71) return true;
       }else if(jet.Pt() >= 20){
         if(jet.PileupJetId() > -0.90) return true;
+      }else{
+        if(jet.PileupJetId() > -0.95) return true;
       }
     }
   }
 
-  if(DataEra == "2017"){
+  else if(DataEra == "2017" || DataEra == "2018"){
     if(ID == "Tight"){
       if(jet.Pt() >= 40){
         if(jet.PileupJetId() > 0.98) return true;
@@ -792,6 +822,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
         if(jet.PileupJetId() > 0.96) return true;
       }else if(jet.Pt() >= 20){
         if(jet.PileupJetId() > 0.90) return true;
+      }else{
+        if(jet.PileupJetId() > 0.77) return true;
       }
     }
     else if(ID == "Medium"){
@@ -801,6 +833,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
         if(jet.PileupJetId() > 0.90) return true;
       }else if(jet.Pt() >= 20){
         if(jet.PileupJetId() > 0.68) return true;
+      }else{
+        if(jet.PileupJetId() > 0.26) return true;
       }
     }
     else{
@@ -811,6 +845,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
           if(jet.PileupJetId() > -0.63) return true;
         }else if(jet.Pt() >= 20){
           if(jet.PileupJetId() > -0.88) return true;
+        }else{
+          if(jet.PileupJetId() > -0.95) return true;
         }
       }else if(fabs(jet.Eta()) < 2.75){
         if(jet.Pt() >= 40){
@@ -819,6 +855,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
           if(jet.PileupJetId() > -0.18) return true;
         }else if(jet.Pt() >= 20){
           if(jet.PileupJetId() > -0.55) return true;
+        }else{
+          if(jet.PileupJetId() > -0.72) return true;
         }
       }else if(fabs(jet.Eta()) < 3.0){
         if(jet.Pt() >= 40){
@@ -827,6 +865,8 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
           if(jet.PileupJetId() > -0.43) return true;
         }else if(jet.Pt() >= 20){
           if(jet.PileupJetId() > -0.60) return true;
+        }else{
+          if(jet.PileupJetId() > -0.68) return true;
         }
       }else{
         if(jet.Pt() >= 40){
@@ -835,50 +875,21 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
           if(jet.PileupJetId() > -0.24) return true;
         }else if(jet.Pt() >= 20){
           if(jet.PileupJetId() > -0.43) return true;
+        }else{
+          if(jet.PileupJetId() > -0.47) return true;
         }
       }
     }
   }
+  else cout<<"dybAnalyzer::PUJetIDPass : era is weird "<<endl;
 
-  if(DataEra == "2018"){
-    if(ID == "Tight"){
-      if(jet.Pt() >= 40){
-        if(jet.PileupJetId() > 0.98) return true;
-      }else if(jet.Pt() >= 30){
-        if(jet.PileupJetId() > 0.96) return true;
-      }else if(jet.Pt() >= 20){
-        if(jet.PileupJetId() > 0.90) return true;
-      }
-    }
-    else if(ID == "Medium"){
-      if(jet.Pt() >= 40){
-        if(jet.PileupJetId() > 0.96) return true;
-      }else if(jet.Pt() >= 30){
-        if(jet.PileupJetId() > 0.90) return true;
-      }else if(jet.Pt() >= 20){
-        if(jet.PileupJetId() > 0.68) return true;
-      }
-    }
-    else{
-      if(jet.Pt() >= 40){
-        if(jet.PileupJetId() > -0.19) return true;
-      }else if(jet.Pt() >= 30){
-        if(jet.PileupJetId() > -0.63) return true;
-      }else if(jet.Pt() >= 20){
-        if(jet.PileupJetId() > -0.88) return true;
-      }
-    }
-  }
   return false;
 }
 
-double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys){
-  sys = 0;
+double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys, unsigned int mode){
   if(IsDATA) return 1.;
 
-  vector<Gen> gens=GetGens();
-
-  double Prob_MC(1.), Prob_DATA(1.);
+  double weight(1.), weight_unc2(0.);
   for(unsigned int i=0; i<jets.size(); i++){
     double jetpt = jets.at(i).Pt();
     double jeteta = jets.at(i).Eta();
@@ -886,40 +897,44 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys)
     if(jets.at(i).Pt() > 50) continue;
     if(abs(jets.at(i).Eta()) > 2.5) continue;
 
-    double this_DATA_eff = heff_data->GetBinContent(heff_data->FindBin(jetpt, jeteta));
-    double this_MC_eff = heff_mc->GetBinContent(heff_mc->FindBin(jetpt, jeteta));
-    double this_DATA_mistag = hmistag_data->GetBinContent(hmistag_data->FindBin(jetpt, jeteta));
-    double this_MC_mistag = hmistag_mc->GetBinContent(hmistag_mc->FindBin(jetpt, jeteta));
-    if(this_DATA_eff * this_MC_eff * this_DATA_mistag * this_MC_mistag == 0.) continue;
+    double this_effSF = heff_sf->GetBinContent(heff_sf->FindBin(jetpt, jeteta));
+    double this_effSF_unc = heff_sf_unc->GetBinContent(heff_sf_unc->FindBin(jetpt, jeteta));
 
     bool isRealJet = false;
     isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
     bool isPassID = PUJetIDPass(jets.at(i), ID);
 
+    // Test deltaR matchings with the HS partons
+    if(mode != 0){
+      isRealJet = false;
+      double deltaR = 0.;
+      if(mode == 1) deltaR = 0.1;
+      else if(mode == 2) deltaR = 0.2;
+      else if(mode == 3) deltaR = 0.3;
+      else if(mode == 4) deltaR = 0.4;
+      else if(mode == 5) deltaR = 0.5;
+
+      vector<Gen> gens = GetGens();
+      for(unsigned int j=0; j<gens.size(); j++){
+        if(!gens.at(j).isHardProcess()) continue;
+        if(gens.at(j).DeltaR(jets.at(i)) > deltaR) continue;
+        isRealJet = true;
+        break;
+      }
+    }
+
     if(isRealJet){
       if(isPassID){
-        if(this_MC_eff == 0) this_MC_eff += 1E-4;
-        Prob_DATA *= this_DATA_eff;
-        Prob_MC *= this_MC_eff;
+        weight *= this_effSF;
+        weight_unc2 += this_effSF_unc * this_effSF_unc;
       }else{
-        if(this_MC_eff == 1) this_MC_eff -= 1E-4;
-        Prob_DATA *= 1.-this_DATA_eff;
-        Prob_MC *= 1.-this_MC_eff;
-      }
-    }else{
-      if(isPassID){
-        if(this_MC_mistag == 0) this_MC_mistag += 1E-4;
-        Prob_DATA *= this_DATA_mistag;
-        Prob_MC *= this_MC_mistag;
-      }else{
-        if(this_MC_mistag == 1) this_MC_mistag -= 1E-4;
-        Prob_DATA *= 1.-this_DATA_mistag;
-        Prob_MC *= 1.-this_MC_mistag;
+        //Prob_DATA *= 1.-this_DATA_eff;
+        //Prob_MC *= 1.-this_MC_eff;
       }
     }
   }
 
-  return Prob_DATA/Prob_MC;
+  return weight + sys * sqrt(weight_unc2);
 }
 
 double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys){
@@ -927,11 +942,11 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sy
   double weight = 1.;
   if(IsDATA) return weight;
 
-  vector<Gen> gens=GetGens();
+  vector<Gen> gens = GetGens();
   for(const auto& jet:jets){
     int genpid = 0;
     double dR = 99.;
-    for(int i=0; i<gens.size(); i++){
+    for(unsigned int i=0; i<gens.size(); i++){
       if(!gens.at(i).isPrompt()) continue;
       if(!gens.at(i).isHardProcess()) continue;
       if(fabs(gens.at(i).PID()) != 5) continue;

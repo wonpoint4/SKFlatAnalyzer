@@ -22,12 +22,10 @@ public:
 
   // PUJetID, SF
   void SetupPUJetWeight();
-  TH2F *heff_data=NULL;
-  TH2F *hmistag_data=NULL;
-  TH2F *heff_mc=NULL;
-  TH2F *hmistag_mc=NULL;
+  TH2F *heff_sf = NULL;
+  TH2F *heff_sf_unc = NULL;
   bool PUJetIDPass(Jet jet, TString ID);
-  double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys);
+  double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys, unsigned int mode=0);
 
   dybAnalyzer();
   ~dybAnalyzer();
@@ -60,7 +58,7 @@ public:
   double weakweight = 1.;
   double btagSF = 1.;
   double topptweight = 1.;
-  double pujetSF = 1.;
+  double pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
 
   bool IsNominalRun = true;
   bool IsSkimmed = false;
