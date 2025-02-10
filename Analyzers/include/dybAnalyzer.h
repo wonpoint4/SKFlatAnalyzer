@@ -25,7 +25,7 @@ public:
   TH2F *heff_sf = NULL;
   TH2F *heff_sf_unc = NULL;
   bool PUJetIDPass(Jet jet, TString ID);
-  double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys, unsigned int mode=0);
+  double GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys);
 
   dybAnalyzer();
   ~dybAnalyzer();
@@ -58,7 +58,7 @@ public:
   double weakweight = 1.;
   double btagSF = 1.;
   double topptweight = 1.;
-  double pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
+  double pujetSF = 1.;
 
   bool IsNominalRun = true;
   bool IsSkimmed = false;
@@ -78,8 +78,6 @@ public:
   static const int afb_ptbinnum = 30;
   static constexpr const double afb_ptbin[afb_ptbinnum+1] = {0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
 };
-
-
 
 #endif
 

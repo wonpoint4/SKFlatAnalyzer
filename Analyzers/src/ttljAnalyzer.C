@@ -106,22 +106,9 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
-  pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
-  double pujetSF_mode1 = 1.;
-  double pujetSF_mode2 = 1.;
-  double pujetSF_mode3 = 1.;
-  double pujetSF_mode4 = 1.;
-  double pujetSF_mode5 = 1.;
-
+  pujetSF = 1., btagSF = 1.;
   if(!IsDATA){
     pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
-    pujetSF_up = GetPUJetWeight(lepvetojets, "Loose", 1);
-    pujetSF_down = GetPUJetWeight(lepvetojets, "Loose", -1);
-    pujetSF_mode1 = GetPUJetWeight(lepvetojets, "Loose", 0, 1);
-    pujetSF_mode2 = GetPUJetWeight(lepvetojets, "Loose", 0, 2);
-    pujetSF_mode3 = GetPUJetWeight(lepvetojets, "Loose", 0, 3);
-    pujetSF_mode4 = GetPUJetWeight(lepvetojets, "Loose", 0, 4);
-    pujetSF_mode5 = GetPUJetWeight(lepvetojets, "Loose", 0, 5);
     btagSF = mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight);
   }
 
@@ -202,33 +189,15 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillHist(prefix+hprefix+"weight_TriggerSF"+suffix, leptonTriggerSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
   }
-  map_weight[""] *= btagSF;
-  if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
-  }
-  if(!IsDATA && IsNominalLike) map_weight["_noPUjetSF"] = map_weight[""];
   map_weight[""] *= pujetSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
-
-    if(!IsDATA){
-      map_weight["_PUjetSF_up"] = map_weight[""] * pujetSF_up / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_up"+suffix, pujetSF_up, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_down"] = map_weight[""] * pujetSF_down / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_down"+suffix, pujetSF_down, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode1"] = map_weight[""] * pujetSF_mode1 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode1"+suffix, pujetSF_mode1, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode2"] = map_weight[""] * pujetSF_mode2 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode2"+suffix, pujetSF_mode2, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode3"] = map_weight[""] * pujetSF_mode3 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode3"+suffix, pujetSF_mode3, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode4"] = map_weight[""] * pujetSF_mode4 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode4"+suffix, pujetSF_mode4, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode5"] = map_weight[""] * pujetSF_mode5 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode5"+suffix, pujetSF_mode5, map_weight[""], 200,-5,5);
-    }
+  }
+  map_weight[""] *= btagSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
   if(IsNominalLike){
@@ -281,6 +250,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
     map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
+
+    // PUjetID SF
+    map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
+    map_weight["_PUjetSF_up"] =  map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
+    map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
   }
   if(HasFlag("SYS") && option == "") map_weight.erase("");
 

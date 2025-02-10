@@ -110,22 +110,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
-  pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
-  double pujetSF_mode1 = 1.;
-  double pujetSF_mode2 = 1.;
-  double pujetSF_mode3 = 1.;
-  double pujetSF_mode4 = 1.;
-  double pujetSF_mode5 = 1.;
-
+  pujetSF = 1., btagSF = 1.;
   if(!IsDATA){
     pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
-    pujetSF_up = GetPUJetWeight(lepvetojets, "Loose", 1);
-    pujetSF_down = GetPUJetWeight(lepvetojets, "Loose", -1);
-    pujetSF_mode1 = GetPUJetWeight(lepvetojets, "Loose", 0, 1);
-    pujetSF_mode2 = GetPUJetWeight(lepvetojets, "Loose", 0, 2);
-    pujetSF_mode3 = GetPUJetWeight(lepvetojets, "Loose", 0, 3);
-    pujetSF_mode4 = GetPUJetWeight(lepvetojets, "Loose", 0, 4);
-    pujetSF_mode5 = GetPUJetWeight(lepvetojets, "Loose", 0, 5);
     btagSF = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose);
   }
 
@@ -231,33 +218,15 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   bcharge = jetCharge(*jet0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
 
-  map_weight[""] *= btagSF;
-  if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
-  }
-
   map_weight[""] *= pujetSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
-
-    if(!IsDATA){
-      map_weight["_PUjetSF_up"] = map_weight[""] * pujetSF_up / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_up"+suffix, pujetSF_up, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_down"] = map_weight[""] * pujetSF_down / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_down"+suffix, pujetSF_down, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode1"] = map_weight[""] * pujetSF_mode1 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode1"+suffix, pujetSF_mode1, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode2"] = map_weight[""] * pujetSF_mode2 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode2"+suffix, pujetSF_mode2, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode3"] = map_weight[""] * pujetSF_mode3 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode3"+suffix, pujetSF_mode3, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode4"] = map_weight[""] * pujetSF_mode4 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode4"+suffix, pujetSF_mode4, map_weight[""], 200,-5,5);
-      map_weight["_PUjetSF_mode5"] = map_weight[""] * pujetSF_mode5 / pujetSF;
-      FillHist(prefix+hprefix+"weight_PUjetSF_mode5"+suffix, pujetSF_mode5, map_weight[""], 200,-5,5);
-    }
+  }
+  map_weight[""] *= btagSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
   if(IsNominalLike){
@@ -318,6 +287,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
     map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
+
+    // PUjetID SF
+    map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
+    map_weight["_PUjetSF_up"] =  map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
+    map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
     for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
   }
@@ -887,7 +861,7 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
   return false;
 }
 
-double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys, unsigned int mode){
+double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys){
   if(IsDATA) return 1.;
 
   double weight(1.), weight_unc2(0.);
@@ -902,27 +876,16 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys,
     double this_effSF_unc = heff_sf_unc->GetBinContent(heff_sf_unc->FindBin(jetpt, jeteta));
 
     bool isRealJet = false;
-    isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
-    bool isPassID = PUJetIDPass(jets.at(i), ID);
-
-    // Test deltaR matchings with the HS partons
-    if(mode != 0){
-      isRealJet = false;
-      double deltaR = 0.;
-      if(mode == 1) deltaR = 0.1;
-      else if(mode == 2) deltaR = 0.2;
-      else if(mode == 3) deltaR = 0.3;
-      else if(mode == 4) deltaR = 0.4;
-      else if(mode == 5) deltaR = 0.5;
-
-      vector<Gen> gens = GetGens();
-      for(unsigned int j=0; j<gens.size(); j++){
-        if(!gens.at(j).isHardProcess()) continue;
-        if(gens.at(j).DeltaR(jets.at(i)) > deltaR) continue;
-        isRealJet = true;
-        break;
-      }
+    //isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
+    vector<Gen> gens = GetGens();
+    double deltaR = 0.4;
+    for(unsigned int j=0; j<gens.size(); j++){
+      if(!gens.at(j).isHardProcess()) continue;
+      if(gens.at(j).DeltaR(jets.at(i)) > deltaR) continue;
+      isRealJet = true;
+      break;
     }
+    bool isPassID = PUJetIDPass(jets.at(i), ID);
 
     if(isRealJet){
       if(isPassID){
@@ -935,7 +898,6 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys,
     }
   }
 
-  if(weight + sys * sqrt(weight_unc2) < 0) cout<<"[dybAnalyzer::GetPUJetWeight] weight < weight_unc, so negative weight exists. weird "<<endl;
   return weight + sys * sqrt(weight_unc2);
 }
 
