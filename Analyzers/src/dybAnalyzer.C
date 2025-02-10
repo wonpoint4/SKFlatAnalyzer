@@ -54,9 +54,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   else if(option.Contains("jet_smear_down")) suffix += "_jet_smear_down";
   if(IsNominalRun || option != "") IsNominalLike = true;
   else IsNominalLike = false;
-  map_weight.clear();
 
   // Weights Setup
+  map_weight.clear();
   if(!IsDATA){
     lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
     PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
@@ -110,6 +110,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
+  pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
   double pujetSF_mode1 = 1.;
   double pujetSF_mode2 = 1.;
   double pujetSF_mode3 = 1.;
@@ -230,6 +231,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   bcharge = jetCharge(*jet0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
 
+  map_weight[""] *= btagSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
+  }
+
   map_weight[""] *= pujetSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
@@ -251,12 +258,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
       map_weight["_PUjetSF_mode5"] = map_weight[""] * pujetSF_mode5 / pujetSF;
       FillHist(prefix+hprefix+"weight_PUjetSF_mode5"+suffix, pujetSF_mode5, map_weight[""], 200,-5,5);
     }
-  }
-
-  map_weight[""] *= btagSF;
-  if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
   if(IsNominalLike){
@@ -303,8 +304,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // PU reweight
-    map_weight["_noPUweight"] =  map_weight[""] / PUweight;
-    map_weight["_PUweight_up"] =  map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
+    map_weight["_noPUweight"] = map_weight[""] / PUweight;
+    map_weight["_PUweight_up"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
     map_weight["_PUweight_down"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, -1);
 
     // b-tagging SF
@@ -767,7 +768,7 @@ void dybAnalyzer::SetupPUJetWeight(){
 
   // Currently, Medium and Tight are not used due to discontinuity at pt = 50 GeV
   heff_sf = (TH2F*)fPUID.Get("h2_eff_sfUL"+era+"_L");
-  heff_sf_unc = (TH2F*)fPUID.Get("h2_eff_mcUL"+era+"_L");
+  heff_sf_unc = (TH2F*)fPUID.Get("h2_eff_sfUL"+era+"_L_Systuncty");
 
   heff_sf->SetDirectory(0);
   heff_sf_unc->SetDirectory(0);
@@ -881,7 +882,7 @@ bool dybAnalyzer::PUJetIDPass(Jet jet, TString ID){
       }
     }
   }
-  else cout<<"dybAnalyzer::PUJetIDPass : era is weird "<<endl;
+  else cout<<"[dybAnalyzer::PUJetIDPass] era is weird "<<endl;
 
   return false;
 }
@@ -934,6 +935,7 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys,
     }
   }
 
+  if(weight + sys * sqrt(weight_unc2) < 0) cout<<"[dybAnalyzer::GetPUJetWeight] weight < weight_unc, so negative weight exists. weird "<<endl;
   return weight + sys * sqrt(weight_unc2);
 }
 

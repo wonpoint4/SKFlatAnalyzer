@@ -48,9 +48,9 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   else if(option.Contains("jet_smear_down")) suffix += "_jet_smear_down";
   if(IsNominalRun || option != "") IsNominalLike = true;
   else IsNominalLike = false;
-  map_weight.clear();
 
   // Weights Setup
+  map_weight.clear();
   if(!IsDATA){
     lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
     PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
@@ -106,6 +106,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
+  pujetSF = 1., pujetSF_up = 1., pujetSF_down = 1.;
   double pujetSF_mode1 = 1.;
   double pujetSF_mode2 = 1.;
   double pujetSF_mode3 = 1.;
