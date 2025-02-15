@@ -17,6 +17,7 @@ class ttljAnalyzer : public dybAnalyzer {
   void FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, TString suffix="", unsigned int mode1=0, unsigned int mode2=0);
   void SetupLikelihoods(unsigned int mode1=0, unsigned int mode2=0);
   vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios, unsigned int mode3=0);
+  double GetLeptonTriggerORSF(const vector<TString> trigkeys, const vector<Lepton*>& leps, int set, int mem, TString option="");
 
   Gen gen_parton0,gen_parton1, gen_b0,gen_b1, gen_l0,gen_l1, gen_j0,gen_j1;
   Gen* gen_lepb = NULL;

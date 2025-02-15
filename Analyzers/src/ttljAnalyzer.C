@@ -75,11 +75,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
-  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
-  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 30, 2.4);
-  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 30, 2.4);
-  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, 2.4);
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
@@ -147,25 +147,32 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   leptonTriggerSF = 1.;
 
   if(!IsDATA){
-    TString trigSFkey = "IsoMu24_MediumID_trkIsoLoose";
     if(channel.Contains("m"+GetEraShort())){
       leptonTrackingSF *= fEff->GetEfficiencySF("Muon_Tracking", lepton0, 0,0);
       leptonRECOSF *= fEff->GetEfficiencySF("Muon_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Muon_MediumID_trkIsoLoose", lepton0, 0,0);
-      if(DataYear == 2017) trigSFkey = "IsoMu27_MediumID_trkIsoLoose";
-      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+      TString trigSFkey = "IsoMu24_MediumID_trkIsoLoose";
+      if(DataYear != 2017) leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+      else{
+        vector<TString> trigSFkeys = {"IsoMu24_MediumID_trkIsoLoose", "IsoMu27_MediumID_trkIsoLoose"};
+        leptonTriggerSF *= GetLeptonTriggerORSF(trigSFkeys, leptons, 0,0);
+      }
     }else if(channel.Contains("e"+GetEraShort())){
       leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton0, 0,0);
-      trigSFkey = "Ele27_MediumID";
-      if(DataYear == 2017) trigSFkey = "Ele32_MediumID";
-      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+      vector<TString> trigSFkeys = {"Ele27_MediumID"};
+      if(DataYear == 2017) trigSFkeys = {"Ele27_MediumID", "Ele32_MediumID"};
+      if(DataYear == 2018) trigSFkeys = {"Ele28_MediumID", "Ele32_MediumID"};
+      if(DataYear == 2016) leptonTriggerSF *= GetLeptonTriggerSF(trigSFkeys[0], leptons, 0,0);
+      else leptonTriggerSF *= GetLeptonTriggerORSF(trigSFkeys, leptons, 0,0);
     }else if(channel.Contains("E"+GetEraShort())){
       leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton0, 0,0);
       leptonIDSF *= fEff->GetEfficiencySF("Electron_SelQ_MediumID", lepton0, 0,0);
-      trigSFkey = "Ele27_SelQ_MediumID";
-      if(DataYear == 2017) trigSFkey = "Ele32_SelQ_MediumID";
-      leptonTriggerSF *= GetLeptonTriggerSF(trigSFkey, leptons, 0,0);
+      vector<TString> trigSFkeys = {"Ele27_SelQ_MediumID"};
+      if(DataYear == 2017) trigSFkeys = {"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"};
+      if(DataYear == 2018) trigSFkeys = {"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"};
+      if(DataYear == 2016) leptonTriggerSF *= GetLeptonTriggerSF(trigSFkeys[0], leptons, 0,0);
+      else leptonTriggerSF *= GetLeptonTriggerORSF(trigSFkeys, leptons, 0,0);
     }
   }
 
@@ -459,20 +466,17 @@ bool ttljAnalyzer::Hasleptons(TString channel){
   bool moreleptons = false;
   double l0pt = 26.;
   if(channel.Contains("m"+GetEraShort())){
-    if(DataYear == 2017) l0pt = 29.;
-    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4), 0,0,0);
+    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0,0);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) moreleptons = true;
   }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
-    if(DataYear > 2016) l0pt = 35.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else if(channel.Contains("E"+GetEraShort())){
     l0pt = 30.;
-    if(DataYear > 2016) l0pt = 35.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0,2.5), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else{
@@ -1042,6 +1046,84 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
   }
 
   return {lb, hb, j0, j1};
+}
+
+// From Hyonsan's [SMPAnalyzerCore::GetLeptonTriggerORSF]
+double ttljAnalyzer::GetLeptonTriggerORSF(const vector<TString> trigkeys, const vector<Lepton*>& leps, int set, int mem, TString option){
+  if(IsDATA) return 1;
+  if(trigkeys.size() != 2){
+    cout<<"[ttljAnalyzer::LeptonTriggerOR_SF] trigkeys.size()= "<<trigkeys.size()<<endl;
+    exit(EXIT_FAILURE);
+  }
+
+  double lumi = _event.GetTriggerLumi("Full");
+  double lumi0, lumi1, lumi01;
+  TString trig0, trig1;
+  if(DataYear == 2017 && trigkeys[0].Contains("IsoMu24") && trigkeys[1].Contains("IsoMu27")){
+    trig0 = "HLT_IsoMu24_v";
+    trig1 = "HLT_IsoMu27_v";
+    lumi0 = _event.GetTriggerLumi(trig0);
+    lumi1 = _event.GetTriggerLumi(trig1);
+    lumi01 = lumi0;
+  }else if(DataYear == 2017 && trigkeys[0].Contains("Ele27") && trigkeys[1].Contains("Ele32")){
+    trig0 = "HLT_Ele27_WPTight_Gsf_v";
+    trig1 = "HLT_Ele32_WPTight_Gsf_v";
+    lumi0 = _event.GetTriggerLumi(trig0);
+    lumi1 = _event.GetTriggerLumi(trig1);
+    lumi01 = 17599.732185;
+  }else if(DataYear == 2018 && trigkeys[0].Contains("Ele28") && trigkeys[1].Contains("Ele32")){
+    trig0 = "HLT_Ele28_WPTight_Gsf_v";
+    trig1 = "HLT_Ele32_WPTight_Gsf_v";
+    lumi0 = _event.GetTriggerLumi(trig0);
+    lumi1 = _event.GetTriggerLumi(trig1);
+    lumi01 = lumi0;
+  }else{
+    cout<<"[ttljAnalyzer::GetLeptonTriggerORSF] not available combination '"<<trigkeys[0]<<"'||'"<<trigkeys[1]<<"' for "<<DataEra<<endl;
+    exit(EXIT_FAILURE);
+  }
+
+  double data_eff0 = 1., sim_eff0 = 1.;
+  double data_eff1 = 1., sim_eff1 = 1.;
+  for(const auto& lep:leps){
+    if(!lep) continue;
+    data_eff0 *= 1 - fEff->GetDataEfficiency(trigkeys[0], lep, set, mem, option);
+    sim_eff0 *= 1 - fEff->GetSimEfficiency(trigkeys[0], lep, set, mem, option);
+    data_eff1 *= 1 - fEff->GetDataEfficiency(trigkeys[1], lep, set, mem, option);
+    sim_eff1 *= 1 - fEff->GetSimEfficiency(trigkeys[1], lep, set, mem, option);
+  }
+  data_eff0 = 1 - data_eff0;
+  sim_eff0 = 1 - sim_eff0;
+  data_eff1 = 1 - data_eff1;
+  sim_eff1 = 1 - sim_eff1;
+
+  double sf=0.;
+  if(_event.PassTrigger(trig1)){
+    double this_sf = (lumi1 - lumi01) / lumi;
+    if(sim_eff1) this_sf *= data_eff1 / sim_eff1;
+    sf += this_sf;
+  }
+  if(_event.PassTrigger(trig0)){
+    double this_sf = (lumi0 - lumi01) / lumi;
+    if(sim_eff0) this_sf *= data_eff0 / sim_eff0;
+    sf += this_sf;
+  }
+  //overlap region
+  if(_event.PassTrigger(trig0)){
+    double this_sf = lumi01 / lumi / 2;
+    if(sim_eff0) this_sf *= data_eff0 / sim_eff0;
+    sf += this_sf;
+  }
+  if(_event.PassTrigger(trig1)){
+    double this_sf = lumi01 / lumi / 2;
+    if(sim_eff1) this_sf *= data_eff1 / sim_eff1;
+    sf += this_sf;
+  }else if(_event.PassTrigger(trig0)){
+    double this_sf = lumi01 / lumi / 2;
+    if(sim_eff0) this_sf *= data_eff0 / sim_eff0;
+    sf += this_sf;
+  }
+
+  return sf;
 }
 
 ttljAnalyzer::ttljAnalyzer(){}

@@ -82,11 +82,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
-  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
-  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 20, 2.4);
-  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 20, 2.4);
-  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 20, 2.4);
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
@@ -320,14 +320,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 bool dybAnalyzer::HasDileptons(TString channel){
   double l0pt = 20., l1pt = 10.;
   if(channel.Contains("mm"+GetEraShort())){
-    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4), 0,0,0);
+    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0,0);
     //muons = SMPGetMuons("POGMediumWithLooseTrkIso", 8.0,2.4);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) lepton1 = &muons.at(1);
   }else if(channel.Contains("ee"+GetEraShort())){
     l0pt = 25.;
     l1pt = 15.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0,2.5), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
     //electrons = SMPGetElectrons("passMediumID", 8.0,2.5);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) lepton1 = &electrons.at(1);
@@ -373,12 +373,22 @@ bool dybAnalyzer::IsFiredTriggers(TString channel){
       "HLT_IsoMu24_v",
       "HLT_IsoTkMu24_v"
     };
-  }else if(DataYear == 2017 && channel.Contains("m"+GetEraShort())) triggers = {"HLT_IsoMu27_v"};
+  }else if(DataYear == 2017 && channel.Contains("m"+GetEraShort())){
+    triggers = {
+      "HLT_IsoMu24_v",
+      "HLT_IsoMu27_v"
+    };
+  }
   else if(DataYear == 2018 && channel.Contains("m"+GetEraShort())) triggers = {"HLT_IsoMu24_v"};
   else if(DataYear == 2016 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())) triggers = {"HLT_Ele27_WPTight_Gsf_v"};
-  else if(DataYear >= 2017 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())){
+  else if(DataYear == 2017 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())){
     triggers = {
       "HLT_Ele27_WPTight_Gsf_v",
+      "HLT_Ele32_WPTight_Gsf_v"
+    };
+  }else if(DataYear == 2018 && (channel.Contains("e"+GetEraShort()) || channel.Contains("E")+GetEraShort())){
+    triggers = {
+      "HLT_Ele28_WPTight_Gsf_v",
       "HLT_Ele32_WPTight_Gsf_v"
     };
   }else{

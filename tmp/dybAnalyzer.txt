@@ -54,6 +54,20 @@ SKFlat.py -a ExampleRun_kinFitter -i TTLL_powheg -n 20 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_top_NoFullyHad -n 10 -e 2017
 SKFlat.py -a ExampleRun_kinFitter -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 
+SKFlat.py -a ttljAnalyzer -i TTLJ_powheg -n 60 -e 2018
+SKFlat.py -a ttljAnalyzer -i EGamma -n 20 -e 2018
+SKFlat.py -a ttljAnalyzer -i SingleMuon -n 20 -e 2018
+SKFlat.py -a ttljAnalyzer -i WJets_MG -n 30 -e 2018
+SKFlat.py -a ttljAnalyzer -i DYJetsToMuMu_MiNNLO -n 40 -e 2018
+SKFlat.py -a ttljAnalyzer -i DYJetsToEE_MiNNLO -n 40 -e 2018
+SKFlat.py -a ttljAnalyzer -i DYJetsToTauTau_MiNNLO -n 20 -e 2018
+SKFlat.py -a ttljAnalyzer -i WW_pythia -n 10 -e 2018
+SKFlat.py -a ttljAnalyzer -i WZ_pythia -n 10 -e 2018
+SKFlat.py -a ttljAnalyzer -i ZZ_pythia -n 10 -e 2018
+SKFlat.py -a ttljAnalyzer -i TTLL_powheg -n 20 -e 2018
+SKFlat.py -a ttljAnalyzer -i SingleTop_tW_top_NoFullyHad -n 10 -e 2018
+SKFlat.py -a ttljAnalyzer -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2018
+
 SKFlat.py -a ttljAnalyzer -i TTLJ_powheg -n 60 -e 2017
 SKFlat.py -a ttljAnalyzer -i SingleElectron -n 20 -e 2017
 SKFlat.py -a ttljAnalyzer -i SingleMuon -n 20 -e 2017
