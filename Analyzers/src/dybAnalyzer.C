@@ -911,8 +911,7 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys)
   return weight + sys * sqrt(weight_unc2);
 }
 
-double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sys){
-  sys = 0;
+double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys){
   double weight = 1.;
   if(IsDATA) return weight;
 
@@ -931,41 +930,92 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, int mode, int sy
     if(genpid == 0) continue; // No matched b-partons
 
     double Charge = jetCharge(jet);
-    double alpha_plus_DATA_eff = 0.631064;
-    double alpha_minus_DATA_eff = 0.611111;
-    double alpha_plus_MC_eff = 0.655499;
-    double alpha_minus_MC_eff = 0.637514;
-    if(mode == 1){ // 1D bChargeSF
+    double alpha_plus_DATA_eff = 0.6280927;
+    double alpha_minus_DATA_eff = 0.61101644;
+    double alpha_plus_MC_eff = 0.65464132;
+    double alpha_minus_MC_eff = 0.63744024;
+    if(sys > 0){
+      alpha_plus_DATA_eff += -0.00086085;
+      alpha_minus_DATA_eff += 0.00082076;
+    }else if(sys < 0){
+      alpha_plus_DATA_eff += -0.00126565;
+      alpha_minus_DATA_eff += -0.00132747;
+    }
+
+    // 1D bChargeSF
+    if(mode == 1){
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.526248;
-        alpha_minus_DATA_eff = 0.519203;
-        alpha_plus_MC_eff = 0.53133;
-        alpha_minus_MC_eff = 0.525911;
-      }else if(fabs(Charge) < afb_chbin[2]){// 0.3
-        alpha_plus_DATA_eff = 0.577542;
-        alpha_minus_DATA_eff = 0.560728;
-        alpha_plus_MC_eff = 0.590962;
-        alpha_minus_MC_eff = 0.57714;
+        alpha_plus_DATA_eff = 0.52414302;
+        alpha_minus_DATA_eff = 0.51873695;
+        alpha_plus_MC_eff = 0.53008972;
+        alpha_minus_MC_eff = 0.52583715;
+        if(sys > 0){
+          alpha_plus_DATA_eff += 0.00243027;
+          alpha_minus_DATA_eff += 0.00224963;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00159293;
+          alpha_minus_DATA_eff += 0.00172084;
+        }
+      }else if(fabs(Charge) < afb_chbin[2]){// 0.2
+        alpha_plus_DATA_eff = 0.57250225;
+        alpha_minus_DATA_eff = 0.56022782;
+        alpha_plus_MC_eff = 0.58974259;
+        alpha_minus_MC_eff = 0.57610602;
+        if(sys > 0){
+          alpha_plus_DATA_eff += 0.00293206;
+          alpha_minus_DATA_eff += 0.00231308;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00158779;
+          alpha_minus_DATA_eff += 0.00201268;
+        }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.67162;
-        alpha_minus_DATA_eff = 0.645446;
-        alpha_plus_MC_eff = 0.707146;
-        alpha_minus_MC_eff = 0.679753;
+        alpha_plus_DATA_eff = 0.66356721;
+        alpha_minus_DATA_eff = 0.63847154;
+        alpha_plus_MC_eff = 0.70239041;
+        alpha_minus_MC_eff = 0.67570902;
+        if(sys > 0){
+          alpha_plus_DATA_eff += 0.00196049;
+          alpha_minus_DATA_eff += 0.00190195;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00129073;
+          alpha_minus_DATA_eff += 0.00133046;
+        }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.784729;
-        alpha_minus_DATA_eff = 0.73104;
-        alpha_plus_MC_eff = 0.849374;
-        alpha_minus_MC_eff = 0.812045;
+        alpha_plus_DATA_eff = 0.76749669;
+        alpha_minus_DATA_eff = 0.72100734;
+        alpha_plus_MC_eff = 0.82272573;
+        alpha_minus_MC_eff = 0.786599;
+        if(sys > 0){
+          alpha_plus_DATA_eff += 0.00631663;
+          alpha_minus_DATA_eff += 0.00569933;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00409166;
+          alpha_minus_DATA_eff += 0.00453483;
+        }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.756391;
-        alpha_minus_DATA_eff = 0.742828;
-        alpha_plus_MC_eff = 0.768852;
-        alpha_minus_MC_eff = 0.766965;
+        alpha_plus_DATA_eff = 0.75173699;
+        alpha_minus_DATA_eff = 0.74882825;
+        alpha_plus_MC_eff = 0.77103295;
+        alpha_minus_MC_eff = 0.77032289;
+        if(sys > 0){
+          alpha_plus_DATA_eff += 0.00474426;
+          alpha_minus_DATA_eff += 0.00468225;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00341546;
+          alpha_minus_DATA_eff += 0.0034607;
+        }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.745411;
-        alpha_minus_DATA_eff = 0.737282;
-        alpha_plus_MC_eff = 0.750156;
-        alpha_minus_MC_eff = 0.751799;
+        alpha_plus_DATA_eff = 0.75096814;
+        alpha_minus_DATA_eff = 0.75445716;
+        alpha_plus_MC_eff = 0.75817005;
+        alpha_minus_MC_eff = 0.76347831;
+        if(sys > 0){
+          alpha_plus_DATA_eff += -0.00485156;
+          alpha_minus_DATA_eff += 0.00421691;
+        }else if(sys < 0){
+          alpha_plus_DATA_eff += -0.00609114;
+          alpha_minus_DATA_eff += -0.00700786;
+        }
       }
     }
 

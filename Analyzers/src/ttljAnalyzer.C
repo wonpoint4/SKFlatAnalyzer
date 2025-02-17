@@ -20,6 +20,10 @@ void ttljAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("SingleMuon")){
     executeEventWithParameter("m"+GetEraShort());
+    if(nPV < 30) executeEventWithParameter("m"+GetEraShort()+"L");
+    else if(nPV < 45) executeEventWithParameter("m"+GetEraShort()+"M");
+    else executeEventWithParameter("m"+GetEraShort()+"H");
+    if(nPV > 55) executeEventWithParameter("m"+GetEraShort()+"V");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
@@ -29,6 +33,10 @@ void ttljAnalyzer::executeEvent(){
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
     executeEventWithParameter("E"+GetEraShort());
+    if(nPV < 30) executeEventWithParameter("E"+GetEraShort()+"L");
+    else if(nPV< 45) executeEventWithParameter("E"+GetEraShort()+"M");
+    else executeEventWithParameter("E"+GetEraShort()+"H");
+    if(nPV > 55) executeEventWithParameter("E"+GetEraShort()+"V");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
@@ -51,6 +59,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // Weights Setup
   map_weight.clear();
+  lumiweight = 1., PUweight = 1., prefireweight = 1.;
   if(!IsDATA){
     lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
     PUweight = mcCorr->GetPileUpWeight(nPileUp, 0);
@@ -242,6 +251,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
+    // Prefiring weight
+    map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
+    map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
+    map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
+
     // PU reweight
     map_weight["_noPUweight"] =  map_weight[""] / PUweight;
     map_weight["_PUweight_up"] =  map_weight[""] / PUweight * mcCorr->GetPileUpWeight(nPileUp, 1);
@@ -252,16 +266,30 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_hup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTag");
     map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
+    map_weight["_btagSF_huncorr2016a"] = map_weight[""];
+    map_weight["_btagSF_huncorr2016b"] = map_weight[""];
+    map_weight["_btagSF_huncorr2017"] = map_weight[""];
+    map_weight["_btagSF_huncorr2018"] = map_weight[""];
+    map_weight["_btagSF_huncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTag");
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
+    map_weight["_btagSF_luncorr2016a"] = map_weight[""];
+    map_weight["_btagSF_luncorr2016b"] = map_weight[""];
+    map_weight["_btagSF_luncorr2017"] = map_weight[""];
+    map_weight["_btagSF_luncorr2018"] = map_weight[""];
+    map_weight["_btagSF_luncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
 
     // PUjetID SF
     map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
     map_weight["_PUjetSF_up"] =  map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
     map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
+
+    // bChargeID SF
+    map_weight["_bChargeSF0_up"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 1);
+    map_weight["_bChargeSF0_down"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, -1);
+    map_weight["_bChargeSF1_up"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 1);
+    map_weight["_bChargeSF1_down"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, -1);
   }
   if(HasFlag("SYS") && option == "") map_weight.erase("");
 

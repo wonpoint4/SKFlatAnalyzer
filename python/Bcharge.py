@@ -41,14 +41,14 @@ def GetAccuracy(ientry,channel,option=""):
     return calcWithCov(h.GetBinContent(1),h.GetBinError(1),h.GetBinContent(2),h.GetBinError(2),h.GetBinContent(3),h.GetBinError(3),h.GetBinContent(4),h.GetBinError(4))
 
 ### For Liklihood ratio method
-def getfc(channel, syst=""):
-    correct = ttlj.GetHist(0, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
-    wrong = ttlj.GetHist(1, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
+def getfc(channel, chargeBin="", syst=""):
+    correct = ttlj.GetHist(0, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+syst).Integral()
+    wrong = ttlj.GetHist(1, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+syst).Integral()
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data = forNorm.GetHist(0, channel+"/lepbjetChargeEasy_Lm"+("" if "jet_scale" not in syst else syst)).Integral()
-    mc = forNorm.GetHist(1, channel+"/lepbjetChargeEasy_Lm"+syst).Integral()
+    data = forNorm.GetHist(0, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst else syst)).Integral()
+    mc = forNorm.GetHist(1, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+syst).Integral()
 
     return fc, fc_e, data / mc
 
@@ -84,10 +84,14 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
     if len(fcs) == 1: return nominal, cov
 
     print("\nSystematics")
-    cov_allsysts = np.zeros((2,2))
-    for systs in range(len(fcs) -1):
-        if systs == 0: print("JES up, down")
-        if systs == 1: print("JER up, down")
+    for systs in range(len(fcs) - 1):
+        if systs == 0: print(" -JES up, down")
+        elif systs == 1: print(" -JER up, down")
+        elif systs == 2: print(" -Prefiring up, down")
+        elif systs == 3: print(" -PU reweight up, down")
+        elif systs == 4: print(" -PUjetID SF up, down")
+        elif systs == 5: print(" -btagSF h, l up, down")
+        elif systs == 7: print(" -btagSF h, l corr, uncorr")
         cov_syst_bigger = np.zeros((2,2))
         for syst in range(len(fcs[systs])):
             dsyst = np.array(calc_withLR(fcs[systs][syst], fleps[systs][syst], fhads[systs][syst])) - nominal
@@ -99,36 +103,54 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
 
     print("nomianl", nominal, "stat+syst unc", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
     print("cov", cov)
+    values, vectors= np.linalg.eig(cov)
+    vector0 = np.array([vectors[0][0], vectors[1][0]]) * values[0] ** 0.5
+    vector1 = np.array([vectors[0][1], vectors[1][1]]) * values[1] ** 0.5
+    print("stat+syst vect0", vector0)
+    print("stat+syst vect1", vector1)
+    print(np.outer(vector0, vector0) + np.outer(vector1, vector1))
 
     return nominal, cov
 
 def GetAccuracy_withLR(ientry, channel, option=""):
     allsysts = [[""]]
-    if option == "syst": allsysts = [["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"], [""]]
+    if "syst" in option:
+        allsysts = [
+            ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+            ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+            ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+            ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+            ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+            [""]
+        ]
 
-    fc, flep, fhad = 0, 0, 0
-    fc_e, flep_e, fhad_e = -1, -1, -1
-    fcs, fleps, fhads = [[]], [[]], [[]]
+    chargeBins = ["0", "1", "2", "3", "4", "5", ""]
+    for chargeBin in chargeBins:
+        print("chargeBin : ", chargeBin, "option = ", option)
+        fc, flep, fhad = 0, 0, 0
+        fc_e, flep_e, fhad_e = -1, -1, -1
+        fcs, fleps, fhads = [[]], [[]], [[]]
 
-    for systs in range(len(allsysts)):
-        for syst in allsysts[systs]:
-            fc, fc_stat, norm = getfc(channel, syst)
-            a = ROOT.ttljPlotter("data_sub ttlj", norm)
-            hlep = a.GetHist(ientry, channel+"/lepbjetChargeEasy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
-            hhad = a.GetHist(ientry, channel+"/hadbjetChargeEasy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
-            hlep.Scale(1. / hlep.Integral())
-            hhad.Scale(1. / hhad.Integral())
-            fcs[systs].append(fc)
-            fleps[systs].append(hlep.GetBinContent(2))
-            flep_stat = hlep.GetBinError(2)
-            fhads[systs].append(hhad.GetBinContent(1))
-            fhad_stat = hhad.GetBinError(1)
-        if systs < len(allsysts) - 1:
-            fcs.append([])
-            fleps.append([])
-            fhads.append([])
+        for systs in range(len(allsysts)):
+            for syst in allsysts[systs]:
+                fc, fc_stat, norm = getfc(channel, chargeBin, syst)
+                a = ROOT.ttljPlotter("data_sub ttlj", norm)
+                hlep = a.GetHist(ientry, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+                hhad = a.GetHist(ientry, channel+"/hadbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+                hlep.Scale(1. / hlep.Integral())
+                hhad.Scale(1. / hhad.Integral())
+                fcs[systs].append(fc)
+                fleps[systs].append(hlep.GetBinContent(2))
+                flep_stat = hlep.GetBinError(2)
+                fhads[systs].append(hhad.GetBinContent(1))
+                fhad_stat = hhad.GetBinError(1)
+            if systs < len(allsysts) - 1:
+                fcs.append([])
+                fleps.append([])
+                fhads.append([])
 
-    return calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
+        nominal, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
+    return nominal, cov
 
 def calc_eff(valp,valf,errp=None,errf=None):
     if valp+valf==0: return 0.,0.
@@ -304,26 +326,30 @@ if __name__=="__main__":
     #value,cov=GetAccuracy(0,"me201[678][ab]?")
     #value,cov=GetAccuracy(1,"me201[678][ab]?")
     print("\n\n@@@ 2016a data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2016a", "")
-    print("\n\n@@@ 2016a simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2016a", "")
+    value, cov = GetAccuracy_withLR(0,"[Em]2016a", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]2016a", "syst")
+
     print("\n\n@@@ 2016b data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2016b", "")
-    print("\n\n@@@ 2016b simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2016b", "")
+    value, cov = GetAccuracy_withLR(0,"[Em]2016b", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]2016b", "syst")
+
     print("\n\n@@@ 2017 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2017", "")
-    print("\n\n@@@ 2017 simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2017", "")
+    value, cov = GetAccuracy_withLR(0,"[Em]2017", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]2017", "syst")
+
     print("\n\n@@@ 2018 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2018", "")
-    print("\n\n@@@ 2018 simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2018", "")
+    value, cov = GetAccuracy_withLR(0,"[Em]2018", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]2018", "syst")
 
     print("\n\n@@@ Run2 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]201[678][ab]?", "")
-    print("\n\n@@@ Run2 simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]201[678][ab]?", "")
+    value, cov = GetAccuracy_withLR(0,"[Em]201[678][ab]?", "syst")
+    print("\n\n@@@ simulation started @@@\n")
+    value, cov = GetAccuracy_withLR(1,"[Em]201[678][ab]?", "syst")
+
     #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
     #DrawAccuracy(["ee201[678][ab]?","mm201[678][ab]?","me201[678][ab]?"])
     #DrawAccuracy([channel+era for channel in ["mn","en","me","mm","ee"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]])
