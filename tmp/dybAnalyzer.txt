@@ -1,5 +1,5 @@
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2017 --memory 5000
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2017 --memory 6000
+SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 10 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 10 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 10 -e 2017
@@ -12,8 +12,8 @@ SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 10 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i GGToLL -n 10 -e 2017
 
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2018 --memory 6000
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2018 --memory 8000
+SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 50 -e 2018
+SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 50 -e 2018
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 10 -e 2018
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i EGamma -n 10 -e 2018
 SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 10 -e 2018

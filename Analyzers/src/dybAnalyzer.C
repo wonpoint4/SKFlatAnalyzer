@@ -110,7 +110,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Jet related weights
-  pujetSF = 1., btagSF = 1.;
+  pujetSF = 1., btagSF = 1., bchargeSF = 1.;
   if(!IsDATA){
     pujetSF = GetPUJetWeight(lepvetojets, "Loose", 0);
     btagSF = GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose);
@@ -216,6 +216,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
   jet0 = &bjets.at(0);
   bcharge = jetCharge(*jet0);
+  bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
 
   map_weight[""] *= pujetSF;
@@ -229,11 +230,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
+  map_weight[""] *= bchargeSF;
   if(IsNominalLike){
-    if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
-    FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
-    if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
-    FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
+    FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, bchargeSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "bChargeSF1", map_weight[""]);
   }
 
   FillHist(prefix+hprefix+"mll_Tight1b"+suffix, dimass, map_weight[""], 80,70,110);
@@ -272,6 +272,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
+    // Prefiring weight
+    map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
+    map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
+    map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
+
     // PU reweight
     map_weight["_noPUweight"] = map_weight[""] / PUweight;
     map_weight["_PUweight_up"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
@@ -282,16 +287,32 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_btagSF_hup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
     map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
+    map_weight["_btagSF_huncorr2016a"] = map_weight[""];
+    map_weight["_btagSF_huncorr2016b"] = map_weight[""];
+    map_weight["_btagSF_huncorr2017"] = map_weight[""];
+    map_weight["_btagSF_huncorr2018"] = map_weight[""];
+    map_weight["_btagSF_huncorr"+GetEraShort()] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
+    map_weight["_btagSF_luncorr2016a"] = map_weight[""];
+    map_weight["_btagSF_luncorr2016b"] = map_weight[""];
+    map_weight["_btagSF_luncorr2017"] = map_weight[""];
+    map_weight["_btagSF_luncorr2018"] = map_weight[""];
+    map_weight["_btagSF_luncorr"+GetEraShort()] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
 
     // PUjetID SF
     map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
     map_weight["_PUjetSF_up"] =  map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
     map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
+
+    // bChargeID SF
+    map_weight["_bChargeSF0"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, 0);
+    map_weight["_bChargeSF0_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, 1);
+    map_weight["_bChargeSF0_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, -1);
+    map_weight["_nobChargeSF1"] = map_weight[""] / bchargeSF;
+    map_weight["_bChargeSF1_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1);
+    map_weight["_bChargeSF1_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1);
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
     for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
   }

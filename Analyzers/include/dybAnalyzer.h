@@ -59,6 +59,7 @@ public:
   double btagSF = 1.;
   double topptweight = 1.;
   double pujetSF = 1.;
+  double bchargeSF = 1.;
 
   bool IsNominalRun = true;
   bool IsSkimmed = false;
