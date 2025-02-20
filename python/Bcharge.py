@@ -59,6 +59,7 @@ def calc_withLR(fc, flep, fhad):
     return ap, am
 
 def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
+    cov_stat = np.zeros((2,2))
     cov = np.zeros((2,2))
     print("fc", fcs)
     fc_nominal = fcs[-1][0]
@@ -68,20 +69,21 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
     stat0 = np.array(calc_withLR(fc_nominal + fc_stat, flep_nominal, fhad_nominal))
     stat1 = np.array(calc_withLR(fc_nominal, flep_nominal + flep_stat, fhad_nominal))
     stat2 = np.array(calc_withLR(fc_nominal, flep_nominal, fhad_nominal + fhad_stat))
-    cov += np.outer(stat0 - nominal, stat0 - nominal)
-    cov += np.outer(stat1 - nominal, stat1 - nominal)
-    cov += np.outer(stat2 - nominal, stat2 - nominal)
-    print("nomianl", nominal, "stat unc", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
-    print("cov", cov)
+    cov_stat += np.outer(stat0 - nominal, stat0 - nominal)
+    cov_stat += np.outer(stat1 - nominal, stat1 - nominal)
+    cov_stat += np.outer(stat2 - nominal, stat2 - nominal)
+    print("nomianl", nominal, "stat unc", [math.sqrt(cov_stat[0][0]), math.sqrt(cov_stat[1][1])])
+    print("cov", cov_stat)
 
-    values, vectors= np.linalg.eig(cov)
+    values, vectors= np.linalg.eig(cov_stat)
     vector0 = np.array([vectors[0][0], vectors[1][0]]) * values[0] ** 0.5
     vector1 = np.array([vectors[0][1], vectors[1][1]]) * values[1] ** 0.5
     print("stat vect0", vector0)
     print("stat vect1", vector1)
     print(np.outer(vector0, vector0) + np.outer(vector1, vector1))
 
-    if len(fcs) == 1: return nominal, cov
+    cov += cov_stat
+    if len(fcs) == 1: return nominal, cov_stat, cov
 
     print("\nSystematics")
     for systs in range(len(fcs) - 1):
@@ -110,7 +112,7 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
     print("stat+syst vect1", vector1)
     print(np.outer(vector0, vector0) + np.outer(vector1, vector1))
 
-    return nominal, cov
+    return nominal, cov_stat, cov
 
 def GetAccuracy_withLR(ientry, channel, option=""):
     allsysts = [[""]]
@@ -124,7 +126,8 @@ def GetAccuracy_withLR(ientry, channel, option=""):
             [""]
         ]
 
-    chargeBins = ["0", "1", "2", "3", "4", "5", ""]
+    #chargeBins = ["0", "1", "2", "3", "4", "5", ""]
+    chargeBins = [""]
     for chargeBin in chargeBins:
         print("chargeBin : ", chargeBin, "option = ", option)
         fc, flep, fhad = 0, 0, 0
@@ -149,8 +152,110 @@ def GetAccuracy_withLR(ientry, channel, option=""):
                 fleps.append([])
                 fhads.append([])
 
-        nominal, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
-    return nominal, cov
+        nominal, cov_stat, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
+    return nominal, cov_stat, cov
+
+def DrawAccuracy_withLR(channels, option=""):
+    channels.reverse()
+    gdata = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+    gsim = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+    gdata_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+    gsim_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+
+    for i in range(len(channels)):
+        channel = channels[i]
+        print("\n\n@@@ Channel : "+channel+" started @@@\n")
+
+        value, cov_stat, cov = GetAccuracy_withLR(0, channel, option)
+        for j in range(2):
+            gdata[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
+            gdata[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
+            gdata_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
+            gdata_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
+
+        value, cov_stat, cov = GetAccuracy_withLR(1, channel, option)
+        for j in range(2):
+            gsim[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.4)
+            gsim[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
+            gsim_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.4)
+            gsim_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
+
+    c = ROOT.gROOT.MakeDefCanvas()
+    c.SetLeftMargin(0.2)
+
+    hframe = ROOT.TH2D("hframe", "", 100, 0.60, 0.67, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
+    for i in range(len(channels)):
+        title = channels[i]
+        title = title.replace("201[678][ab]?"," Run2")
+        title = title.replace("[Em]","l")
+        title = title.replace("E","e")
+        title = title.replace("m","#mu")
+        hframe.GetYaxis().SetBinLabel(i * 2 + 1, "#alpha^{#minus} ("+title+")")
+        hframe.GetYaxis().SetBinLabel(i * 2 + 2, "#alpha^{#plus} ("+title+")")
+    hframe.SetStats(0)
+    hframe.Draw()
+    hframe.GetXaxis().SetTitle("Accuracy")
+    hframe.GetYaxis().SetLabelSize(hframe.GetYaxis().GetLabelSize() * 1.5)
+
+    leg = ROOT.TLegend(c.GetLeftMargin() + 0.01, 0.79, 0.99 - c.GetRightMargin(), 0.89)
+    leg.AddEntry(gdata[0], "data")
+    leg.AddEntry(gsim[0], "simulation")
+    leg.SetBorderSize(0)
+    leg.Draw()
+
+    gdata[0].SetMarkerStyle(20)
+    gdata[0].SetMarkerSize(0.8)
+    gdata[0].SetMarkerColor(1)
+    gdata[0].SetLineColor(1)
+    gdata[0].Draw("same p")
+
+    gdata[1].SetMarkerStyle(24)
+    gdata[1].SetMarkerSize(0.8)
+    gdata[1].SetMarkerColor(1)
+    gdata[1].SetLineColor(1)
+    gdata[1].Draw("same p")
+
+    gsim[0].SetMarkerStyle(20)
+    gsim[0].SetMarkerSize(0.6)
+    gsim[0].SetMarkerColor(2)
+    gsim[0].SetLineColor(2)
+    gsim[0].Draw("same p")
+
+    gsim[1].SetMarkerStyle(24)
+    gsim[1].SetMarkerSize(0.6)
+    gsim[1].SetMarkerColor(2)
+    gsim[1].SetLineColor(2)
+    gsim[1].Draw("same p")
+
+    # For stat+syst uncertainties
+    gdata_tot_unc[0].SetMarkerStyle(20)
+    gdata_tot_unc[0].SetMarkerSize(0.8)
+    gdata_tot_unc[0].SetMarkerColor(1)
+    gdata_tot_unc[0].SetLineColor(1)
+    gdata_tot_unc[0].Draw("same p")
+
+    gdata_tot_unc[1].SetMarkerStyle(24)
+    gdata_tot_unc[1].SetMarkerSize(0.8)
+    gdata_tot_unc[1].SetMarkerColor(1)
+    gdata_tot_unc[1].SetLineColor(1)
+    gdata_tot_unc[1].Draw("same p")
+
+    gsim_tot_unc[0].SetMarkerStyle(20)
+    gsim_tot_unc[0].SetMarkerSize(0.6)
+    gsim_tot_unc[0].SetMarkerColor(2)
+    gsim_tot_unc[0].SetLineColor(2)
+    gsim_tot_unc[0].Draw("same p")
+
+    gsim_tot_unc[1].SetMarkerStyle(24)
+    gsim_tot_unc[1].SetMarkerSize(0.6)
+    gsim_tot_unc[1].SetMarkerColor(2)
+    gsim_tot_unc[1].SetLineColor(2)
+    gsim_tot_unc[1].Draw("same p")
+
+    #raw_input()
+    c.hists = [gdata, gsim, gdata_tot_unc, gsim_tot_unc, hframe, leg]
+    c.SaveAs("Accuracies"+("" if option == "" else "_"+option)+".png")
+    return c
 
 def calc_eff(valp,valf,errp=None,errf=None):
     if valp+valf==0: return 0.,0.
@@ -325,30 +430,6 @@ def DrawAccuracyByType(channels,types):
 if __name__=="__main__":
     #value,cov=GetAccuracy(0,"me201[678][ab]?")
     #value,cov=GetAccuracy(1,"me201[678][ab]?")
-    print("\n\n@@@ 2016a data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2016a", "syst")
-    print("\n\n@@@ simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2016a", "syst")
-
-    print("\n\n@@@ 2016b data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2016b", "syst")
-    print("\n\n@@@ simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2016b", "syst")
-
-    print("\n\n@@@ 2017 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2017", "syst")
-    print("\n\n@@@ simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2017", "syst")
-
-    print("\n\n@@@ 2018 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]2018", "syst")
-    print("\n\n@@@ simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]2018", "syst")
-
-    print("\n\n@@@ Run2 data started @@@\n")
-    value, cov = GetAccuracy_withLR(0,"[Em]201[678][ab]?", "syst")
-    print("\n\n@@@ simulation started @@@\n")
-    value, cov = GetAccuracy_withLR(1,"[Em]201[678][ab]?", "syst")
 
     #DrawAccuracy(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"])
     #DrawAccuracy(["ee201[678][ab]?","mm201[678][ab]?","me201[678][ab]?"])
@@ -357,3 +438,6 @@ if __name__=="__main__":
     
     #DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
     #DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])
+
+    DrawAccuracy_withLR(["[Em]2016a", "[Em]2016b", "[Em]2017", "[Em]2018", "[Em]201[678][ab]?"], "syst")
+    DrawAccuracy_withLR(["[Em]2016aL", "[Em]2016aM", "[Em]2016aH", "[Em]2016bL", "[Em]2016bM", "[Em]2017L", "[Em]2017M", "[Em]2017H", "[Em]2017V", "[Em]2018L", "[Em]2018M", "[Em]2018H", "[Em]2018V", "[Em]201[678][ab]?L", "[Em]201[678][ab]?M", "[Em]201[678][ab]?H", "[Em]201[678][ab]?V"])
