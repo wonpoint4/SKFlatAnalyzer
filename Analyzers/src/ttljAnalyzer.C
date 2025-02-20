@@ -499,12 +499,12 @@ bool ttljAnalyzer::Hasleptons(TString channel){
     if(muons.size() > 1) moreleptons = true;
   }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else if(channel.Contains("E"+GetEraShort())){
     l0pt = 30.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5), 0,0);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else{

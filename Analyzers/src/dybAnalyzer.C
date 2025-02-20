@@ -348,7 +348,7 @@ bool dybAnalyzer::HasDileptons(TString channel){
   }else if(channel.Contains("ee"+GetEraShort())){
     l0pt = 25.;
     l1pt = 15.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, (DataYear == 2016? 2.4: 2.5)), 0,0);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0);
     //electrons = SMPGetElectrons("passMediumID", 8.0,2.5);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) lepton1 = &electrons.at(1);
