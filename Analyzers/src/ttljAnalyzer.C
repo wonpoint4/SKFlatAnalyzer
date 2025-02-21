@@ -24,6 +24,7 @@ void ttljAnalyzer::executeEvent(){
     else if(nPV < 45) executeEventWithParameter("m"+GetEraShort()+"M");
     else executeEventWithParameter("m"+GetEraShort()+"H");
     if(nPV > 55) executeEventWithParameter("m"+GetEraShort()+"V");
+    if(nPV < 20) executeEventWithParameter("m"+GetEraShort()+"B");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
@@ -37,6 +38,7 @@ void ttljAnalyzer::executeEvent(){
     else if(nPV< 45) executeEventWithParameter("E"+GetEraShort()+"M");
     else executeEventWithParameter("E"+GetEraShort()+"H");
     if(nPV > 55) executeEventWithParameter("E"+GetEraShort()+"V");
+    if(nPV < 20) executeEventWithParameter("E"+GetEraShort()+"B");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
@@ -300,7 +302,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     bool Gen_LR_match_full = false;
     if((gen_j0.DeltaR(Wj0) < match_dR && gen_j1.DeltaR(Wj1) < match_dR) || (gen_j0.DeltaR(Wj1) < match_dR && gen_j1.DeltaR(Wj0) < match_dR)) Gen_LR_match_Whad = true;
 
-    // chargeEasy => 0:negative, 1:positive
+    // ChargeEasy => 0:negative, 1:positive
     // purity => -1:UnMatched, 0:Wrong, 1:Correct in TTLJ
     // correct => 0:Wrong, 1:Correct in TTLJ
 
@@ -313,29 +315,31 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
         FillHist(prefix+"LR_correct"+suffix, 1, map_weight, 2,0,2);
         FillHist(prefix+"LR_purity_Lp"+suffix, 1, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct_Lp"+suffix, 1, map_weight, 2,0,2);
+
+        // For bCharge Accuracy (gen-info)
+        FillHist(prefix+"genbjetChargeEasy_Lp"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"genbbarjetChargeEasy_Lp"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        for(unsigned int i=1; i<afb_chbinnum+1; i++){
+          if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbjetCharge%dEasy_Lp"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+          if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbbarjetCharge%dEasy_Lp"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        }
+
         prefix += "Correct_"; // lep+
       }else{
         FillHist(prefix+"LR_purity"+suffix, 0, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct"+suffix, 0, map_weight, 2,0,2);
         FillHist(prefix+"LR_purity_Lm"+suffix, 0, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct_Lm"+suffix, 0, map_weight, 2,0,2);
+
+        // For bCharge Accuracy (gen-info)
+        FillHist(prefix+"genbjetChargeEasy_Lm"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"genbbarjetChargeEasy_Lm"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        for(unsigned int i=1; i<afb_chbinnum+1; i++){
+          if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbjetCharge%dEasy_Lm"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+          if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbbarjetCharge%dEasy_Lm"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        }
+
         prefix +="Wrong_"; // lep-
-      }
-      if(IsNominalLike){
-        FillHist(prefix+"lepbjetCharge_Matched_b"+suffix, lepb_charge, map_weight, 200,-5,5);
-        FillHist(prefix+"lepbjetChargeEasy_Matched_b"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
-        FillHist(prefix+"hadbjetCharge_Matched_bbar"+suffix, hadb_charge, map_weight, 200,-5,5);
-        FillHist(prefix+"hadbjetChargeEasy_Matched_bbar"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
-        FillHist(prefix+"lcharge_lepb_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        if(lepb_charge < 0){
-          FillHist(prefix+"lcharge_lepb_negaive_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-          FillHist(prefix+"lchargeEasy_lepb_negaive_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        }
-        if(0 < hadb_charge){
-          FillHist(prefix+"lcharge_hadb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-          FillHist(prefix+"lchargeEasy_hadb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        }
       }
     }
     //When lepb = bbar, hadb = b => lep-
@@ -347,29 +351,31 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
         FillHist(prefix+"LR_correct"+suffix, 1, map_weight, 2,0,2);
         FillHist(prefix+"LR_purity_Lm"+suffix, 1, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct_Lm"+suffix, 1, map_weight, 2,0,2);
+
+        // For bCharge Accuracy (gen-info)
+        FillHist(prefix+"genbjetChargeEasy_Lm"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"genbbarjetChargeEasy_Lm"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        for(unsigned int i=1; i<afb_chbinnum+1; i++){
+          if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbjetCharge%dEasy_Lm"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+          if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbbarjetCharge%dEasy_Lm"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        }
+
         prefix += "Correct_"; // lep-
       }else{
         FillHist(prefix+"LR_purity"+suffix, 0, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct"+suffix, 0, map_weight, 2,0,2);
         FillHist(prefix+"LR_purity_Lp"+suffix, 0, map_weight, 4,-2,2);
         FillHist(prefix+"LR_correct_Lp"+suffix, 0, map_weight, 2,0,2);
+
+        // For bCharge Accuracy (gen-info)
+        FillHist(prefix+"genbjetChargeEasy_Lp"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(prefix+"genbbarjetChargeEasy_Lp"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+        for(unsigned int i=1; i<afb_chbinnum+1; i++){
+          if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbjetCharge%dEasy_Lp"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+          if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]) FillHist(Form(prefix+"genbbarjetCharge%dEasy_Lp"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        }
+
         prefix +="Wrong_"; // lep+
-      }
-      if(IsNominalLike){
-        FillHist(prefix+"hadbjetCharge_Matched_b"+suffix, hadb_charge, map_weight, 200,-5,5);
-        FillHist(prefix+"hadbjetChargeEasy_Matched_b"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
-        FillHist(prefix+"lepbjetCharge_Matched_bbar"+suffix, lepb_charge, map_weight, 200,-5,5);
-        FillHist(prefix+"lepbjetChargeEasy_Matched_bbar"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
-        FillHist(prefix+"lcharge_lepb_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-        FillHist(prefix+"lchargeEasy_lepb_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        if(0 < lepb_charge){
-          FillHist(prefix+"lcharge_lepb_positive_Matched_bbar"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-          FillHist(prefix+"lchargeEasy_lepb_positive_Matched_bbar"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        }
-        if(hadb_charge < 0){
-          FillHist(prefix+"lcharge_hadb_negative_Matched_b"+suffix, lepton0->Charge(), map_weight, 4,-2,2);
-          FillHist(prefix+"lchargeEasy_hadb_negative_Matched_b"+suffix, lepton0->Charge()<0?0:1, map_weight, 2,0,2);
-        }
       }
     }
     else{
@@ -443,21 +449,21 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(lepton0->Charge() < 0){
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetCharge%d_Lm"+suffix,i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm"+suffix,i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lm"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetCharge%d_Lm"+suffix,i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm"+suffix,i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lm"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }else{
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"lepbjetCharge%d_Lp"+suffix,i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp"+suffix,i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"lepbjetCharge%d_Lp"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
-        FillHist(Form(prefix+"hadbjetCharge%d_Lp"+suffix,i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp"+suffix,i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"hadbjetCharge%d_Lp"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }
   }

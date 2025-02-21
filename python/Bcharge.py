@@ -114,7 +114,7 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
 
     return nominal, cov_stat, cov
 
-def GetAccuracy_withLR(ientry, channel, option=""):
+def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     allsysts = [[""]]
     if "syst" in option:
         allsysts = [
@@ -126,54 +126,59 @@ def GetAccuracy_withLR(ientry, channel, option=""):
             [""]
         ]
 
-    #chargeBins = ["0", "1", "2", "3", "4", "5", ""]
-    chargeBins = [""]
-    for chargeBin in chargeBins:
-        print("chargeBin : ", chargeBin, "option = ", option)
-        fc, flep, fhad = 0, 0, 0
-        fc_e, flep_e, fhad_e = -1, -1, -1
-        fcs, fleps, fhads = [[]], [[]], [[]]
+    print("chargeBin : ", chargeBin, "option = ", option)
+    fc, flep, fhad = 0, 0, 0
+    fc_e, flep_e, fhad_e = -1, -1, -1
+    fcs, fleps, fhads = [[]], [[]], [[]]
 
-        for systs in range(len(allsysts)):
-            for syst in allsysts[systs]:
-                fc, fc_stat, norm = getfc(channel, chargeBin, syst)
-                a = ROOT.ttljPlotter("data_sub ttlj", norm)
-                hlep = a.GetHist(ientry, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
-                hhad = a.GetHist(ientry, channel+"/hadbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
-                hlep.Scale(1. / hlep.Integral())
-                hhad.Scale(1. / hhad.Integral())
-                fcs[systs].append(fc)
-                fleps[systs].append(hlep.GetBinContent(2))
-                flep_stat = hlep.GetBinError(2)
-                fhads[systs].append(hhad.GetBinContent(1))
-                fhad_stat = hhad.GetBinError(1)
-            if systs < len(allsysts) - 1:
-                fcs.append([])
-                fleps.append([])
-                fhads.append([])
+    for systs in range(len(allsysts)):
+        for syst in allsysts[systs]:
+            fc, fc_stat, norm = getfc(channel, chargeBin, syst)
+            a = ROOT.ttljPlotter("data_sub ttlj", norm)
+            hlep = a.GetHist(ientry, channel+"/lepbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hhad = a.GetHist(ientry, channel+"/hadbjetCharge"+chargeBin+"Easy_Lm"+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hlep.Scale(1. / hlep.Integral())
+            hhad.Scale(1. / hhad.Integral())
+            fcs[systs].append(fc)
+            fleps[systs].append(hlep.GetBinContent(2))
+            flep_stat = hlep.GetBinError(2)
+            fhads[systs].append(hhad.GetBinContent(1))
+            fhad_stat = hhad.GetBinError(1)
+        if systs < len(allsysts) - 1:
+            fcs.append([])
+            fleps.append([])
+            fhads.append([])
 
-        nominal, cov_stat, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
+    nominal, cov_stat, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
     return nominal, cov_stat, cov
 
-def DrawAccuracy_withLR(channels, option=""):
-    channels.reverse()
+def DrawAccuracy_withLR(channels, tag="", option=""):
+    #channels.reverse()
     gdata = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gsim = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gdata_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gsim_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
 
+    Bins = ["_[0-3]", "_0", "_1", "_2", "_3", "_4", "_5"]
     for i in range(len(channels)):
         channel = channels[i]
         print("\n\n@@@ Channel : "+channel+" started @@@\n")
 
-        value, cov_stat, cov = GetAccuracy_withLR(0, channel, option)
+        chargeBin = ""
+        for Bin in Bins:
+            if Bin in channel:
+                channel = channel.replace(Bin, "")
+                chargeBin = Bin.replace("_", "")
+                break
+
+        value, cov_stat, cov = GetAccuracy_withLR(0, channel, chargeBin, option)
         for j in range(2):
             gdata[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
             gdata[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
             gdata_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
             gdata_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
 
-        value, cov_stat, cov = GetAccuracy_withLR(1, channel, option)
+        value, cov_stat, cov = GetAccuracy_withLR(1, channel, chargeBin, option)
         for j in range(2):
             gsim[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.4)
             gsim[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
@@ -183,15 +188,28 @@ def DrawAccuracy_withLR(channels, option=""):
     c = ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)
 
-    hframe = ROOT.TH2D("hframe", "", 100, 0.60, 0.67, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
+    #hframe = ROOT.TH2D("hframe", "", 100, 0.60, 0.67, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
+    hframe = ROOT.TH2D("hframe", "", 100, 0.50, 0.85, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
     for i in range(len(channels)):
         title = channels[i]
         title = title.replace("201[678][ab]?"," Run2")
-        title = title.replace("[Em]","l")
         title = title.replace("E","e")
         title = title.replace("m","#mu")
-        hframe.GetYaxis().SetBinLabel(i * 2 + 1, "#alpha^{#minus} ("+title+")")
-        hframe.GetYaxis().SetBinLabel(i * 2 + 2, "#alpha^{#plus} ("+title+")")
+        chargeBin = ""
+        for Bin in Bins:
+            if Bin in title:
+                title = title.replace(Bin, "")
+                chargeBin = Bin.replace("_", "")
+                break
+        alpha = "#alpha"
+        if chargeBin != "":
+            if chargeBin == "[0-3]": alpha = "#alpha_{j}"
+            elif chargeBin == "4": alpha = "#alpha_{#mu}"
+            elif chargeBin == "5": alpha = "#alpha_{e}"
+            else: alpha = "#alpha_{j,"+chargeBin+"}"
+        hframe.GetYaxis().SetBinLabel(i * 2 + 1, alpha+"^{#minus} ("+title+")")
+        hframe.GetYaxis().SetBinLabel(i * 2 + 2, alpha+"^{#plus} ("+title+")")
+
     hframe.SetStats(0)
     hframe.Draw()
     hframe.GetXaxis().SetTitle("Accuracy")
@@ -254,7 +272,7 @@ def DrawAccuracy_withLR(channels, option=""):
 
     #raw_input()
     c.hists = [gdata, gsim, gdata_tot_unc, gsim_tot_unc, hframe, leg]
-    c.SaveAs("Accuracies"+("" if option == "" else "_"+option)+".png")
+    c.SaveAs("Accuracies"+("" if tag == "" else "_"+tag)+".png")
     return c
 
 def calc_eff(valp,valf,errp=None,errf=None):
@@ -439,5 +457,23 @@ if __name__=="__main__":
     #DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
     #DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])
 
-    DrawAccuracy_withLR(["[Em]2016a", "[Em]2016b", "[Em]2017", "[Em]2018", "[Em]201[678][ab]?"], "syst")
-    DrawAccuracy_withLR(["[Em]2016aL", "[Em]2016aM", "[Em]2016aH", "[Em]2016bL", "[Em]2016bM", "[Em]2017L", "[Em]2017M", "[Em]2017H", "[Em]2017V", "[Em]2018L", "[Em]2018M", "[Em]2018H", "[Em]2018V", "[Em]201[678][ab]?L", "[Em]201[678][ab]?M", "[Em]201[678][ab]?H", "[Em]201[678][ab]?V"])
+    leps = ["[Em]", "E", "m"]
+    eras = ["2016a", "2016b", "2017", "2018", "201[678][ab]?"]
+    chargeBins = ["", "_4", "_5", "_[0-3]", "_0", "_1", "_2", "_3"]
+
+    DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], eras[0]+"s", "")
+    DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], eras[1]+"s", "")
+    DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], eras[2]+"s", "")
+    DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], eras[3]+"s", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], "Run2s", "")
+
+    DrawAccuracy_withLR([leps[0]+eras[4]+"B"+chargeBin for chargeBin in chargeBins], "Run2B", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+"L"+chargeBin for chargeBin in chargeBins], "Run2L", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+"M"+chargeBin for chargeBin in chargeBins], "Run2M", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], "Run2H", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], "Run2V", "")
+
+    DrawAccuracy_withLR([leps[0]+era for era in eras], "Eras", "")
+    DrawAccuracy_withLR([lep+era for era in eras for lep in leps], "Eras_Leps", "")
+    chargeBins = ["", "_[0-3]", "_4", "_5"]
+    DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], "Eras_Bins", "")
