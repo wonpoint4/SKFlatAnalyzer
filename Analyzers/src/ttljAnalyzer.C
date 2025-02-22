@@ -20,11 +20,6 @@ void ttljAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("SingleMuon")){
     executeEventWithParameter("m"+GetEraShort());
-    if(nPV < 30) executeEventWithParameter("m"+GetEraShort()+"L");
-    else if(nPV < 45) executeEventWithParameter("m"+GetEraShort()+"M");
-    else executeEventWithParameter("m"+GetEraShort()+"H");
-    if(nPV > 55) executeEventWithParameter("m"+GetEraShort()+"V");
-    if(nPV < 20) executeEventWithParameter("m"+GetEraShort()+"B");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
@@ -34,11 +29,6 @@ void ttljAnalyzer::executeEvent(){
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
     executeEventWithParameter("E"+GetEraShort());
-    if(nPV < 30) executeEventWithParameter("E"+GetEraShort()+"L");
-    else if(nPV< 45) executeEventWithParameter("E"+GetEraShort()+"M");
-    else executeEventWithParameter("E"+GetEraShort()+"H");
-    if(nPV > 55) executeEventWithParameter("E"+GetEraShort()+"V");
-    if(nPV < 20) executeEventWithParameter("E"+GetEraShort()+"B");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);

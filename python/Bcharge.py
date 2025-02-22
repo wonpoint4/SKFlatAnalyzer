@@ -7,6 +7,7 @@ ROOT.Plotter.SetupStyle()
 
 p=ROOT.BBPlotter("eff")
 ttlj = ROOT.ttljPlotter("correct_ttlj wrong_ttlj unmatched_ttlj")
+ttlj_gen = ROOT.ttljPlotter("ttlj_kin")
 forNorm = ROOT.ttljPlotter("data mc")
 
 def calc(a0,a1,a2,a3):
@@ -152,12 +153,54 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     nominal, cov_stat, cov = calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat)
     return nominal, cov_stat, cov
 
-def DrawAccuracy_withLR(channels, tag="", option=""):
-    #channels.reverse()
+def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
+    allsysts = [[""]]
+    if "syst" in option:
+        allsysts.extend([
+            ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+            ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+            ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+            ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+            ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+        ])
+
+    ap, am, stat_ep, stat_em, ep, em = 0, 0, -1, -1, 0, 0
+    for systs in range(len(allsysts)):
+        syst_ep_bigger, syst_em_bigger = 0, 0
+        for syst in allsysts[systs]:
+            hp = ttlj_gen.GetHist(0, channel+"/genbbarjetCharge"+chargeBin+"Easy_Lm"+syst, option)
+            hm = ttlj_gen.GetHist(0, channel+"/genbjetCharge"+chargeBin+"Easy_Lm"+syst, option)
+            hp.Scale(1. / hp.Integral())
+            hm.Scale(1. / hm.Integral())
+
+            if syst == "":
+                ap = hp.GetBinContent(2)
+                stat_ep = hp.GetBinError(2)
+                am = hm.GetBinContent(1)
+                stat_em = hm.GetBinError(1)
+            else:
+                dep = hp.GetBinContent(2) - ap
+                dem = hm.GetBinContent(1) - am
+                if (dep**2 + dem**2) > (syst_ep_bigger**2 + syst_em_bigger**2): ## Choose the dep, dem with the larger square sum (~ trace)
+                    syst_ep_bigger = dep
+                    syst_em_bigger = dem
+
+        ep = (ep**2 + syst_ep_bigger**2)**0.5
+        em = (em**2 + syst_em_bigger**2)**0.5
+
+    ep = (ep**2 + stat_ep**2)**0.5
+    em = (em**2 + stat_em**2)**0.5
+
+    print("True Accuracy nominal = ", (ap, am), "stat error = ", (stat_ep, stat_em), "stat+syst error = ", (ep, em))
+    return (ap, am), (stat_ep, stat_em), (ep, em)
+
+def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
     gdata = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gsim = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+    gtrue = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gdata_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gsim_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
+    gtrue_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
 
     Bins = ["_[0-3]", "_0", "_1", "_2", "_3", "_4", "_5"]
     for i in range(len(channels)):
@@ -185,11 +228,17 @@ def DrawAccuracy_withLR(channels, tag="", option=""):
             gsim_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.4)
             gsim_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
 
+        value, stat_e, e = GetTrueAccuracy_withLR(channel, chargeBin, option)
+        for j in range(2):
+            gtrue[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.3)
+            gtrue[j].SetPointError(i, stat_e[j], 0)
+            gtrue_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.3)
+            gtrue_tot_unc[j].SetPointError(i, e[j], 0)
+
     c = ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)
 
-    #hframe = ROOT.TH2D("hframe", "", 100, 0.60, 0.67, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
-    hframe = ROOT.TH2D("hframe", "", 100, 0.50, 0.85, len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
+    hframe = ROOT.TH2D("hframe", "", 100, Xrange[0], Xrange[1], len(channels) * 2 + 1, 0, len(channels) * 2 + 1);
     for i in range(len(channels)):
         title = channels[i]
         title = title.replace("201[678][ab]?"," Run2")
@@ -218,6 +267,7 @@ def DrawAccuracy_withLR(channels, tag="", option=""):
     leg = ROOT.TLegend(c.GetLeftMargin() + 0.01, 0.79, 0.99 - c.GetRightMargin(), 0.89)
     leg.AddEntry(gdata[0], "data")
     leg.AddEntry(gsim[0], "simulation")
+    leg.AddEntry(gtrue[0], "simulation (truth)")
     leg.SetBorderSize(0)
     leg.Draw()
 
@@ -245,6 +295,18 @@ def DrawAccuracy_withLR(channels, tag="", option=""):
     gsim[1].SetLineColor(2)
     gsim[1].Draw("same p")
 
+    gtrue[0].SetMarkerStyle(20)
+    gtrue[0].SetMarkerSize(0.6)
+    gtrue[0].SetMarkerColor(4)
+    gtrue[0].SetLineColor(4)
+    gtrue[0].Draw("same p")
+
+    gtrue[1].SetMarkerStyle(24)
+    gtrue[1].SetMarkerSize(0.6)
+    gtrue[1].SetMarkerColor(4)
+    gtrue[1].SetLineColor(4)
+    gtrue[1].Draw("same p")
+
     # For stat+syst uncertainties
     gdata_tot_unc[0].SetMarkerStyle(20)
     gdata_tot_unc[0].SetMarkerSize(0.8)
@@ -270,9 +332,25 @@ def DrawAccuracy_withLR(channels, tag="", option=""):
     gsim_tot_unc[1].SetLineColor(2)
     gsim_tot_unc[1].Draw("same p")
 
+    gtrue_tot_unc[0].SetMarkerStyle(20)
+    gtrue_tot_unc[0].SetMarkerSize(0.6)
+    gtrue_tot_unc[0].SetMarkerColor(4)
+    gtrue_tot_unc[0].SetLineColor(4)
+    gtrue_tot_unc[0].Draw("same p")
+
+    gtrue_tot_unc[1].SetMarkerStyle(24)
+    gtrue_tot_unc[1].SetMarkerSize(0.6)
+    gtrue_tot_unc[1].SetMarkerColor(4)
+    gtrue_tot_unc[1].SetLineColor(4)
+    gtrue_tot_unc[1].Draw("same p")
+
     #raw_input()
-    c.hists = [gdata, gsim, gdata_tot_unc, gsim_tot_unc, hframe, leg]
-    c.SaveAs("Accuracies"+("" if tag == "" else "_"+tag)+".png")
+    c.hists = [gdata, gsim, gtrue, gdata_tot_unc, gsim_tot_unc, gtrue_tot_unc, hframe, leg]
+    nametag = ""
+    if tag != "": nametag = nametag+"_"+tag
+    if option != "": nametag = nametag+"_"+option
+    c.SaveAs("Accuracies"+nametag+".png")
+
     return c
 
 def calc_eff(valp,valf,errp=None,errf=None):
@@ -460,20 +538,21 @@ if __name__=="__main__":
     leps = ["[Em]", "E", "m"]
     eras = ["2016a", "2016b", "2017", "2018", "201[678][ab]?"]
     chargeBins = ["", "_4", "_5", "_[0-3]", "_0", "_1", "_2", "_3"]
+    option = "syst" # "syst" or ""
 
-    DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], eras[0]+"s", "")
-    DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], eras[1]+"s", "")
-    DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], eras[2]+"s", "")
-    DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], eras[3]+"s", "")
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], "Run2s", "")
+    DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[0]+"s", option)
+    DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)
+    DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[2]+"s", option)
+    DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2s", option)
 
-    DrawAccuracy_withLR([leps[0]+eras[4]+"B"+chargeBin for chargeBin in chargeBins], "Run2B", "")
-    DrawAccuracy_withLR([leps[0]+eras[4]+"L"+chargeBin for chargeBin in chargeBins], "Run2L", "")
-    DrawAccuracy_withLR([leps[0]+eras[4]+"M"+chargeBin for chargeBin in chargeBins], "Run2M", "")
-    DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], "Run2H", "")
-    DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], "Run2V", "")
+    DrawAccuracy_withLR([leps[0]+eras[4]+"B"+chargeBin for chargeBin in chargeBins], (0.48, 0.86), "Run2B", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+"L"+chargeBin for chargeBin in chargeBins], (0.48, 0.86), "Run2L", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+"M"+chargeBin for chargeBin in chargeBins], (0.48, 0.86), "Run2M", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], (0.48, 0.86), "Run2H", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], (0.48, 0.86), "Run2V", option)
 
-    DrawAccuracy_withLR([leps[0]+era for era in eras], "Eras", "")
-    DrawAccuracy_withLR([lep+era for era in eras for lep in leps], "Eras_Leps", "")
+    DrawAccuracy_withLR([leps[0]+era for era in eras], (0.6, 0.67), "Eras", option)
+    DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.6, 0.67), "Eras_Leps", option)
     chargeBins = ["", "_[0-3]", "_4", "_5"]
-    DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], "Eras_Bins", "")
+    DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], (0.59, 0.79), "Eras_Bins", option)
