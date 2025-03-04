@@ -20,19 +20,47 @@ void ttljAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("SingleMuon")){
     executeEventWithParameter("m"+GetEraShort());
+    if(nPV <= 10) executeEventWithParameter("m"+GetEraShort()+"F");
+    else if(nPV <= 20) executeEventWithParameter("m"+GetEraShort()+"S");
+    else if(nPV <= 30) executeEventWithParameter("m"+GetEraShort()+"L");
+    else if(nPV <= 40) executeEventWithParameter("m"+GetEraShort()+"M");
+    else if(nPV <= 50) executeEventWithParameter("m"+GetEraShort()+"H");
+    else executeEventWithParameter("m"+GetEraShort()+"V");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
+        if(syst.Contains("scale") || !IsDATA){
+          executeEventWithParameter("m"+GetEraShort(), syst);
+          if(nPV <= 10) executeEventWithParameter("m"+GetEraShort()+"F", syst);
+          else if(nPV <= 20) executeEventWithParameter("m"+GetEraShort()+"S", syst);
+          else if(nPV <= 30) executeEventWithParameter("m"+GetEraShort()+"L", syst);
+          else if(nPV <= 40) executeEventWithParameter("m"+GetEraShort()+"M", syst);
+          else if(nPV <= 50) executeEventWithParameter("m"+GetEraShort()+"H", syst);
+          else executeEventWithParameter("m"+GetEraShort()+"V", syst);
+        }
       }
     }
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
     executeEventWithParameter("e"+GetEraShort());
     executeEventWithParameter("E"+GetEraShort());
+    if(nPV <= 10) executeEventWithParameter("E"+GetEraShort()+"F");
+    else if(nPV <= 20) executeEventWithParameter("E"+GetEraShort()+"S");
+    else if(nPV <= 30) executeEventWithParameter("E"+GetEraShort()+"L");
+    else if(nPV <= 40) executeEventWithParameter("E"+GetEraShort()+"M");
+    else if(nPV <= 50) executeEventWithParameter("E"+GetEraShort()+"H");
+    else executeEventWithParameter("E"+GetEraShort()+"V");
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("E"+GetEraShort(), syst);
+        if(syst.Contains("scale") || !IsDATA){
+          executeEventWithParameter("E"+GetEraShort(), syst);
+          if(nPV <= 10) executeEventWithParameter("E"+GetEraShort()+"F", syst);
+          else if(nPV <= 20) executeEventWithParameter("E"+GetEraShort()+"S", syst);
+          else if(nPV <= 30) executeEventWithParameter("E"+GetEraShort()+"L", syst);
+          else if(nPV <= 40) executeEventWithParameter("E"+GetEraShort()+"M", syst);
+          else if(nPV <= 50) executeEventWithParameter("E"+GetEraShort()+"H", syst);
+          else executeEventWithParameter("E"+GetEraShort()+"V", syst);
+        }
       }
     }
   }
@@ -430,30 +458,46 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillHist(prefix+"lepbjetChargeEasy_Lm"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
     FillHist(prefix+"hadbjetCharge_Lm"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"hadbjetChargeEasy_Lm"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"recobbarjetCharge"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobbarjetChargeEasy"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"recobjetCharge"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobjetChargeEasy"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
   }else{
     FillHist(prefix+"lepbjetCharge_Lp"+suffix, lepb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"lepbjetChargeEasy_Lp"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
     FillHist(prefix+"hadbjetCharge_Lp"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"hadbjetChargeEasy_Lp"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"recobjetCharge"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobjetChargeEasy"+suffix, lepb_charge<0?0:1, map_weight, 2,0,2);
+    FillHist(prefix+"recobbarjetCharge"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobbarjetChargeEasy"+suffix, hadb_charge<0?0:1, map_weight, 2,0,2);
   }
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(lepton0->Charge() < 0){
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"lepbjetCharge%d_Lm"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"lepbjetCharge%dEasy_Lm"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"recobbarjetCharge%d"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobbarjetCharge%dEasy"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"hadbjetCharge%d_Lm"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"hadbjetCharge%dEasy_Lm"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"recobjetCharge%d"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobjetCharge%dEasy"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }else{
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"lepbjetCharge%d_Lp"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"lepbjetCharge%dEasy_Lp"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"recobjetCharge%d"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobjetCharge%dEasy"+suffix, i-1), lepb_charge<0?0:1, map_weight, 2,0,2);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"hadbjetCharge%d_Lp"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"hadbjetCharge%dEasy_Lp"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
+        FillHist(Form(prefix+"recobbarjetCharge%d"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobbarjetCharge%dEasy"+suffix, i-1), hadb_charge<0?0:1, map_weight, 2,0,2);
       }
     }
   }
@@ -484,6 +528,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"ajetsChargeAbsSum"+suffix, (acharge0<0?-1:1) + (acharge1<0?-1:1), map_weight, 8,-4,4);
   FillHist(prefix+hprefix+"bjetsChargeSum"+suffix, lepb_charge + hadb_charge, map_weight, 400,-10,10);
   FillHist(prefix+hprefix+"bjetsChargeAbsSum"+suffix, (lepb_charge<0?-1:1) + (hadb_charge<0?-1:1), map_weight, 8,-4,4);
+
+  FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
 }
 
 bool ttljAnalyzer::Hasleptons(TString channel){

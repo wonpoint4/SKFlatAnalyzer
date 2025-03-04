@@ -22,7 +22,7 @@ void chi2_AFBextractor(){
   //Hists_2D_AFB();
 
   Plots_1D_chi2();
-  //Plots_2D_chi2();
+  Plots_2D_chi2();
 
   //Charge_Purity_Calc();
   //Charge_Purity_Calc2();
@@ -66,13 +66,6 @@ void Hists_2D_AFB(TString channel="[em][em]201[6-8][ab]?/m[52,200]/", TString fr
       AFB->SetName(Form("MC_sthw2_%d_ch%d",i,ch));
       AFB->SaveAs(Form("sthw2_%d_ch%d_MC.root",i,ch));
     }
-
-    for(unsigned int i=0; i<systs.size(); i++){
-      AFB = a.GetHist(1, channel+"y["+chargebins.at(ch)+","+chargebins.at(ch+1)+"]/"+frame+"(x)", Form("suffix:_sthw2_%d:dy",i));
-      AFB->SetName(Form("MC_sthw2_%d_ch%d",i,ch));
-      AFB->SaveAs(Form("sthw2_%d_ch%d_MC.root",i,ch));
-    }
-
   }
 }
 
