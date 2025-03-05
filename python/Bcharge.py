@@ -95,7 +95,7 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
         elif systs == 4: print(" -PUjetID SF up, down")
         elif systs == 5: print(" -btagSF h, l up, down")
         elif systs == 7: print(" -btagSF h, l corr, uncorr")
-        cov_syst_bigger = np.zeros((2,2))
+        cov_syst_bigger = np.zeros((2, 2))
         for syst in range(len(fcs[systs])):
             dsyst = np.array(calc_withLR(fcs[systs][syst], fleps[systs][syst], fhads[systs][syst])) - nominal
             cov_syst = np.outer(dsyst, dsyst)
