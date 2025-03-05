@@ -60,8 +60,8 @@ def calc_withLR(fc, flep, fhad):
     return ap, am
 
 def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
-    cov_stat = np.zeros((2,2))
-    cov = np.zeros((2,2))
+    cov_stat = np.zeros((2, 2))
+    cov = np.zeros((2, 2))
     print("fc", fcs)
     fc_nominal = fcs[-1][0]
     flep_nominal = fleps[-1][0]
