@@ -10,17 +10,26 @@ sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.231
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
 NmassBins = 30 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
-allsysts = [
-    ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-    ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-    ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-    ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-    ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
-    ["_bChargeSF1_up"], ["_bChargeSF1_down"],
+systscategories = [
+    [["_jet_scale_up", "_jet_scale_down"]],
+    [["_jet_smear_up", "_jet_smear_down"]],
+    [["_prefireweight_up", "_prefireweight_down"]],
+    [["_PUweight_up", "_PUweight_down"]],
+    [["_PUjetSF_up", "_PUjetSF_down"]],
+    [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+     ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
+    [["_bChargeSF1_up"], ["_bChargeSF1_down"]],
 ]
-systnames = ["JES up, down", "JER up, down", "Prefiring up, down", "PUreweight up, down", "PUjetIDSF up, down",
-    "btagSF hup, down", "btagSF lup, down", "btagSF hcorr", "btagSF huncorr2016a", "btagSF huncorr2016b", "btagSF huncorr2017", "btagSF huncorr2018",
-    "btagSF lcorr", "btagSF luncorr2016a", "btagSF luncorr2016b", "btagSF luncorr2017", "btagSF luncorr2018", "bChargeSF eig0", "bChargeSF1 eig1",
+systnames = [
+    "JES up, down",
+    "JER up, down",
+    "Prefiring up, down",
+    "PUreweight up, down",
+    "PUjetIDSF up, down",
+    "btagSF",
+    #"btagSF hup, down, hcorr, huncorr",
+    #"btagSF lup, down, lcorr, luncorr",
+    "bChargeSF eig0, eig1",
 ]
 
 def calPrecision(chi2s, nametag):
@@ -136,18 +145,23 @@ def calCovs(channel, option=""):
 
         if "syst" in option:
             print("\n Systematics")
-            for systs in range(len(allsysts)):
+            for systs in range(len(systscategories)):
                 print("\n -"+systnames[systs])
-                cov_syst_bigger = np.zeros((NmassBins, NmassBins))
-                for syst in range(len(allsysts[systs])):
-                    AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+allsysts[systs][syst]+"(x)", "")
-                    dAFB = getdAFB(AFB_mc_nominal, AFB_mc_syst)
-                    cov_syst = np.outer(dAFB, dAFB)
-                    print("cov syst", systs, syst)
-                    #print(cov_syst)
-                    if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
-                covs[ch].append(cov_syst_bigger) # each cov_syst
-                print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_bigger)**0.5, "len(Csyst) = ", len(cov_syst_bigger))
+                cov_syst_cat = np.zeros((NmassBins, NmassBins))
+                systcat = systscategories[systs]
+                for terms in range(len(systcat)):
+                    cov_syst_bigger = np.zeros((NmassBins, NmassBins))
+                    for syst in range(len(systcat[terms])):
+                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+systcat[terms][syst]+"(x)", "")
+                        dAFB = getdAFB(AFB_mc_nominal, AFB_mc_syst)
+                        cov_syst = np.outer(dAFB, dAFB)
+                        print("cov syst", terms, syst)
+                        #print(cov_syst)
+                        if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
+                    cov_syst_cat += cov_syst_bigger
+                    print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
+                covs[ch].append(cov_syst_cat) # each cov_syst_cat
+                print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
 
     chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
     return covs
@@ -176,20 +190,25 @@ def calCovsfull2D(channel, option=""):
 
     if "syst" in option:
         print("\n Systematics")
-        for systs in range(len(allsysts)):
+        for systs in range(len(systscategories)):
             print("\n -"+systnames[systs])
-            cov_syst_bigger = np.zeros((NBins, NBins))
-            for syst in range(len(allsysts[systs])):
-                AFB_mc_systs = []
-                for ch in range(1, len(chargeBins)):
-                    AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+allsysts[systs][syst]+"(x)", ""))
-                dAFB = getdAFB(AFB_mc_nominals, AFB_mc_systs, True)
-                cov_syst = np.outer(dAFB, dAFB)
-                print("cov syst", systs, syst)
-                #print(cov_syst)
-                if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
-            covs.append(cov_syst_bigger) # each cov_syst
-            print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_bigger)**0.5, "len(Csyst) = ", len(cov_syst_bigger))
+            cov_syst_cat = np.zeros((NBins, NBins))
+            systcat = systscategories[systs]
+            for terms in range(len(systcat)):
+                cov_syst_bigger = np.zeros((NBins, NBins))
+                for syst in range(len(systcat[terms])):
+                    AFB_mc_systs = []
+                    for ch in range(1, len(chargeBins)):
+                        AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+systcat[terms][syst]+"(x)", ""))
+                    dAFB = getdAFB(AFB_mc_nominals, AFB_mc_systs, True)
+                    cov_syst = np.outer(dAFB, dAFB)
+                    print("cov syst", systs, syst)
+                    #print(cov_syst)
+                    if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
+                cov_syst_cat += cov_syst_bigger
+                print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
+            covs.append(cov_syst_cat) # each cov_syst_cat
+            print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
 
     return covs
 
