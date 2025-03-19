@@ -61,7 +61,6 @@ def calPrecision(chi2s, nametag):
             x2 = x[i]
             diff2 = abs(yi - (miny + 1))
 
-    print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)
     plt.plot(sin2ws, chi2s, 'o', color='black')
     plt.plot(x, y, color='blue')
     z=np.full(len(y), miny+1)
@@ -77,6 +76,9 @@ def calPrecision(chi2s, nametag):
     plt.grid()
     plt.savefig("./precision_"+nametag+".png", dpi=300, bbox_inches='tight')
     plt.close()
+
+    print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)
+    return (x2 - x1) / 2
 
 def getdAFB(AFB_nominal, AFB, isfull2D=False):
     dAFB = []
@@ -249,9 +251,9 @@ if __name__=="__main__":
         chi2s_2D_stat = [chi2s_2D_stat[j] + chi2s[j] for j in range(len(chi2s_2D_stat))]
     chi2s_full2D_stat = calChi2sWithCov(covs_full2D_stat, dAFBs_full2D)
 
-    calPrecision(chi2s_1D_stat, "1D_statonly")
-    calPrecision(chi2s_2D_stat, "2D_statonly")
-    calPrecision(chi2s_full2D_stat, "full2D_statonly")
+    unc_1D_stat = calPrecision(chi2s_1D_stat, "1D_statonly")
+    unc_2D_stat = calPrecision(chi2s_2D_stat, "2D_statonly")
+    unc_full2D_stat = calPrecision(chi2s_full2D_stat, "full2D_statonly")
 
     covs_total = calCovs(channel, "syst") # "syst" or "1D syst"
     covs_full2D_total = calCovsfull2D(channel, "syst") # "syst"
@@ -262,9 +264,13 @@ if __name__=="__main__":
         chi2s_2D_total = [chi2s_2D_total[j] + chi2s[j] for j in range(len(chi2s_2D_total))]
     chi2s_full2D_total = calChi2sWithCov(covs_full2D_total, dAFBs_full2D)
 
-    calPrecision(chi2s_1D_total, "1D_total")
-    calPrecision(chi2s_2D_total, "2D_total")
-    calPrecision(chi2s_full2D_total, "full2D_total")
+    unc_1D_total = calPrecision(chi2s_1D_total, "1D_total")
+    unc_2D_total = calPrecision(chi2s_2D_total, "2D_total")
+    unc_full2D_total = calPrecision(chi2s_full2D_total, "full2D_total")
+
+    print("1D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_1D_stat, (unc_1D_total**2 - unc_1D_stat**2)**0.5, unc_1D_total))
+    print("2D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_2D_stat, (unc_2D_total**2 - unc_2D_stat**2)**0.5, unc_2D_total))
+    print("full2D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_full2D_stat, (unc_full2D_total**2 - unc_full2D_stat**2)**0.5, unc_full2D_total))
 
     # (N-1) stat + syst uncertainties
     for n in range(len(covs_total[0])):
@@ -279,6 +285,10 @@ if __name__=="__main__":
         if n == 0: nosource += "DataStat"
         elif n == 1: nosource += "MCStat"
         else: nosource += systnames[n-2].replace(", ", "").replace(" ", "_")
-        calPrecision(chi2s_1D_total_N_1, ("1D_total_%i_" % n)+nosource)
-        calPrecision(chi2s_2D_total_N_1, ("2D_total_%i_" % n)+nosource)
-        calPrecision(chi2s_full2D_total_N_1, ("full2D_total_%i_" % n)+nosource)
+        unc_1D_total_N_1 = calPrecision(chi2s_1D_total_N_1, ("1D_total_%i_" % n)+nosource)
+        unc_2D_total_N_1 = calPrecision(chi2s_2D_total_N_1, ("2D_total_%i_" % n)+nosource)
+        unc_full2D_total_N_1 = calPrecision(chi2s_full2D_total_N_1, ("full2D_total_%i_" % n)+nosource)
+
+        print("Impact of "+nosource.replace("no", "")+" on 1D precision = %.5f " % (unc_1D_total**2 - unc_1D_total_N_1**2)**0.5)
+        print("Impact of "+nosource.replace("no", "")+" on 2D precision = %.5f " % (unc_2D_total**2 - unc_2D_total_N_1**2)**0.5)
+        print("Impact of "+nosource.replace("no", "")+" on full2D precision = %.5f " % (unc_full2D_total**2 - unc_full2D_total_N_1**2)**0.5)
