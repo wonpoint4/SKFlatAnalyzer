@@ -14,6 +14,3 @@
 [submodule "external/ZptCorrection"]
 	path = external/ZptCorrection
 	url = https://github.com/sansan9401/ZptCorrection.git
-[submodule "external/KinematicFitter"]
-	path = external/KinematicFitter
-	url = https://github.com/bhoh/KinematicFitter.git

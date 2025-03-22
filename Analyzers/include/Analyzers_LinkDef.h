@@ -9,7 +9,6 @@
 #pragma link C++ class AnalyzerCore+;
 #pragma link C++ class GetEffLumi+;
 #pragma link C++ class ExampleRun+;
-#pragma link C++ class ExampleRun_kinFitter+;
 #pragma link C++ class SKFlatValidation+;
 #pragma link C++ class SkimTree_SS2lOR3l+;
 #pragma link C++ class SkimTree_LRSMHighPt+;

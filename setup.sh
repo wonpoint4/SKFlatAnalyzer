@@ -10,8 +10,8 @@ export DATA_DIR=$SKFlat_WD/data/$SKFlatV
 #### use cvmfs for root ####
 export CMS_PATH=/cvmfs/cms.cern.ch
 source $CMS_PATH/cmsset_default.sh
-export SCRAM_ARCH=slc7_amd64_gcc900
-export cmsswrel='cmssw/CMSSW_11_2_5'
+export SCRAM_ARCH=el9_amd64_gcc12
+export cmsswrel='cmssw/CMSSW_15_0_1'
 cd /cvmfs/cms.cern.ch/$SCRAM_ARCH/cms/$cmsswrel/src
 echo "@@@@ SCRAM_ARCH = "$SCRAM_ARCH
 echo "@@@@ cmsswrel = "$cmsswrel
@@ -62,6 +62,7 @@ export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/DataFormats/include/:$SKF
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/external/TH4D
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:$SKFlat_WD/Plotter/
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SKFlat_LIB_PATH
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/bin/python2.7:$LD_LIBRARY_PATH
 
 source $SKFlat_WD/bin/BashColorSets.sh
 
@@ -72,10 +73,11 @@ if [ "$1" = "-q" ];then
     return
 fi
 
+alias python="python3"
 ## Todo list ##
-python python/PrintToDoLists.py
-source $SKFlat_WD/tmp/ToDoLists.sh
-rm $SKFlat_WD/tmp/ToDoLists.sh
+#python python/PrintToDoLists.py
+#source $SKFlat_WD/tmp/ToDoLists.sh
+#rm $SKFlat_WD/tmp/ToDoLists.sh
 
 CurrentGitBranch=`git branch | grep \* | cut -d ' ' -f2`
 printf "> Current SKFlatAnalyzer branch : "${BRed}$CurrentGitBranch${Color_Off}"\n"
