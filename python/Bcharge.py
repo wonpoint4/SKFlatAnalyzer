@@ -7,7 +7,7 @@ ROOT.Plotter.SetupStyle()
 
 p=ROOT.BBPlotter("eff")
 ttlj = ROOT.ttljPlotter("correct_ttlj wrong_ttlj unmatched_ttlj")
-ttlj_gen = ROOT.ttljPlotter("ttlj_kin")
+ttlj_gen = ROOT.ttljPlotter("ttlj_2b")
 forNorm = ROOT.ttljPlotter("data mc")
 
 def calc(a0,a1,a2,a3):
@@ -76,7 +76,7 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
     print("nomianl", nominal, "stat unc", [math.sqrt(cov_stat[0][0]), math.sqrt(cov_stat[1][1])])
     print("cov", cov_stat)
 
-    values, vectors= np.linalg.eig(cov_stat)
+    values, vectors = np.linalg.eig(cov_stat)
     vector0 = np.array([vectors[0][0], vectors[1][0]]) * values[0] ** 0.5
     vector1 = np.array([vectors[0][1], vectors[1][1]]) * values[1] ** 0.5
     print("stat vect0", vector0)
@@ -106,7 +106,8 @@ def calcWithCov_withLR(fcs, fleps, fhads, fc_stat, flep_stat, fhad_stat):
 
     print("nomianl", nominal, "stat+syst unc", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
     print("cov", cov)
-    values, vectors= np.linalg.eig(cov)
+
+    values, vectors = np.linalg.eig(cov)
     vector0 = np.array([vectors[0][0], vectors[1][0]]) * values[0] ** 0.5
     vector1 = np.array([vectors[0][1], vectors[1][1]]) * values[1] ** 0.5
     print("stat+syst vect0", vector0)
@@ -544,7 +545,7 @@ if __name__=="__main__":
     leps = ["[Em]", "E", "m"]
     eras = ["2016a", "2016b", "2017", "2018", "201[678][ab]?"]
     chargeBins = ["", "_4", "_5", "_[0-3]", "_0", "_1", "_2", "_3"]
-    option = "syst" # "syst" or ""
+    option = "" # "syst" or ""
 
     DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[0]+"s", option)
     DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)

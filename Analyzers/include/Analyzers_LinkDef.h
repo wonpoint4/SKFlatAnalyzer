@@ -13,6 +13,7 @@
 #pragma link C++ class SkimTree_SS2lOR3l+;
 #pragma link C++ class SkimTree_LRSMHighPt+;
 #pragma link C++ class SkimTree_Dilepton+;
+#pragma link C++ class SkimTree_2B1L+;
 #pragma link C++ class SkimTree_HNFake+;
 #pragma link C++ class SkimTree_HighPt1LJets+;
 #pragma link C++ class SkimTree_HNMultiLep+;
