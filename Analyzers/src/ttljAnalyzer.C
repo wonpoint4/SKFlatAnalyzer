@@ -260,6 +260,16 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   if(!goodKinematic) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
 
+  FillHist(prefix+"likelihood_ratio_beforeLRcut"+suffix, LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
+  FillHist(prefix+"likelihood_ratio_Mbl_beforeLRcut"+suffix, LRs.at(0), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_MblMET_beforeLRcut"+suffix, LRs.at(1), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_Mbjj_beforeLRcut"+suffix, LRs.at(2), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_Mjj_beforeLRcut"+suffix, LRs.at(3), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_dRtt_beforeLRcut"+suffix, LRs.at(4), map_weight, 100,0,5);
+  FillHist(prefix+"likelihood_ratio_dPhitt_beforeLRcut"+suffix, LRs.at(5), map_weight, 100,0,5);
+  if(LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3) < 0.5) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LR0p5 cuts", map_weight[""]);
+
   Jet lepb = bjets.at(idx_bbjj.at(0));
   Jet hadb = bjets.at(idx_bbjj.at(1));
   Jet Wj0 = ajets.at(idx_bbjj.at(2));
@@ -486,46 +496,46 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillHist(prefix+"lepbCharge_Lm"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+"hadbChargeRaw_Lm"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"hadbCharge_Lm"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+"recobbarChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"recobbarCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+"recobChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"recobCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+"recobChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+"recobbarChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobbarCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   }else{
     FillHist(prefix+"lepbChargeRaw_Lp"+suffix, lepb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"lepbCharge_Lp"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+"hadbChargeRaw_Lp"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+"hadbCharge_Lp"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+"recobChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"recobCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+"recobbarChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
-    FillHist(prefix+"recobbarCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+"recobbarChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobbarCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+"recobChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+"recobCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   }
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(lepton0->Charge() < 0){
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"lepbCharge%dRaw_Lm"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"lepbCharge%d_Lm"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-        FillHist(Form(prefix+"recobbarCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"recobbarCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+"recobCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"hadbCharge%dRaw_Lm"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"hadbCharge%d_Lm"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-        FillHist(Form(prefix+"recobCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"recobCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+"recobbarCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobbarCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       }
     }else{
       if(afb_chbin[i-1] < abs(lepb_charge) && abs(lepb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"lepbCharge%dRaw_Lp"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"lepbCharge%d_Lp"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-        FillHist(Form(prefix+"recobCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"recobCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+"recobbarCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobbarCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       }
       if(afb_chbin[i-1] < abs(hadb_charge) && abs(hadb_charge) < afb_chbin[i]){
         FillHist(Form(prefix+"hadbCharge%dRaw_Lp"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+"hadbCharge%d_Lp"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-        FillHist(Form(prefix+"recobbarCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
-        FillHist(Form(prefix+"recobbarCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+"recobCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+"recobCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       }
     }
   }
