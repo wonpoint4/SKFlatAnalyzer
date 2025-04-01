@@ -1,19 +1,17 @@
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --nmax 100 --skim SkimTree_Dilepton -a SkimTree_1B2L -o /gv0/Users/wonjun &"
-
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToMuMu_MiNNLO -n 300 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToEE_MiNNLO -n 300 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DYJetsToTauTau_MiNNLO -n 30 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i EGamma -n 60 -e 2018
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DoubleEG -n 60 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i DoubleMuon -n 60 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i TTLL_powheg -n 120 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i WW_pythia -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i WZ_pythia -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i ZZ_pythia -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i WJets_MG -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_top_NoFullyHad -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i SingleTop_tW_antitop_NoFullyHad -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_Dilepton -i GGToLL -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DYJetsToMuMu_MiNNLO -n 100 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DYJetsToEE_MiNNLO -n 100 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DYJetsToTauTau_MiNNLO -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i EGamma -n 10 -e 2018
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DoubleEG -n 10 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DoubleMuon -n 10 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i TTLL_powheg -n 60 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WW_pythia -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WZ_pythia -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i ZZ_pythia -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WJets_MG -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_top_NoFullyHad -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_antitop_NoFullyHad -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i GGToLL -n 5 -e 2017
 
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 60 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLL_powheg -n 20 -e 2017

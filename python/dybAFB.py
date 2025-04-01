@@ -18,7 +18,8 @@ systscategories = [
     [["_PUjetSF_up", "_PUjetSF_down"]],
     [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
      ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
-    [["_bChargeSF1_up"], ["_bChargeSF1_down"]],
+    [["_bChargeSF1_up0"], ["_bChargeSF1_up1"], ["_bChargeSF1_up2"], ["_bChargeSF1_up3"], ["_bChargeSF1_up4"], ["_bChargeSF1_up5"],
+     ["_bChargeSF1_down0"], ["_bChargeSF1_down1"], ["_bChargeSF1_down2"], ["_bChargeSF1_down3"], ["_bChargeSF1_down4"], ["_bChargeSF1_down5"]],
 ]
 systnames = [
     "JES up, down",

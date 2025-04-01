@@ -313,8 +313,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_nobChargeSF1"] = map_weight[""] / bchargeSF;
     map_weight["_bChargeSF1_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1);
     map_weight["_bChargeSF1_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1);
+    for(TString bCh:{"0", "1", "2", "3", "4", "5"}){
+      map_weight["_bChargeSF1_up"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1, bCh);
+      map_weight["_bChargeSF1_down"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1, bCh);
+    }
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
-    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d",i)] = map_weight[""] * weight_sthw2->at(i);
+    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
   }
   if(HasFlag("SYS") && option == "") map_weight.erase("");
 
@@ -331,8 +335,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"bCharge"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   for(unsigned int i=1; i<afb_chbinnum+1; i++){
     if(afb_chbin[i-1] < abs(bcharge) && abs(bcharge) < afb_chbin[i]){
-      FillHist(Form(prefix+"bCharge%dRaw"+suffix,i-1), bcharge, map_weight, 200,-5,5);
-      FillHist(Form(prefix+"bCharge%d"+suffix,i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+      FillHist(Form(prefix+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
+      FillHist(Form(prefix+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     }
   }
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
@@ -932,7 +936,7 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys)
   return weight + sys * sqrt(weight_unc2);
 }
 
-double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys){
+double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys, TString bChargeBins){
   double weight = 1.;
   if(IsDATA) return weight;
 
@@ -951,91 +955,91 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     if(genpid == 0) continue; // No matched b-partons
 
     double Charge = jetCharge(jet);
-    double alpha_plus_DATA_eff = 0.6280927;
-    double alpha_minus_DATA_eff = 0.61101644;
-    double alpha_plus_MC_eff = 0.65464132;
-    double alpha_minus_MC_eff = 0.63744024;
-    if(sys > 0){
-      alpha_plus_DATA_eff += -0.00086085;
-      alpha_minus_DATA_eff += 0.00082076;
-    }else if(sys < 0){
-      alpha_plus_DATA_eff += -0.00126565;
-      alpha_minus_DATA_eff += -0.00132747;
+    double alpha_plus_DATA_eff = 0.6278552;
+    double alpha_minus_DATA_eff = 0.61232865;
+    double alpha_plus_MC_eff = 0.65408853;
+    double alpha_minus_MC_eff = 0.63814405;
+    if(sys > 0){ // asym gets bigger
+      alpha_plus_DATA_eff += 0.00075906;
+      alpha_minus_DATA_eff += -0.00057259;
+    }else if(sys < 0){ // SF gets bigger
+      alpha_plus_DATA_eff += -0.00090552;
+      alpha_minus_DATA_eff += -0.0012004;
     }
 
     // 1D bChargeSF
     if(mode == 1){
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.52414302;
-        alpha_minus_DATA_eff = 0.51873695;
-        alpha_plus_MC_eff = 0.53008972;
-        alpha_minus_MC_eff = 0.52583715;
-        if(sys > 0){
-          alpha_plus_DATA_eff += 0.00243027;
-          alpha_minus_DATA_eff += 0.00224963;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00159293;
-          alpha_minus_DATA_eff += 0.00172084;
+        alpha_plus_DATA_eff = 0.52461065;
+        alpha_minus_DATA_eff = 0.52055927;
+        alpha_plus_MC_eff = 0.5300022;
+        alpha_minus_MC_eff = 0.52587682;
+        if(sys > 0 && bChargeBins.Contains("0")){
+          alpha_plus_DATA_eff += 0.00129497;
+          alpha_minus_DATA_eff += -0.00127812;
+        }else if(sys < 0 && bChargeBins.Contains("0")){
+          alpha_plus_DATA_eff += -0.00166911;
+          alpha_minus_DATA_eff += -0.00169112;
         }
       }else if(fabs(Charge) < afb_chbin[2]){// 0.2
-        alpha_plus_DATA_eff = 0.57250225;
-        alpha_minus_DATA_eff = 0.56022782;
-        alpha_plus_MC_eff = 0.58974259;
-        alpha_minus_MC_eff = 0.57610602;
-        if(sys > 0){
-          alpha_plus_DATA_eff += 0.00293206;
-          alpha_minus_DATA_eff += 0.00231308;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00158779;
-          alpha_minus_DATA_eff += 0.00201268;
+        alpha_plus_DATA_eff = 0.56994435;
+        alpha_minus_DATA_eff = 0.56001289;
+        alpha_plus_MC_eff = 0.58951292;
+        alpha_minus_MC_eff = 0.57688143;
+        if(sys > 0 && bChargeBins.Contains("1")){
+          alpha_plus_DATA_eff += 0.00128287;
+          alpha_minus_DATA_eff += -0.00133923;
+        }else if(sys < 0 && bChargeBins.Contains("1")){
+          alpha_plus_DATA_eff += -0.00213882;
+          alpha_minus_DATA_eff += -0.00204882;
         }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.66356721;
-        alpha_minus_DATA_eff = 0.63847154;
-        alpha_plus_MC_eff = 0.70239041;
-        alpha_minus_MC_eff = 0.67570902;
-        if(sys > 0){
-          alpha_plus_DATA_eff += 0.00196049;
-          alpha_minus_DATA_eff += 0.00190195;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00129073;
-          alpha_minus_DATA_eff += 0.00133046;
+        alpha_plus_DATA_eff = 0.66398118;
+        alpha_minus_DATA_eff = 0.63990481;
+        alpha_plus_MC_eff = 0.70164123;
+        alpha_minus_MC_eff = 0.67664159;
+        if(sys > 0 && bChargeBins.Contains("2")){
+          alpha_plus_DATA_eff += 0.00111143;
+          alpha_minus_DATA_eff += -0.0008855;
+        }else if(sys < 0 && bChargeBins.Contains("2")){
+          alpha_plus_DATA_eff += -0.00136247;
+          alpha_minus_DATA_eff += -0.00171009;
         }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.76749669;
-        alpha_minus_DATA_eff = 0.72100734;
-        alpha_plus_MC_eff = 0.82272573;
-        alpha_minus_MC_eff = 0.786599;
-        if(sys > 0){
-          alpha_plus_DATA_eff += 0.00631663;
-          alpha_minus_DATA_eff += 0.00569933;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00409166;
-          alpha_minus_DATA_eff += 0.00453483;
+        alpha_plus_DATA_eff = 0.77131912;
+        alpha_minus_DATA_eff = 0.72725428;
+        alpha_plus_MC_eff = 0.8229154;
+        alpha_minus_MC_eff = 0.78881504;
+        if(sys > 0 && bChargeBins.Contains("3")){
+          alpha_plus_DATA_eff += 0.00356123;
+          alpha_minus_DATA_eff += -0.00295504;
+        }else if(sys < 0 && bChargeBins.Contains("3")){
+          alpha_plus_DATA_eff += -0.00436348;
+          alpha_minus_DATA_eff += -0.00525859;
         }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.75173699;
-        alpha_minus_DATA_eff = 0.74882825;
-        alpha_plus_MC_eff = 0.77103295;
-        alpha_minus_MC_eff = 0.77032289;
-        if(sys > 0){
-          alpha_plus_DATA_eff += 0.00474426;
-          alpha_minus_DATA_eff += 0.00468225;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00341546;
-          alpha_minus_DATA_eff += 0.0034607;
+        alpha_plus_DATA_eff = 0.75383394;
+        alpha_minus_DATA_eff = 0.75016336;
+        alpha_plus_MC_eff = 0.77076044;
+        alpha_minus_MC_eff = 0.76900866;
+        if(sys > 0 && bChargeBins.Contains("4")){
+          alpha_plus_DATA_eff += 0.00252748;
+          alpha_minus_DATA_eff += -0.00223796;
+        }else if(sys < 0 && bChargeBins.Contains("4")){
+          alpha_plus_DATA_eff += -0.00338427;
+          alpha_minus_DATA_eff += -0.00382209;
         }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.75096814;
-        alpha_minus_DATA_eff = 0.75445716;
-        alpha_plus_MC_eff = 0.75817005;
-        alpha_minus_MC_eff = 0.76347831;
-        if(sys > 0){
-          alpha_plus_DATA_eff += -0.00485156;
-          alpha_minus_DATA_eff += 0.00421691;
-        }else if(sys < 0){
-          alpha_plus_DATA_eff += -0.00609114;
-          alpha_minus_DATA_eff += -0.00700786;
+        alpha_plus_DATA_eff = 0.74660024;
+        alpha_minus_DATA_eff = 0.74845344;
+        alpha_plus_MC_eff = 0.7587662;
+        alpha_minus_MC_eff = 0.76188986;
+        if(sys > 0 && bChargeBins.Contains("5")){
+          alpha_plus_DATA_eff += 0.00356592;
+          alpha_minus_DATA_eff += -0.0029006;
+        }else if(sys < 0 && bChargeBins.Contains("5")){
+          alpha_plus_DATA_eff += -0.00442595;
+          alpha_minus_DATA_eff += -0.00544113;
         }
       }
     }
