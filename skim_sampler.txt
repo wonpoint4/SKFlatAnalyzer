@@ -1,0 +1,27 @@
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToEE_M-50_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToEE_MiNNLO.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToMuMu_M-50_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToMuMu_MiNNLO.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToTauTau_MiNNLO.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ST_tW_top_5f_NoFullyHadronicDecays_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_SingleTop_tW_top_NoFullyHad.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ST_tW_antitop_5f_NoFullyHadronicDecays_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_SingleTop_tW_antitop_NoFullyHad.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_TTLL_powheg.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_WJets_MG.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/WW_TuneCP5_13TeV-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_WW_pythia.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/WZ_TuneCP5_13TeV-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_WZ_pythia.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ZZ_TuneCP5_13TeV-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_ZZ_pythia.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/GGToLL_TuneCP5_13TeV-pythia8/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_GGToLL.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/EGamma/periodA/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_EGamma_A.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/EGamma/periodB/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_EGamma_B.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/EGamma/periodC/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_EGamma_C.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/EGamma/periodD/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_EGamma_D.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/DoubleMuon/periodA/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DoubleMuon_A.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/DoubleMuon/periodB/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DoubleMuon_B.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/DoubleMuon/periodC/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DoubleMuon_C.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/DoubleMuon/periodD/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DoubleMuon_D.txt
+
+#ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodB/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_B.txt
+#ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodC/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_C.txt
+#ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodD/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_D.txt
+#ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodE/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_E.txt
+#ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodF/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_F.txt
+
