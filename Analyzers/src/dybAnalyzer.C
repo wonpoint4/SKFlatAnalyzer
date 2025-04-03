@@ -311,16 +311,27 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_bChargeSF0_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, 1);
     map_weight["_bChargeSF0_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, -1);
     map_weight["_nobChargeSF1"] = map_weight[""] / bchargeSF;
-    map_weight["_bChargeSF1_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1);
-    map_weight["_bChargeSF1_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1);
     for(TString bCh:{"0", "1", "2", "3", "4", "5"}){
       map_weight["_bChargeSF1_up"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1, bCh);
       map_weight["_bChargeSF1_down"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1, bCh);
     }
+  }else if(!IsDATA && HasFlag("PDFSYS") && option == ""){
+    if(weight_AlphaS->size() == 2){
+      map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
+      map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
+    }
+    if(weight_PSSyst->size()){
+      map_weight["_FSR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(1));
+      map_weight["_FSR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(0));
+      map_weight["_ISR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(3));
+      map_weight["_ISR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(2));
+    }
+    for(unsigned int i=0; i<weight_Scale->size(); i++) map_weight[Form("_scalevariation%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_Scale->at(i));
+    for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
-    for(unsigned int i=0;i<weight_sthw2->size();i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
+    for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
   }
-  if(HasFlag("SYS") && option == "") map_weight.erase("");
+  if((HasFlag("SYS") || HasFlag("PDFSYS")) && option == "") map_weight.erase("");
 
   FillHist(prefix+hprefix+"mll"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll"+suffix, dirap, map_weight, 96,-2.4,2.4);

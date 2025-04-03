@@ -18,8 +18,13 @@ systscategories = [
     [["_PUjetSF_up", "_PUjetSF_down"]],
     [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
      ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
-    [["_bChargeSF1_up0"], ["_bChargeSF1_up1"], ["_bChargeSF1_up2"], ["_bChargeSF1_up3"], ["_bChargeSF1_up4"], ["_bChargeSF1_up5"],
-     ["_bChargeSF1_down0"], ["_bChargeSF1_down1"], ["_bChargeSF1_down2"], ["_bChargeSF1_down3"], ["_bChargeSF1_down4"], ["_bChargeSF1_down5"]],
+    [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
+    #[["_bChargeSF1_up"], ["_bChargeSF1_down"]],
+    [["_scalevariation%d" % i for i in range(9)]],
+    [["_alphaS_up", "_alphaS_down"]],
+    [["_FSR_up", "_FSR_down"]],
+    [["_ISR_up", "_ISR_down"]],
+    [["_pdf%d"] % i for i in range(100)],
 ]
 systnames = [
     "JES up, down",
@@ -27,11 +32,15 @@ systnames = [
     "Prefiring up, down",
     "PUreweight up, down",
     "PUjetIDSF up, down",
-    "btagSF",
-    #"btagSF hup, down, hcorr, huncorr",
-    #"btagSF lup, down, lcorr, luncorr",
-    "bChargeSF eig0, eig1",
+    "btagSF up, down, un, corr",
+    "bChargeSF Variations",
+    "Scale Variations",
+    "AlphaS up, down",
+    "FSR up, down",
+    "ISR up, down",
+    "PDF Hessians",
 ]
+if len(systscategories) != len(systnames): print("Lengths of systscategories, and systnames are different!!")
 
 def calPrecision(chi2s, nametag):
     sin2ws = []
@@ -154,14 +163,18 @@ def calCovs(channel, option=""):
                 systcat = systscategories[systs]
                 for terms in range(len(systcat)):
                     cov_syst_bigger = np.zeros((NmassBins, NmassBins))
+                    idx_bigger = -1
                     for syst in range(len(systcat[terms])):
                         AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+systcat[terms][syst]+"(x)", "")
                         dAFB = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                         cov_syst = np.outer(dAFB, dAFB)
                         print("cov syst", terms, syst)
                         #print(cov_syst)
-                        if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
+                        if np.trace(cov_syst) > np.trace(cov_syst_bigger): ## Choose the cov_systematic with the larger trace
+                            cov_syst_bigger = cov_syst
+                            idx_bigger = syst
                     cov_syst_cat += cov_syst_bigger
+                    if len(systcat[terms]) > 1: print(systcat[terms][syst]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
                     print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
                 covs[ch].append(cov_syst_cat) # each cov_syst_cat
                 print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
@@ -199,6 +212,7 @@ def calCovsfull2D(channel, option=""):
             systcat = systscategories[systs]
             for terms in range(len(systcat)):
                 cov_syst_bigger = np.zeros((NBins, NBins))
+                idx_bigger = -1
                 for syst in range(len(systcat[terms])):
                     AFB_mc_systs = []
                     for ch in range(1, len(chargeBins)):
@@ -207,8 +221,12 @@ def calCovsfull2D(channel, option=""):
                     cov_syst = np.outer(dAFB, dAFB)
                     print("cov syst", systs, syst)
                     #print(cov_syst)
-                    if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
+                    if np.trace(cov_syst) > np.trace(cov_syst_bigger): ## Choose the cov_systematic with the larger trace
+                        cov_syst_bigger = cov_syst
+                        idx_bigger = syst
+                #if "Hessian" in systnames[systs]: cov_syst_bigger *= 1. / len(systcat[terms])
                 cov_syst_cat += cov_syst_bigger
+                if len(systcat[terms]) > 1: print(systcat[terms][syst]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
                 print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
             covs.append(cov_syst_cat) # each cov_syst_cat
             print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
