@@ -1,3 +1,4 @@
+import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ systscategories = [
     [["_alphaS_up", "_alphaS_down"]],
     [["_FSR_up", "_FSR_down"]],
     [["_ISR_up", "_ISR_down"]],
-    [["_pdf%d"] % i for i in range(100)],
+    [["_pdf%d" % i] for i in range(100)],
 ]
 systnames = [
     "JES up, down",
@@ -258,8 +259,16 @@ def calChi2sWithCov(covs, dAFBs, mode=-1):
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
-    dAFBs = caldAFBs(channel)
-    dAFBs_full2D = caldAFBs(channel, True)
+    channel_path = channel.replace("?/", "").replace("[", "").replace("]", "")
+    if not os.path.exists(channel_path+"_dAFBs.npz"):
+        dAFBs = caldAFBs(channel)
+        dAFBs_full2D = caldAFBs(channel, True)
+        np.savez(channel_path+"_dAFBs", X = dAFBs, Y = dAFBs_full2D)
+    else:
+        dAFBs_npz = np.load(channel_path+"_dAFBs.npz")
+        print(channel_path+"_dAFBs.npz is loaded")
+        dAFBs = dAFBs_npz['X']
+        dAFBs_full2D = dAFBs_npz['Y']
 
     covs_stat = calCovs(channel, "") # "" or "1D"
     covs_full2D_stat = calCovsfull2D(channel, "") # ""
@@ -274,8 +283,17 @@ if __name__=="__main__":
     unc_2D_stat = calPrecision(chi2s_2D_stat, "2D_statonly")
     unc_full2D_stat = calPrecision(chi2s_full2D_stat, "full2D_statonly")
 
-    covs_total = calCovs(channel, "syst") # "syst" or "1D syst"
-    covs_full2D_total = calCovsfull2D(channel, "syst") # "syst"
+    ## Systematics
+    if not os.path.exists(channel_path+"_covs_total.npz"):
+        covs_total = calCovs(channel, "syst") # "syst" or "1D syst"
+        covs_full2D_total = calCovsfull2D(channel, "syst") # "syst"
+        np.savez(channel_path+"_covs_total", X = covs_total, Y = covs_full2D_total)
+    else:
+        covs_total_npz = np.load(channel_path+"_covs_total.npz")
+        print(channel_path+"_covs_total.npz is loaded")
+        covs_total = covs_total_npz['X']
+        covs_full2D_total = covs_total_npz['Y']
+
     chi2s_1D_total = calChi2sWithCov(covs_total[0], dAFBs[0])
     chi2s_2D_total = [0] * len(sin2w_indice)
     for i in range(1, len(chargeBins)):
