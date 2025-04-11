@@ -236,40 +236,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "bChargeSF1", map_weight[""]);
   }
 
-  FillHist(prefix+hprefix+"mll_Tight1b"+suffix, dimass, map_weight[""], 80,70,110);
-  FillHist(prefix+hprefix+"yll_Tight1b"+suffix, dirap, map_weight[""], 96,-2.4,2.4);
-  FillHist(prefix+hprefix+"ptll_Tight1b"+suffix, dipt, map_weight[""], AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
-  FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"bpt_Tight1b"+suffix, jet0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"beta_Tight1b"+suffix, jet0->Eta(), map_weight[""], 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"bCharge_Tight1b"+suffix, bcharge, map_weight[""], 200,-5,5);
-  FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
-
-  if(ajets.size() > 0) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2b", map_weight[""]);
-
-  int n_30jet = 0;
-  for(unsigned int k=0; k<realjets.size(); k++){
-    if(realjets.at(k).Pt() > 30) n_30jet += 1;
-  }
-  if(n_30jet > 1) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
-
-  if(PuppiMET_Type1_pt > 75) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET75", map_weight[""]);
-
-  if(abs((*lepton0 + *lepton1).DeltaPhi(*jet0)) < 1.6) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbdPhi1p6", map_weight[""]);
-
-  if((*lepton0 + *lepton1 + *jet0).Pt() > 60) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbpT60", map_weight[""]);
-
-  if((*lepton0 + *lepton1).Pt() < 15) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
-
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // Prefiring weight
@@ -332,6 +298,63 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
   }
   if((HasFlag("SYS") || HasFlag("PDFSYS")) && option == "") map_weight.erase("");
+
+  FillHist(prefix+hprefix+"mll_Tight1b"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_Tight1b"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_Tight1b"+suffix, dipt, map_weight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+  FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_Tight1b"+suffix, jet0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"beta_Tight1b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bCharge_Tight1b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+  if(ajets.size() > 0) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2b", map_weight[""]);
+
+  FillHist(prefix+hprefix+"mll_Veto2b"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_Veto2b"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_Veto2b"+suffix, dipt, map_weight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+  FillHist(prefix+hprefix+"lpt_Veto2b"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Veto2b"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_Veto2b"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Veto2b"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_Veto2b"+suffix, jet0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"beta_Veto2b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bCharge_Veto2b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  int n_30jet = 0;
+  for(unsigned int k=0; k<realjets.size(); k++){
+    if(realjets.at(k).Pt() > 30) n_30jet += 1;
+  }
+  if(n_30jet > 1) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
+
+  FillHist(prefix+hprefix+"mll_Veto2j"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_Veto2j"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_Veto2j"+suffix, dipt, map_weight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+  FillHist(prefix+hprefix+"lpt_Veto2j"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Veto2j"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_Veto2j"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"leta_Veto2j"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_Veto2j"+suffix, jet0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+  FillHist(prefix+hprefix+"beta_Veto2j"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bCharge_Veto2j"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"costhetaRecoil_Veto2j"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+  if(PuppiMET_Type1_pt > 75) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET75", map_weight[""]);
+
+  if(abs((*lepton0 + *lepton1).DeltaPhi(*jet0)) < 1.6) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbdPhi1p6", map_weight[""]);
+
+  if((*lepton0 + *lepton1 + *jet0).Pt() > 60) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZbpT60", map_weight[""]);
+
+  if((*lepton0 + *lepton1).Pt() < 15) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
 
   FillHist(prefix+hprefix+"mll"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll"+suffix, dirap, map_weight, 96,-2.4,2.4);

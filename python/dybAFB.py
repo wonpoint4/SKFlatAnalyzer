@@ -21,7 +21,7 @@ systscategories = [
      ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
     [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     #[["_bChargeSF1_up"], ["_bChargeSF1_down"]],
-    [["_scalevariation%d" % i for i in range(9)]],
+    [["_scalevariation%d" % i for i in [1, 2, 3, 4, 6, 8]]], # No 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     [["_alphaS_up", "_alphaS_down"]],
     [["_FSR_up", "_FSR_down"]],
     [["_ISR_up", "_ISR_down"]],
@@ -85,7 +85,7 @@ def calPrecision(chi2s, nametag):
 
     plt.legend(loc='upper right')
     plt.grid()
-    plt.savefig("./precision_"+nametag+".png", dpi=300, bbox_inches='tight')
+    #plt.savefig("./precision_"+nametag+".png", dpi=300, bbox_inches='tight')
     plt.close()
 
     print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)
@@ -112,8 +112,8 @@ def caldAFBs(channel, isfull2D=False):
             dAFB = np.zeros(NmassBins)
             for sin in range(len(sin2w_indice)):
                 iSin = sin2w_indice[sin]
-                AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
+                AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "")
+                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "suffix:_sthw2_%i:dy" % iSin)
                 dAFB = getdAFB(AFB_mc_nominal, AFB_mc_sin2w)
                 dAFBs[ch].append(dAFB) # dAFB per each sin2w scenario
                 print("\n dAFBs of "+channel+chargeBins[ch]+", sin2w_variation : %d" % iSin)
@@ -126,8 +126,8 @@ def caldAFBs(channel, isfull2D=False):
             AFB_mc_nominals = []
             AFB_mc_sin2ws = []
             for ch in range(1, len(chargeBins)):
-                AFB_mc_nominals.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", ""))
-                AFB_mc_sin2ws.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin))
+                AFB_mc_nominals.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", ""))
+                AFB_mc_sin2ws.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "suffix:_sthw2_%i:dy" % iSin))
 
             dAFB = getdAFB(AFB_mc_nominals, AFB_mc_sin2ws, True)
             dAFBs.append(dAFB) # dAFB per each sin2w scenario
@@ -142,8 +142,8 @@ def calCovs(channel, option=""):
     covs = [[] for i in range(len(chargeBins))] # covs[chargeBins][each cov terms]
 
     for ch in range(len(chargeBins)):
-        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "")
+        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "")
 
         cov_stat_data = np.zeros((NmassBins, NmassBins))
         cov_stat_mc = np.zeros((NmassBins, NmassBins))
@@ -166,16 +166,16 @@ def calCovs(channel, option=""):
                     cov_syst_bigger = np.zeros((NmassBins, NmassBins))
                     idx_bigger = -1
                     for syst in range(len(systcat[terms])):
-                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+systcat[terms][syst]+"(x)", "")
+                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j"+systcat[terms][syst]+"(x)", "")
                         dAFB = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                         cov_syst = np.outer(dAFB, dAFB)
-                        print("cov syst", terms, syst)
+                        print("cov syst", terms, syst, np.trace(cov_syst))
                         #print(cov_syst)
                         if np.trace(cov_syst) > np.trace(cov_syst_bigger): ## Choose the cov_systematic with the larger trace
                             cov_syst_bigger = cov_syst
                             idx_bigger = syst
                     cov_syst_cat += cov_syst_bigger
-                    if len(systcat[terms]) > 1: print(systcat[terms][syst]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
+                    if len(systcat[terms]) > 1: print(systcat[terms][idx_bigger]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
                     print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
                 covs[ch].append(cov_syst_cat) # each cov_syst_cat
                 print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
@@ -191,8 +191,8 @@ def calCovsfull2D(channel, option=""):
     AFB_mc_nominals = []
 
     for ch in range(1, len(chargeBins)):
-        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "")
+        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j(x)", "")
         AFB_mc_nominals.append(AFB_mc_nominal)
 
         for mbin in range(NmassBins):
@@ -217,17 +217,17 @@ def calCovsfull2D(channel, option=""):
                 for syst in range(len(systcat[terms])):
                     AFB_mc_systs = []
                     for ch in range(1, len(chargeBins)):
-                        AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+systcat[terms][syst]+"(x)", ""))
+                        AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2j"+systcat[terms][syst]+"(x)", ""))
                     dAFB = getdAFB(AFB_mc_nominals, AFB_mc_systs, True)
                     cov_syst = np.outer(dAFB, dAFB)
-                    print("cov syst", systs, syst)
+                    print("cov syst", systs, syst, np.trace(cov_syst))
                     #print(cov_syst)
                     if np.trace(cov_syst) > np.trace(cov_syst_bigger): ## Choose the cov_systematic with the larger trace
                         cov_syst_bigger = cov_syst
                         idx_bigger = syst
                 #if "Hessian" in systnames[systs]: cov_syst_bigger *= 1. / len(systcat[terms])
                 cov_syst_cat += cov_syst_bigger
-                if len(systcat[terms]) > 1: print(systcat[terms][syst]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
+                if len(systcat[terms]) > 1: print(systcat[terms][idx_bigger]+" is chosen, Trace(C) = ", np.trace(cov_syst_bigger)**0.5)
                 print("Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5)
             covs.append(cov_syst_cat) # each cov_syst_cat
             print(systnames[systs]+", Sqrt of Trace(Csyst) = ", np.trace(cov_syst_cat)**0.5, "len(Csyst) = ", len(cov_syst_cat))
