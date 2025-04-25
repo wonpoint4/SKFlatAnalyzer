@@ -11,6 +11,17 @@ sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.231
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
 NmassBins = 30 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+xsec_unc = {
+    "dy" : [1.7, -1.8],
+    "wjets" : [3.8, -3.8],
+    "ww" : [2.5, -2.2],
+    "wz" : [6.1, -6.1],
+    "zz" : [4.9, -4.9],
+    "tt" : [4.8, -6.1],
+    "tw" : [5.4, -5.4],
+    "aa" : [30, -30],
+    "qcd" : [10, -10],
+}
 systscategories = [
     [["_jet_scale_up", "_jet_scale_down"]],
     [["_jet_smear_up", "_jet_smear_down"]],
@@ -20,12 +31,12 @@ systscategories = [
     [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
      ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
     [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
-    #[["_bChargeSF1_up"], ["_bChargeSF1_down"]],
     [["_scalevariation%d" % i for i in [1, 2, 3, 4, 6, 8]]], # No 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     [["_alphaS_up", "_alphaS_down"]],
     [["_FSR_up", "_FSR_down"]],
     [["_ISR_up", "_ISR_down"]],
     [["_pdf%d" % i] for i in range(100)],
+    [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
 ]
 systnames = [
     "JES up, down",
@@ -40,8 +51,10 @@ systnames = [
     "FSR up, down",
     "ISR up, down",
     "PDF Hessians",
+    "Bkg Normalizations",
 ]
 if len(systscategories) != len(systnames): print("Lengths of systscategories, and systnames are different!!")
+
 
 def calPrecision(chi2s, nametag):
     sin2ws = []
@@ -112,8 +125,8 @@ def caldAFBs(channel, isfull2D=False):
             dAFB = np.zeros(NmassBins)
             for sin in range(len(sin2w_indice)):
                 iSin = sin2w_indice[sin]
-                AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "")
-                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "suffix:_sthw2_%i:dy" % iSin)
+                AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
                 dAFB = getdAFB(AFB_mc_nominal, AFB_mc_sin2w)
                 dAFBs[ch].append(dAFB) # dAFB per each sin2w scenario
                 print("\n dAFBs of "+channel+chargeBins[ch]+", sin2w_variation : %d" % iSin)
@@ -126,8 +139,8 @@ def caldAFBs(channel, isfull2D=False):
             AFB_mc_nominals = []
             AFB_mc_sin2ws = []
             for ch in range(1, len(chargeBins)):
-                AFB_mc_nominals.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", ""))
-                AFB_mc_sin2ws.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "suffix:_sthw2_%i:dy" % iSin))
+                AFB_mc_nominals.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", ""))
+                AFB_mc_sin2ws.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin))
 
             dAFB = getdAFB(AFB_mc_nominals, AFB_mc_sin2ws, True)
             dAFBs.append(dAFB) # dAFB per each sin2w scenario
@@ -142,8 +155,8 @@ def calCovs(channel, option=""):
     covs = [[] for i in range(len(chargeBins))] # covs[chargeBins][each cov terms]
 
     for ch in range(len(chargeBins)):
-        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "")
-        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "")
+        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
 
         cov_stat_data = np.zeros((NmassBins, NmassBins))
         cov_stat_mc = np.zeros((NmassBins, NmassBins))
@@ -166,7 +179,14 @@ def calCovs(channel, option=""):
                     cov_syst_bigger = np.zeros((NmassBins, NmassBins))
                     idx_bigger = -1
                     for syst in range(len(systcat[terms])):
-                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b"+systcat[terms][syst]+"(x)", "")
+                        syststr = systcat[terms][syst]
+                        norm_syst = ""
+                        if "norm" in syststr:
+                            for process, uncs in xsec_unc.items():
+                                if process in syststr: norm_syst += "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
+                            syststr = ""
+                            print(norm_syst)
+                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+syststr+"(x)", norm_syst)
                         dAFB = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                         cov_syst = np.outer(dAFB, dAFB)
                         print("cov syst", terms, syst, np.trace(cov_syst))
@@ -191,8 +211,8 @@ def calCovsfull2D(channel, option=""):
     AFB_mc_nominals = []
 
     for ch in range(1, len(chargeBins)):
-        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "")
-        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b(x)", "")
+        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
         AFB_mc_nominals.append(AFB_mc_nominal)
 
         for mbin in range(NmassBins):
@@ -216,8 +236,15 @@ def calCovsfull2D(channel, option=""):
                 idx_bigger = -1
                 for syst in range(len(systcat[terms])):
                     AFB_mc_systs = []
+                    syststr = systcat[terms][syst]
+                    norm_syst = ""
+                    if "norm" in syststr:
+                        for process, uncs in xsec_unc.items():
+                            if process in syststr: norm_syst += "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
+                        syststr = ""
+                        print(norm_syst)
                     for ch in range(1, len(chargeBins)):
-                        AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil_Veto2b"+systcat[terms][syst]+"(x)", ""))
+                        AFB_mc_systs.append(dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+syststr+"(x)", norm_syst))
                     dAFB = getdAFB(AFB_mc_nominals, AFB_mc_systs, True)
                     cov_syst = np.outer(dAFB, dAFB)
                     print("cov syst", systs, syst, np.trace(cov_syst))
@@ -259,15 +286,16 @@ def calChi2sWithCov(covs, dAFBs, mode=-1):
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
+    npz_files_tag = "_baseline2"
+
     channel_path = channel.replace("?/", "").replace("[", "").replace("]", "")
-    if not os.path.exists(channel_path+"_dAFBs_remove.npz"):
-    #if not os.path.exists(channel_path+"_dAFBs.npz"):
+    if not os.path.exists(channel_path+"_dAFBs"+npz_files_tag+".npz"):
         dAFBs = caldAFBs(channel)
         dAFBs_full2D = caldAFBs(channel, True)
-        #np.savez(channel_path+"_dAFBs", X = dAFBs, Y = dAFBs_full2D)
+        np.savez(channel_path+"_dAFBs"+npz_files_tag+"", X = dAFBs, Y = dAFBs_full2D)
     else:
-        dAFBs_npz = np.load(channel_path+"_dAFBs.npz")
-        print(channel_path+"_dAFBs.npz is loaded")
+        dAFBs_npz = np.load(channel_path+"_dAFBs"+npz_files_tag+".npz")
+        print(channel_path+"_dAFBs"+npz_files_tag+".npz is loaded")
         dAFBs = dAFBs_npz['X']
         dAFBs_full2D = dAFBs_npz['Y']
 
@@ -285,14 +313,13 @@ if __name__=="__main__":
     unc_full2D_stat = calPrecision(chi2s_full2D_stat, "full2D_statonly")
 
     ## Systematics
-    if not os.path.exists(channel_path+"_covs_total_remove.npz"):
-    #if not os.path.exists(channel_path+"_covs_total.npz"):
+    if not os.path.exists(channel_path+"_covs_total"+npz_files_tag+".npz"):
         covs_total = calCovs(channel, "syst") # "syst" or "1D syst"
         covs_full2D_total = calCovsfull2D(channel, "syst") # "syst"
-        #np.savez(channel_path+"_covs_total", X = covs_total, Y = covs_full2D_total)
+        np.savez(channel_path+"_covs_total"+npz_files_tag+"", X = covs_total, Y = covs_full2D_total)
     else:
-        covs_total_npz = np.load(channel_path+"_covs_total.npz")
-        print(channel_path+"_covs_total.npz is loaded")
+        covs_total_npz = np.load(channel_path+"_covs_total"+npz_files_tag+".npz")
+        print(channel_path+"_covs_total"+npz_files_tag+".npz is loaded")
         covs_total = covs_total_npz['X']
         covs_full2D_total = covs_total_npz['Y']
 
