@@ -913,25 +913,23 @@ void SMPAnalyzerCore::DeleteZptWeight(){
 }
 
 double SMPAnalyzerCore::GetTopPtReweight2(const std::vector<Gen>& gens){
-  //==== ref: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting2017
+  //==== ref: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
   //==== Only top quarks in SM ttbar events must be reweighted,
   //==== not single tops or tops from BSM production mechanisms.
   if(!MCSample.Contains("TT") || !MCSample.Contains("powheg")){
     return 1.;
   }
-  //==== initialize with large number                                                                                                                                                                                                                                                                                                                           
-  double toppt1=10000, toppt2=10000;
+  double toppt1 = 0, toppt2 = 0;
   bool found_top = false, found_atop = false;
-  
+
   for(vector<Gen>::const_iterator genit=gens.begin(); genit!=gens.end(); genit++){
-    
     if(genit->Status() == 22){
       if(genit->PID() == 6){
-        toppt1= genit->Pt();
+        toppt1 = genit->Pt();
         found_top = true;
       }
       else if(genit->PID() == -6){
-        toppt2= genit->Pt();
+        toppt2 = genit->Pt();
         found_atop = true;
       }
     }
@@ -940,12 +938,13 @@ double SMPAnalyzerCore::GetTopPtReweight2(const std::vector<Gen>& gens){
   }
   double pt_reweight = 1.;
   //==== if top pair is not found, return 1.
-  pt_reweight*=0.103*exp(-0.0118*toppt1)-0.000134*toppt1+0.973;
-  pt_reweight*=0.103*exp(-0.0118*toppt2)-0.000134*toppt2+0.973;
+  if(!(found_top && found_atop)) return pt_reweight;
+
+  pt_reweight *= 0.103 * exp(-0.0118 * toppt1) - 0.000134 * toppt1 + 0.973;
+  pt_reweight *= 0.103 * exp(-0.0118 * toppt2) - 0.000134 * toppt2 + 0.973;
   pt_reweight = sqrt(pt_reweight);
   return pt_reweight;
 }
-
 
 void SMPAnalyzerCore::SetupRoccoR(){
   cout<<"[SMPAnalyzerCore::SetupRoccoR] setting Rocheseter Correction"<<endl;

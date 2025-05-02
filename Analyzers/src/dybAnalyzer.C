@@ -19,7 +19,7 @@ void dybAnalyzer::executeEvent(){
   if(MCSample == "DYJets" && !isnormal(weight_Scale->at(0))) return;
 
   ///////////////// GEN level /////////////////////
-  executeEventGen();
+  if(IsDYSample || IsTTSample) executeEventGen();
 
   ///////////////// RECO level /////////////////////
   if(!IsDATA || DataStream.Contains("DoubleMuon")){
@@ -104,8 +104,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb);
   JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Loose, JetTagging::incl, JetTagging::comb);
 
-  for(const auto& jet:realjets){
-    if(jet.Pt() > 30 && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
+  for(auto& jet:realjets){
+    //jet *= jet.BJetNNCorrection(); // full bJetEnergyCorrection (BBjetRegression)?
+    if(jet.Pt() > 25 && jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
     else if(jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) ajets.push_back(jet);
   }
 
@@ -214,6 +215,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   if(bjets.size() != 1) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
+  //bjets.at(0) *= bjets.at(0).BJetNNCorrection(); // bJetEnergyCorrection (BjetRegression)?
   jet0 = &bjets.at(0);
   bcharge = jetCharge(*jet0);
   bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
@@ -282,17 +284,31 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
       map_weight["_bChargeSF1_down"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1, bCh);
     }
   }else if(!IsDATA && HasFlag("PDFSYS") && option == ""){
+    // Zpt Reweight
+    map_weight["_noZpt"] =  map_weight[""] / zptweight;
+    map_weight["_Zpt_gym"] =  map_weight[""] / zptweight * zptweight_gym;
+
+    // Top pt Reweight
+    map_weight["_noToppt"] =  map_weight[""] / topptweight;
+
+    // AlphaS
     if(weight_AlphaS->size() == 2){
       map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
       map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
     }
+
+    // FSR, ISR
     if(weight_PSSyst->size()){
       map_weight["_FSR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(1));
       map_weight["_FSR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(0));
       map_weight["_ISR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(3));
       map_weight["_ISR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(2));
     }
+
+    // Scale Variations
     for(unsigned int i=0; i<weight_Scale->size(); i++) map_weight[Form("_scalevariation%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_Scale->at(i));
+
+    // PDF
     for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
     for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
@@ -329,7 +345,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   if(ajets.size() > 0){
     FillHist(prefix+hprefix+"apt_Tight1b"+suffix, ajets.at(0).Pt(), map_weight, 200,0,200);
-    if(ajets.at(0).Pt() > 30) return;
+    if(ajets.at(0).Pt() > 25) return;
   }
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2b", map_weight[""]);
 
@@ -350,6 +366,21 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   if(PuppiMET_Type1_pt > 60) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET60", map_weight[""]);
+
+  FillHist(prefix+hprefix+"mll_met60"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_met60"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"lpt_met60"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_met60"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_met60"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_met60"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_met60"+suffix, jet0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"beta_met60"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bCharge_met60"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"met_met60"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"Zbpt_met60"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"Zpt_met60"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"costhetaRecoil_met60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if((*lepton0 + *lepton1).Pt() < 15) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
@@ -553,6 +584,7 @@ void dybAnalyzer::executeEventGen(){
   gprefix = "";
   if(IsData) return;
 
+  vector<Gen> gens = GetGens();
   if(IsDYSample){
     // LHE Setting
     vector<LHE> lhes = GetLHEs();
@@ -572,7 +604,6 @@ void dybAnalyzer::executeEventGen(){
     }
 
     // GEN Setting
-    vector<Gen> gens = GetGens();
     Gen gen_l0, gen_l1;
     vector<const Gen*> leptons;
     vector<const Gen*> photons;
@@ -639,7 +670,8 @@ void dybAnalyzer::executeEventGen(){
 
     if(abs(lhe_l0.ID()) == 11 || abs(lhe_l0.ID()) == 13){
       TLorentzVector genZ = (gen_l0 + gen_l1);
-      zptweight = fZptCorrection->GetZptWeight(genZ.Pt(),genZ.Rapidity(),genZ.M());
+      zptweight = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity());
+      zptweight_gym = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity(), genZ.M());
       weakweight = GetDYWeakWeight(genZ.M());
 
       // Only qqbar collisions (LO DY)
@@ -679,7 +711,7 @@ void dybAnalyzer::executeEventGen(){
       }
     }else gprefix += "tau_";
   }
-  if(IsTTSample) topptweight=mcCorr->GetTopPtReweight(gens);
+  if(IsTTSample) topptweight = mcCorr->GetTopPtReweight(gens);
 }
 
 double dybAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int direction){

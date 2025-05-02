@@ -54,7 +54,7 @@ public:
   double lumiweight = 1.;
   double PUweight = 1.;
   double prefireweight = 1.;
-  double zptweight =1.;
+  double zptweight = 1., zptweight_gym = 1.;
   double weakweight = 1.;
   double btagSF = 1.;
   double topptweight = 1.;

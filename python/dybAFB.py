@@ -12,7 +12,6 @@ sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
 NmassBins = 30 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
-    "dy" : [1.7, -1.8],
     "wjets" : [3.8, -3.8],
     "ww" : [2.5, -2.2],
     "wz" : [6.1, -6.1],
@@ -20,7 +19,7 @@ xsec_unc = {
     "tt" : [4.8, -6.1],
     "tw" : [5.4, -5.4],
     "aa" : [30, -30],
-    "qcd" : [10, -10],
+    "qcd" : [30, -30],
 }
 systscategories = [
     [["_jet_scale_up", "_jet_scale_down"]],
@@ -37,6 +36,8 @@ systscategories = [
     [["_ISR_up", "_ISR_down"]],
     [["_pdf%d" % i] for i in range(100)],
     [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
+    [["_noToppt"]],
+    [["_noZpt"], ["_Zpt_gym"]],
 ]
 systnames = [
     "JES up, down",
@@ -52,6 +53,8 @@ systnames = [
     "ISR up, down",
     "PDF Hessians",
     "Bkg Normalizations",
+    "Top pt reweight",
+    "Zpt reweight",
 ]
 if len(systscategories) != len(systnames): print("Lengths of systscategories, and systnames are different!!")
 
@@ -286,7 +289,7 @@ def calChi2sWithCov(covs, dAFBs, mode=-1):
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
-    npz_files_tag = "_baseline2"
+    npz_files_tag = "_zpt"
 
     channel_path = channel.replace("?/", "").replace("[", "").replace("]", "")
     if not os.path.exists(channel_path+"_dAFBs"+npz_files_tag+".npz"):
