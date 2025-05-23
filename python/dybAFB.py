@@ -101,7 +101,7 @@ def calPrecision(chi2s, nametag):
 
     plt.legend(loc='upper right')
     plt.grid()
-    #plt.savefig("./precision_"+nametag+".png", dpi=300, bbox_inches='tight')
+    plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
     print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)

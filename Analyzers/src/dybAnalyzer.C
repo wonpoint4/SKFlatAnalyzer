@@ -323,7 +323,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bpt_Tight1b"+suffix, jet0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"beta_Tight1b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"bCharge_Tight1b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw_Tight1b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bCharge_Tight1b"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_Tight1b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"ZbdPhi_Tight1b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Tight1b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
@@ -357,7 +358,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"leta_Veto2b"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bpt_Veto2b"+suffix, jet0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"beta_Veto2b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"bCharge_Veto2b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw_Veto2b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bCharge_Veto2b"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_Veto2b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Veto2b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
@@ -375,7 +377,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"leta_met60"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bpt_met60"+suffix, jet0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"beta_met60"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"bCharge_met60"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw_met60"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bCharge_met60"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_met60"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_met60"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
@@ -395,10 +398,25 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"beta"+suffix, jet0->Eta(), map_weight[""], 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bChargeRaw"+suffix, bcharge, map_weight, 200,-5,5);
   FillHist(prefix+hprefix+"bCharge"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-  for(unsigned int i=1; i<afb_chbinnum+1; i++){
+  // bCharges vs. nPV
+  FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
+  TString prefix_nPV = prefix;
+  if(nPV <= 10) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"F");      // few
+  else if(nPV <= 20) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"S"); // some
+  else if(nPV <= 30) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"L"); // little
+  else if(nPV <= 40) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"M"); // middle
+  else if(nPV <= 50) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"H"); // high
+  else prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"V");               // very high
+  for(int i=1; i<afb_chbinnum+1; i++){
     if(afb_chbin[i-1] < abs(bcharge) && abs(bcharge) < afb_chbin[i]){
       FillHist(Form(prefix+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
       FillHist(Form(prefix+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+      FillHist(prefix+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
+      FillHist(prefix+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);
+      FillHist(Form(prefix_nPV+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
+      FillHist(Form(prefix_nPV+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+      FillHist(prefix_nPV+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
+      FillHist(prefix_nPV+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);
     }
   }
   FillHist(prefix+hprefix+"met"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
@@ -430,7 +448,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillHist(prefix+hprefix+"leta_ZbdPhi0p5pi"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
     FillHist(prefix+hprefix+"bpt_ZbdPhi0p5pi"+suffix, jet0->Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"beta_ZbdPhi0p5pi"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bCharge_ZbdPhi0p5pi"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw_ZbdPhi0p5pi"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bCharge_ZbdPhi0p5pi"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"met_ZbdPhi0p5pi"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
     FillHist(prefix+hprefix+"ZbdPhi_ZbdPhi0p5pi"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
     FillHist(prefix+hprefix+"Zbpt_ZbdPhi0p5pi"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
@@ -447,7 +466,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     FillHist(prefix+hprefix+"leta_Zbpt100"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
     FillHist(prefix+hprefix+"bpt_Zbpt100"+suffix, jet0->Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"beta_Zbpt100"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bCharge_Zbpt100"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw_Zbpt100"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bCharge_Zbpt100"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"met_Zbpt100"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
     FillHist(prefix+hprefix+"ZbdPhi_Zbpt100"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
     FillHist(prefix+hprefix+"Zbpt_Zbpt100"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
