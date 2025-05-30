@@ -82,7 +82,7 @@ def calPrecision(chi2s, nametag):
     plt.text(0.224, 0.1, "$\chi^{2}_{max}$ = %.3f" % chi2s[0])
     plt.text(0.231, chi2s[0] * 0.79, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f" % ((x1 + x2) / 2, (x2 - x1) / 2))
 
-    plt.legend(loc='upper right')
+    #plt.legend(loc='upper right')
     plt.grid()
     plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
@@ -108,15 +108,15 @@ def getdAFBs_sin2w(channel):
             AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
             dAFB = getdAFB(AFB_mc_nominal, AFB_mc_sin2w)
-            dAFBs[iSin].append(dAFB)
+            dAFBs[sin].append(dAFB)
             if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
             print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB) of " % iSin), (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
             print(dAFB)
         dAFBs_full.append(dAFB_full)
-        print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB_full) of " % iSin), (dAFB_full * dAFB_full).sum(), ", len(dAFB_full) = ", len(dAFB_full))
+        print("\n dAFBs of "+channel, (", sin2w_variation : %d, trace(dAFB_full) of " % iSin), (dAFB_full * dAFB_full).sum(), ", len(dAFB_full) = ", len(dAFB_full))
         print(dAFB_full)
 
-    return dAFBs, dAFBs_full
+    return np.array(dAFBs), np.array(dAFBs_full)
 
 def getdAFBs_syst(channel):
     dAFBs = {}  ## dAFBs{systkey}[term][syst][chargeBins] - numpy 1D array with dimass bins
@@ -171,13 +171,12 @@ def getdAFBs_syst(channel):
 
     return dAFBs, dAFBs_full
 
-def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, N_1="", statOnly=False):
+def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""):
     dim = dAFBs_sin2w.shape[1] # 30 or 180
-    print(dim)
     cov = np.zeros((dim, dim))
     for systkey, list_syst in dAFBs_syst.items():
         if systkey == N_1: continue # For (N-1) syst uncertainties
-        elif statOnly and "stat" not in systkey: continue
+        elif statOnly and "stat" not in systkey: continue # For Stat-only uncertainties
         else:
             cov_term = np.zeros((dim, dim))
             for term in range(len(list_syst)):
@@ -185,11 +184,11 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, N_1="", statOnly=False
                 cov_syst_bigger = np.zeros((dim, dim))
                 for syst in range(len(list_syst[term])):
                     trace = (dAFBs_syst[systkey][term][syst][chargeBin] * dAFBs_syst[systkey][term][syst][chargeBin]).sum()
-                    print(syst, ", ", trace)
                     if trace > dAFBs_trace:
                         dAFBs_trace = trace
                         cov_syst_bigger = np.outer(dAFBs_syst[systkey][term][syst][chargeBin], dAFBs_syst[systkey][term][syst][chargeBin])
                         if "stat" in systkey: cov_syst_bigger = np.diag(np.diag(cov_syst_bigger))
+                #print(cov_syst_bigger)
                 print("trace(cov_syst_bigger) = ", np.trace(cov_syst_bigger))
                 cov_term += cov_syst_bigger
             print("trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
@@ -227,8 +226,8 @@ if __name__=="__main__":
     else:
         npz_sin2w = np.load(dAFBs_sin2w_npz)
         print(dAFBs_sin2w_npz+" is loaded")
-        dAFBs_sin2w = npz_sin2w['X'][()]
-        dAFBs_sin2w_full = npz_sin2w['Y'][()]
+        dAFBs_sin2w = npz_sin2w['X']
+        dAFBs_sin2w_full = npz_sin2w['Y']
 
     ## dAFBs_syst{systematics}[chargeBins]
     dAFBs_syst_npz = channel_path+"_dAFBs_syst"+npz_files_tag+".npz"
@@ -268,20 +267,19 @@ if __name__=="__main__":
 
     ## (N-1) stat + syst uncertainties
     n = 0
-    for syst in dAFBs_syst[0].values():
-        chi2s_1D_total_N_1 = calChi2sWithCov(dAFBs_sin2w[:, 0], dAFBs_syst, 0, syst)
+    for syst in dAFBs_syst.keys():
+        chi2s_1D_total_N_1 = calChi2sWithCov(dAFBs_sin2w[:, 0], dAFBs_syst, 0, False, syst)
         chi2s_2D_total_N_1 = [0] * len(sin2w_indice)
         for i in range(1, len(chargeBins)):
-            chi2s = calChi2sWithCov(dAFBs_sin2w[:, i], dAFBs_syst, i, syst)
+            chi2s = calChi2sWithCov(dAFBs_sin2w[:, i], dAFBs_syst, i, False, syst)
             chi2s_2D_total_N_1 = [chi2s_2D_total_N_1[j] + chi2s[j] for j in range(len(chi2s_2D_total_N_1))]
-        chi2s_full2D_total_N_1 = calChi2sWithCov(dAFBs_sin2w_full_N_1, dAFBs_syst_full_N_1, 0, syst)
+        chi2s_full2D_total_N_1 = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0, False, syst)
 
-        nosource = "no"+syst
-        unc_1D_total_N_1 = calPrecision(chi2s_1D_total_N_1, ("1D_total_%i_" % n)+nosource)
-        unc_2D_total_N_1 = calPrecision(chi2s_2D_total_N_1, ("2D_total_%i_" % n)+nosource)
-        unc_full2D_total_N_1 = calPrecision(chi2s_full2D_total_N_1, ("full2D_total_%i_" % n)+nosource)
+        unc_1D_total_N_1 = calPrecision(chi2s_1D_total_N_1, ("1D_total_%i_" % n)+"no"+syst)
+        unc_2D_total_N_1 = calPrecision(chi2s_2D_total_N_1, ("2D_total_%i_" % n)+"no"+syst)
+        unc_full2D_total_N_1 = calPrecision(chi2s_full2D_total_N_1, ("full2D_total_%i_" % n)+"no"+syst)
 
-        print("Impact of "+nosource.replace("no", "")+" on 1D precision = %.5f " % (unc_1D_total**2 - unc_1D_total_N_1**2)**0.5)
-        print("Impact of "+nosource.replace("no", "")+" on 2D precision = %.5f " % (unc_2D_total**2 - unc_2D_total_N_1**2)**0.5)
-        print("Impact of "+nosource.replace("no", "")+" on full2D precision = %.5f " % (unc_full2D_total**2 - unc_full2D_total_N_1**2)**0.5)
+        print("Impact of "+syst+" on 1D precision = %.5f " % (unc_1D_total**2 - unc_1D_total_N_1**2)**0.5)
+        print("Impact of "+syst+" on 2D precision = %.5f " % (unc_2D_total**2 - unc_2D_total_N_1**2)**0.5)
+        print("Impact of "+syst+" on full2D precision = %.5f " % (unc_full2D_total**2 - unc_full2D_total_N_1**2)**0.5)
         n += 1
