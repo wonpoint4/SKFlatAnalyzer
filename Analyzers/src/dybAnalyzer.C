@@ -229,7 +229,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
         muonTriggerSF_sys = Make2DWeights(fEff->GetStructure(muonTriggerLeg1SF_key));
         for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
-            muonTriggerSF_sys[s][m] *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, 0,0);
+            muonTriggerSF_sys[s][m] *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, s,m);
           }
         }
       }
@@ -239,7 +239,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
         electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerLeg1SF_key));
         for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-            electronTriggerSF_sys[s][m] *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, 0,0);
+            electronTriggerSF_sys[s][m] *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, s,m);
           }
         }
       }
