@@ -3,7 +3,7 @@
 void dybAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
   IsSkimmed = (GetSkimName() != ""? true: false);
-  IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && IsSkimmed;
+  IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && !HasFlag("LEPSYS") && IsSkimmed;
 
   PDFbase = LHAPDF::mkPDF(306000);
   PDFnf4 = LHAPDF::mkPDF(325500);
@@ -146,51 +146,140 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   }
 
   // Lepton Efficiency Correction
-  if(!IsDATA && IsNominalLike) map_weight["_noEffSF"] = map_weight[""];
-  leptonTrackingSF = 1.;
-  leptonRECOSF = 1.;
-  leptonIDSF = 1.;
-  leptonTriggerSF = 1.;
+  muonTrackingSF = 1.;
+  muonRECOSF = 1.;
+  muonIDSF = 1.;
+  muonTriggerSF = 1.;
+  electronRECOSF = 1.;
+  electronIDSF = 1.;
+  electronTriggerSF = 1.;
 
   if(!IsDATA){
-    TString DZSF = "";
+    // Efficiency SF keys
+    TString muonTrackingSF_key = channel.Contains("mm"+GetEraShort())? "Muon_Tracking": "";
+    TString muonRECOSF_key = channel.Contains("mm"+GetEraShort())? "Muon_RECO": "";
+    TString muonIDSF_key = channel.Contains("mm"+GetEraShort())? "Muon_MediumID_trkIsoLoose": "";
+    TString muonTriggerLeg1SF_key = channel.Contains("mm"+GetEraShort())? "Mu17Leg1_MediumID_trkIsoLoose": "";
+    TString muonTriggerLeg2SF_key = channel.Contains("mm"+GetEraShort())? "Mu8Leg2_MediumID_trkIsoLoose": "";
+    TString muonTriggerDZSF_key = (channel.Contains("mm"+GetEraShort()) && GetEraShort() !="2016a")? "DZ_MediumID_trkIsoLoose": "";
+    TString electronRECOSF_key = channel.Contains("ee"+GetEraShort())? "Electron_RECO": "";
+    TString electronIDSF_key = channel.Contains("ee"+GetEraShort())? "Electron_MediumID": "";
+    TString electronTriggerLeg1SF_key = channel.Contains("ee"+GetEraShort())? "Ele23Leg1_MediumID": "";
+    TString electronTriggerLeg2SF_key = channel.Contains("ee"+GetEraShort())? "Ele12Leg2_MediumID": "";
+    TString electronTriggerDZSF_key = (channel.Contains("ee"+GetEraShort()) && GetEraShort().Contains("2016"))? "DZ_MediumID": "";
+
+    if(HasFlag("LEPSYS") && option == ""){
+      if(channel.Contains("mm"+GetEraShort())){
+        muonTrackingSF_sys = Make2DWeights(fEff->GetStructure(muonTrackingSF_key));
+        muonRECOSF_sys = Make2DWeights(fEff->GetStructure(muonRECOSF_key));
+        muonIDSF_sys = Make2DWeights(fEff->GetStructure(muonIDSF_key));
+      }else if(channel.Contains("ee"+GetEraShort())){
+        electronRECOSF_sys = Make2DWeights(fEff->GetStructure(electronRECOSF_key));
+        electronIDSF_sys = Make2DWeights(fEff->GetStructure(electronIDSF_key));
+      }
+    }
+
+    // Tracking, RECO, ID SF per lepton
+    for(const Lepton* lepton:leptons){
+      if(lepton->LeptonFlavour()==Lepton::MUON){
+        muonTrackingSF *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, 0,0);
+        muonRECOSF *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, 0,0);
+        muonIDSF *= fEff->GetEfficiencySF(muonIDSF_key, lepton, 0,0);
+
+        if(HasFlag("LEPSYS") && option == ""){
+          for(unsigned int s=0; s<muonTrackingSF_sys.size(); s++){
+            for(unsigned int m=0; m<muonTrackingSF_sys[s].size(); m++){
+              muonTrackingSF_sys[s][m] *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, s,m);
+            }
+          }
+          for(unsigned int s=0; s<muonRECOSF_sys.size(); s++){
+            for(unsigned int m=0; m<muonRECOSF_sys[s].size(); m++){
+              muonRECOSF_sys[s][m] *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, s,m);
+            }
+          }
+          for(unsigned int s=0; s<muonIDSF_sys.size(); s++){
+            for(unsigned int m=0; m<muonIDSF_sys[s].size(); m++){
+              muonIDSF_sys[s][m] *= fEff->GetEfficiencySF(muonIDSF_key, lepton, s,m);
+            }
+          }
+        }
+      }else if(lepton->LeptonFlavour()==Lepton::ELECTRON){
+        electronRECOSF *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, 0,0);
+        electronIDSF *= fEff->GetEfficiencySF(electronIDSF_key, lepton, 0,0);
+
+        if(HasFlag("LEPSYS") && option == ""){
+          for(unsigned int s=0; s<electronRECOSF_sys.size(); s++){
+            for(unsigned int m=0; m<electronRECOSF_sys[s].size(); m++){
+              electronRECOSF_sys[s][m] *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, s,m);
+            }
+          }
+          for(unsigned int s=0; s<electronIDSF_sys.size(); s++){
+            for(unsigned int m=0; m<electronIDSF_sys[s].size(); m++){
+              electronIDSF_sys[s][m] *= fEff->GetEfficiencySF(electronIDSF_key, lepton, s,m);
+            }
+          }
+        }
+      }
+    }
+
+    // Trigger SF
     if(channel.Contains("mm"+GetEraShort())){
-      for(const Lepton* lepton:leptons){
-        leptonTrackingSF *= fEff->GetEfficiencySF("Muon_Tracking", lepton, 0,0);
-        leptonRECOSF *= fEff->GetEfficiencySF("Muon_RECO", lepton, 0,0);
-        leptonIDSF *= fEff->GetEfficiencySF("Muon_MediumID_trkIsoLoose", lepton, 0,0);
+      muonTriggerSF *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, 0,0);
+      if(HasFlag("LEPSYS") && option == ""){
+        muonTriggerSF_sys = Make2DWeights(fEff->GetStructure(muonTriggerLeg1SF_key));
+        for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
+          for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
+            muonTriggerSF_sys[s][m] *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, 0,0);
+          }
+        }
       }
-      if(GetEraShort() !="2016a") DZSF = "DZ_MediumID_trkIsoLoose";
-      leptonTriggerSF *= GetDileptonTriggerSF("Mu17Leg1_MediumID_trkIsoLoose", "Mu8Leg2_MediumID_trkIsoLoose", DZSF, leptons, 0,0);
     }else if(channel.Contains("ee"+GetEraShort())){
-      for(const Lepton* lepton:leptons){
-        leptonRECOSF *= fEff->GetEfficiencySF("Electron_RECO", lepton, 0,0);
-        leptonIDSF *= fEff->GetEfficiencySF("Electron_MediumID", lepton, 0,0);
+      electronTriggerSF *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, 0,0);
+      if(HasFlag("LEPSYS") && option == ""){
+        electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerLeg1SF_key));
+        for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
+          for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
+            electronTriggerSF_sys[s][m] *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, 0,0);
+          }
+        }
       }
-      if(GetEraShort().Contains("2016")) DZSF = "DZ_MediumID";
-      leptonTriggerSF *= GetDileptonTriggerSF("Ele23Leg1_MediumID", "Ele12Leg2_MediumID", DZSF, leptons, 0,0);
     }
   }
 
-  map_weight[""] *= leptonTrackingSF;
+  map_weight[""] *= muonTrackingSF;
   if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_TrackingSF"+suffix, leptonTrackingSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "TrackingSF", map_weight[""]);
+    FillHist(prefix+hprefix+"weight_muonTrackingSF"+suffix, muonTrackingSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "muonTrackingSF", map_weight[""]);
   }
-  map_weight[""] *= leptonRECOSF;
+  map_weight[""] *= muonRECOSF;
   if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_RECOSF"+suffix, leptonRECOSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "RECOSF", map_weight[""]);
+    FillHist(prefix+hprefix+"weight_muonRECOSF"+suffix, muonRECOSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "muonRECOSF", map_weight[""]);
   }
-  map_weight[""] *= leptonIDSF;
+  map_weight[""] *= muonIDSF;
   if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_IDSF"+suffix, leptonIDSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "IDSF", map_weight[""]);
+    FillHist(prefix+hprefix+"weight_muonIDSF"+suffix, muonIDSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "muonIDSF", map_weight[""]);
   }
-  map_weight[""] *= leptonTriggerSF;
+  map_weight[""] *= muonTriggerSF;
   if(IsNominalLike){
-    FillHist(prefix+hprefix+"weight_TriggerSF"+suffix, leptonTriggerSF, map_weight[""], 200,-5,5);
-    FillCutflow(prefix+hprefix+"cutflow"+suffix, "TriggerSF", map_weight[""]);
+    FillHist(prefix+hprefix+"weight_muonTriggerSF"+suffix, muonTriggerSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "muonTriggerSF", map_weight[""]);
+  }
+  map_weight[""] *= electronRECOSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_electronRECOSF"+suffix, electronRECOSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "electronRECOSF", map_weight[""]);
+  }
+  map_weight[""] *= electronIDSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_electronIDSF"+suffix, electronIDSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "electronIDSF", map_weight[""]);
+  }
+  map_weight[""] *= electronTriggerSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_electronTriggerSF"+suffix, electronTriggerSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "electronTriggerSF", map_weight[""]);
   }
 
   //==== Inclusive DY
@@ -288,6 +377,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     map_weight["_noZpt"] =  map_weight[""] / zptweight;
     map_weight["_Zpt_gym"] =  map_weight[""] / zptweight * zptweight_gym;
 
+    // Weak Reweight
+    map_weight["_noWeak"] =  map_weight[""] / weakweight;
+
     // Top pt Reweight
     map_weight["_noToppt"] =  map_weight[""] / topptweight;
 
@@ -310,6 +402,58 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
     // PDF
     for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
+  }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
+    for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
+  }else if(!IsDATA && HasFlag("LEPSYS") && option == ""){
+    // EfficiencySF - stat
+    for(int j=0; j<fEff->nreplica; j++){
+      double SF_stat = 1. / muonTrackingSF / muonRECOSF / muonIDSF / muonTriggerSF / electronRECOSF / electronIDSF / electronTriggerSF;
+      SF_stat *= muonTrackingSF_sys.size()? (double)muonTrackingSF_sys[0][j]: 1.;
+      SF_stat *= muonRECOSF_sys.size()? (double)muonRECOSF_sys[0][j]: 1.;
+      SF_stat *= muonIDSF_sys.size()? (double)muonIDSF_sys[0][j]: 1.;
+      SF_stat *= muonTriggerSF_sys.size()? (double)muonTriggerSF_sys[0][j]: 1.;
+      SF_stat *= electronRECOSF_sys.size()? (double)electronRECOSF_sys[0][j]: 1.;
+      SF_stat *= electronIDSF_sys.size()? (double)electronIDSF_sys[0][j]: 1.;
+      SF_stat *= electronTriggerSF_sys.size()? (double)electronTriggerSF_sys[0][j]: 1.;
+      map_weight[Form("_lepeffSF_stat%d", j)] = map_weight[""] * SF_stat;
+    }
+
+    // EfficiencySF - syst
+    for(unsigned int i=1; i<muonTrackingSF_sys.size(); i++){
+      for(unsigned int j=0; j<muonTrackingSF_sys[i].size(); j++){
+        map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<muonRECOSF_sys.size(); i++){
+      for(unsigned int j=0; j<muonRECOSF_sys[i].size(); j++){
+        map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<muonIDSF_sys.size(); i++){
+      for(unsigned int j=0; j<muonIDSF_sys[i].size(); j++){
+        map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<muonTriggerSF_sys.size(); i++){
+      for(unsigned int j=0; j<muonTriggerSF_sys[i].size(); j++){
+        map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<electronRECOSF_sys.size(); i++){
+      for(unsigned int j=0; j<electronRECOSF_sys[i].size(); j++){
+        map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<electronIDSF_sys.size(); i++){
+      for(unsigned int j=0; j<electronIDSF_sys[i].size(); j++){
+        map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
+      }
+    }
+    for(unsigned int i=1; i<electronTriggerSF_sys.size(); i++){
+      for(unsigned int j=0; j<electronTriggerSF_sys[i].size(); j++){
+        map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
+      }
+    }
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
     for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
   }
@@ -781,6 +925,7 @@ double dybAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
   if(direction==0) direction=dilepton.Pz()>0?1:-1;
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 }
+
 double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, int mode){
   if(!p0||!p1) return 0.;
   const TLorentzVector *lm,*lp;
@@ -826,6 +971,14 @@ double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Pa
     b_m0*=b->E()/b_m0.E();
     return direction*((*lm-*lp)*(b_m0))/((*lm+*lp)*(b_m0));
   }
+}
+
+vector<vector<double>> dybAnalyzer::Make2DWeights(const vector<int>& structure){
+  vector<vector<double>> rt;
+  for(const int& nmem:structure){
+    rt.push_back(vector<double>(nmem,1.0));
+  }
+  return rt;
 }
 
 // Functions in MY SMPAnalyzerCore

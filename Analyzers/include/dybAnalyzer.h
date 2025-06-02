@@ -32,6 +32,7 @@ public:
 
   virtual double GetCosThetaCS(const Particle *p0, const Particle *p1, int direction=0);
   virtual double GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, int mode=0);
+  vector<vector<double>> Make2DWeights(const vector<int>& structure);
 
   TString prefix, gprefix, hprefix, suffix;
   vector<Gen> gens;
@@ -46,10 +47,20 @@ public:
   double bcharge = 0;
   std::map<TString,double> map_weight;
 
-  double leptonTrackingSF =1.;
-  double leptonRECOSF =1.;
-  double leptonIDSF =1.;
-  double leptonTriggerSF =1.;
+  double muonTrackingSF =1.;
+  double muonRECOSF =1.;
+  double muonIDSF =1.;
+  double muonTriggerSF =1.;
+  double electronRECOSF =1.;
+  double electronIDSF =1.;
+  double electronTriggerSF =1.;
+  vector<vector<double>> muonTrackingSF_sys;
+  vector<vector<double>> muonRECOSF_sys;
+  vector<vector<double>> muonIDSF_sys;
+  vector<vector<double>> muonTriggerSF_sys;
+  vector<vector<double>> electronRECOSF_sys;
+  vector<vector<double>> electronIDSF_sys;
+  vector<vector<double>> electronTriggerSF_sys;
 
   double lumiweight = 1.;
   double PUweight = 1.;

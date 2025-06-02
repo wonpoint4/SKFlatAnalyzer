@@ -22,8 +22,10 @@ xsec_unc = {
     "qcd" : [30, -30],
 }
 systematics = {
+    # Stat
     "stat_Data" : [["stat_Data"]],
     "stat_MC" :   [["stat_MC"]],
+    # SYS
     "JES" :       [["_jet_scale_up", "_jet_scale_down"]],
     "JER" :       [["_jet_smear_up", "_jet_smear_down"]],
     "Prefiring" : [["_prefireweight_up", "_prefireweight_down"]],
@@ -32,6 +34,7 @@ systematics = {
     "btagSF" :    [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
                    ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
+    # PDFSYS
     "Scales" :    [["_scalevariation%d" % i for i in [1, 2, 3, 4, 6, 8]]], # No 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
     "FSR" :       [["_FSR_up", "_FSR_down"]],
@@ -40,6 +43,16 @@ systematics = {
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
     "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],
+    "Weak" :      [["_noWeak"]],
+    # LEPSYS
+    "MuTracking" : [["_muonTrackingeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_muonTrackingeffSF_s%dm0" % i, "_muonTrackingeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "MuRECO"     : [["_muonRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 8, 9, 10, 14, 15, 16]] + [["_muonRECOeffSF_s%dm0" % i, "_muonRECOeffSF_s%dm1" % i] for i in [7, 11, 12, 13]],
+    "MuID"       : [["_muonIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17]] + [["_muonIDeffSF_s%dm0" % i, "_muonIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    #"MuTrigger"  : [["_muonTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15]] + [["_muonTriggereffSF_s%dm0" % i, "_muonTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "ElRECO"     : [["_electronRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronRECOeffSF_s%dm0" % i, "_electronRECOeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "ElID"       : [["_electronIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17, 18]] + [["_electronIDeffSF_s%dm0" % i, "_electronIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    #"ElTrigger"  : [["_electronTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronTriggereffSF_s%dm0" % i, "_electronTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "EffStatReplica" : [["_lepeffSF_stat%d" % i] for i in range(20)],
 }
 
 def calPrecision(chi2s, nametag):
@@ -84,7 +97,7 @@ def calPrecision(chi2s, nametag):
 
     #plt.legend(loc='upper right')
     plt.grid()
-    plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
+    #plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
     print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)
@@ -97,8 +110,9 @@ def getdAFB(AFB_ref, AFB):
 
     return np.array(dAFB)
 
+## dAFBs[sin2w scenarios][chargeBins] - numpy 1D array with dimass bins
 def getdAFBs_sin2w(channel):
-    dAFBs = [[] for i in range(len(sin2w_indice))] ## dAFBs[sin2w scenarios][chargeBins] - numpy 1D array with dimass bins
+    dAFBs = [[] for i in range(len(sin2w_indice))]
     dAFBs_full = []
 
     for sin in range(len(sin2w_indice)):
@@ -118,11 +132,10 @@ def getdAFBs_sin2w(channel):
 
     return np.array(dAFBs), np.array(dAFBs_full)
 
-def getdAFBs_syst(channel):
-    dAFBs = {}  ## dAFBs{systkey}[term][syst][chargeBins] - numpy 1D array with dimass bins
-    dAFBs_full = {}
-
+## dAFBs{systkey}[term][syst][chargeBins] - numpy 1D array with dimass bins
+def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
     for systkey, list_syst in systematics.items():
+        if missingSyst != "" and systkey != missingSyst: continue
         dAFBs[systkey] = []
         dAFBs_full[systkey] = []
         for term in range(len(list_syst)):
@@ -176,7 +189,7 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
     cov = np.zeros((dim, dim))
     for systkey, list_syst in dAFBs_syst.items():
         if systkey == N_1: continue # For (N-1) syst uncertainties
-        elif statOnly and "stat" not in systkey: continue # For Stat-only uncertainties
+        elif statOnly and "stat_" not in systkey: continue # For Stat-only uncertainties
         else:
             cov_term = np.zeros((dim, dim))
             for term in range(len(list_syst)):
@@ -187,11 +200,14 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
                     if trace > dAFBs_trace:
                         dAFBs_trace = trace
                         cov_syst_bigger = np.outer(dAFBs_syst[systkey][term][syst][chargeBin], dAFBs_syst[systkey][term][syst][chargeBin])
-                        if "stat" in systkey: cov_syst_bigger = np.diag(np.diag(cov_syst_bigger))
+                        if "stat_" in systkey: cov_syst_bigger = np.diag(np.diag(cov_syst_bigger))
                 #print(cov_syst_bigger)
                 print("trace(cov_syst_bigger) = ", np.trace(cov_syst_bigger))
                 cov_term += cov_syst_bigger
             print("trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
+            if "Replica" in systkey:
+                cov_term = cov_term / len(list_syst)
+                print("cove_term divided by "+len(list_syst)+", and then trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
             cov += cov_term
 
     inv_cov = np.linalg.inv(cov)
@@ -230,9 +246,11 @@ if __name__=="__main__":
         dAFBs_sin2w_full = npz_sin2w['Y']
 
     ## dAFBs_syst{systematics}[chargeBins]
+    dAFBs_syst = {}
+    dAFBs_syst_full = {}
     dAFBs_syst_npz = channel_path+"_dAFBs_syst"+npz_files_tag+".npz"
     if not os.path.exists(dAFBs_syst_npz):
-        dAFBs_syst, dAFBs_syst_full = getdAFBs_syst(channel)
+        dAFBs_syst, dAFBs_syst_full = getdAFBs_syst(channel, dAFBs_syst, dAFBs_syst_full)
         np.savez(dAFBs_syst_npz, X = dAFBs_syst, Y = dAFBs_syst_full)
         print("New "+dAFBs_syst_npz+" is saved")
     else:
@@ -240,6 +258,12 @@ if __name__=="__main__":
         print(dAFBs_syst_npz+" is loaded")
         dAFBs_syst = npz_syst['X'][()]
         dAFBs_syst_full = npz_syst['Y'][()]
+        for syst in systematics.keys():
+            if syst not in dAFBs_syst:
+                print(syst+" is missing in "+dAFBs_syst_npz)
+                dAFBs_syst, dAFBs_syst_full = getdAFBs_syst(channel, dAFBs_syst, dAFBs_syst_full, syst)
+                np.savez(dAFBs_syst_npz, X = dAFBs_syst, Y = dAFBs_syst_full)
+                print(syst+" is added in "+dAFBs_syst_npz+", "+dAFBs_syst_npz+" is updated")
 
     ## Chi2s (1D, 2D and full2D)
     chi2s_1D_stat = calChi2sWithCov(dAFBs_sin2w[:, 0], dAFBs_syst, 0, True)

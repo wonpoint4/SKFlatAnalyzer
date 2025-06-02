@@ -13,5 +13,10 @@ cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2017 --userflags PDFSYS
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --userflags PDFSYS --memory 30000 --nmax 70 &"
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016preVFP --userflags PDFSYS --memory 30000 --nmax 70 &"
 
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2018 --userflags LEPSYS --memory 25000 --nmax 80 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2017 --userflags LEPSYS --memory 25000 --nmax 80 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --userflags LEPSYS --memory 25000 --nmax 80 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016preVFP --userflags LEPSYS --memory 25000 --nmax 80 &"
+
 condor_qedit wonjun "RequestMemory=9000"
 condor_qedit wonjun 'concurrencylimits="n101.wonjun"'
