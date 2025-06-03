@@ -40,7 +40,9 @@ public:
   vector<Jet> bjets;
   vector<Lepton*> leptons;
   vector<Muon> muons;
+  vector<Muon> muons_raw;
   vector<Electron> electrons;
+  vector<Electron> electrons_raw;
   Lepton* lepton0 = NULL;
   Lepton* lepton1 = NULL;
   Jet* jet0 = NULL;

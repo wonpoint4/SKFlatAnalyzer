@@ -46,13 +46,17 @@ systematics = {
     "Weak" :      [["_noWeak"]],
     # LEPSYS
     "MuTracking" : [["_muonTrackingeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_muonTrackingeffSF_s%dm0" % i, "_muonTrackingeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    "MuRECO"     : [["_muonRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 8, 9, 10, 14, 15, 16]] + [["_muonRECOeffSF_s%dm0" % i, "_muonRECOeffSF_s%dm1" % i] for i in [7, 11, 12, 13]],
-    "MuID"       : [["_muonIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17]] + [["_muonIDeffSF_s%dm0" % i, "_muonIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    #"MuTrigger"  : [["_muonTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15]] + [["_muonTriggereffSF_s%dm0" % i, "_muonTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    "ElRECO"     : [["_electronRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronRECOeffSF_s%dm0" % i, "_electronRECOeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    "ElID"       : [["_electronIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17, 18]] + [["_electronIDeffSF_s%dm0" % i, "_electronIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    #"ElTrigger"  : [["_electronTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronTriggereffSF_s%dm0" % i, "_electronTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
-    "EffStatReplica" : [["_lepeffSF_stat%d" % i] for i in range(20)],
+    "MuRECO" :     [["_muonRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 8, 9, 10, 14, 15, 16]] + [["_muonRECOeffSF_s%dm0" % i, "_muonRECOeffSF_s%dm1" % i] for i in [7, 11, 12, 13]],
+    "MuID" :       [["_muonIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17]] + [["_muonIDeffSF_s%dm0" % i, "_muonIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "MuTrigger" :  [["_muonTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15]] + [["_muonTriggereffSF_s%dm0" % i, "_muonTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "ElRECO" :     [["_electronRECOeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronRECOeffSF_s%dm0" % i, "_electronRECOeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "ElID" :       [["_electronIDeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 17, 18]] + [["_electronIDeffSF_s%dm0" % i, "_electronIDeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "ElTrigger" :  [["_electronTriggereffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_electronTriggereffSF_s%dm0" % i, "_electronTriggereffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
+    "EffStatReplica" :    [["_lepeffSF_stat%d" % i] for i in range(20)],
+    "RoccoRStatReplica" : [["_MuonMomentum_s1m%d" % i] for i in range(40)],
+    "RoccoR" :            [["_MuonMomentum_s%dm0" % i for i in range(2, 6)]],
+    "AepcorStatReplica" : [["_ElectronEnergy_s1m%d" % i] for i in range(40)],
+    "Aepcor" :            [["_ElectronEnergy_s%dm0" % i for i in range(2, 9)]],
 }
 
 def calPrecision(chi2s, nametag):
