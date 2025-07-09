@@ -211,7 +211,7 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
             print("trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
             if "Replica" in systkey:
                 cov_term = cov_term / len(list_syst)
-                print("cove_term divided by "+len(list_syst)+", and then trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
+                print("cove_term divided by ", len(list_syst), ", and then trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
             cov += cov_term
 
     inv_cov = np.linalg.inv(cov)
@@ -234,10 +234,11 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
+    #channel = "mm201[678][ab]?/"
     npz_files_tag = ""
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
-    channel_path = channel.replace("?/", "").replace("[", "").replace("]", "")
+    channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
     dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+".npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
