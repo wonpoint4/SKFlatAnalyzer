@@ -59,15 +59,7 @@ systematics = {
     "Aepcor" :            [["_ElectronEnergy_s%dm0" % i for i in range(2, 9)]],
 }
 
-def calPrecision(chi2s, nametag):
-    sin2ws = []
-    for i in sin2w_indice:
-        sin2ws.append(sin2w_values[i])
-
-    fit = np.polyfit(sin2ws, chi2s, 2)
-    pol2 = np.poly1d(fit)
-    x = np.linspace(0.22300, 0.23800, 15000)
-    y = pol2(x)
+def findIntersection(x, y, sigma=1):
     miny = 100
     minx = 0
     x1 = 0
@@ -81,31 +73,61 @@ def calPrecision(chi2s, nametag):
         yi = y[i]
         diff1 = 0.01
         diff2 = 0.01
-        if i < len(x)/2 and abs(yi - (miny + 1)) < diff1:
+        if i < len(x)/2 and abs(yi - (miny + sigma**2)) < diff1:
             x1 = x[i]
-            diff1 = abs(yi - (miny + 1))
-        if i > len(x)/2 and abs(yi - (miny + 1)) < diff2:
+            diff1 = abs(yi - (miny + sigma**2))
+        if i > len(x)/2 and abs(yi - (miny + sigma**2)) < diff2:
             x2 = x[i]
-            diff2 = abs(yi - (miny + 1))
+            diff2 = abs(yi - (miny + sigma**2))
 
-    plt.plot(sin2ws, chi2s, 'o', color='black')
-    plt.plot(x, y, color='blue')
-    z=np.full(len(y), miny+1)
+    return x1, x2, minx, miny
+
+def calPrecision(chi2s_stat, chi2s_total, nametag=""):
+    sin2ws = []
+    for i in sin2w_indice:
+        sin2ws.append(sin2w_values[i])
+
+    sigma = 1
+    x = np.linspace(0.22300, 0.23800, 150000)
+
+    # stat-only
+    fit_stat = np.polyfit(sin2ws, chi2s_stat, 2)
+    pol2_stat = np.poly1d(fit_stat)
+    y_stat = pol2_stat(x)
+    x1_stat, x2_stat, minx_stat, miny_stat = findIntersection(x, y_stat, sigma)
+
+    # stat+syst
+    fit_total = np.polyfit(sin2ws, chi2s_total, 2)
+    pol2_total = np.poly1d(fit_total)
+    y_total = pol2_total(x)
+    x1_total, x2_total, minx_total, miny_total = findIntersection(x, y_total, sigma)
+
+    central = (x2_total + x1_total) / 2 # Or minx_total?
+    unc_stat = (x2_stat - x1_stat) / 2
+    unc_total = (x2_total - x1_total) / 2
+    unc_syst = (unc_total**2 - unc_stat**2)**0.5
+
+    plt.plot(sin2ws, chi2s_stat, 'o', color='black')
+    plt.plot(sin2ws, chi2s_total, 'o', color='black')
+    pol2_stat, = plt.plot(x, y_stat, color='darkviolet', label="stat-only")
+    pol2_total, = plt.plot(x, y_total, color='blue', label="stat+syst")
+    z = np.full(len(y_stat), miny_total + sigma)
     plt.plot(x, z, color='red')
 
     plt.title(r"$\chi^{2}$ Fitting ("+nametag+")", fontsize=15)
     plt.xlabel("$sin^{2}\\theta^{l}_{eff}$")
     plt.ylabel("$\chi^{2}$")
-    plt.text(0.224, 0.1, "$\chi^{2}_{max}$ = %.3f" % chi2s[0])
-    plt.text(0.231, chi2s[0] * 0.79, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f" % ((x1 + x2) / 2, (x2 - x1) / 2))
+    plt.text(0.224, 0.1, "$\chi^{2}_{max}$ = %.3f" % chi2s_total[0])
+    plt.text(0.226, chi2s_total[0] * 0.82, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat) $\\pm$ %.5f (syst)" % (central, unc_stat, unc_syst))
+    plt.text(0.228, chi2s_total[0] * 0.76, "= %.5f $\\pm$ %.5f (total)" % (central, unc_total))
 
-    #plt.legend(loc='upper right')
+    plt.legend(handles=[pol2_stat, pol2_total], loc='upper right')
     plt.grid()
-    #plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
+    plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(nametag, "sin2w central : ", (x1 + x2) / 2, "1 sigma : ",(x2 - x1) / 2, "sin2w range : ", x1, x2)
-    return (x2 - x1) / 2
+    print(nametag, "sin2w central : ", central, "1 sigma (stat): ", unc_stat, "1 sigma (total): ", unc_total, "sin2w range : ", x1_total, x2_total)
+    return unc_stat, unc_total
 
 def getdAFB(AFB_ref, AFB):
     dAFB = []
@@ -283,12 +305,9 @@ if __name__=="__main__":
     chi2s_full2D_stat = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0, True)
     chi2s_full2D_total = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0)
 
-    unc_1D_stat = calPrecision(chi2s_1D_stat, "1D_stat")
-    unc_2D_stat = calPrecision(chi2s_2D_stat, "2D_stat")
-    unc_full2D_stat = calPrecision(chi2s_full2D_stat, "full2D_stat")
-    unc_1D_total = calPrecision(chi2s_1D_total, "1D_total")
-    unc_2D_total = calPrecision(chi2s_2D_total, "2D_total")
-    unc_full2D_total = calPrecision(chi2s_full2D_total, "full2D_total")
+    unc_1D_stat, unc_1D_total = calPrecision(chi2s_1D_stat, chi2s_1D_total, "1D")
+    unc_2D_stat, unc_2D_total = calPrecision(chi2s_2D_stat, chi2s_2D_total, "2D")
+    unc_full2D_stat, unc_full2D_total = calPrecision(chi2s_full2D_stat, chi2s_full2D_total, "full2D")
 
     print("1D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_1D_stat, (unc_1D_total**2 - unc_1D_stat**2)**0.5, unc_1D_total))
     print("2D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_2D_stat, (unc_2D_total**2 - unc_2D_stat**2)**0.5, unc_2D_total))
@@ -304,9 +323,9 @@ if __name__=="__main__":
             chi2s_2D_total_N_1 = [chi2s_2D_total_N_1[j] + chi2s[j] for j in range(len(chi2s_2D_total_N_1))]
         chi2s_full2D_total_N_1 = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0, False, syst)
 
-        unc_1D_total_N_1 = calPrecision(chi2s_1D_total_N_1, ("1D_total_%i_" % n)+"no"+syst)
-        unc_2D_total_N_1 = calPrecision(chi2s_2D_total_N_1, ("2D_total_%i_" % n)+"no"+syst)
-        unc_full2D_total_N_1 = calPrecision(chi2s_full2D_total_N_1, ("full2D_total_%i_" % n)+"no"+syst)
+        unc_1D_stat, unc_1D_total_N_1 = calPrecision(chi2s_1D_stat, chi2s_1D_total_N_1, ("1D_%i_" % n)+"no"+syst)
+        unc_2D_stat, unc_2D_total_N_1 = calPrecision(chi2s_2D_stat, chi2s_2D_total_N_1, ("2D_%i_" % n)+"no"+syst)
+        unc_full2D_stat, unc_full2D_total_N_1 = calPrecision(chi2s_full2D_stat, chi2s_full2D_total_N_1, ("full2D_%i_" % n)+"no"+syst)
 
         print("Impact of "+syst+" on 1D precision = %.5f " % (unc_1D_total**2 - unc_1D_total_N_1**2)**0.5)
         print("Impact of "+syst+" on 2D precision = %.5f " % (unc_2D_total**2 - unc_2D_total_N_1**2)**0.5)
