@@ -21,6 +21,13 @@ xsec_unc = {
     "aa" : [30, -30],
     "qcd" : [30, -30],
 }
+lumi_unc = {
+    "2016"    : [1.0, 1.0, 0.0, 0.0],
+    "2017"    : [0.0, 0.0, 2.0, 0.0],
+    "2018"    : [0.0, 0.0, 0.0, 1.5],
+    "161718"  : [0.6, 0.6, 0.9, 2.0],
+    "17and18" : [0.0, 0.0, 0.6, 0.2],
+}
 systematics = {
     # Stat
     "stat_Data" : [["stat_Data"]],
@@ -34,11 +41,12 @@ systematics = {
     "btagSF" :    [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
                    ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
+    "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     # PDFSYS
     "Scales" :    [["_scalevariation%d" % i for i in [1, 2, 3, 4, 6, 8]]], # No 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
-    "FSR" :       [["_FSR_up", "_FSR_down"]],
     "ISR" :       [["_ISR_up", "_ISR_down"]],
+    "FSR" :       [["_FSR_up", "_FSR_down"]],
     "PDF" :       [["_pdf%d" % i] for i in range(100)],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
@@ -123,7 +131,7 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
 
     plt.legend(handles=[pol2_stat, pol2_total], loc='upper right')
     plt.grid()
-    plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
+    #plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
     print(nametag, "sin2w central : ", central, "1 sigma (stat): ", unc_stat, "1 sigma (total): ", unc_total, "sin2w range : ", x1_total, x2_total)
@@ -194,9 +202,15 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                         syststr = list_syst[term][syst]
                         if "norm" in syststr:
                             for process, uncs in xsec_unc.items():
-                                if process in syststr: norm_syst += "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
+                                if process in syststr: norm_syst = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
                             syststr = ""
-                            print(norm_syst)
+                        elif "lumi" in syststr:
+                            for era, uncs in lumi_unc.items():
+                                if era in syststr:
+                                    unc = [1 + a * 0.01 * (1 if "up" in syststr else -1) for a in uncs]
+                                    norm_syst = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
+                            syststr = ""
+                        print(norm_syst)
                         AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+syststr+"(x)", norm_syst)
                         dAFB_syst = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                         dAFBs[systkey][term][syst].append(dAFB_syst)
