@@ -10,7 +10,7 @@ dyb = ROOT.dybPlotter()
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-nMassbins = 30 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+nMassbins = 12 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
     "wjets" : [3.8, -3.8],
     "ww" : [2.5, -2.2],
@@ -43,11 +43,16 @@ systematics = {
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     # PDFSYS
-    "Scales" :    [["_scalevariation%d" % i for i in [1, 2, 3, 4, 6, 8]]], # No 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
+    "Scales" :    [["_scalevariation%d" % i for i in [0, 1, 2, 3, 4, 6, 8]]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
     "ISR" :       [["_ISR_up", "_ISR_down"]],
     "FSR" :       [["_FSR_up", "_FSR_down"]],
     "PDF" :       [["_pdf%d" % i] for i in range(100)],
+    #"PDF0" :      [["_pdf%d" % i] for i in range(20)],
+    #"PDF1" :      [["_pdf%d" % i] for i in range(20,40)],
+    #"PDF2" :      [["_pdf%d" % i] for i in range(40,60)],
+    #"PDF3" :      [["_pdf%d" % i] for i in range(60,80)],
+    #"PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
     "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],
@@ -131,7 +136,7 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
 
     plt.legend(handles=[pol2_stat, pol2_total], loc='upper right')
     plt.grid()
-    #plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
+    if "no" not in nametag: plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
     print(nametag, "sin2w central : ", central, "1 sigma (stat): ", unc_stat, "1 sigma (total): ", unc_total, "sin2w range : ", x1_total, x2_total)
@@ -141,6 +146,7 @@ def getdAFB(AFB_ref, AFB):
     dAFB = []
     for iBin in range(nMassbins):
         dAFB.append(AFB_ref.GetBinContent(iBin + 1) - AFB.GetBinContent(iBin + 1))
+        #print(iBin+1, "th Bin : nominal AFB = ", AFB_ref.GetBinContent(iBin + 1), "syst AFB = ", AFB.GetBinContent(iBin + 1), "diff = ", AFB_ref.GetBinContent(iBin + 1) - AFB.GetBinContent(iBin + 1))
 
     return np.array(dAFB)
 
@@ -198,20 +204,17 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                         if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
                     else: # Systematics
                         AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-                        norm_syst = ""
-                        syststr = list_syst[term][syst]
+                        syststr = "suffix:"+list_syst[term][syst]
                         if "norm" in syststr:
                             for process, uncs in xsec_unc.items():
-                                if process in syststr: norm_syst = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
-                            syststr = ""
+                                if process in syststr: syststr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
                         elif "lumi" in syststr:
                             for era, uncs in lumi_unc.items():
                                 if era in syststr:
                                     unc = [1 + a * 0.01 * (1 if "up" in syststr else -1) for a in uncs]
-                                    norm_syst = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
-                            syststr = ""
-                        print(norm_syst)
-                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+syststr+"(x)", norm_syst)
+                                    syststr = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
+                        print("syststr = "+syststr)
+                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", syststr)
                         dAFB_syst = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                         dAFBs[systkey][term][syst].append(dAFB_syst)
                         print(list_syst[term][syst]+", trace(dAFB_syst) = ", (dAFBs[systkey][term][syst][ch] * dAFBs[systkey][term][syst][ch]).sum(), ", len(dAFB_syst) = ", len(dAFBs[systkey][term][syst][ch]))
@@ -237,18 +240,23 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
                 cov_syst_bigger = np.zeros((dim, dim))
                 for syst in range(len(list_syst[term])):
                     trace = (dAFBs_syst[systkey][term][syst][chargeBin] * dAFBs_syst[systkey][term][syst][chargeBin]).sum()
+                    #print(syst, "trace(cov_syst_cand) = ", trace)
                     if trace > dAFBs_trace:
                         dAFBs_trace = trace
                         cov_syst_bigger = np.outer(dAFBs_syst[systkey][term][syst][chargeBin], dAFBs_syst[systkey][term][syst][chargeBin])
                         if "stat_" in systkey: cov_syst_bigger = np.diag(np.diag(cov_syst_bigger))
                 #print(cov_syst_bigger)
-                print("trace(cov_syst_bigger) = ", np.trace(cov_syst_bigger))
+                #print(term, "trace(cov_syst_bigger) = ", np.trace(cov_syst_bigger))
                 cov_term += cov_syst_bigger
             print("trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
             if "Replica" in systkey:
                 cov_term = cov_term / len(list_syst)
-                print("cove_term divided by ", len(list_syst), ", and then trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
+                print("cov_term divided by ", len(list_syst), ", and then trace(cov_term) of "+systkey+" = ", np.trace(cov_term), "len(Csyst) = ", len(cov_term))
             cov += cov_term
+            #for i in range(dim):
+            #    print("cov_term : ", i, "th bin = ", cov_term[i][i]**0.5)
+            #for i in range(dim):
+            #    print("cov : ", i, "th bin = ", cov[i][i]**0.5)
 
     inv_cov = np.linalg.inv(cov)
     print("\n cov : ")
@@ -271,7 +279,7 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
     #channel = "mm201[678][ab]?/"
-    npz_files_tag = ""
+    npz_files_tag = "_12bins"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
@@ -330,6 +338,7 @@ if __name__=="__main__":
     ## (N-1) stat + syst uncertainties
     n = 0
     for syst in dAFBs_syst.keys():
+        if "stat_" in syst: continue
         chi2s_1D_total_N_1 = calChi2sWithCov(dAFBs_sin2w[:, 0], dAFBs_syst, 0, False, syst)
         chi2s_2D_total_N_1 = [0] * len(sin2w_indice)
         for i in range(1, len(chargeBins)):

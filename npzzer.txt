@@ -1,0 +1,35 @@
+import numpy as np
+npz_syst = np.load("emem201678ab_dAFBs_syst_12bins_SYS.npz", allow_pickle=True)
+dAFBs_syst = npz_syst['X'][()]
+dAFBs_syst_full = npz_syst['Y'][()]
+len(dAFBs_syst)
+
+npz_syst2 = np.load("emem201678ab_dAFBs_syst_12bins_PDFSYS.npz", allow_pickle=True)
+dAFBs_syst2 = npz_syst2['X'][()]
+dAFBs_syst2_full = npz_syst2['Y'][()]
+dAFBs_syst.update(dAFBs_syst2)
+dAFBs_syst_full.update(dAFBs_syst2_full)
+len(dAFBs_syst)
+
+npz_syst3 = np.load("emem201678ab_dAFBs_syst_12bins_LEPSYS_muon.npz", allow_pickle=True)
+dAFBs_syst3 = npz_syst3['X'][()]
+dAFBs_syst3_full = npz_syst3['Y'][()]
+dAFBs_syst.update(dAFBs_syst3)
+dAFBs_syst_full.update(dAFBs_syst3_full)
+len(dAFBs_syst)
+
+npz_syst4 = np.load("emem201678ab_dAFBs_syst_12bins_LEPSYS_electron.npz", allow_pickle=True)
+dAFBs_syst4 = npz_syst4['X'][()]
+dAFBs_syst4_full = npz_syst4['Y'][()]
+dAFBs_syst.update(dAFBs_syst4)
+dAFBs_syst_full.update(dAFBs_syst4_full)
+len(dAFBs_syst)
+
+npz_syst5 = np.load("emem201678ab_dAFBs_syst_12bins_LEPSYS_RoccoR.npz", allow_pickle=True)
+dAFBs_syst5 = npz_syst5['X'][()]
+dAFBs_syst5_full = npz_syst5['Y'][()]
+dAFBs_syst.update(dAFBs_syst5)
+dAFBs_syst_full.update(dAFBs_syst5_full)
+len(dAFBs_syst)
+
+np.savez("emem201678ab_dAFBs_syst_12bins_hadded.npz", X = dAFBs_syst, Y = dAFBs_syst_full)

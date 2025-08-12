@@ -81,8 +81,16 @@ public:
   LHAPDF::PDF* PDFbase = NULL;
   LHAPDF::PDF* PDFnf4 = NULL;
 
-  static const int afb_mbinnum = 40;
-  static constexpr const double afb_mbin[afb_mbinnum+1] = {52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};
+  // Old binnings or HS's binning
+  static const int afb_mbinnum_original = 40;
+  static constexpr const double afb_mbin_original[afb_mbinnum_original+1] = {52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,130,140,150,175,200,240,280,340,400,500,600,700,800,1000,3000};
+  static const int afb_mbinnum_original2 = 26;
+  static constexpr const double afb_mbin_original2[afb_mbinnum_original2+1] = {52,56,60,65,70,74,77,80,82,84,86,88,89,90,91,92,93,94,96,98,100,103,106,110,115,120,200};
+  static const int afb_mbinnum_HS = 8;
+  static constexpr const double afb_mbin_HS[afb_mbinnum_HS+1] = {52,65,77,106,140,200,280,400,3000};
+
+  static const int afb_mbinnum = 12;
+  static constexpr const double afb_mbin[afb_mbinnum+1] = {52,66,76,82,86,89.5,92.7,96,100,106,116,150,200};
   static const int afb_chbinnum = 6;
   static constexpr const double afb_chbin[afb_chbinnum+1] = {0., 0.1, 0.2, 0.6, 1.0, 3.0, 5.0};
   //static const int afb_chbinnum = 12;

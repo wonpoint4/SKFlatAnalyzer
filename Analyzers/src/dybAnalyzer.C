@@ -317,8 +317,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"nrealjets_IncDY"+suffix, realjets.size(), map_weight[""], 15,0,15);
   FillHist(prefix+hprefix+"nbjets_IncDY"+suffix, bjets.size(), map_weight[""], 10,0,10);
 
-  if(bjets.size() != 1) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
+  if(bjets.size() == 0) return;
   //bjets.at(0) *= bjets.at(0).BJetNNCorrection(); // bJetEnergyCorrection (BjetRegression)?
   jet0 = &bjets.at(0);
   bcharge = jetCharge(*jet0);
@@ -482,6 +481,29 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   double weight_default = map_weight[""];
   if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
+  // For comparison with Hyonsan's results
+  if(jet0->Pt() > 40){
+    FillHist(prefix+hprefix+"mll_nbjets"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_nbjets"+suffix, dirap, map_weight, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"lpt_nbjets"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_nbjets"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_nbjets"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_nbjets"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_nbjets"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_nbjets"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bChargeRaw_nbjets"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bCharge_nbjets"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_nbjets"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"ZbdPhi_nbjets"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"Zbpt_nbjets"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"Zpt_nbjets"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+    FillHist(prefix+hprefix+"costhetaRecoil2_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  }
+
+  if(bjets.size() != 1) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tight1b", map_weight[""]);
+
   FillHist(prefix+hprefix+"mll_Tight1b"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll_Tight1b"+suffix, dirap, map_weight, 96,-2.4,2.4);
   FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -570,6 +592,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"Zpt"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil4"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original2,(double*)afb_mbin_original2, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   // bCharges vs. nPV
   FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
@@ -1279,6 +1305,7 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
   for(const auto& jet:jets){
     int genpid = 0;
     double dR = 99.;
+
     for(unsigned int i=0; i<gens.size(); i++){
       if(!gens.at(i).isPrompt()) continue;
       if(!gens.at(i).isHardProcess()) continue;
@@ -1290,16 +1317,16 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     if(genpid == 0) continue; // No matched b-partons
 
     double Charge = jetCharge(jet);
-    double alpha_plus_DATA_eff = 0.6278552;
-    double alpha_minus_DATA_eff = 0.61232865;
-    double alpha_plus_MC_eff = 0.65408853;
-    double alpha_minus_MC_eff = 0.63814405;
+    double alpha_plus_DATA_eff = 0.63597127;//0.6278552;
+    double alpha_minus_DATA_eff = 0.62062727;//0.61232865;
+    double alpha_plus_MC_eff = 0.65465339;//0.65408853;
+    double alpha_minus_MC_eff = 0.63993788;//0.63814405;
     if(sys > 0){ // asym gets bigger
-      alpha_plus_DATA_eff += 0.00075906;
-      alpha_minus_DATA_eff += -0.00057259;
+      alpha_plus_DATA_eff += 0.00107148;//0.00075906;
+      alpha_minus_DATA_eff += -0.00107671;//-0.00057259;
     }else if(sys < 0){ // SF gets bigger
-      alpha_plus_DATA_eff += -0.00090552;
-      alpha_minus_DATA_eff += -0.0012004;
+      alpha_plus_DATA_eff += -0.00303157;//-0.00090552;
+      alpha_minus_DATA_eff += -0.00304636;//-0.0012004;
     }
 
     // 1D bChargeSF
@@ -1388,6 +1415,24 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
       if(genpid > 0 ) weight *= (1. - alpha_minus_DATA_eff) / (1. - alpha_minus_MC_eff);
       else weight *= (1. - alpha_plus_DATA_eff) / (1. - alpha_plus_MC_eff);
     }
+
+    /*
+    int origin=jet.GenHFHadronMatcherOrigin();
+    if(origin==-999) continue;
+    if(origin*Charge<0){
+      if(origin>0){
+        weight *= alpha_minus_DATA_eff / alpha_minus_MC_eff;
+      }else{
+        weight *= alpha_plus_DATA_eff / alpha_plus_MC_eff;
+      }
+    }else{
+      if(origin>0){
+        weight *= (1. - alpha_minus_DATA_eff) / (1. - alpha_minus_MC_eff);
+      }else{
+        weight *= (1. - alpha_plus_DATA_eff) / (1. - alpha_plus_MC_eff);
+      }
+    }
+    */
   }
 
   return weight;
