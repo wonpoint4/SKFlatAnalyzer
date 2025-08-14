@@ -1,0 +1,18 @@
+condor_run "python3 python/dybAFB5_LEPSYS_Aepcor.py > npzing_syst_35bins_LEPSYS_Aepcor.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_EffStatReplica.py > npzing_syst_35bins_LEPSYS_EffStatReplica.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_ElID.py > npzing_syst_35bins_LEPSYS_ElID.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_ElRECO.py > npzing_syst_35bins_LEPSYS_ElRECO.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_ElTrigger.py > npzing_syst_35bins_LEPSYS_ElTrigger.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_MuID.py > npzing_syst_35bins_LEPSYS_MuID.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_MuRECO.py > npzing_syst_35bins_LEPSYS_MuRECO.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_MuTracking.py > npzing_syst_35bins_LEPSYS_MuTracking.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_MuTrigger.py > npzing_syst_35bins_LEPSYS_MuTrigger.log" &
+condor_run "python3 python/dybAFB5_LEPSYS_RoccoR.py > npzing_syst_35bins_LEPSYS_RoccoR.log" &
+condor_run "python3 python/dybAFB5_PDF0.py > npzing_syst_35bins_PDF0.log" &
+condor_run "python3 python/dybAFB5_PDF1.py > npzing_syst_35bins_PDF1.log" &
+condor_run "python3 python/dybAFB5_PDF2.py > npzing_syst_35bins_PDF2.log" &
+condor_run "python3 python/dybAFB5_PDF3.py > npzing_syst_35bins_PDF3.log" &
+condor_run "python3 python/dybAFB5_PDF4.py > npzing_syst_35bins_PDF4.log" &
+condor_run "python3 python/dybAFB5_PDFSYS.py > npzing_syst_35bins_PDFSYS.log" &
+condor_run "python3 python/dybAFB5_SYS.py > npzing_syst_35bins_SYS.log" &
+

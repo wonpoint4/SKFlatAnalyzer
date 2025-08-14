@@ -633,6 +633,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"nj35"+suffix, njets_35, map_weight, 10,0,10);
   FillHist(prefix+hprefix+"nj40"+suffix, njets_40, map_weight, 10,0,10);
 
+  //cout<<"1. costhetaRecoil, lpt0, lpt1 = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton1->Pt()<<endl;
   // RoccoR, AepCor Variations (pt, m ,Zpt event selections are not accordingly variated)
   if(HasFlag("LEPSYS") && option == ""){
     vector<double> nmem_muon = {1, 40, 1, 1, 1, 1};
@@ -642,8 +643,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     Lepton* lepton0_syst = lepton0;
     Lepton* lepton1_syst = lepton1;
     double costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
+    //cout<<"1. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
 
-    for(unsigned int s=1; s<nmem_muon.size(); s++){
+    for(unsigned int s=0; s<nmem_muon.size(); s++){
       for(unsigned int m=0; m<nmem_muon.at(s); m++){
         suffix = Form("_MuonMomentum_s%dm%d", s, m);
         if(channel.Contains("mm"+GetEraShort())){
@@ -652,6 +654,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
           lepton1_syst = &muons_syst.at(1);
           costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
         }
+        //if(channel.Contains("ee"+GetEraShort()) && costhetaRecoil != costhetaRecoil_syst){
+        //  cout<<"1. costhetaRecoil, lpt0, lcharge0, lpt1, lcharge1, bcharge = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton0->Charge()<<", "<<lepton1->Pt()<<", "<<lepton1->Charge()<<", "<<bcharge<<endl;
+        //  cout<<"2(RoccoR s,m)="<<s<<","<<m<<"). costhetaRecoil_syst, lpt0_syst, lcharge0_syst, lpt1_syst, lcharge1_syst, bcharge = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton0_syst->Charge()<<", "<<lepton1_syst->Pt()<<", "<<lepton1_syst->Charge()<<", "<<bcharge<<endl;
+        //}
 
         FillHist(prefix+hprefix+"mll"+suffix, (*lepton0_syst + *lepton1_syst).M(), weight_default, 80,70,110);
         FillHist(prefix+hprefix+"yll"+suffix, (*lepton0_syst + *lepton1_syst).Rapidity(), weight_default, 96,-2.4,2.4);
@@ -665,11 +671,13 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
       }
     }
 
+    //cout<<"3. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
     muons_syst = muons;
     lepton0_syst = lepton0;
     lepton1_syst = lepton1;
     costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
-    for(unsigned int s=1; s<nmem_electron.size(); s++){
+    //cout<<"4. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
+    for(unsigned int s=0; s<nmem_electron.size(); s++){
       for(unsigned int m=0; m<nmem_electron.at(s); m++){
         suffix = Form("_ElectronEnergy_s%dm%d", s, m);
         if(channel.Contains("ee"+GetEraShort())){
@@ -678,6 +686,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
           lepton1_syst = &electrons_syst.at(1);
           costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
         }
+        //if(channel.Contains("mm"+GetEraShort()) && costhetaRecoil != costhetaRecoil_syst){
+        //  cout<<"1. costhetaRecoil, lpt0, lcharge0, lpt1, lcharge1, bcharge = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton0->Charge()<<", "<<lepton1->Pt()<<", "<<lepton1->Charge()<<", "<<bcharge<<endl;
+        //  cout<<"5(Aepcor s,m)="<<s<<","<<m<<"). costhetaRecoil_syst, lpt0_syst, lcharge0_syst, lpt1_syst, lcharge1_syst, bcharge = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton0_syst->Charge()<<", "<<lepton1_syst->Pt()<<", "<<lepton1_syst->Charge()<<", "<<bcharge<<endl;
+        //}
 
         FillHist(prefix+hprefix+"mll"+suffix, (*lepton0_syst + *lepton1_syst).M(), weight_default, 80,70,110);
         FillHist(prefix+hprefix+"yll"+suffix, (*lepton0_syst + *lepton1_syst).Rapidity(), weight_default, 96,-2.4,2.4);
@@ -1016,6 +1028,7 @@ double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Pa
       lm=p1;
       lp=p0;
     }else{
+      gRandom->SetSeed((run<<15)+(lumi<<10)+(event<<5)+p0->Eta()*100);
       if(gRandom->Rndm()<0.5){
         lm=p0;
         lp=p1;
@@ -1025,6 +1038,7 @@ double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Pa
       }      
     } 
   }else{
+    gRandom->SetSeed((run<<15)+(lumi<<10)+(event<<5)+p0->Eta()*100);
     if(gRandom->Rndm()<0.5){
       lm=p0;
       lp=p1;

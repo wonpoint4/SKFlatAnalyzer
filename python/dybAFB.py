@@ -47,12 +47,12 @@ systematics = {
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
     "ISR" :       [["_ISR_up", "_ISR_down"]],
     "FSR" :       [["_FSR_up", "_FSR_down"]],
-    "PDF" :       [["_pdf%d" % i] for i in range(100)],
-    #"PDF0" :      [["_pdf%d" % i] for i in range(20)],
-    #"PDF1" :      [["_pdf%d" % i] for i in range(20,40)],
-    #"PDF2" :      [["_pdf%d" % i] for i in range(40,60)],
-    #"PDF3" :      [["_pdf%d" % i] for i in range(60,80)],
-    #"PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
+    #"PDF" :       [["_pdf%d" % i] for i in range(100)],
+    "PDF0" :      [["_pdf%d" % i] for i in range(20)],
+    "PDF1" :      [["_pdf%d" % i] for i in range(20,40)],
+    "PDF2" :      [["_pdf%d" % i] for i in range(40,60)],
+    "PDF3" :      [["_pdf%d" % i] for i in range(60,80)],
+    "PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
     "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],
@@ -159,9 +159,12 @@ def getdAFBs_sin2w(channel):
         iSin = sin2w_indice[sin]
         dAFB_full = np.array([])
         for ch in range(len(chargeBins)):
-            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+            AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+            AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
-            dAFB = getdAFB(AFB_mc_nominal, AFB_mc_sin2w)
+            for i in range(1, AFB_data.GetNbinsX() + 1):
+                if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
+            dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
             dAFBs[sin].append(dAFB)
             if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
             print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB) of " % iSin), (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
@@ -297,7 +300,7 @@ if __name__=="__main__":
     ## dAFBs_syst{systematics}[chargeBins]
     dAFBs_syst = {}
     dAFBs_syst_full = {}
-    dAFBs_syst_npz = channel_path+"_dAFBs_syst"+npz_files_tag+".npz"
+    dAFBs_syst_npz = channel_path+"_dAFBs_syst"+npz_files_tag+"_hadded.npz"
     if not os.path.exists(dAFBs_syst_npz):
         dAFBs_syst, dAFBs_syst_full = getdAFBs_syst(channel, dAFBs_syst, dAFBs_syst_full)
         np.savez(dAFBs_syst_npz, X = dAFBs_syst, Y = dAFBs_syst_full)
