@@ -13,10 +13,10 @@ cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2017 --userflags PDFSYS
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --userflags PDFSYS --memory 25000 --nmax 90 &"
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016preVFP --userflags PDFSYS --memory 25000 --nmax 90 &"
 
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2018 --userflags LEPSYS --memory 30000 --nmax 80 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2017 --userflags LEPSYS --memory 30000 --nmax 80 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --userflags LEPSYS --memory 30000 --nmax 80 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016preVFP --userflags LEPSYS --memory 30000 --nmax 80 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2018 --userflags LEPSYS --memory 33000 --nmax 100 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2017 --userflags LEPSYS --memory 30000 --nmax 100 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016postVFP --userflags LEPSYS --memory 30000 --nmax 100 &"
+cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} -e 2016preVFP --userflags LEPSYS --memory 30000 --nmax 100 &"
 
 condor_qedit wonjun "RequestMemory=9000"
 condor_qedit wonjun 'concurrencylimits="n101.wonjun"'
@@ -30,3 +30,8 @@ cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2018 --userflags SYS -
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2017 --userflags SYS --memory 15000 --nmax 100 &"
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2016postVFP --userflags SYS --memory 15000 --nmax 100 &"
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2016preVFP --userflags SYS --memory 15000 --nmax 100 &"
+
+cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2018 --userflags LEPSYS --memory 10000 --nmax 200 &"
+cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2017 --userflags LEPSYS --memory 10000 --nmax 200 &"
+cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2016postVFP --userflags LEPSYS --memory 10000 --nmax 200 &"
+cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2016preVFP --userflags LEPSYS --memory 10000 --nmax 200 &"

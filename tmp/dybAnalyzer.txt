@@ -13,8 +13,8 @@ SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_top_NoFullyHad -n 
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_antitop_NoFullyHad -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i GGToLL -n 5 -e 2017
 
-SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 60 -e 2017
-SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLL_powheg -n 20 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 150 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLL_powheg -n 30 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i EGamma -n 10 -e 2018
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleElectron -n 10 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleMuon -n 10 -e 2017

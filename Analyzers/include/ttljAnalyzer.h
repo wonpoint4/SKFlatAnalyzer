@@ -10,10 +10,10 @@ class ttljAnalyzer : public dybAnalyzer {
 
   virtual void initializeAnalyzer();
   virtual void GetTTLJGenParticles(const vector<Gen>& gens, Gen& parton0,Gen& parton1,Gen& l0,Gen& l1,Gen& b0,Gen& b1,Gen& j0,Gen& j1, int mode);
-  virtual void executeEventWithParameter(TString channel, TString option="");
+  virtual void executeEventWithParameter(TString channel, TString option="", unsigned int set=0, unsigned int mem=0);
   virtual void executeEvent();
   virtual void executeEventGen();
-  virtual bool Hasleptons(TString channel);
+  virtual bool HasLeptons(TString channel ,unsigned int set=0, unsigned int mem=0);
   void FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, TString suffix="", unsigned int mode1=0, unsigned int mode2=0);
   void SetupLikelihoods(unsigned int mode1=0, unsigned int mode2=0);
   vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios, unsigned int mode3=0);

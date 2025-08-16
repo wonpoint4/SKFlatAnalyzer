@@ -181,7 +181,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     // Tracking, RECO, ID SF per lepton
     for(const Lepton* lepton:leptons){
       if(lepton->LeptonFlavour() == Lepton::MUON){
-        //cout<<"muonTrackingSF = "<<muonTrackingSF<<", muonRECOSF = "<<muonRECOSF<<", muonIDSF = "<<muonIDSF<<endl;
         muonTrackingSF *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, 0,0);
         muonRECOSF *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, 0,0);
         muonIDSF *= fEff->GetEfficiencySF(muonIDSF_key, lepton, 0,0);
@@ -189,38 +188,32 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
         if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<muonTrackingSF_sys.size(); s++){
             for(unsigned int m=0; m<muonTrackingSF_sys[s].size(); m++){
-	      //cout<<"muonTrackingSF_sys[s][m] = "<<muonTrackingSF_sys[s][m]<<endl;
               muonTrackingSF_sys[s][m] *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, s,m);
             }
           }
           for(unsigned int s=0; s<muonRECOSF_sys.size(); s++){
             for(unsigned int m=0; m<muonRECOSF_sys[s].size(); m++){
-              //cout<<"muonRECOSF_sys[s][m] = "<<muonRECOSF_sys[s][m]<<endl;
               muonRECOSF_sys[s][m] *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, s,m);
             }
           }
           for(unsigned int s=0; s<muonIDSF_sys.size(); s++){
             for(unsigned int m=0; m<muonIDSF_sys[s].size(); m++){
-              //cout<<"muonIDSF_sys[s][m] = "<<muonIDSF_sys[s][m]<<endl;
               muonIDSF_sys[s][m] *= fEff->GetEfficiencySF(muonIDSF_key, lepton, s,m);
             }
           }
         }
       }else if(lepton->LeptonFlavour() == Lepton::ELECTRON){
-        //cout<<"electronRECOSF = "<<electronRECOSF<<", electronIDSF = "<<electronIDSF<<endl;
         electronRECOSF *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, 0,0);
         electronIDSF *= fEff->GetEfficiencySF(electronIDSF_key, lepton, 0,0);
 
         if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronRECOSF_sys.size(); s++){
             for(unsigned int m=0; m<electronRECOSF_sys[s].size(); m++){
-              //cout<<"electronRECOSF_sys[s][m] = "<<electronRECOSF_sys[s][m]<<endl;
               electronRECOSF_sys[s][m] *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, s,m);
             }
           }
           for(unsigned int s=0; s<electronIDSF_sys.size(); s++){
             for(unsigned int m=0; m<electronIDSF_sys[s].size(); m++){
-              //cout<<"electronIDSF_sys[s][m] = "<<electronIDSF_sys[s][m]<<endl;
               electronIDSF_sys[s][m] *= fEff->GetEfficiencySF(electronIDSF_key, lepton, s,m);
             }
           }
@@ -230,37 +223,27 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
 
     // Trigger SF
     if(channel.Contains("mm"+GetEraShort())){
-      //cout<<"muonTriggerSF = "<<muonTriggerSF<<endl;
       muonTriggerSF *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, 0,0);
-      //cout<<"And then, muonTriggerSF = "<<muonTriggerSF<<endl;
       if(HasFlag("LEPSYS") && option == ""){
         for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
-	    //cout<<"muonTriggerSF_sys[s][m] = "<<muonTriggerSF_sys[s][m]<<endl;
             muonTriggerSF_sys[s][m] *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, s,m);
-	    //cout<<"And then, muonTriggerSF_sys[s][m] = "<<muonTriggerSF_sys[s][m]<<endl;
           }
         }
       }
     }
     if(channel.Contains("ee"+GetEraShort())){
-      //cout<<"electronTriggerSF = "<<electronTriggerSF<<endl;
       electronTriggerSF *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, 0,0);
-      //cout<<"And then, electronTriggerSF = "<<electronTriggerSF<<endl;
       if(HasFlag("LEPSYS") && option == ""){
         for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-            //cout<<"electronTriggerSF_sys[s][m] = "<<electronTriggerSF_sys[s][m]<<endl;
             electronTriggerSF_sys[s][m] *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, s,m);
-            //cout<<"And then, electronTriggerSF_sys[s][m] = "<<electronTriggerSF_sys[s][m]<<endl;
           }
         }
       }
     }
   }
 
-  //cout<<"Finally,,,,,, muonTrackingSF = "<<muonTrackingSF<<", muonRECOSF = "<<muonRECOSF<<", muonIDSF = "<<muonIDSF<<", muonTriggerSF = "<<muonTriggerSF<<endl;
-  //cout<<"Finally,,,,,, electronRECOSF = "<<electronRECOSF<<", electronIDSF = "<<electronIDSF<<", electronTriggerSF = "<<electronTriggerSF<<endl;
   map_weight[""] *= muonTrackingSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_muonTrackingSF"+suffix, muonTrackingSF, map_weight[""], 200,-5,5);
@@ -436,43 +419,36 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     for(unsigned int i=1; i<muonTrackingSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTrackingSF_sys[i].size(); j++){
         map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
-	//cout<<Form("map_weight of _muonTrackingeffSF_s%dm%d = ", i, j)<<map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", muonTrackingSF = "<<muonTrackingSF<<endl;
       }
     }
     for(unsigned int i=1; i<muonRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<muonRECOSF_sys[i].size(); j++){
         map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
-        //cout<<Form("map_weight of _muonRECOeffSF_s%dm%d = ", i, j)<<map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", muonRECOSF = "<<muonRECOSF<<endl;
       }
     }
     for(unsigned int i=1; i<muonIDSF_sys.size(); i++){
       for(unsigned int j=0; j<muonIDSF_sys[i].size(); j++){
         map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
-        //cout<<Form("map_weight of _muonIDeffSF_s%dm%d = ", i, j)<<map_weight[""] / muonIDSF * muonIDSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", muonIDSF = "<<muonIDSF<<endl;
       }
     }
     for(unsigned int i=1; i<muonTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTriggerSF_sys[i].size(); j++){
         map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
-        //cout<<Form("map_weight of _muonTriggereffSF_s%dm%d = ", i, j)<<map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", muonTriggerSF = "<<muonTriggerSF<<endl;
       }
     }
     for(unsigned int i=1; i<electronRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<electronRECOSF_sys[i].size(); j++){
         map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
-        //cout<<Form("map_weight of _electronRECOeffSF_s%dm%d = ", i, j)<<map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", electronRECOSF = "<<electronRECOSF<<endl;
       }
     }
     for(unsigned int i=1; i<electronIDSF_sys.size(); i++){
       for(unsigned int j=0; j<electronIDSF_sys[i].size(); j++){
         map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
-        //cout<<Form("map_weight of _electronIDeffSF_s%dm%d = ", i, j)<<map_weight[""] / electronIDSF * electronIDSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", electronIDSF = "<<electronIDSF<<endl;
       }
     }
     for(unsigned int i=1; i<electronTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<electronTriggerSF_sys[i].size(); j++){
         map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
-        //cout<<Form("map_weight of _electronTriggereffSF_s%dm%d = ", i, j)<<map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j]<<", while map_weight = "<<map_weight[""]<<", electronTriggerSF = "<<electronTriggerSF<<endl;
       }
     }
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun){
@@ -633,8 +609,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"nj35"+suffix, njets_35, map_weight, 10,0,10);
   FillHist(prefix+hprefix+"nj40"+suffix, njets_40, map_weight, 10,0,10);
 
-  //cout<<"1. costhetaRecoil, lpt0, lpt1 = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton1->Pt()<<endl;
-  // RoccoR, AepCor Variations (pt, m ,Zpt event selections are not accordingly variated)
+  // RoccoR, AepCor Variations (pt, m, Zpt event selections are not accordingly variated)
   if(HasFlag("LEPSYS") && option == ""){
     vector<double> nmem_muon = {1, 40, 1, 1, 1, 1};
     vector<double> nmem_electron = {1, 40, 1, 1, 1, 1, 1, 1, 1};
@@ -643,7 +618,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
     Lepton* lepton0_syst = lepton0;
     Lepton* lepton1_syst = lepton1;
     double costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
-    //cout<<"1. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
 
     for(unsigned int s=0; s<nmem_muon.size(); s++){
       for(unsigned int m=0; m<nmem_muon.at(s); m++){
@@ -654,10 +628,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
           lepton1_syst = &muons_syst.at(1);
           costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
         }
-        //if(channel.Contains("ee"+GetEraShort()) && costhetaRecoil != costhetaRecoil_syst){
-        //  cout<<"1. costhetaRecoil, lpt0, lcharge0, lpt1, lcharge1, bcharge = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton0->Charge()<<", "<<lepton1->Pt()<<", "<<lepton1->Charge()<<", "<<bcharge<<endl;
-        //  cout<<"2(RoccoR s,m)="<<s<<","<<m<<"). costhetaRecoil_syst, lpt0_syst, lcharge0_syst, lpt1_syst, lcharge1_syst, bcharge = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton0_syst->Charge()<<", "<<lepton1_syst->Pt()<<", "<<lepton1_syst->Charge()<<", "<<bcharge<<endl;
-        //}
 
         FillHist(prefix+hprefix+"mll"+suffix, (*lepton0_syst + *lepton1_syst).M(), weight_default, 80,70,110);
         FillHist(prefix+hprefix+"yll"+suffix, (*lepton0_syst + *lepton1_syst).Rapidity(), weight_default, 96,-2.4,2.4);
@@ -671,12 +641,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
       }
     }
 
-    //cout<<"3. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
     muons_syst = muons;
     lepton0_syst = lepton0;
     lepton1_syst = lepton1;
     costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
-    //cout<<"4. costhetaRecoil_syst, lpt0_syst, lpt1_syst = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton1_syst->Pt()<<endl;
     for(unsigned int s=0; s<nmem_electron.size(); s++){
       for(unsigned int m=0; m<nmem_electron.at(s); m++){
         suffix = Form("_ElectronEnergy_s%dm%d", s, m);
@@ -686,10 +654,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option){
           lepton1_syst = &electrons_syst.at(1);
           costhetaRecoil_syst = GetCosThetaRecoil(lepton0_syst, lepton1_syst, jet0);
         }
-        //if(channel.Contains("mm"+GetEraShort()) && costhetaRecoil != costhetaRecoil_syst){
-        //  cout<<"1. costhetaRecoil, lpt0, lcharge0, lpt1, lcharge1, bcharge = "<<costhetaRecoil<<", "<<lepton0->Pt()<<", "<<lepton0->Charge()<<", "<<lepton1->Pt()<<", "<<lepton1->Charge()<<", "<<bcharge<<endl;
-        //  cout<<"5(Aepcor s,m)="<<s<<","<<m<<"). costhetaRecoil_syst, lpt0_syst, lcharge0_syst, lpt1_syst, lcharge1_syst, bcharge = "<<costhetaRecoil_syst<<", "<<lepton0_syst->Pt()<<", "<<lepton0_syst->Charge()<<", "<<lepton1_syst->Pt()<<", "<<lepton1_syst->Charge()<<", "<<bcharge<<endl;
-        //}
 
         FillHist(prefix+hprefix+"mll"+suffix, (*lepton0_syst + *lepton1_syst).M(), weight_default, 80,70,110);
         FillHist(prefix+hprefix+"yll"+suffix, (*lepton0_syst + *lepton1_syst).Rapidity(), weight_default, 96,-2.4,2.4);

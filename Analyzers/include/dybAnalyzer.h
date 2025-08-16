@@ -36,6 +36,7 @@ public:
 
   TString prefix, gprefix, hprefix, suffix;
   vector<Gen> gens;
+  vector<Jet> jets_raw;
   vector<Jet> jets;
   vector<Jet> bjets;
   vector<Lepton*> leptons;

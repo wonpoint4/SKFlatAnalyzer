@@ -2,7 +2,7 @@
 
 void ttljAnalyzer::initializeAnalyzer(){
   SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
-  IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS");
+  IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && !HasFlag("LEPSYS");
 
   PDFbase = LHAPDF::mkPDF(306000);
   PDFnf4 = LHAPDF::mkPDF(325500);
@@ -18,35 +18,47 @@ void ttljAnalyzer::executeEvent(){
   if(!IsDATA) executeEventGen();
 
   ///////////////// RECO level /////////////////////
+  jets_raw = GetAllJets(); // This can make event loops much slower in case of running over Unskimmed samples
   if(!IsDATA || DataStream.Contains("SingleMuon")){
+    muons_raw = SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4);
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
       }
+    }else if(HasFlag("LEPSYS")){
+      vector<unsigned int> nmem_muon = {1, 40, 1, 1, 1, 1}; // RoccoR
+      for(unsigned int s=0; s<nmem_muon.size(); s++){
+        for(unsigned int m=0; m<nmem_muon.at(s); m++){
+          executeEventWithParameter("m"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
+        }
+      }
     }
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
+    electrons_raw = SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5);
     executeEventWithParameter("e"+GetEraShort());
-    executeEventWithParameter("E"+GetEraShort());
     if(HasFlag("SYS")){
       for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("E"+GetEraShort(), syst);
+      }
+    }else if(HasFlag("LEPSYS")){
+      vector<unsigned int> nmem_electron = {1, 40, 1, 1, 1, 1, 1, 1, 1}; // Aepcor
+      for(unsigned int s=0; s<nmem_electron.size(); s++){
+        for(unsigned int m=0; m<nmem_electron.at(s); m++){
+          executeEventWithParameter("e"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
+        }
       }
     }
   }
 }
 
-void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
+  void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, unsigned int set, unsigned int mem){
 
   lepton0 = NULL;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
-  if(option.Contains("jet_scale_up")) suffix += "_jet_scale_up";
-  else if(option.Contains("jet_scale_down")) suffix += "_jet_scale_down";
-  else if(option.Contains("jet_smear_up")) suffix += "_jet_smear_up";
-  else if(option.Contains("jet_smear_down")) suffix += "_jet_smear_down";
-  if(IsNominalRun || option != "") IsNominalLike = true;
+  if(option != "") suffix += option;
+  if((IsNominalRun || option != "") && set != 1) IsNominalLike = true;
   else IsNominalLike = false;
 
   // Weights Setup
@@ -72,15 +84,15 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "METfilter", map_weight[""]);
 
   // Single Lepton + pT + MET
-  if(!Hasleptons(channel)) return;
+  if(!HasLeptons(channel, set, mem)) return;
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(GetAllJets(), 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(GetAllJets(), -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(GetAllJets(), 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(GetAllJets(), -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else alljets = SelectJets(GetAllJets(), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(jets_raw, 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(jets_raw, -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(jets_raw, 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(jets_raw, -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  else alljets = SelectJets(jets_raw, "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
@@ -95,16 +107,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   // b-tagging
   JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb);
-  std::vector<bool> btag_vector = {};
   for(const auto& jet:realjets){
     //jet *= jet.BJetNNCorrection(); // full bJetEnergyCorrection (BBjetRegression)?
-    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)){
-      btag_vector.push_back(true);
-      bjets.push_back(jet);
-    }else{
-      btag_vector.push_back(false);
-      ajets.push_back(jet);
-    }
+    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
+    else ajets.push_back(jet);
   }
 
   // Jet related weights
@@ -151,39 +157,33 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   electronTriggerSF = 1.;
 
   if(!IsDATA){
-    bool iselectronchannel = (channel.Contains("e"+GetEraShort()) || channel.Contains("E"+GetEraShort()));
     // Efficiency SF keys
-    TString muonTrackingSF_key = channel.Contains("m"+GetEraShort())? "Muon_Tracking": "";
-    TString muonRECOSF_key = channel.Contains("m"+GetEraShort())? "Muon_RECO": "";
-    TString muonIDSF_key = channel.Contains("m"+GetEraShort())? "Muon_MediumID_trkIsoLoose": "";
-    TString muonTriggerSF_key = channel.Contains("m"+GetEraShort())? "IsoMu24_MediumID_trkIsoLoose": "";
-    TString electronRECOSF_key = iselectronchannel? "Electron_RECO": "";
-    TString electronIDSF_key = iselectronchannel? "Electron_MediumID": "";
-    TString electronTriggerSF_key = iselectronchannel? "Ele27_MediumID": "";
-    if(channel.Contains("E"+GetEraShort())){
-      electronIDSF_key.ReplaceAll("MediumID", "SelQ_MediumID");
-      electronTriggerSF_key.ReplaceAll("MediumID", "SelQ_MediumID");
-    }
+    TString muonTrackingSF_key = "Muon_Tracking";
+    TString muonRECOSF_key = "Muon_RECO";
+    TString muonIDSF_key = "Muon_MediumID_trkIsoLoose";
+    TString muonTriggerSF_key = "IsoMu24_MediumID_trkIsoLoose";
+    TString electronRECOSF_key = "Electron_RECO";
+    TString electronIDSF_key = "Electron_SelQ_MediumID";
+    TString electronTriggerSF_key = DataYear == 2018? "Ele28_SelQ_MediumID": "Ele27_SelQ_MediumID";
 
-    if(HasFlag("SYS") && option == ""){
-      if(channel.Contains("m"+GetEraShort())){
-        muonTrackingSF_sys = Make2DWeights(fEff->GetStructure(muonTrackingSF_key));
-        muonRECOSF_sys = Make2DWeights(fEff->GetStructure(muonRECOSF_key));
-        muonIDSF_sys = Make2DWeights(fEff->GetStructure(muonIDSF_key));
-      }else if(iselectronchannel){
-        electronRECOSF_sys = Make2DWeights(fEff->GetStructure(electronRECOSF_key));
-        electronIDSF_sys = Make2DWeights(fEff->GetStructure(electronIDSF_key));
-      }
+    if(HasFlag("LEPSYS") && option == ""){
+      muonTrackingSF_sys = Make2DWeights(fEff->GetStructure(muonTrackingSF_key));
+      muonRECOSF_sys = Make2DWeights(fEff->GetStructure(muonRECOSF_key));
+      muonIDSF_sys = Make2DWeights(fEff->GetStructure(muonIDSF_key));
+      muonTriggerSF_sys = Make2DWeights(fEff->GetStructure(muonTriggerSF_key));
+      electronRECOSF_sys = Make2DWeights(fEff->GetStructure(electronRECOSF_key));
+      electronIDSF_sys = Make2DWeights(fEff->GetStructure(electronIDSF_key));
+      electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerSF_key));
     }
 
     // Tracking, RECO, ID SF per lepton
     for(const Lepton* lepton:leptons){
-      if(lepton->LeptonFlavour()==Lepton::MUON){
+      if(lepton->LeptonFlavour() == Lepton::MUON){
         muonTrackingSF *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, 0,0);
         muonRECOSF *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, 0,0);
         muonIDSF *= fEff->GetEfficiencySF(muonIDSF_key, lepton, 0,0);
 
-        if(HasFlag("SYS") && option == ""){
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<muonTrackingSF_sys.size(); s++){
             for(unsigned int m=0; m<muonTrackingSF_sys[s].size(); m++){
               muonTrackingSF_sys[s][m] *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, s,m);
@@ -200,11 +200,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
             }
           }
         }
-      }else if(lepton->LeptonFlavour()==Lepton::ELECTRON){
+      }else if(lepton->LeptonFlavour() == Lepton::ELECTRON){
         electronRECOSF *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, 0,0);
         electronIDSF *= fEff->GetEfficiencySF(electronIDSF_key, lepton, 0,0);
 
-        if(HasFlag("SYS") && option == ""){
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronRECOSF_sys.size(); s++){
             for(unsigned int m=0; m<electronRECOSF_sys[s].size(); m++){
               electronRECOSF_sys[s][m] *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, s,m);
@@ -223,8 +223,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
     if(channel.Contains("m"+GetEraShort())){
       if(DataYear != 2017){
         muonTriggerSF *= GetLeptonTriggerSF(muonTriggerSF_key, leptons, 0,0);
-        if(HasFlag("SYS") && option == ""){
-          muonTriggerSF_sys = Make2DWeights(fEff->GetStructure(muonTriggerSF_key));
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
               muonTriggerSF_sys[s][m] *= GetLeptonTriggerSF(muonTriggerSF_key, leptons, s,m);
@@ -233,8 +232,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
         }
       }else{
         muonTriggerSF *= GetLeptonTriggerORSF({"IsoMu24_MediumID_trkIsoLoose", "IsoMu27_MediumID_trkIsoLoose"}, leptons, 0,0);
-        if(HasFlag("SYS") && option == ""){
-          muonTriggerSF_sys = Make2DWeights(fEff->GetStructure(muonTriggerSF_key));
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
               muonTriggerSF_sys[s][m] *= GetLeptonTriggerORSF({"IsoMu24_MediumID_trkIsoLoose", "IsoMu27_MediumID_trkIsoLoose"}, leptons, s,m);
@@ -242,11 +240,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
           }
         }
       }
-    }else if(iselectronchannel){
+    }
+    if(channel.Contains("e"+GetEraShort())){
       if(DataYear == 2016){
         electronTriggerSF *= GetLeptonTriggerSF(electronTriggerSF_key, leptons, 0,0);
-        if(HasFlag("SYS") && option == ""){
-          electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerSF_key));
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
               electronTriggerSF_sys[s][m] *= GetLeptonTriggerSF(electronTriggerSF_key, leptons, s,m);
@@ -254,26 +252,20 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
           }
         }
       }else if(DataYear == 2017){
-        if(channel.Contains("E"+GetEraShort())) electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, 0,0);
-        else electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_MediumID", "Ele32_MediumID"}, leptons, 0,0);
-        if(HasFlag("SYS") && option == ""){
-          electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerSF_key));
+        electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, 0,0);
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-              if(channel.Contains("E"+GetEraShort())) electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
-              else electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_MediumID", "Ele32_MediumID"}, leptons, s,m);
+              electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
             }
           }
         }
       }else{
-        if(channel.Contains("E"+GetEraShort())) electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, 0,0);
-        else electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_MediumID", "Ele32_MediumID"}, leptons, 0,0);
-        if(HasFlag("SYS") && option == ""){
-          electronTriggerSF_sys = Make2DWeights(fEff->GetStructure(electronTriggerSF_key));
+        electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, 0,0);
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-              if(channel.Contains("E"+GetEraShort())) electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
-              else electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_MediumID", "Ele32_MediumID"}, leptons, s,m);
+              electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
             }
           }
         }
@@ -339,8 +331,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
   //==== Making Likelihood
   if(IsNominalLike){
-    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 0, 0); // ByungHun Oh's method - drop events with ambiguity
-    if(!IsDATA && MCSample.Contains("TTLJ") && !channel.Contains("e"+GetEraShort())) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
+    if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 0, 0); // ByungHun Oh's method - drop events with ambiguity
+    if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
   }
 
   //==== Finding the correct bbjj combination
@@ -429,7 +421,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
 
     // Top pt Reweight
     map_weight["_noToppt"] =  map_weight[""] / topptweight;
-
+  }else if(!IsDATA && HasFlag("LEPSYS") && option == ""){
     // EfficiencySF - stat
     for(int j=0; j<fEff->nreplica; j++){
       double SF_stat = 1. / muonTrackingSF / muonRECOSF / muonIDSF / muonTriggerSF / electronRECOSF / electronIDSF / electronTriggerSF;
@@ -480,7 +472,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
       }
     }
   }
-  if(HasFlag("SYS") && option == "") map_weight.erase("");
+  if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
     bool isTTLJinAcceptance = true;
@@ -867,21 +859,16 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option){
   FillHist(prefix+hprefix+"bsChargeAbsSum"+suffix, (lepb_charge < 0? -1: 1) + (hadb_charge < 0? -1: 1), map_weight, 8,-4,4);
 }
 
-bool ttljAnalyzer::Hasleptons(TString channel){
+bool ttljAnalyzer::HasLeptons(TString channel, unsigned int s, unsigned int m){
   bool moreleptons = false;
   double l0pt = 26.;
   if(channel.Contains("m"+GetEraShort())){
-    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0,0);
+    muons = MuonMomentumCorrection(muons_raw, s,m);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) moreleptons = true;
   }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0);
-    if(electrons.size() > 0) lepton0 = &electrons.at(0);
-    if(electrons.size() > 1) moreleptons = true;
-  }else if(channel.Contains("E"+GetEraShort())){
-    l0pt = 30.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5), 0,0);
+    electrons = ElectronEnergyCorrection(electrons_raw, s,m);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else{
