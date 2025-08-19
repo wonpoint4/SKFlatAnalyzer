@@ -27,7 +27,6 @@ void ttljAnalyzer::executeEvent(){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
-      vector<unsigned int> nmem_muon = {1, 40, 1, 1, 1, 1}; // RoccoR
       for(unsigned int s=0; s<nmem_muon.size(); s++){
         for(unsigned int m=0; m<nmem_muon.at(s); m++){
           executeEventWithParameter("m"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
@@ -43,7 +42,6 @@ void ttljAnalyzer::executeEvent(){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
-      vector<unsigned int> nmem_electron = {1, 40, 1, 1, 1, 1, 1, 1, 1}; // Aepcor
       for(unsigned int s=0; s<nmem_electron.size(); s++){
         for(unsigned int m=0; m<nmem_electron.at(s); m++){
           executeEventWithParameter("e"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
@@ -53,7 +51,7 @@ void ttljAnalyzer::executeEvent(){
   }
 }
 
-  void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, unsigned int set, unsigned int mem){
+void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, unsigned int set, unsigned int mem){
 
   lepton0 = NULL;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
@@ -390,18 +388,10 @@ void ttljAnalyzer::executeEvent(){
     map_weight["_btagSF_hup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTag");
     map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr2016a"] = map_weight[""];
-    map_weight["_btagSF_huncorr2016b"] = map_weight[""];
-    map_weight["_btagSF_huncorr2017"] = map_weight[""];
-    map_weight["_btagSF_huncorr2018"] = map_weight[""];
     map_weight["_btagSF_huncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTag");
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr2016a"] = map_weight[""];
-    map_weight["_btagSF_luncorr2016b"] = map_weight[""];
-    map_weight["_btagSF_luncorr2017"] = map_weight[""];
-    map_weight["_btagSF_luncorr2018"] = map_weight[""];
     map_weight["_btagSF_luncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
 
     // PUjetID SF
@@ -436,39 +426,55 @@ void ttljAnalyzer::executeEvent(){
     }
 
     // EfficiencySF - syst
-    for(unsigned int i=1; i<muonTrackingSF_sys.size(); i++){
+    for(unsigned int i=0; i<muonTrackingSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTrackingSF_sys[i].size(); j++){
         map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<muonRECOSF_sys.size(); i++){
+    for(unsigned int i=0; i<muonRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<muonRECOSF_sys[i].size(); j++){
         map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<muonIDSF_sys.size(); i++){
+    for(unsigned int i=0; i<muonIDSF_sys.size(); i++){
       for(unsigned int j=0; j<muonIDSF_sys[i].size(); j++){
         map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<muonTriggerSF_sys.size(); i++){
+    for(unsigned int i=0; i<muonTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTriggerSF_sys[i].size(); j++){
         map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<electronRECOSF_sys.size(); i++){
+    for(unsigned int i=0; i<electronRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<electronRECOSF_sys[i].size(); j++){
         map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<electronIDSF_sys.size(); i++){
+    for(unsigned int i=0; i<electronIDSF_sys.size(); i++){
       for(unsigned int j=0; j<electronIDSF_sys[i].size(); j++){
         map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
       }
     }
-    for(unsigned int i=1; i<electronTriggerSF_sys.size(); i++){
+    for(unsigned int i=0; i<electronTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<electronTriggerSF_sys[i].size(); j++){
         map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
+      }
+    }
+
+    // Dummy for Aepcor, RoccoR
+    if(channel.Contains("m"+GetEraShort())){
+      for(unsigned int i=0; i<nmem_electron.size(); i++){
+        for(unsigned int j=0; j<nmem_electron.at(i); j++){
+          map_weight[Form("_ElectronEnergy_s%dm%d", i, j)] = map_weight[""];
+        }
+      }
+    }
+    if(channel.Contains("e"+GetEraShort())){
+      for(unsigned int i=0; i<nmem_muon.size(); i++){
+        for(unsigned int j=0; j<nmem_muon.at(i); j++){
+          map_weight[Form("_MuonMomentum_s%dm%d", i, j)] = map_weight[""];
+        }
       }
     }
   }

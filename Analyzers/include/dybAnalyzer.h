@@ -11,11 +11,11 @@ class dybAnalyzer : public SMPAnalyzerCore {
 public:
 
   virtual void initializeAnalyzer();
-  virtual void executeEventWithParameter(TString channel, TString option="");
+  virtual void executeEventWithParameter(TString channel, TString option="", unsigned int set=0, unsigned int mem=0);
   virtual void executeEventGen();
   virtual void executeEvent();
   virtual bool IsFiredTriggers(TString channel);
-  virtual bool HasDileptons(TString channel);
+  virtual bool HasDileptons(TString channel, unsigned int set=0, unsigned int mem=0);
   virtual double jetCharge(const Jet& jet);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys=0, TString bChargeBins="012345");
@@ -64,6 +64,8 @@ public:
   vector<vector<double>> electronRECOSF_sys;
   vector<vector<double>> electronIDSF_sys;
   vector<vector<double>> electronTriggerSF_sys;
+  vector<unsigned int> nmem_muon {1, 40, 1, 1, 1, 1}; // RoccoR
+  vector<unsigned int> nmem_electron = {1, 40, 1, 1, 1, 1, 1, 1, 1}; // Aepcor
 
   double lumiweight = 1.;
   double PUweight = 1.;
