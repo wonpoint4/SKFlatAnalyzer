@@ -20,11 +20,12 @@ void ttljAnalyzer::executeEvent(){
   ///////////////// RECO level /////////////////////
   jets_raw = GetAllJets(); // This can make event loops much slower in case of running over Unskimmed samples
   if(!IsDATA || DataStream.Contains("SingleMuon")){
-    muons_raw = SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4);
+    muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0, true);
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
+        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("M"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_muon.size(); s++){
@@ -32,14 +33,15 @@ void ttljAnalyzer::executeEvent(){
           executeEventWithParameter("m"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
         }
       }
-    }
+    }else executeEventWithParameter("M"+GetEraShort());
   }
   if(!IsDATA || DataStream.Contains("SingleElectron") || DataStream.Contains("EGamma")){
-    electrons_raw = SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5);
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0, true);
     executeEventWithParameter("e"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"jet_scale_up", "jet_scale_down", "jet_smear_up", "jet_smear_down"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
+        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("E"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_electron.size(); s++){
@@ -47,7 +49,7 @@ void ttljAnalyzer::executeEvent(){
           executeEventWithParameter("e"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
         }
       }
-    }
+    }else executeEventWithParameter("E"+GetEraShort());
   }
 }
 
@@ -55,7 +57,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
 
   lepton0 = NULL;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
-  if(option != "") suffix += option;
+  suffix += option;
   if((IsNominalRun || option != "") && set != 1) IsNominalLike = true;
   else IsNominalLike = false;
 
@@ -128,7 +130,6 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, ">=2j", map_weight[""]);
 
   // Weights
-  if(!IsDATA && IsNominalLike) map_weight["_noWts"] = map_weight[""];
   map_weight[""] *= PUweight;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PU"+suffix, PUweight, map_weight[""], 200,-5,5);
@@ -320,6 +321,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   if(IsNominalLike){
     if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
     FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
+    if(!IsDATA) map_weight["_bChargeSFHS"] = map_weight[""] * GetbChargeSFWeight(bjets, 2, 0);
+    FillHist(prefix+hprefix+"weight_bChargeSFHS"+suffix, GetbChargeSFWeight(bjets, 2, 0), map_weight[""], 200,-5,5);
     if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
     FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
   }
@@ -332,6 +335,17 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 0, 0); // ByungHun Oh's method - drop events with ambiguity
     if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
   }
+
+  FillHist(prefix+hprefix+"lpt_incTTLJ"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"leta_incTTLJ"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(1).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(1).Eta(), map_weight, 50,-2.5,2.5);
 
   //==== Finding the correct bbjj combination
   vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
@@ -351,8 +365,31 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   FillHist(prefix+"likelihood_ratio_Mjj_beforeLRcut"+suffix, LRs.at(3), map_weight, 100,0,5);
   FillHist(prefix+"likelihood_ratio_dRtt_beforeLRcut"+suffix, LRs.at(4), map_weight, 100,0,5);
   FillHist(prefix+"likelihood_ratio_dPhitt_beforeLRcut"+suffix, LRs.at(5), map_weight, 100,0,5);
+
+  FillHist(prefix+hprefix+"lpt_beforeLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"leta_beforeLRcut"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(1).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(1).Eta(), map_weight, 50,-2.5,2.5);
+
   if(LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3) < 0.5) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LR0p5 cuts", map_weight[""]);
+
+  FillHist(prefix+hprefix+"lpt_afterLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"leta_afterLRcut"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(1).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+  FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(0).Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(1).Eta(), map_weight, 50,-2.5,2.5);
 
   TString prefix_nPV = prefix;
   if(nPV <= 10) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"F");      // few
@@ -869,12 +906,21 @@ bool ttljAnalyzer::HasLeptons(TString channel, unsigned int s, unsigned int m){
   bool moreleptons = false;
   double l0pt = 26.;
   if(channel.Contains("m"+GetEraShort())){
-    muons = MuonMomentumCorrection(muons_raw, s,m);
+    muons = MuonMomentumCorrection(muons, s,m, false);
     if(muons.size() > 0) lepton0 = &muons.at(0);
     if(muons.size() > 1) moreleptons = true;
   }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
-    electrons = ElectronEnergyCorrection(electrons_raw, s,m);
+    electrons = ElectronEnergyCorrection(electrons, s,m, false);
+    if(electrons.size() > 0) lepton0 = &electrons.at(0);
+    if(electrons.size() > 1) moreleptons = true;
+  }else if(channel.Contains("M"+GetEraShort())){
+    muons = MuonMomentumCorrection(SMPGetMuons("FakeID", 8.0, 2.4), s,m, true);
+    if(muons.size() > 0) lepton0 = &muons.at(0);
+    if(muons.size() > 1) moreleptons = true;
+  }else if(channel.Contains("E"+GetEraShort())){
+    l0pt = 30.;
+    electrons = ElectronEnergyCorrection(SMPGetElectrons("FakeID", 8.0, 2.5), s,m, true);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else{
