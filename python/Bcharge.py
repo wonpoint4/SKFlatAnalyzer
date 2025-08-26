@@ -43,15 +43,16 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
-    correct = ttlj.GetHist(0, channel+"/recobCharge"+chargeBin+syst).Integral()
-    wrong = ttlj.GetHist(1, channel+"/recobCharge"+chargeBin+syst).Integral()
+    correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
+    wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data = forNorm.GetHist(0, channel+"/recobCharge"+chargeBin+("" if "jet_scale" not in syst else syst)).Integral()
-    mc = forNorm.GetHist(1, channel+"/recobCharge"+chargeBin+syst).Integral()
+    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+("" if "jet_scale" not in syst else syst)).Integral()
+    mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
 
     return fc, fc_e, data / mc
+    #return fc * 0.99, fc_e, data / mc
 
 def calc_withLR(fc, fp, fm):
     ap = (fc * (fp + fc -1) + (1 - fc) * (fm + fc -1)) / (2 * fc - 1)
@@ -137,8 +138,8 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
         for syst in allsysts[systs]:
             fc, fc_stat, norm = getfc(channel, chargeBin, syst)
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
-            hp = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
-            hm = a.GetHist(ientry, channel+"/recobbarCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
             fcs[systs].append(fc)
@@ -169,7 +170,7 @@ def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     for systs in range(len(allsysts)):
         syst_ep_bigger, syst_em_bigger = 0, 0
         for syst in allsysts[systs]:
-            hp = ttlj_gen.GetHist(0, channel+"/genbbarCharge"+chargeBin+"_L[pm]"+syst, option)
+            hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]"+syst, option)
             hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]"+syst, option)
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
@@ -543,34 +544,34 @@ if __name__=="__main__":
     #DrawAccuracyByType(["mn201[678][ab]?","en201[678][ab]?","me201[678][ab]?","mm201[678][ab]?","ee201[678][ab]?"],[0,1,2])
     #DrawAccuracyByType([channel+era for channel in ["mn","en"] for era in ["2016a","2016b","2017","2018","201[678][ab]?"]],[0,1,2])
 
-    leps = ["[Em]", "E", "m"]
+    leps = ["[em]", "e", "m"]
     eras = ["2016a", "2016b", "2017", "2018", "201[678][ab]?"]
     chargeBins = ["", "_4", "_5", "_[0-3]", "_0", "_1", "_2", "_3"]
-    option = "syst" # "syst" or ""
+    option = "" # "syst" or ""
 
-    DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[0]+"s", option)
-    DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)
-    DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[2]+"s", option)
-    DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
+    #DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[0]+"s", option)
+    #DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)
+    #DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[2]+"s", option)
+    #DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2s", option)
 
-    DrawAccuracy_withLR([leps[0]+eras[4]+"F"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2F", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+"S"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2S", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+"L"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2L", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+"M"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2M", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2H", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2V", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"F"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2F", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"S"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2S", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"L"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2L", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"M"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2M", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2H", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2V", option)
 
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.59, 0.66), "chargeBin", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[1] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.70, 0.79), "chargeBin4", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[2] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.63, 0.79), "chargeBin5", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[3] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.645), "chargeBin0123", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[4] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.505, 0.55), "chargeBin0", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[5] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.54, 0.62), "chargeBin1", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "chargeBin2", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "chargeBin3", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.59, 0.66), "chargeBin", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[1] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.70, 0.79), "chargeBin4", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[2] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.63, 0.79), "chargeBin5", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[3] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.645), "chargeBin0123", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[4] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.505, 0.55), "chargeBin0", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[5] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.54, 0.62), "chargeBin1", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "chargeBin2", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "chargeBin3", option)
 
     DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
-    DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.605, 0.66), "Eras_Leps", option)
-    chargeBins = ["", "_[0-3]", "_4", "_5"]
-    DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], (0.59, 0.78), "Eras_Bins", option)
+    #DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.605, 0.66), "Eras_Leps", option)
+    #chargeBins = ["", "_[0-3]", "_4", "_5"]
+    #DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], (0.59, 0.78), "Eras_Bins", option)
