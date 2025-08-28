@@ -94,12 +94,15 @@ public:
   static constexpr const double afb_mbin[afb_mbinnum+1] = {52,66,76,82,86,89.5,92.7,96,100,106,116,150,200};
   static const int afb_chbinnum = 6;
   static constexpr const double afb_chbin[afb_chbinnum+1] = {0., 0.1, 0.2, 0.6, 1.0, 3.0, 5.0};
+  static const int afb_ptbinnum = 5;
+  static constexpr const double afb_ptbin[afb_ptbinnum+1] = {0, 35, 50, 80, 120, 650};
+
   //static const int afb_chbinnum = 12;
   //static constexpr const double afb_chbin[afb_chbinnum+1] = {-5.0, -3.0, -1.0, -0.6, -0.2, -0.1, 0., 0.1, 0.2, 0.6, 1.0, 3.0, 5.0};
   static const int afb_ybinnum = 12;
   static constexpr const double afb_ybin[afb_ybinnum+1] = {-2.4,-2.0,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2.0,2.4};
-  static const int afb_ptbinnum = 30;
-  static constexpr const double afb_ptbin[afb_ptbinnum+1] = {0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
+  //static const int afb_ptbinnum = 30;
+  //static constexpr const double afb_ptbin[afb_ptbinnum+1] = {0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
 };
 
 #endif

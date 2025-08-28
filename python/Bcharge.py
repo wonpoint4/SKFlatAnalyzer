@@ -121,11 +121,12 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     allsysts = [[""]]
     if "syst" in option:
         allsysts = [
-            ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-            ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-            ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-            ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-            ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+            ["_jetpt25"], ["_jetpt55"], ["_jeteta5", "_jeteta1p5"],
+            #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+            #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+            #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+            #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+            #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
             [""]
         ]
 
@@ -159,11 +160,12 @@ def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     allsysts = [[""]]
     if "syst" in option:
         allsysts.extend([
-            ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-            ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-            ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-            ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-            ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+            ["_jetpt25"], ["_jetpt55"], ["_jeteta5", "_jeteta1p5"],
+            #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+            #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+            #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+            #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+            #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
         ])
 
     ap, am, stat_ep, stat_em, ep, em = 0, 0, -1, -1, 0, 0
@@ -204,16 +206,22 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
     gsim_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
     gtrue_tot_unc = [ROOT.TGraphErrors(), ROOT.TGraphErrors()]
 
-    Bins = ["_[0-3]", "_0", "_1", "_2", "_3", "_4", "_5"]
+    chBins = ["_[0-3]", "_0", "_1", "_2", "_3", "_4", "_5"]
+    ptBins = ["_pt0", "_pt1", "_pt2", "_pt3", "_pt4"]
     for i in range(len(channels)):
         channel = channels[i]
         print("\n\n@@@ Channel : "+channel+" started @@@\n")
 
         chargeBin = ""
-        for Bin in Bins:
+        for Bin in chBins:
             if Bin in channel:
                 channel = channel.replace(Bin, "")
                 chargeBin = Bin.replace("_", "")
+                break
+        for Bin in ptBins:
+            if Bin in channel:
+                channel = channel.replace(Bin, "")
+                chargeBin += Bin
                 break
 
         value, cov_stat, cov = GetAccuracy_withLR(0, channel, chargeBin, option)
@@ -252,17 +260,19 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
         title = title.replace("[e#mu] Run2M", "nPV(30,40]")
         title = title.replace("[e#mu] Run2H", "nPV(40,50]")
         title = title.replace("[e#mu] Run2V", "nPV > 50")
+
         chargeBin = ""
-        for Bin in Bins:
+        for Bin in chBins:
             if Bin in title:
                 title = title.replace(Bin, "")
                 chargeBin = Bin.replace("_", "")
                 break
+
         alpha = "#alpha"
         if chargeBin != "":
-            if chargeBin == "[0-3]": alpha = "#alpha_{j}"
-            elif chargeBin == "4": alpha = "#alpha_{#mu}"
-            elif chargeBin == "5": alpha = "#alpha_{e}"
+            if "[0-3]" in chargeBin: alpha = "#alpha_{j}"
+            elif "4" in chargeBin: alpha = "#alpha_{#mu}"
+            elif "5" in chargeBin: alpha = "#alpha_{e}"
             else: alpha = "#alpha_{j,"+chargeBin+"}"
         hframe.GetYaxis().SetBinLabel(i * 2 + 1, alpha+"^{#minus} ("+title+")")
         hframe.GetYaxis().SetBinLabel(i * 2 + 2, alpha+"^{#plus} ("+title+")")
@@ -547,13 +557,23 @@ if __name__=="__main__":
     leps = ["[em]", "e", "m"]
     eras = ["2016a", "2016b", "2017", "2018", "201[678][ab]?"]
     chargeBins = ["", "_4", "_5", "_[0-3]", "_0", "_1", "_2", "_3"]
-    option = "" # "syst" or ""
+    ptBins = ["", "_pt0", "_pt1", "_pt2", "_pt3", "_pt4"]
+    option = "syst" # "syst" or ""
 
     #DrawAccuracy_withLR([leps[0]+eras[0]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[0]+"s", option)
     #DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)
     #DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[2]+"s", option)
     #DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2s", option)
+
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[1]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin4", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[2]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin5", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[3]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0123", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[4]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[5]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin1", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[6]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin2", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[7]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin3", option)
 
     #DrawAccuracy_withLR([leps[0]+eras[4]+"F"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2F", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+"S"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2S", option)
