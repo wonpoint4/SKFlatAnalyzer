@@ -100,7 +100,7 @@ def calcWithCov_withLR(fcs, fps, fms, fc_stat, fp_stat, fm_stat):
         for syst in range(len(fcs[systs])):
             dsyst = np.array(calc_withLR(fcs[systs][syst], fps[systs][syst], fms[systs][syst])) - nominal
             cov_syst = np.outer(dsyst, dsyst)
-            print("cov syst", systs, syst)
+            print("cov syst", systs, syst, "alpha :", dsyst + nominal, "d(alpha) :", dsyst)
             print(cov_syst)
             if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
         cov += cov_syst_bigger
@@ -121,7 +121,7 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     allsysts = [[""]]
     if "syst" in option:
         allsysts = [
-            ["_jetpt25"], ["_jetpt55"], ["_jeteta5", "_jeteta1p5"],
+            ["_jetpt25", "_jetpt55"],# ["_jeteta5"], ["_jeteta1p5"],
             #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
             #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
             #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
@@ -160,7 +160,7 @@ def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     allsysts = [[""]]
     if "syst" in option:
         allsysts.extend([
-            ["_jetpt25"], ["_jetpt55"], ["_jeteta5", "_jeteta1p5"],
+            ["_jetpt25", "_jetpt55"],# ["_jeteta5"], ["_jeteta1p5"],
             #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
             #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
             #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
@@ -224,12 +224,20 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
                 chargeBin += Bin
                 break
 
+        alphas = []
+        betas = []
+        alphas_error = []
+        betas_error = []
         value, cov_stat, cov = GetAccuracy_withLR(0, channel, chargeBin, option)
         for j in range(2):
             gdata[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
             gdata[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
             gdata_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.5)
             gdata_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
+            alphas.append(value[j])
+            betas.append(1 - value[j])
+            alphas_error.append(cov_stat[j][j]**0.5)
+            betas_error.append(cov_stat[j][j]**0.5)
 
         value, cov_stat, cov = GetAccuracy_withLR(1, channel, chargeBin, option)
         for j in range(2):
@@ -237,6 +245,10 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
             gsim[j].SetPointError(i, cov_stat[j][j]**0.5, 0)
             gsim_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.4)
             gsim_tot_unc[j].SetPointError(i, cov[j][j]**0.5, 0)
+            alphas[j] *= 1. / value[j]
+            betas[j] *= 1. / (1 - value[j])
+            alphas_error[j] *= 1. / (value[j])
+            betas_error[j] *= 1. / (1 - value[j])
 
         value, stat_e, e = GetTrueAccuracy_withLR(channel, chargeBin, option)
         for j in range(2):
@@ -244,6 +256,8 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
             gtrue[j].SetPointError(i, stat_e[j], 0)
             gtrue_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.3)
             gtrue_tot_unc[j].SetPointError(i, e[j], 0)
+
+        print("@@ alpha ratio =", alphas, "+-", alphas_error, ", (1-alpha) ratio =", betas, "+-", betas_error)
 
     c = ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)

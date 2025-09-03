@@ -1,3 +1,5 @@
+#cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2018 --nmax 50 -a SkimTree_2B1L -o /gv0/Users/wonjun &"
+
 ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToEE_M-50_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToEE_MiNNLO.txt
 ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToMuMu_M-50_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToMuMu_MiNNLO.txt
 ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_*/2025_03*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_DYJetsToTauTau_MiNNLO.txt
@@ -24,6 +26,51 @@ ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/DATA_SkimTree_1B2L/DoubleMuon/perio
 #ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodD/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_D.txt
 #ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodE/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_E.txt
 #ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/DATA_SkimTree_1B2L/DoubleEG/periodF/2025_03*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_DoubleEG_F.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/2025_08*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_TTLJ_powheg.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_1B2L/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/2025_08*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_TTLJ_powheg.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_1B2L/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/2025_08*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_1B2L_TTLJ_powheg.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_1B2L/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/2025_08*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_1B2L_TTLJ_powheg.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_1B2L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_1B2L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_1B2L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_sch_Lep.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_1B2L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_1B2L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_1B2L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_antitop_Incl.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_1B2L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_1B2L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_1B2L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_1B2L_SingleTop_tch_top_Incl.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_1B2L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_1B2L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_1B2L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_1B2L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_1B2L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_1B2L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_1B2L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_1B2L_WJets_Sherpa.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_2B1L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_2B1L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_2B1L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_2B1L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_2B1L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_sch_Lep.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_sch_Lep.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_2B1L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_2B1L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_2B1L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_antitop_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_antitop_Incl.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_2B1L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_2B1L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_2B1L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_top_Incl.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_SingleTop_tch_top_Incl.txt
+
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2018/MC_SkimTree_2B1L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2018/Sample/ForSNU/SkimTree_2B1L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2017/MC_SkimTree_2B1L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2017/Sample/ForSNU/SkimTree_2B1L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016postVFP/MC_SkimTree_2B1L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016postVFP/Sample/ForSNU/SkimTree_2B1L_WJets_Sherpa.txt
+ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/2025_09_01_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_WJets_Sherpa.txt
 
 ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/2025_08_27_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_QCD_bEnriched_HT1000to1500.txt
 ls /gv0/Users/wonjun/Run2UltraLegacy_v3/2016preVFP/MC_SkimTree_2B1L/QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8/2025_08_27_*/*.root > data/Run2UltraLegacy_v3/2016preVFP/Sample/ForSNU/SkimTree_2B1L_QCD_bEnriched_HT100to200.txt

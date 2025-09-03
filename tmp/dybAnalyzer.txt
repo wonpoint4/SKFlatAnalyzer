@@ -5,12 +5,16 @@ SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i EGamma -n 10 -e 2018
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DoubleEG -n 10 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i DoubleMuon -n 10 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i TTLL_powheg -n 60 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i TTLJ_powheg -n 20 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WW_pythia -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WZ_pythia -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i ZZ_pythia -n 5 -e 2017
-SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WJets_MG -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i WJets_Sherpa -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_top_NoFullyHad -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tW_antitop_NoFullyHad -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_sch_Lep -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tch_antitop_Incl -n 5 -e 2017
+SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i SingleTop_tch_top_Incl -n 5 -e 2017
 SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i GGToLL -n 5 -e 2017
 
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 150 -e 2017
@@ -23,7 +27,10 @@ SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i DYJetsToEE_MiNNLO -n 10 -e 201
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i DYJetsToTauTau_MiNNLO -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tW_top_NoFullyHad -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tW_antitop_NoFullyHad -n 5 -e 2017
-SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WJets_MG -n 5 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_sch_Lep -n 5 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tch_antitop_Incl -n 5 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tch_top_Incl -n 5 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WJets_Sherpa -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WW_pythia -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WZ_pythia -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i ZZ_pythia -n 5 -e 2017

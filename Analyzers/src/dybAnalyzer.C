@@ -494,8 +494,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"ZbdPhi_nbjets"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
     FillHist(prefix+hprefix+"Zbpt_nbjets"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"Zpt_nbjets"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
-    FillHist(prefix+hprefix+"costhetaRecoil2_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
+    FillHist(prefix+hprefix+"costhetaRecoil_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+    FillHist(prefix+hprefix+"costhetaRecoil2_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   }
 
   if(bjets.size() != 1) return;
@@ -515,7 +515,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi_Tight1b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Tight1b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"Zpt_Tight1b"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   FillHist(prefix+hprefix+"na20_Tight1b"+suffix, ajets.size(), map_weight, 10,0,10);
   unsigned int najets_25 = 0, najets_30 = 0, najets_35 = 0, najets_40 = 0;
@@ -550,7 +550,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Veto2b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"Zpt_Veto2b"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if(PuppiMET_Type1_pt > 60) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET60", map_weight[""]);
@@ -569,7 +569,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_met60"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"Zpt_met60"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"costhetaRecoil_met60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_met60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if((*lepton0 + *lepton1).Pt() < 15) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
@@ -588,11 +588,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"Zpt"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil4"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original2,(double*)afb_mbin_original2, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 20,-1,1);
-  FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 4,(double*)afb_ptbin, 10,0,1);
+  FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil4"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original2,(double*)afb_mbin_original2, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   // bCharges vs. nPV
@@ -1250,16 +1250,16 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     if(genpid == 0) continue; // No matched b-partons
 
     double Charge = jetCharge(jet);
-    double alpha_plus_DATA_eff = 0.6278552;
-    double alpha_minus_DATA_eff = 0.61232865;
-    double alpha_plus_MC_eff = 0.65408853;
-    double alpha_minus_MC_eff = 0.63814405;
+    double alpha_plus_DATA_eff = 0.63079885; //0.63005467; //0.6278552;
+    double alpha_minus_DATA_eff = 0.61295115; //0.61212181; //0.61232865;
+    double alpha_plus_MC_eff = 0.65415066; //0.65408853;
+    double alpha_minus_MC_eff = 0.63769426; //0.63814405;
     if(sys > 0){ // asym gets bigger
-      alpha_plus_DATA_eff += 0.00075906;
-      alpha_minus_DATA_eff += -0.00057259;
+      alpha_plus_DATA_eff += 0.00075146; //0.00078919; //0.00075906;
+      alpha_minus_DATA_eff += -0.00080784; //-0.00076405; //-0.00057259;
     }else if(sys < 0){ // SF gets bigger
-      alpha_plus_DATA_eff += -0.00090552;
-      alpha_minus_DATA_eff += -0.0012004;
+      alpha_plus_DATA_eff += -0.00659027; //-0.00579127; //-0.00090552;
+      alpha_minus_DATA_eff += -0.00613036; //-0.00598178; //-0.0012004;
     }
 
     // Hyonsans's SF
@@ -1278,78 +1278,78 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     }
 
     // 1D bChargeSF
-    if(mode == 1){
+    if(mode == 1){ // Adding wjets(sherpa) + STs // Changing jpt : 25 -> 40 // Oldest one when 0812
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.52461065;
-        alpha_minus_DATA_eff = 0.52055927;
-        alpha_plus_MC_eff = 0.5300022;
-        alpha_minus_MC_eff = 0.52587682;
+        alpha_plus_DATA_eff = 0.52455235; //0.52470382; //0.52461065;
+        alpha_minus_DATA_eff = 0.51779908; //0.51821136; //0.52055927;
+        alpha_plus_MC_eff = 0.52968978; //0.5300022;
+        alpha_minus_MC_eff = 0.52540184; //0.52587682;
         if(sys > 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += 0.00129497;
-          alpha_minus_DATA_eff += -0.00127812;
+          alpha_plus_DATA_eff += 0.00169279; //0.00148615; //0.00129497;
+          alpha_minus_DATA_eff += -0.00152331; //-0.00146182; //-0.00127812;
         }else if(sys < 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += -0.00166911;
-          alpha_minus_DATA_eff += -0.00169112;
+          alpha_plus_DATA_eff += -0.00229026; //-0.00217365; //-0.00166911;
+          alpha_minus_DATA_eff += -0.00254506; //-0.00220983; //-0.00169112;
         }
       }else if(fabs(Charge) < afb_chbin[2]){// 0.2
-        alpha_plus_DATA_eff = 0.56994435;
-        alpha_minus_DATA_eff = 0.56001289;
-        alpha_plus_MC_eff = 0.58951292;
-        alpha_minus_MC_eff = 0.57688143;
+        alpha_plus_DATA_eff = 0.57503119; //0.5747797; //0.56994435;
+        alpha_minus_DATA_eff = 0.56072413; //0.56003882; //0.56001289;
+        alpha_plus_MC_eff = 0.58939608; //0.58951292;
+        alpha_minus_MC_eff = 0.57641132; //0.57688143;
         if(sys > 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += 0.00128287;
-          alpha_minus_DATA_eff += -0.00133923;
+          alpha_plus_DATA_eff += 0.00164878; //0.00165557; //0.00128287;
+          alpha_minus_DATA_eff += -0.00152796; //-0.00162373; //-0.00133923;
         }else if(sys < 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += -0.00213882;
-          alpha_minus_DATA_eff += -0.00204882;
+          alpha_plus_DATA_eff += -0.00408572; //-0.00376937; //-0.00213882;
+          alpha_minus_DATA_eff += -0.00440879; //-0.00384327; //-0.00204882;
         }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.66398118;
-        alpha_minus_DATA_eff = 0.63990481;
-        alpha_plus_MC_eff = 0.70164123;
-        alpha_minus_MC_eff = 0.67664159;
+        alpha_plus_DATA_eff = 0.66685555; //0.66516676; //0.66398118;
+        alpha_minus_DATA_eff = 0.6406924; //0.63932514; //0.63990481;
+        alpha_plus_MC_eff = 0.7016705; //0.70164123;
+        alpha_minus_MC_eff = 0.67580431; //0.67664159;
         if(sys > 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += 0.00111143;
-          alpha_minus_DATA_eff += -0.0008855;
+          alpha_plus_DATA_eff += 0.00132996; //0.00122955; //0.00111143;
+          alpha_minus_DATA_eff += -0.00112938; //-0.00129671; //-0.0008855;
         }else if(sys < 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += -0.00136247;
-          alpha_minus_DATA_eff += -0.00171009;
+          alpha_plus_DATA_eff += -0.006698; //-0.0081655; //-0.00136247;
+          alpha_minus_DATA_eff += -0.00788756; //-0.00774258; //-0.00171009;
         }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.77131912;
-        alpha_minus_DATA_eff = 0.72725428;
-        alpha_plus_MC_eff = 0.8229154;
-        alpha_minus_MC_eff = 0.78881504;
+        alpha_plus_DATA_eff = 0.78271638; //0.7843662; //0.77131912;
+        alpha_minus_DATA_eff = 0.73778292; //0.73419007; //0.72725428;
+        alpha_plus_MC_eff = 0.82685472; //0.8229154;
+        alpha_minus_MC_eff = 0.79243187; //0.78881504;
         if(sys > 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += 0.00356123;
-          alpha_minus_DATA_eff += -0.00295504;
+          alpha_plus_DATA_eff += 0.00352192; //0.00212515; //0.00356123;
+          alpha_minus_DATA_eff += -0.00405013; //-0.00565178; //-0.00295504;
         }else if(sys < 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += -0.00436348;
-          alpha_minus_DATA_eff += -0.00525859;
+          alpha_plus_DATA_eff += -0.01856055; //-0.02210047; //-0.00436348;
+          alpha_minus_DATA_eff += -0.01613992; //-0.0083101; //-0.00525859;
         }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.75383394;
-        alpha_minus_DATA_eff = 0.75016336;
-        alpha_plus_MC_eff = 0.77076044;
-        alpha_minus_MC_eff = 0.76900866;
+        alpha_plus_DATA_eff = 0.77182254; //0.76952895; //0.75383394;
+        alpha_minus_DATA_eff = 0.77357429; //0.77414871; //0.75016336;
+        alpha_plus_MC_eff = 0.78518778; //0.77076044;
+        alpha_minus_MC_eff = 0.78552888; //0.76900866;
         if(sys > 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += 0.00252748;
-          alpha_minus_DATA_eff += -0.00223796;
+          alpha_plus_DATA_eff += 0.003319; //0.00308116; //0.00252748;
+          alpha_minus_DATA_eff += -0.00312407; //-0.00329286; //-0.00223796;
         }else if(sys < 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += -0.00338427;
-          alpha_minus_DATA_eff += -0.00382209;
+          alpha_plus_DATA_eff += -0.0137816; //-0.01522245; //-0.00338427;
+          alpha_minus_DATA_eff += -0.01464154; //-0.01424379; //-0.00382209;
         }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.74660024;
-        alpha_minus_DATA_eff = 0.74845344;
-        alpha_plus_MC_eff = 0.7587662;
-        alpha_minus_MC_eff = 0.76188986;
+        alpha_plus_DATA_eff = 0.75433632; //0.7567604; //0.74660024;
+        alpha_minus_DATA_eff = 0.75499201; //0.7538831; //0.74845344;
+        alpha_plus_MC_eff = 0.76063023; //0.7587662;
+        alpha_minus_MC_eff = 0.76337732; //0.76188986;
         if(sys > 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += 0.00356592;
-          alpha_minus_DATA_eff += -0.0029006;
+          alpha_plus_DATA_eff += 0.00429357; //0.00217267; //0.00356592;
+          alpha_minus_DATA_eff += -0.00379321; //-0.00643987; //-0.0029006;
         }else if(sys < 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += -0.00442595;
-          alpha_minus_DATA_eff += -0.00544113;
+          alpha_plus_DATA_eff += -0.01342092; //-0.02190844; //-0.00442595;
+          alpha_minus_DATA_eff += -0.01519129; //-0.00739142; //-0.00544113;
         }
       }
     }

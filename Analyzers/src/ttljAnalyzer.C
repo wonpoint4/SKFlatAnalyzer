@@ -25,7 +25,6 @@ void ttljAnalyzer::executeEvent(){
     if(HasFlag("SYS")){
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("M"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_muon.size(); s++){
@@ -45,7 +44,6 @@ void ttljAnalyzer::executeEvent(){
     if(HasFlag("SYS")){
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
         if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("E"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_electron.size(); s++){
@@ -273,7 +271,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-              electronTriggerSF *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
+              electronTriggerSF_sys[s][m] *= GetLeptonTriggerORSF({"Ele27_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
             }
           }
         }
@@ -282,7 +280,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
             for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
-              electronTriggerSF *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
+              electronTriggerSF_sys[s][m] *= GetLeptonTriggerORSF({"Ele28_SelQ_MediumID", "Ele32_SelQ_MediumID"}, leptons, s,m);
             }
           }
         }
@@ -354,16 +352,18 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
   }
 
-  FillHist(prefix+hprefix+"lpt_incTTLJ"+suffix, lepton0->Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"leta_incTTLJ"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"lpt_incTTLJ"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"leta_incTTLJ"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+  }
 
   //==== Finding the correct bbjj combination
   vector<unsigned int> idx_bbjj = {0, 0, 0, 0};
@@ -376,38 +376,42 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   if(!goodKinematic) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
 
-  FillHist(prefix+"likelihood_ratio_beforeLRcut"+suffix, LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
-  FillHist(prefix+"likelihood_ratio_Mbl_beforeLRcut"+suffix, LRs.at(0), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_MblMET_beforeLRcut"+suffix, LRs.at(1), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_Mbjj_beforeLRcut"+suffix, LRs.at(2), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_Mjj_beforeLRcut"+suffix, LRs.at(3), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_dRtt_beforeLRcut"+suffix, LRs.at(4), map_weight, 100,0,5);
-  FillHist(prefix+"likelihood_ratio_dPhitt_beforeLRcut"+suffix, LRs.at(5), map_weight, 100,0,5);
+  if(IsNominalLike){
+    FillHist(prefix+"likelihood_ratio_beforeLRcut"+suffix, LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
+    FillHist(prefix+"likelihood_ratio_Mbl_beforeLRcut"+suffix, LRs.at(0), map_weight, 100,0,5);
+    FillHist(prefix+"likelihood_ratio_MblMET_beforeLRcut"+suffix, LRs.at(1), map_weight, 100,0,5);
+    FillHist(prefix+"likelihood_ratio_Mbjj_beforeLRcut"+suffix, LRs.at(2), map_weight, 100,0,5);
+    FillHist(prefix+"likelihood_ratio_Mjj_beforeLRcut"+suffix, LRs.at(3), map_weight, 100,0,5);
+    FillHist(prefix+"likelihood_ratio_dRtt_beforeLRcut"+suffix, LRs.at(4), map_weight, 100,0,5);
+    FillHist(prefix+"likelihood_ratio_dPhitt_beforeLRcut"+suffix, LRs.at(5), map_weight, 100,0,5);
 
-  FillHist(prefix+hprefix+"lpt_beforeLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"leta_beforeLRcut"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"lpt_beforeLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"leta_beforeLRcut"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+  }
 
   if(LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3) < 0.5) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LR0p5 cuts", map_weight[""]);
 
-  FillHist(prefix+hprefix+"lpt_afterLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"leta_afterLRcut"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
-  FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
-  FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"lpt_afterLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"leta_afterLRcut"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
+    FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+  }
 
   TString prefix_nPV = prefix;
   if(nPV <= 10) prefix_nPV.ReplaceAll(GetEraShort(), GetEraShort()+"F");      // few
@@ -533,6 +537,25 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
       }
     }
   }
+  /*
+  for(const auto& [suff, value]:map_weight) cout<<"suffix = "<<suff<<", value = "<<value<<endl;
+  cout<<""<<endl;
+  if(fabs(map_weight[""]) > 10e+3 || fabs(map_weight[""]) < 10e-6){
+    cout<<"weight is weird, map_weight[""] value = "<<map_weight[""]<<", printing every weights"<<endl;
+    cout<<"PUweight = "<<PUweight<<endl;
+    cout<<"prefireweight = "<<prefireweight<<endl;
+    cout<<"topptweight = "<<topptweight<<endl;
+    cout<<"muonTrackingSF = "<<muonTrackingSF<<endl;
+    cout<<"muonRECOSF = "<<prefireweight<<endl;
+    cout<<"muonIDSF = "<<muonIDSF<<endl;
+    cout<<"muonTriggerSF = "<<muonTriggerSF<<endl;
+    cout<<"electronRECOSF = "<<electronRECOSF<<endl;
+    cout<<"electronIDSF = "<<electronIDSF<<endl;
+    cout<<"electronTriggerSF = "<<electronTriggerSF<<endl;
+    cout<<"pujetSF = "<<pujetSF<<endl;
+    cout<<"btagSF = "<<btagSF<<endl;
+  }
+  */
   if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
   if(!IsDATA && MCSample.Contains("TTLJ")){
@@ -778,8 +801,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
       prefix += "UnMatched";
       prefix_nPV += "UnMatched";
     }
-    prefix += (isTTLJinAcceptance? "0_": "1_");
-    prefix_nPV += (isTTLJinAcceptance? "0_": "1_");
+    // Too many histograms
+    //prefix += (isTTLJinAcceptance? "0_": "1_");
+    //prefix_nPV += (isTTLJinAcceptance? "0_": "1_");
+    prefix += "_";
+    prefix_nPV += "_";
 
     FillHist("Gen_LR_match_onlyb"+suffix, Gen_LR_match_onlyb, map_weight, 2,0,2);
     FillHist("Gen_LR_match_Whad"+suffix, Gen_LR_match_Whad, map_weight, 2,0,2);
@@ -1160,15 +1186,6 @@ bool ttljAnalyzer::HasLeptons(TString channel, unsigned int s, unsigned int m){
   }else if(channel.Contains("e"+GetEraShort())){
     l0pt = 30.;
     electrons = ElectronEnergyCorrection(electrons, s,m, false);
-    if(electrons.size() > 0) lepton0 = &electrons.at(0);
-    if(electrons.size() > 1) moreleptons = true;
-  }else if(channel.Contains("M"+GetEraShort())){
-    muons = MuonMomentumCorrection(SMPGetMuons("FakeID", 8.0, 2.4), s,m, true);
-    if(muons.size() > 0) lepton0 = &muons.at(0);
-    if(muons.size() > 1) moreleptons = true;
-  }else if(channel.Contains("E"+GetEraShort())){
-    l0pt = 30.;
-    electrons = ElectronEnergyCorrection(SMPGetElectrons("FakeID", 8.0, 2.5), s,m, true);
     if(electrons.size() > 0) lepton0 = &electrons.at(0);
     if(electrons.size() > 1) moreleptons = true;
   }else{
@@ -1699,9 +1716,9 @@ vector<unsigned int> ttljAnalyzer::Finding_bbjj_byLikelihood(TString channel, ve
 
           // Kinematic Cuts
           //if(c > 4 || d > 4) break;
-          //if(Mbjj < 100 || 240 < Mbjj) continue;
-          //if(Mbl > 170) continue;
-          //if(fabs(Mjj - 80.4) > 30) continue;
+          if(Mbjj < 100 || 240 < Mbjj) continue;
+          if(Mbl > 170) continue;
+          if(fabs(Mjj - 80.4) > 30) continue;
 
           double Likelihood_Mbl_correct = hMbl_correct->GetBinContent(hMbl_correct->FindBin(Mbl)) / hMbl_correct->Integral();
           double Likelihood_Mbl_wrong = hMbl_wrong->GetBinContent(hMbl_wrong->FindBin(Mbl)) / hMbl_wrong->Integral();
