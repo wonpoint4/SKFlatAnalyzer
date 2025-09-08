@@ -10,6 +10,33 @@ ttlj = ROOT.ttljPlotter("correct_ttlj wrong_ttlj unmatched_ttlj")
 ttlj_gen = ROOT.ttljPlotter("ttlj_2b")
 forNorm = ROOT.ttljPlotter("data mc")
 
+xsec_unc = {
+    "dy" : [1.7, -1.8],
+    "wjets" : [3.8, -3.8],
+    "ttll" : [4.8, -6.1],
+    "ttlj" : [4.8, -6.1],
+    "tw" : [5.4, -5.4],
+    "stt" : [4.2, -3.6],
+    "sts" : [3.9, -3.5],
+    "ww" : [2.5, -2.2],
+    "wz" : [6.1, -6.1],
+    "zz" : [4.9, -4.9],
+    #"aa" : [30, -30],
+    "qcd" : [30, -30],
+}
+systematics = [
+    #["_jetpt25", "_jetpt30", "_jetpt40", "_jetpt45", "_jetpt50", "_jetpt55"],
+    ["_nonorm"],
+    ["_lumi_up", "_lumi_down"],
+    ["_jetpt25", "_jetpt55"],
+    ["_jeteta5", "_jeteta1p5"],
+    #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+    #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+    #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+    #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+    #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+] + [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()]
+
 def calc(a0,a1,a2,a3):
     N=a0+a1+a2+a3
     bm=(2*a0+a1+a2)/N
@@ -43,16 +70,25 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
+    norm = 1.
+    if "lumi_up" in syst:
+        syst = ""
+        norm *= (100 + 1.616477652180815) / 100
+    elif "lumi_down" in syst:
+        syst = ""
+        norm *= (100 - 1.616477652180815) / 100
+    elif "norm" in syst: syst = ""
+
     correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+("" if "jet_scale" not in syst else syst)).Integral()
+    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
+    print("getfc function : fc = ", fc, ", fc_e = ", fc_e, ", data = ", data, ", mc = ", mc, ", norm = ", data / mc)
 
-    return fc, fc_e, data / mc
-    #return fc * 0.99, fc_e, data / mc
+    return fc, fc_e, (data / mc) * norm
 
 def calc_withLR(fc, fp, fm):
     ap = (fc * (fp + fc -1) + (1 - fc) * (fm + fc -1)) / (2 * fc - 1)
@@ -74,7 +110,7 @@ def calcWithCov_withLR(fcs, fps, fms, fc_stat, fp_stat, fm_stat):
     cov_stat += np.outer(stat0 - nominal, stat0 - nominal)
     cov_stat += np.outer(stat1 - nominal, stat1 - nominal)
     cov_stat += np.outer(stat2 - nominal, stat2 - nominal)
-    print("nomianl", nominal, "stat unc", [math.sqrt(cov_stat[0][0]), math.sqrt(cov_stat[1][1])])
+    print("nomianl : ", nominal, ", stat unc : ", [math.sqrt(cov_stat[0][0]), math.sqrt(cov_stat[1][1])])
     print("cov", cov_stat)
 
     values, vectors = np.linalg.eig(cov_stat)
@@ -89,23 +125,16 @@ def calcWithCov_withLR(fcs, fps, fms, fc_stat, fp_stat, fm_stat):
 
     print("\nSystematics")
     for systs in range(len(fcs) - 1):
-        if systs == 0: print(" -JES up, down")
-        elif systs == 1: print(" -JER up, down")
-        elif systs == 2: print(" -Prefiring up, down")
-        elif systs == 3: print(" -PU reweight up, down")
-        elif systs == 4: print(" -PUjetID SF up, down")
-        elif systs == 5: print(" -btagSF h, l up, down")
-        elif systs == 7: print(" -btagSF h, l corr, uncorr")
         cov_syst_bigger = np.zeros((2, 2))
         for syst in range(len(fcs[systs])):
             dsyst = np.array(calc_withLR(fcs[systs][syst], fps[systs][syst], fms[systs][syst])) - nominal
             cov_syst = np.outer(dsyst, dsyst)
-            print("cov syst", systs, syst, "alpha :", dsyst + nominal, "d(alpha) :", dsyst)
+            print(systs, syst, ", syst : "+systematics[systs][syst]+", alpha : ", dsyst + nominal, ", d(alpha) : ", dsyst, ", trace(cov) : ", np.trace(cov_syst))
             print(cov_syst)
             if np.trace(cov_syst) > np.trace(cov_syst_bigger): cov_syst_bigger = cov_syst ## Choose the cov_systematic with the larger trace
         cov += cov_syst_bigger
 
-    print("nomianl", nominal, "stat+syst unc", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
+    print("nomianl : ", nominal, ", stat+syst unc : ", [math.sqrt(cov[0][0]), math.sqrt(cov[1][1])])
     print("cov", cov)
 
     values, vectors = np.linalg.eig(cov)
@@ -119,18 +148,9 @@ def calcWithCov_withLR(fcs, fps, fms, fc_stat, fp_stat, fm_stat):
 
 def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     allsysts = [[""]]
-    if "syst" in option:
-        allsysts = [
-            ["_jetpt25", "_jetpt55"],# ["_jeteta5"], ["_jeteta1p5"],
-            #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-            #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-            #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-            #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-            #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
-            [""]
-        ]
+    if "syst" in option: allsysts = systematics + allsysts # Nominal last
 
-    print("chargeBin : "+chargeBin+", option = "+option)
+    print("chargeBin : "+chargeBin+", ientry = ", ientry, ", option = "+option+"\n")
     fc, fp, fm = 0, 0, 0
     fc_e, fp_e, fm_e = -1, -1, -1
     fcs, fps, fms = [[]], [[]], [[]]
@@ -138,9 +158,18 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     for systs in range(len(allsysts)):
         for syst in allsysts[systs]:
             fc, fc_stat, norm = getfc(channel, chargeBin, syst)
+            if "nonorm" in syst: norm = 1.
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
-            hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
-            hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+("" if "jet_scale" not in syst and ientry == 0 else syst))
+            if "lumi" in syst: syst = ""
+            normstr = ""
+            if "norm" in syst:
+                for process, uncs in xsec_unc.items():
+                    if process in syst: normstr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syst else 1)] * 0.01, process)
+                syst = ""
+
+            hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin+syst, normstr)
+            hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+syst, normstr)
+            print("syst = "+syst+normstr+", hp = ", hp.Integral(), ", fpxhp = ", hp.GetBinContent(2), ", hm = ", hm.Integral(), ", fmxhm = ", hm.GetBinContent(1), ", fc = ", fc, ", norm = ", norm)
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
             fcs[systs].append(fc)
@@ -158,22 +187,15 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
 
 def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     allsysts = [[""]]
-    if "syst" in option:
-        allsysts.extend([
-            ["_jetpt25", "_jetpt55"],# ["_jeteta5"], ["_jeteta1p5"],
-            #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-            #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-            #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-            #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-            #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
-        ])
+    if "syst" in option: allsysts = allsysts + systematics # Nominal first
 
     ap, am, stat_ep, stat_em, ep, em = 0, 0, -1, -1, 0, 0
     for systs in range(len(allsysts)):
         syst_ep_bigger, syst_em_bigger = 0, 0
         for syst in allsysts[systs]:
-            hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]"+syst, option)
-            hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]"+syst, option)
+            if "lumi" in syst or "norm" in syst: syst = ""
+            hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]"+syst)
+            hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]"+syst)
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
 
@@ -257,7 +279,7 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
             gtrue_tot_unc[j].SetPoint(i, value[j], 2 * i + 1 - j + 0.3)
             gtrue_tot_unc[j].SetPointError(i, e[j], 0)
 
-        print("@@ alpha ratio =", alphas, "+-", alphas_error, ", (1-alpha) ratio =", betas, "+-", betas_error)
+        print("alpha ratio : ", alphas, "+-", alphas_error, ", (1-alpha) ratio : ", betas, "+-", betas_error)
 
     c = ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)

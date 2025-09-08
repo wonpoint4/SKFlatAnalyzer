@@ -33,7 +33,7 @@ void ttljAnalyzer::executeEvent(){
         }
       }
     }else{
-      for(TString syst:{"_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
+      for(TString syst:{"_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
         executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }
@@ -52,7 +52,7 @@ void ttljAnalyzer::executeEvent(){
         }
       }
     }else{
-      for(TString syst:{"_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
+      for(TString syst:{"_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
         executeEventWithParameter("e"+GetEraShort(), syst);
       }
     }
@@ -119,7 +119,15 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP) && fabs(jet.Eta()) < (DataYear == 2016? 2.4: 2.5)) bjets.push_back(jet);
     else{
       if(option.Contains("jetpt25")) ajets.push_back(jet);
-      else if(option.Contains("jetpt55")){
+      else if(option.Contains("jetpt30")){
+        if(jet.Pt() > 30) ajets.push_back(jet);
+      }else if(option.Contains("jetpt35")){
+        if(jet.Pt() > 35) ajets.push_back(jet);
+      }else if(option.Contains("jetpt45")){
+        if(jet.Pt() > 45) ajets.push_back(jet);
+      }else if(option.Contains("jetpt50")){
+        if(jet.Pt() > 50) ajets.push_back(jet);
+      }else if(option.Contains("jetpt55")){
         if(jet.Pt() > 55) ajets.push_back(jet);
       }else if(option.Contains("jeteta1p5")){
         if(jet.Pt() > 40 && fabs(jet.Eta()) < 1.5) ajets.push_back(jet);
