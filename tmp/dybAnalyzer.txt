@@ -19,6 +19,7 @@ SKFlat.py -a dybAnalyzer --skim SkimTree_1B2L -i GGToLL -n 5 -e 2017
 
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 150 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLL_powheg -n 30 -e 2017
+SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTJJ_powheg -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i EGamma -n 10 -e 2018
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleElectron -n 10 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleMuon -n 10 -e 2017
@@ -31,6 +32,7 @@ SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_sch_Lep -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tch_antitop_Incl -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i SingleTop_tch_top_Incl -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WJets_Sherpa -n 5 -e 2017
+#SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WJets_MG -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WW_pythia -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i WZ_pythia -n 5 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i ZZ_pythia -n 5 -e 2017

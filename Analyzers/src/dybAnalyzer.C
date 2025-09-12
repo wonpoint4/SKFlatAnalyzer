@@ -1249,17 +1249,17 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     }
     if(genpid == 0) continue; // No matched b-partons
 
-    double Charge = jetCharge(jet);
-    double alpha_plus_DATA_eff = 0.63079885;
-    double alpha_minus_DATA_eff = 0.61295115;
+    double Charge = jetCharge(jet); // No Normalization & TTJJ
+    double alpha_plus_DATA_eff = 0.63181282; //0.63079885;
+    double alpha_minus_DATA_eff = 0.61395198; //0.61295115;
     double alpha_plus_MC_eff = 0.65415066;
     double alpha_minus_MC_eff = 0.63769426;
     if(sys > 0){ // asym gets smaller
-      alpha_plus_DATA_eff += -0.00086244;
-      alpha_minus_DATA_eff += 0.00072373;
+      alpha_plus_DATA_eff += -0.00088663; //-0.00086244;
+      alpha_minus_DATA_eff += 0.00074632; //0.00072373;
     }else if(sys < 0){ // SF gets smaller
-      alpha_plus_DATA_eff += 0.00237556;
-      alpha_minus_DATA_eff += 0.00283084;
+      alpha_plus_DATA_eff += 0.00250343; //0.00237556;
+      alpha_minus_DATA_eff += 0.00297406; //0.00283084;
     }
 
     // Hyonsans's SF
@@ -1280,76 +1280,76 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     // 1D bChargeSF
     if(mode == 1){
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.52455235;
-        alpha_minus_DATA_eff = 0.51779908;
+        alpha_plus_DATA_eff = 0.52466892; //0.52455235;
+        alpha_minus_DATA_eff = 0.51791587; //0.51779908;
         alpha_plus_MC_eff = 0.52968978;
         alpha_minus_MC_eff = 0.52540184;
         if(sys > 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += -0.00157464;
-          alpha_minus_DATA_eff += 0.00209931;
+          alpha_plus_DATA_eff += -0.00159007; //-0.00157464;
+          alpha_minus_DATA_eff += 0.0021877; //0.00209931;
         }else if(sys < 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += 0.00287364;
-          alpha_minus_DATA_eff += 0.00215546;
+          alpha_plus_DATA_eff += 0.0029865; //0.00287364;
+          alpha_minus_DATA_eff += 0.00217065; //0.00215546;
         }
       }else if(fabs(Charge) < afb_chbin[2]){// 0.2
-        alpha_plus_DATA_eff = 0.57503119;
-        alpha_minus_DATA_eff = 0.56072413;
+        alpha_plus_DATA_eff = 0.57549775; //0.57503119;
+        alpha_minus_DATA_eff = 0.56120889; //0.56072413;
         alpha_plus_MC_eff = 0.58939608;
         alpha_minus_MC_eff = 0.57641132;
         if(sys > 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += -0.00176428;
-          alpha_minus_DATA_eff += 0.00222184;
+          alpha_plus_DATA_eff += -0.00163046; //-0.00176428;
+          alpha_minus_DATA_eff += 0.00239976; //0.00222184;
         }else if(sys < 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += 0.00332861;
-          alpha_minus_DATA_eff += 0.00264313;
+          alpha_plus_DATA_eff += 0.00365694; //0.00332861;
+          alpha_minus_DATA_eff += 0.00248462; //0.00264313;
         }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.66685555;
-        alpha_minus_DATA_eff = 0.6406924;
+        alpha_plus_DATA_eff = 0.66795153; //0.66685555;
+        alpha_minus_DATA_eff = 0.64183908; //0.6406924;
         alpha_plus_MC_eff = 0.7016705;
         alpha_minus_MC_eff = 0.67580431;
         if(sys > 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += -0.00192819;
-          alpha_minus_DATA_eff += 0.00094884;
+          alpha_plus_DATA_eff += -0.00198435; //-0.00192819;
+          alpha_minus_DATA_eff += 0.00098174; //0.00094884;
         }else if(sys < 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += 0.00262054;
-          alpha_minus_DATA_eff += 0.00532535;
+          alpha_plus_DATA_eff += 0.00278728; //0.00262054;
+          alpha_minus_DATA_eff += 0.00563382; //0.00532535;
         }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.78271638;
-        alpha_minus_DATA_eff = 0.73778292;
+        alpha_plus_DATA_eff = 0.78691713; //0.78271638;
+        alpha_minus_DATA_eff = 0.74175893; //0.73778292;
         alpha_plus_MC_eff = 0.82685472;
         alpha_minus_MC_eff = 0.79243187;
         if(sys > 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += -0.00284074;
-          alpha_minus_DATA_eff += 0.00513936;
+          alpha_plus_DATA_eff += -0.00277093; //-0.00284074;
+          alpha_minus_DATA_eff += 0.00567753; //0.00513936;
         }else if(sys < 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += 0.01040963;
-          alpha_minus_DATA_eff += 0.00575384;
+          alpha_plus_DATA_eff += 0.01097872; //0.01040963;
+          alpha_minus_DATA_eff += 0.0053582; //0.00575384;
         }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.77182254;
-        alpha_minus_DATA_eff = 0.77357429;
+        alpha_plus_DATA_eff = 0.77490976; //0.77182254;
+        alpha_minus_DATA_eff = 0.77647107; //0.77357429;
         alpha_plus_MC_eff = 0.78518778;
         alpha_minus_MC_eff = 0.78552888;
         if(sys > 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += -0.00300315;
-          alpha_minus_DATA_eff += 0.01019522;
+          alpha_plus_DATA_eff += -0.00930939; //-0.00300315;
+          alpha_minus_DATA_eff += 0.00629106; //0.01019522;
         }else if(sys < 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += 0.01005651;
-          alpha_minus_DATA_eff += 0.00296229;
+          alpha_plus_DATA_eff += 0.00671166; //0.01005651;
+          alpha_minus_DATA_eff += 0.00993179; //0.00296229;
         }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.75433632;
-        alpha_minus_DATA_eff = 0.75499201;
+        alpha_plus_DATA_eff = 0.75926086; //0.75433632;
+        alpha_minus_DATA_eff = 0.75920095; //0.75499201;
         alpha_plus_MC_eff = 0.76063023;
         alpha_minus_MC_eff = 0.76337732;
         if(sys > 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += -0.00443982;
-          alpha_minus_DATA_eff += 0.00398256;
+          alpha_plus_DATA_eff += -0.00459789; //-0.00443982;
+          alpha_minus_DATA_eff += 0.00433558; //0.00398256;
         }else if(sys < 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += 0.00811232;
-          alpha_minus_DATA_eff += 0.00904374;
+          alpha_plus_DATA_eff += 0.00822754; //0.00811232;
+          alpha_minus_DATA_eff += 0.00872532; //0.00904374;
         }
       }
     }

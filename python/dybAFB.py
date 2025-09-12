@@ -47,16 +47,16 @@ systematics = {
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     # PDFSYS
-    "Scales" :    [["_scalevariation%d" % i for i in [0, 1, 2, 3, 4, 6, 8]]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
+    "Scales" :    [["_scalevariation%d:%s" % (i, j) for i in [0, 1, 2, 3, 4, 6, 8]] for j in ["dy", "tt"]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
     "ISR" :       [["_ISR_up", "_ISR_down"]],
     "FSR" :       [["_FSR_up", "_FSR_down"]],
-    #"PDF" :       [["_pdf%d" % i] for i in range(100)],
-    "PDF0" :      [["_pdf%d" % i] for i in range(20)],
-    "PDF1" :      [["_pdf%d" % i] for i in range(20,40)],
-    "PDF2" :      [["_pdf%d" % i] for i in range(40,60)],
-    "PDF3" :      [["_pdf%d" % i] for i in range(60,80)],
-    "PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
+    #"PDF" :       [["_pdf%d:%s" % (i, j)] for i in range(100) for j in ["dy", "tt"]],
+    "PDF0" :      [["_pdf%d:%s" % (i, j)] for i in range(20) for j in ["dy", "tt"]],
+    "PDF1" :      [["_pdf%d:%s" % (i, j)] for i in range(20,40) for j in ["dy", "tt"]],
+    "PDF2" :      [["_pdf%d:%s" % (i, j)] for i in range(40,60) for j in ["dy", "tt"]],
+    "PDF3" :      [["_pdf%d:%s" % (i, j)] for i in range(60,80) for j in ["dy", "tt"]],
+    "PDF4" :      [["_pdf%d:%s" % (i, j)] for i in range(80,100) for j in ["dy", "tt"]],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
     "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],

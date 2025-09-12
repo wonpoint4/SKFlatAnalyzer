@@ -13,7 +13,7 @@ class ttljAnalyzer : public dybAnalyzer {
   virtual void executeEventWithParameter(TString channel, TString option="", unsigned int set=0, unsigned int mem=0);
   virtual void executeEvent();
   virtual void executeEventGen();
-  virtual bool HasLeptons(TString channel ,unsigned int set=0, unsigned int mem=0);
+  virtual bool HasLeptons(TString channel, bool leps=false, unsigned int set=0, unsigned int mem=0);
   void FillingLikelihood(vector<Jet> bjets, vector<Jet> ajets, double weight, TString suffix="", unsigned int mode1=0, unsigned int mode2=0);
   void SetupLikelihoods(unsigned int mode1=0, unsigned int mode2=0);
   vector<unsigned int> Finding_bbjj_byLikelihood(TString channel, vector<Jet> bjets, vector<Jet> ajets, vector<double>& Likelihood_ratios, unsigned int mode3=0);

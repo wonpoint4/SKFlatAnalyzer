@@ -15,6 +15,7 @@ xsec_unc = {
     "wjets" : [3.8, -3.8],
     "ttll" : [4.8, -6.1],
     "ttlj" : [4.8, -6.1],
+    "ttjj" : [4.8, -6.1],
     "tw" : [5.4, -5.4],
     "stt" : [4.2, -3.6],
     "sts" : [3.9, -3.5],
@@ -26,7 +27,8 @@ xsec_unc = {
 }
 systematics = [
     #["_jetpt25", "_jetpt30", "_jetpt40", "_jetpt45", "_jetpt50", "_jetpt55"],
-    ["_nonorm"],
+    ["_donorm"],
+    ["_noSelQ"],
     ["_lumi_up", "_lumi_down"],
     ["_jetpt25", "_jetpt55"],
     ["_jeteta5", "_jeteta1p5"],
@@ -70,15 +72,6 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
-    norm = 1.
-    if "lumi_up" in syst:
-        syst = ""
-        norm *= (100 + 1.616477652180815) / 100
-    elif "lumi_down" in syst:
-        syst = ""
-        norm *= (100 - 1.616477652180815) / 100
-    elif "norm" in syst: syst = ""
-
     correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     fc = correct / (correct + wrong)
@@ -88,7 +81,7 @@ def getfc(channel, chargeBin="", syst=""):
     mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     print("getfc function : fc = ", fc, ", fc_e = ", fc_e, ", data = ", data, ", mc = ", mc, ", norm = ", data / mc)
 
-    return fc, fc_e, (data / mc) * norm
+    return fc, fc_e, (data / mc)
 
 def calc_withLR(fc, fp, fm):
     ap = (fc * (fp + fc -1) + (1 - fc) * (fm + fc -1)) / (2 * fc - 1)
@@ -158,8 +151,11 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
     for systs in range(len(allsysts)):
         for syst in allsysts[systs]:
             fc, fc_stat, norm = getfc(channel, chargeBin, syst)
-            if "nonorm" in syst: norm = 1.
+            if "donorm" not in syst: norm = 1.
+            if "lumi_up" in syst: norm *= (100 + 1.616477652180815) / 100
+            elif "lumi_down" in syst: norm *= (100 - 1.616477652180815) / 100
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
+
             if "lumi" in syst: syst = ""
             normstr = ""
             if "norm" in syst:
