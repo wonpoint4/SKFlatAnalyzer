@@ -319,6 +319,40 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   bcharge = jetCharge(*jet0);
   bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
+  vector<Gen> gens=GetGens();
+  unsigned int ngens = 0;
+  double mindR = 99.;
+  double ptratio = 99.;
+  for(unsigned int i=0; i<gens.size(); i++){
+    if(gens.at(i).DeltaR(*jet0) > 0.4) continue;
+    if(!gens.at(i).isPrompt()) continue;
+    if(!gens.at(i).isHardProcess()) continue;
+
+    FillHist(prefix+hprefix+"b0_PID"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
+    FillHist(prefix+hprefix+"b0_PIDwide"+suffix, gens.at(i).PID(), map_weight, 2000,-1000,1000);
+    FillHist(prefix+hprefix+"b0_pt"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"b0_ptratio"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"b0_dR"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+    FillHist(Form(prefix+hprefix+"b0_PID_%d"+suffix, ngens), gens.at(i).PID(), map_weight, 200,-100,100);
+    FillHist(Form(prefix+hprefix+"b0_PIDwide_%d"+suffix, ngens), gens.at(i).PID(), map_weight, 2000,-1000,1000);
+    FillHist(Form(prefix+hprefix+"b0_pt_%d"+suffix, ngens), gens.at(i).Pt(), map_weight, 200,0,200);
+    FillHist(Form(prefix+hprefix+"b0_ptratio_%d"+suffix, ngens), gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
+    FillHist(Form(prefix+hprefix+"b0_dR_%d"+suffix, ngens), gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+    ngens++;
+    if(gens.at(i).DeltaR(*jet0) < mindR){
+      FillHist(prefix+hprefix+"b0_PID_mindR"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
+      FillHist(prefix+hprefix+"b0_pt_mindR"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
+      FillHist(prefix+hprefix+"b0_ptratio_mindR"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
+      FillHist(prefix+hprefix+"b0_dR_mindR"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+    }
+    if(fabs((gens.at(i).Pt() / jet0->Pt()) - 1) < ptratio){
+      FillHist(prefix+hprefix+"b0_PID_ptratio"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
+      FillHist(prefix+hprefix+"b0_pt_ptratio"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
+      FillHist(prefix+hprefix+"b0_ptratio_ptratio"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
+      FillHist(prefix+hprefix+"b0_dR_ptratio"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+    }
+  }
+  FillHist(prefix+hprefix+"b0_ngens"+suffix, ngens, map_weight, 10,0,10);
 
   map_weight[""] *= pujetSF;
   if(IsNominalLike){
