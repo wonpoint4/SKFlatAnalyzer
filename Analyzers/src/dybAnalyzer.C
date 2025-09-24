@@ -319,40 +319,31 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   bcharge = jetCharge(*jet0);
   bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
-  vector<Gen> gens=GetGens();
-  unsigned int ngens = 0;
-  double mindR = 99.;
-  double ptratio = 99.;
-  for(unsigned int i=0; i<gens.size(); i++){
-    if(gens.at(i).DeltaR(*jet0) > 0.4) continue;
-    if(!gens.at(i).isPrompt()) continue;
-    if(!gens.at(i).isHardProcess()) continue;
 
-    FillHist(prefix+hprefix+"b0_PID"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
-    FillHist(prefix+hprefix+"b0_PIDwide"+suffix, gens.at(i).PID(), map_weight, 2000,-1000,1000);
-    FillHist(prefix+hprefix+"b0_pt"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"b0_ptratio"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"b0_dR"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
-    FillHist(Form(prefix+hprefix+"b0_PID_%d"+suffix, ngens), gens.at(i).PID(), map_weight, 200,-100,100);
-    FillHist(Form(prefix+hprefix+"b0_PIDwide_%d"+suffix, ngens), gens.at(i).PID(), map_weight, 2000,-1000,1000);
-    FillHist(Form(prefix+hprefix+"b0_pt_%d"+suffix, ngens), gens.at(i).Pt(), map_weight, 200,0,200);
-    FillHist(Form(prefix+hprefix+"b0_ptratio_%d"+suffix, ngens), gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
-    FillHist(Form(prefix+hprefix+"b0_dR_%d"+suffix, ngens), gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
-    ngens++;
-    if(gens.at(i).DeltaR(*jet0) < mindR){
-      FillHist(prefix+hprefix+"b0_PID_mindR"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
-      FillHist(prefix+hprefix+"b0_pt_mindR"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
-      FillHist(prefix+hprefix+"b0_ptratio_mindR"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
-      FillHist(prefix+hprefix+"b0_dR_mindR"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+  if(IsDYSample){
+    Gen* gen_b0 = NULL;
+    vector<Gen> gens = GetGens();
+    double mindR = 99.;
+    for(unsigned int i=0; i<gens.size(); i++){
+      if(gens.at(i).DeltaR(*jet0) > 0.4) continue;
+      if(!gens.at(i).isPrompt()) continue;
+      if(!gens.at(i).isHardProcess()) continue;
+      if(gens.at(i).DeltaR(*jet0) > mindR) continue;
+      gen_b0 = &gens.at(i);
     }
-    if(fabs((gens.at(i).Pt() / jet0->Pt()) - 1) < ptratio){
-      FillHist(prefix+hprefix+"b0_PID_ptratio"+suffix, gens.at(i).PID(), map_weight, 200,-100,100);
-      FillHist(prefix+hprefix+"b0_pt_ptratio"+suffix, gens.at(i).Pt(), map_weight, 200,0,200);
-      FillHist(prefix+hprefix+"b0_ptratio_ptratio"+suffix, gens.at(i).Pt() / jet0->Pt(), map_weight, 200,0,10);
-      FillHist(prefix+hprefix+"b0_dR_ptratio"+suffix, gens.at(i).DeltaR(*jet0), map_weight, 500,0,10);
+
+    if(gen_b0){
+      if(gen_b0->PID() == 5) prefix += "dyb_";
+      else if(gen_b0->PID() == -5) prefix += "dybbar_";
+      else if(gen_b0->PID() == 4) prefix += "dyc_";
+      else if(gen_b0->PID() == -4) prefix += "dycbar_";
+
+      FillHist(prefix+hprefix+"gen_b0_PID"+suffix, gen_b0->PID(), map_weight, 200,-100,100);
+      FillHist(prefix+hprefix+"gen_b0_pt"+suffix, gen_b0->Pt(), map_weight, 200,0,200);
+      FillHist(prefix+hprefix+"gen_b0_ptratio"+suffix, gen_b0->Pt() / jet0->Pt(), map_weight, 200,0,10);
+      FillHist(prefix+hprefix+"gen_b0_dR"+suffix, gen_b0->DeltaR(*jet0), map_weight, 500,0,10);
     }
   }
-  FillHist(prefix+hprefix+"b0_ngens"+suffix, ngens, map_weight, 10,0,10);
 
   map_weight[""] *= pujetSF;
   if(IsNominalLike){
@@ -875,43 +866,7 @@ void dybAnalyzer::executeEventGen(){
       zptweight = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity());
       zptweight_gym = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity(), genZ.M());
       weakweight = GetDYWeakWeight(genZ.M());
-
-      // Only qqbar collisions (LO DY)
-      if(lhe_p0.ID() + lhe_p1.ID() == 0) gprefix += "";
-      // Only qG collisions (NLO DY)
-      else if((abs(lhe_p0.ID()) <= 5 && lhe_p1.ID() == 21) || (lhe_p0.ID() == 21 && abs(lhe_p1.ID()) <= 5)){
-        if(lhe_p0.ID() == 5 || lhe_p1.ID() == 5) gprefix += "dyb_";
-        else if(lhe_p0.ID() == -5 || lhe_p1.ID() == -5) gprefix += "dybbar_";
-        else if(lhe_p0.ID() == 4 || lhe_p1.ID() == 4) gprefix += "dyc_";
-        else if(lhe_p0.ID() == -4 || lhe_p1.ID() == -4) gprefix += "dycbar_";
-        else gprefix += "dyudsg_";
-      } // GG collisions or bq, cq collisions (NNLO DY) - find the heavy flavor parton with highest-pt within accptance
-      else if((lhe_p0.ID()==21 && lhe_p1.ID()==21) || (abs(lhe_p0.ID())==4 || abs(lhe_p0.ID())==5 || abs(lhe_p1.ID())==4 || abs(lhe_p1.ID())==5)){
-        Gen heavyparton = gens.at(0);
-        int nheavyparton = 0;
-        for(unsigned int i=0; i<gens.size(); i++){
-          if(!gens.at(i).isHardProcess()) continue;
-          if(abs(gens.at(i).PID()) >= 11 && abs(gens.at(i).PID()) <= 16) continue; // No Lepton
-          if(gens.at(i).PID() == 22 || gens.at(i).PID() == 23) continue; // No Gamma, Z
-          if(gens.at(i).Pt() < 30 || abs(gens.at(i).Eta()) > 2.4) continue; // In the acceptance
-
-          if(nheavyparton == 0 && (abs(gens.at(i).PID()) == 4 || abs(gens.at(i).PID()) == 5)){
-            heavyparton = gens.at(i);
-            nheavyparton++;
-            continue;
-          }else if(nheavyparton > 0 && (abs(gens.at(i).PID()) == 4 || abs(gens.at(i).PID()) == 5)){
-            heavyparton = (heavyparton.Pt() > gens.at(i).Pt()? heavyparton: gens.at(i));
-            nheavyparton++;
-            continue;//break;
-          }
-        }
-        if(nheavyparton > 0 && heavyparton.PID() == 5) gprefix += "dyb_";
-        else if(nheavyparton > 0 && heavyparton.PID() == -5) gprefix += "dybbar_";
-        else if(nheavyparton > 0 && heavyparton.PID() == 4) gprefix += "dyc_";
-        else if(nheavyparton > 0 && heavyparton.PID() == -4) gprefix += "dycbar_";
-        else gprefix += "";
-      }
-    }else gprefix += "tau_";
+    }//else gprefix += "tau_";
   }
   if(IsTTSample) topptweight = mcCorr->GetTopPtReweight(gens);
 }
