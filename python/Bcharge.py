@@ -72,6 +72,8 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
+    if "norm" in syst or "lumi" in syst: syst = ""
+
     correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     fc = correct / (correct + wrong)
@@ -596,7 +598,7 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[1]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[1]+"s", option)
     #DrawAccuracy_withLR([leps[0]+eras[2]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[2]+"s", option)
     #DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2s", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2ss", option)
 
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin", option)
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[1]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin4", option)
@@ -614,14 +616,14 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2H", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2V", option)
 
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.59, 0.66), "chargeBin", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[1] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.70, 0.79), "chargeBin4", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[2] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.63, 0.79), "chargeBin5", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[3] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.645), "chargeBin0123", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[4] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.505, 0.55), "chargeBin0", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[5] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.54, 0.62), "chargeBin1", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "chargeBin2", option)
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "chargeBin3", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.59, 0.66), "nPV_chargeBin", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[1] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.70, 0.79), "nPV_chargeBin4", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[2] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.63, 0.79), "nPV_chargeBin5", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[3] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.645), "nPV_chargeBin0123", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[4] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.505, 0.55), "nPV_chargeBin0", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[5] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.54, 0.62), "nPV_chargeBin1", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "nPV_chargeBin2", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "nPV_chargeBin3", option)
 
     DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
     #DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.605, 0.66), "Eras_Leps", option)

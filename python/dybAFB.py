@@ -10,7 +10,7 @@ dyb = ROOT.dybPlotter()
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-nMassbins = 12 # 52 ~ 200 GeV instead of 52 ~ 3000 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+nMassbins = 14 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
     #"dy" : [1.7, -1.8],
     "wjets" : [3.8, -3.8],
@@ -42,8 +42,8 @@ systematics = {
     "Prefiring" : [["_prefireweight_up", "_prefireweight_down"]],
     "PU" :        [["_PUweight_up", "_PUweight_down"]],
     "PUIDSF" :    [["_PUjetSF_up", "_PUjetSF_down"]],
-    "btagSF" :    [["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-                   ["_btagSF_lup", "_btagSF_ldown"], ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
+    "btagSF" :    [["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+                   ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     # PDFSYS
@@ -51,12 +51,12 @@ systematics = {
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
     "ISR" :       [["_ISR_up", "_ISR_down"]],
     "FSR" :       [["_FSR_up", "_FSR_down"]],
-    #"PDF" :       [["_pdf%d:%s" % (i, j)] for i in range(100) for j in ["dy", "tt"]],
-    "PDF0" :      [["_pdf%d:%s" % (i, j)] for i in range(20) for j in ["dy", "tt"]],
-    "PDF1" :      [["_pdf%d:%s" % (i, j)] for i in range(20,40) for j in ["dy", "tt"]],
-    "PDF2" :      [["_pdf%d:%s" % (i, j)] for i in range(40,60) for j in ["dy", "tt"]],
-    "PDF3" :      [["_pdf%d:%s" % (i, j)] for i in range(60,80) for j in ["dy", "tt"]],
-    "PDF4" :      [["_pdf%d:%s" % (i, j)] for i in range(80,100) for j in ["dy", "tt"]],
+    #"PDF" :       [["_pdf%d" % i] for i in range(100)],
+    "PDF0" :      [["_pdf%d" % i] for i in range(20)],
+    "PDF1" :      [["_pdf%d" % i] for i in range(20,40)],
+    "PDF2" :      [["_pdf%d" % i] for i in range(40,60)],
+    "PDF3" :      [["_pdf%d" % i] for i in range(60,80)],
+    "PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
     "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],
@@ -163,13 +163,13 @@ def getdAFBs_sin2w(channel):
         iSin = sin2w_indice[sin]
         dAFB_full = np.array([])
         for ch in range(len(chargeBins)):
-            AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+            #AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
-            for i in range(1, AFB_data.GetNbinsX() + 1):
-                if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
-            dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
-            #dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
+            #for i in range(1, AFB_data.GetNbinsX() + 1):
+            #    if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
+            #dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
+            dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
             dAFBs[sin].append(dAFB)
             if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
             print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB) of " % iSin), (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
@@ -287,7 +287,7 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
     #channel = "mm201[678][ab]?/"
-    npz_files_tag = "_12bins"
+    npz_files_tag = "_14bins"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
