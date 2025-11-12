@@ -37,13 +37,12 @@ systematics = {
     "stat_Data" : [["stat_Data"]],
     "stat_MC" :   [["stat_MC"]],
     # SYS
-    "JES" :       [["_jet_scale_up", "_jet_scale_down"]],
-    "JER" :       [["_jet_smear_up", "_jet_smear_down"]],
+    "JES" :       [["_jet_scale"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]],
+    "JER" :       [["_jet_smear"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]],
     "Prefiring" : [["_prefireweight_up", "_prefireweight_down"]],
     "PU" :        [["_PUweight_up", "_PUweight_down"]],
     "PUIDSF" :    [["_PUjetSF_up", "_PUjetSF_down"]],
-    "btagSF" :    [["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-                   ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"]],
+    "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr2016a", "uncorr2016b", "uncorr2017", "uncorr2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     # PDFSYS
