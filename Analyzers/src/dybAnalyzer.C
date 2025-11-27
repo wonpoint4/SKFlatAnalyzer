@@ -266,6 +266,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
 
+  double weight_noeffSF = map_weight[""];
   map_weight[""] *= muonTrackingSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_muonTrackingSF"+suffix, muonTrackingSF, map_weight[""], 200,-5,5);
@@ -323,12 +324,101 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"metphi_IncDY"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"met_metphi_IncDY"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   FillHist(prefix+hprefix+"costhetaCS_IncDY"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+  FillHist(prefix+hprefix+"nPV_IncDY"+suffix, nPV, map_weight, 100,0,100);
 
   FillHist(prefix+hprefix+"nalljets_IncDY"+suffix, alljets.size(), map_weight, 15,0,15);
   FillHist(prefix+hprefix+"nlepvetojets_IncDY"+suffix, lepvetojets.size(), map_weight, 15,0,15);
   FillHist(prefix+hprefix+"nrealjets_before_vetomap_IncDY"+suffix, realjets_before_vetomap.size(), map_weight, 15,0,15);
   FillHist(prefix+hprefix+"nrealjets_IncDY"+suffix, realjets.size(), map_weight, 15,0,15);
   FillHist(prefix+hprefix+"nbjets_IncDY"+suffix, bjets.size(), map_weight, 10,0,10);
+
+  // For control plots before/after corrections
+  if(IsNominalRun){
+    // Without efficiency SF
+    FillHist(prefix+hprefix+"mll_IncDY_noeffSF"+suffix, dimass, weight_noeffSF, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noeffSF"+suffix, dirap, weight_noeffSF, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noeffSF"+suffix, dipt, weight_noeffSF, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF"+suffix, lepton0->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF"+suffix, lepton0->Eta(), weight_noeffSF, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF"+suffix, lepton1->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF"+suffix, lepton1->Eta(), weight_noeffSF, 50,-2.5,2.5);
+
+    weight_noeffSF *= muonTrackingSF;
+    FillHist(prefix+hprefix+"mll_IncDY_noeffSF_1_Tracking"+suffix, dimass, weight_noeffSF, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noeffSF_1_Tracking"+suffix, dirap, weight_noeffSF, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noeffSF_1_Tracking"+suffix, dipt, weight_noeffSF, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_1_Tracking"+suffix, lepton0->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_1_Tracking"+suffix, lepton0->Eta(), weight_noeffSF, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_1_Tracking"+suffix, lepton1->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_1_Tracking"+suffix, lepton1->Eta(), weight_noeffSF, 50,-2.5,2.5);
+
+    weight_noeffSF *= muonRECOSF * electronRECOSF;
+    FillHist(prefix+hprefix+"mll_IncDY_noeffSF_2_RECO"+suffix, dimass, weight_noeffSF, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noeffSF_2_RECO"+suffix, dirap, weight_noeffSF, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noeffSF_2_RECO"+suffix, dipt, weight_noeffSF, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_2_RECO"+suffix, lepton0->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_2_RECO"+suffix, lepton0->Eta(), weight_noeffSF, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_2_RECO"+suffix, lepton1->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_2_RECO"+suffix, lepton1->Eta(), weight_noeffSF, 50,-2.5,2.5);
+
+    weight_noeffSF *= muonIDSF * electronIDSF;
+    FillHist(prefix+hprefix+"mll_IncDY_noeffSF_3_ID"+suffix, dimass, weight_noeffSF, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noeffSF_3_ID"+suffix, dirap, weight_noeffSF, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noeffSF_3_ID"+suffix, dipt, weight_noeffSF, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_3_ID"+suffix, lepton0->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_3_ID"+suffix, lepton0->Eta(), weight_noeffSF, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noeffSF_3_ID"+suffix, lepton1->Pt(), weight_noeffSF, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noeffSF_3_ID"+suffix, lepton1->Eta(), weight_noeffSF, 50,-2.5,2.5);
+
+    // Without lepton momentum / energy correction
+    Lepton* lepton0_raw = NULL;
+    Lepton* lepton1_raw = NULL;
+    if(channel.Contains("mm"+GetEraShort())){
+      vector<Muon> muons_raw = MuonMomentumCorrection(muons, -1,0, true);
+      lepton0_raw = &muons_raw.at(0);
+      lepton1_raw = &muons_raw.at(1);
+    }else{
+      vector<Electron> electrons_raw = ElectronEnergyCorrection(electrons, -1,0, true);
+      lepton0_raw = &electrons_raw.at(0);
+      lepton1_raw = &electrons_raw.at(1);
+    }
+
+    FillHist(prefix+hprefix+"mll_IncDY_noRocAep"+suffix, (*lepton0_raw + *lepton1_raw).M(), map_weight[""], 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noRocAep"+suffix, (*lepton0_raw + *lepton1_raw).Rapidity(), map_weight[""], 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noRocAep"+suffix, (*lepton0_raw + *lepton1_raw).Pt(), map_weight[""], AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noRocAep"+suffix, lepton0_raw->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noRocAep"+suffix, lepton0_raw->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noRocAep"+suffix, lepton1_raw->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noRocAep"+suffix, lepton1_raw->Eta(), map_weight[""], 50,-2.5,2.5);
+
+    // Without Zpt Correction
+    FillHist(prefix+hprefix+"mll_IncDY_noZpt"+suffix, dimass, map_weight[""] / zptweight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noZpt"+suffix, dirap, map_weight[""] / zptweight, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noZpt"+suffix, dipt, map_weight[""] / zptweight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noZpt"+suffix, lepton0->Pt(), map_weight[""] / zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noZpt"+suffix, lepton0->Eta(), map_weight[""] / zptweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noZpt"+suffix, lepton1->Pt(), map_weight[""] / zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noZpt"+suffix, lepton1->Eta(), map_weight[""] / zptweight, 50,-2.5,2.5);
+
+    // Without Weak Correction
+    FillHist(prefix+hprefix+"mll_IncDY_noWeak"+suffix, dimass, map_weight[""] / weakweight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noWeak"+suffix, dirap, map_weight[""] / weakweight, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noWeak"+suffix, dipt, map_weight[""] / weakweight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noWeak"+suffix, lepton0->Pt(), map_weight[""] / weakweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noWeak"+suffix, lepton0->Eta(), map_weight[""] / weakweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noWeak"+suffix, lepton1->Pt(), map_weight[""] / weakweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noWeak"+suffix, lepton1->Eta(), map_weight[""] / weakweight, 50,-2.5,2.5);
+
+    // Without PUweight Correction
+    FillHist(prefix+hprefix+"mll_IncDY_noPU"+suffix, dimass, map_weight[""] / PUweight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_noPU"+suffix, dirap, map_weight[""] / PUweight, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY_noPU"+suffix, dipt, map_weight[""] / PUweight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_noPU"+suffix, lepton0->Pt(), map_weight[""] / PUweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noPU"+suffix, lepton0->Eta(), map_weight[""] / PUweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_noPU"+suffix, lepton1->Pt(), map_weight[""] / PUweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_noPU"+suffix, lepton1->Eta(), map_weight[""] / PUweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"nPV_IncDY_noPU"+suffix, nPV, map_weight[""] / PUweight, 100,0,100);
+  }
 
   if(bjets.size() == 0) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tightnb", map_weight[""]);
@@ -337,6 +427,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   bcharge = jetCharge(*jet0);
   bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
   double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
+  double costhetaRecoil_nobch = GetCosThetaRecoil(lepton0, lepton1, jet0, -1);
 
   if(IsDYSample){
     Gen* gen_b0 = NULL;
@@ -685,6 +776,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 10,0,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_nobch"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil_nobch, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   // bCharges vs. nPV
@@ -830,9 +922,57 @@ double dybAnalyzer::jetCharge(const Jet& jet){
   }
 
   //The jet has soft muon inside, and its charge will determine the jet charge
-  if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
-  else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
-
+  if(bmuon.size() > 0){
+    jetCharge += 2 * bmuon.at(0).Charge();
+    if(IsNominalRun){
+      FillHist("softmuon/nmu", bmuon.size(), 1, 10,0,10);
+      FillHist("softmuon/nel", belectron.size(), 1, 10,0,10);
+      FillHist("softmuon/pt", bmuon.at(0).Pt(), 1, 200,0,200);
+      FillHist("softmuon/ptRel", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
+      FillHist("softmuon/ptRatio", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+      FillHist("softmuon/jetpt_pt", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      if(bmuon.at(0).Charge() * jet.Charge() > 0){
+        FillHist("softmuon/nmu_SS", bmuon.size(), 1, 10,0,10);
+        FillHist("softmuon/nel_SS", belectron.size(), 1, 10,0,10);
+        FillHist("softmuon/pt_SS", bmuon.at(0).Pt(), 1, 200,0,200);
+        FillHist("softmuon/ptRel_SS", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
+        FillHist("softmuon/ptRatio_SS", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+        FillHist("softmuon/jetpt_pt_SS", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      }else{
+        FillHist("softmuon/nmu_OS", bmuon.size(), 1, 10,0,10);
+        FillHist("softmuon/nel_OS", belectron.size(), 1, 10,0,10);
+        FillHist("softmuon/pt_OS", bmuon.at(0).Pt(), 1, 200,0,200);
+        FillHist("softmuon/ptRel_OS", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
+        FillHist("softmuon/ptRatio_OS", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+        FillHist("softmuon/jetpt_pt_OS", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      }
+    }
+  }else if(belectron.size() > 0){
+    jetCharge += 4 * belectron.at(0).Charge();
+    if(IsNominalRun){
+      FillHist("softelectron/nmu", bmuon.size(), 1, 10,0,10);
+      FillHist("softelectron/nel", belectron.size(), 1, 10,0,10);
+      FillHist("softelectron/pt", belectron.at(0).Pt(), 1, 200,0,200);
+      FillHist("softelectron/ptRel", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
+      FillHist("softelectron/ptRatio", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+      FillHist("softelectron/jetpt_pt", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      if(belectron.at(0).Charge() * jet.Charge() > 0){
+        FillHist("softelectron/nmu_SS", belectron.size(), 1, 10,0,10);
+        FillHist("softelectron/nel_SS", belectron.size(), 1, 10,0,10);
+        FillHist("softelectron/pt_SS", belectron.at(0).Pt(), 1, 200,0,200);
+        FillHist("softelectron/ptRel_SS", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
+        FillHist("softelectron/ptRatio_SS", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+        FillHist("softelectron/jetpt_pt_SS", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      }else{
+        FillHist("softelectron/nmu_OS", belectron.size(), 1, 10,0,10);
+        FillHist("softelectron/nel_OS", belectron.size(), 1, 10,0,10);
+        FillHist("softelectron/pt_OS", belectron.at(0).Pt(), 1, 200,0,200);
+        FillHist("softelectron/ptRel_OS", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
+        FillHist("softelectron/ptRatio_OS", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
+        FillHist("softelectron/jetpt_pt_OS", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
+      }
+    }
+  }
   return jetCharge;
 }
 
@@ -1027,6 +1167,8 @@ double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Pa
   else direction=1;
   if(mode==0){
     return direction*((*lm-*lp)*(*b))/((*lm+*lp)*(*b));
+  }else if(mode == -1){// not looking at bcharge
+    return ((*lm - *lp) * (*b)) / ((*lm + *lp) * (*b));
   }else{
     TLorentzVector b_m0;
     b_m0.SetPtEtaPhiM(b->Pt(),b->Eta(),b->Phi(),0);
