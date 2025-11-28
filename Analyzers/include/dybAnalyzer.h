@@ -31,6 +31,9 @@ public:
   void SetupJetVetoMap();
   TH2D *hvetomap = NULL;
 
+  // electro charge flip
+  double GetCFSF(int sys);
+
   dybAnalyzer();
   ~dybAnalyzer();
 
@@ -40,6 +43,7 @@ public:
 
   TString prefix, gprefix, hprefix, suffix;
   vector<Gen> gens;
+  vector<LHE> lhes;
   vector<Jet> jets_raw;
   vector<Jet> jets;
   vector<Jet> bjets;
@@ -49,16 +53,19 @@ public:
   Lepton* lepton0 = NULL;
   Lepton* lepton1 = NULL;
   Jet* jet0 = NULL;
+  Gen truth_lepton0;
+  Gen truth_lepton1;
   double bcharge = 0;
   std::map<TString,double> map_weight;
 
-  double muonTrackingSF =1.;
-  double muonRECOSF =1.;
-  double muonIDSF =1.;
-  double muonTriggerSF =1.;
-  double electronRECOSF =1.;
-  double electronIDSF =1.;
-  double electronTriggerSF =1.;
+  double chargeflipSF = 1.;
+  double muonTrackingSF = 1.;
+  double muonRECOSF = 1.;
+  double muonIDSF = 1.;
+  double muonTriggerSF = 1.;
+  double electronRECOSF = 1.;
+  double electronIDSF = 1.;
+  double electronTriggerSF = 1.;
   vector<vector<double>> muonTrackingSF_sys;
   vector<vector<double>> muonRECOSF_sys;
   vector<vector<double>> muonIDSF_sys;

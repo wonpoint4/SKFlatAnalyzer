@@ -1,7 +1,7 @@
 #include "dybAnalyzer.h"
 
 void dybAnalyzer::initializeAnalyzer(){
-  SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0
+  SMPAnalyzerCore::initializeAnalyzer(); //setup eff zpt roc z0 cf
   IsNominalRun = !HasFlag("SYS") && !HasFlag("PDFSYS") && !HasFlag("LEPSYS");
 
   PDFbase = LHAPDF::mkPDF(306000);
@@ -266,6 +266,20 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
 
+  // electron charge-flip SF
+  chargeflipSF = 1.;
+  if(!IsDATA){
+    truth_lepton0 = SMPGetGenMatchedLepton(*lepton0, gens);
+    truth_lepton1 = SMPGetGenMatchedLepton(*lepton1, gens);
+    chargeflipSF = GetCFSF(0);
+  }
+
+  map_weight[""] *= chargeflipSF;
+  if(IsNominalLike){
+    FillHist(prefix+hprefix+"weight_CFSF"+suffix, chargeflipSF, map_weight[""], 200,-5,5);
+    FillCutflow(prefix+hprefix+"cutflow"+suffix, "CFSF", map_weight[""]);
+  }
+
   double weight_noeffSF = map_weight[""];
   map_weight[""] *= muonTrackingSF;
   if(IsNominalLike){
@@ -431,7 +445,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   if(IsDYSample){
     Gen* gen_b0 = NULL;
-    vector<Gen> gens = GetGens();
     double mindR = 99.;
     for(unsigned int i=0; i<gens.size(); i++){
       if(gens.at(i).DeltaR(*jet0) > 0.4) continue;
@@ -511,6 +524,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_bChargeSFHS"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
     map_weight["_bChargeSFHS_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
     map_weight["_bChargeSFHS_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
+
+    // Electron charge flip SF
+    map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
+    map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
+    map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
   }else if(!IsDATA && HasFlag("PDFSYS") && option == "" && !hprefix.Contains("ss_")){
     // Zpt Reweight
     map_weight["_noZpt"] =  map_weight[""] / zptweight;
@@ -984,10 +1002,10 @@ void dybAnalyzer::executeEventGen(){
   gprefix = "";
   if(IsData) return;
 
-  vector<Gen> gens = GetGens();
+  gens = GetGens();
   if(IsDYSample){
     // LHE Setting
-    vector<LHE> lhes = GetLHEs();
+    lhes = GetLHEs();
     LHE lhe_l0, lhe_l1;
     for(int i=0; i<(int)lhes.size(); i++){
       if(lhe_l0.ID() == 0 && (abs(lhes[i].ID()) == 11 || abs(lhes[i].ID()) == 13 || abs(lhes[i].ID()) == 15)) lhe_l0 = lhes[i];
@@ -1412,7 +1430,6 @@ double dybAnalyzer::GetPUJetWeight(const vector<Jet>& jets, TString ID, int sys)
 
     bool isRealJet = false;
     //isRealJet = (jets.at(i).GenHFHadronMatcherFlavour() >= 0.);
-    vector<Gen> gens = GetGens();
     double deltaR = 0.4;
     for(unsigned int j=0; j<gens.size(); j++){
       if(!gens.at(j).isHardProcess()) continue;
@@ -1472,7 +1489,6 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
   double weight = 1.;
   if(IsDATA) return weight;
 
-  vector<Gen> gens = GetGens();
   for(const auto& jet:jets){
     int genpid = 0;
     double dR = 99.;
@@ -1622,4 +1638,37 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
   }
 
   return weight;
+}
+
+double dybAnalyzer::GetCFSF(int sys){
+  if(IsDATA) return 1.;
+  if(!hcfrate_data || !hcfrate_mc) return 1.;
+
+  double sf = 1.;
+  double cf_data_l0 = GetBinContentUser(hcfrate_data, lepton0->Eta(), lepton0->Pt(), sys);
+  double cf_data_l1 = GetBinContentUser(hcfrate_data, lepton1->Eta(), lepton1->Pt(), sys);
+  double cf_mc_l0 = GetBinContentUser(hcfrate_mc, lepton0->Eta(), lepton0->Pt(), -sys);
+  double cf_mc_l1 = GetBinContentUser(hcfrate_mc, lepton1->Eta(), lepton1->Pt(), -sys);
+
+  if(lepton0 && !truth_lepton0.IsEmpty()){
+    if(lepton0->LeptonFlavour() == Lepton::ELECTRON){
+      if(lepton0->Charge() * truth_lepton0.Charge() < 0) sf *= cf_data_l0 / cf_mc_l0;
+      else{
+        double this_sf = (1 - cf_data_l0) / (1 - cf_mc_l0);
+        if(isnormal(this_sf)) sf *= this_sf;
+      }
+    }
+  }
+
+  if(lepton1 && !truth_lepton1.IsEmpty()){
+    if(lepton1->LeptonFlavour() == Lepton::ELECTRON){
+      if(lepton1->Charge() * truth_lepton1.Charge() < 0) sf *= cf_data_l1 / cf_mc_l1;
+      else{
+        double this_sf = (1 - cf_data_l1) / (1 - cf_mc_l1);
+        if(isnormal(this_sf)) sf *= this_sf;
+      }
+    }
+  }
+
+  return sf;
 }

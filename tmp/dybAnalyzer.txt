@@ -17,15 +17,6 @@ SKFlat.py -a dybAnalyzer -i SingleTop_tch_antitop_Incl -n 5 -e 2017
 SKFlat.py -a dybAnalyzer -i SingleTop_tch_top_Incl -n 5 -e 2017
 SKFlat.py -a dybAnalyzer -i GGToLL -n 5 -e 2017
 
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT100to200 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT200to300 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT300to500 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT500to700 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT700to1000 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT1000to1500 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT1500to2000 -n 5 -e 2017
-SKFlat.py -a dybAnalyzer -i QCD_bEnriched_HT2000toInf -n 5 -e 2017
-
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLJ_powheg -n 150 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTLL_powheg -n 30 -e 2017
 SKFlat.py -a ttljAnalyzer --skim SkimTree_2B1L -i TTJJ_powheg -n 5 -e 2017

@@ -45,6 +45,7 @@ systematics = {
     "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr2016a", "uncorr2016b", "uncorr2017", "uncorr2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
+    "CFSF" :      [["_CFSF_up", "_CFSF_down"]],
     # PDFSYS
     "Scales" :    [["_scalevariation%d:%s" % (i, j) for i in [0, 1, 2, 3, 4, 6, 8]] for j in ["dy", "tt"]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
