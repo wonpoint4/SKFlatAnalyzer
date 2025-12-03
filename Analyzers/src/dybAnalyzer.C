@@ -190,7 +190,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     TString electronTriggerLeg2SF_key = "Ele12Leg2_MediumID";
     TString electronTriggerDZSF_key = GetEraShort().Contains("2016")? "DZ_MediumID": "";
 
-    if(HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+    if(HasFlag("LEPSYS") && option == ""){
       muonTrackingSF_sys = Make2DWeights(fEff->GetStructure(muonTrackingSF_key));
       muonRECOSF_sys = Make2DWeights(fEff->GetStructure(muonRECOSF_key));
       muonIDSF_sys = Make2DWeights(fEff->GetStructure(muonIDSF_key));
@@ -207,7 +207,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
         muonRECOSF *= fEff->GetEfficiencySF(muonRECOSF_key, lepton, 0,0);
         muonIDSF *= fEff->GetEfficiencySF(muonIDSF_key, lepton, 0,0);
 
-        if(HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<muonTrackingSF_sys.size(); s++){
             for(unsigned int m=0; m<muonTrackingSF_sys[s].size(); m++){
               muonTrackingSF_sys[s][m] *= fEff->GetEfficiencySF(muonTrackingSF_key, lepton, s,m);
@@ -228,7 +228,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
         electronRECOSF *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, 0,0);
         electronIDSF *= fEff->GetEfficiencySF(electronIDSF_key, lepton, 0,0);
 
-        if(HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+        if(HasFlag("LEPSYS") && option == ""){
           for(unsigned int s=0; s<electronRECOSF_sys.size(); s++){
             for(unsigned int m=0; m<electronRECOSF_sys[s].size(); m++){
               electronRECOSF_sys[s][m] *= fEff->GetEfficiencySF(electronRECOSF_key, lepton, s,m);
@@ -246,7 +246,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     // Trigger SF
     if(channel.Contains("mm"+GetEraShort())){
       muonTriggerSF *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, 0,0);
-      if(HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+      if(HasFlag("LEPSYS") && option == ""){
         for(unsigned int s=0; s<muonTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<muonTriggerSF_sys[s].size(); m++){
             muonTriggerSF_sys[s][m] *= GetDileptonTriggerSF(muonTriggerLeg1SF_key, muonTriggerLeg2SF_key, muonTriggerDZSF_key, leptons, s,m);
@@ -256,7 +256,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
     if(channel.Contains("ee"+GetEraShort())){
       electronTriggerSF *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, 0,0);
-      if(HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+      if(HasFlag("LEPSYS") && option == ""){
         for(unsigned int s=0; s<electronTriggerSF_sys.size(); s++){
           for(unsigned int m=0; m<electronTriggerSF_sys[s].size(); m++){
             electronTriggerSF_sys[s][m] *= GetDileptonTriggerSF(electronTriggerLeg1SF_key, electronTriggerLeg2SF_key, electronTriggerDZSF_key, leptons, s,m);
@@ -485,7 +485,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }
 
   //==== Weights of Systematics
-  if(!IsDATA && HasFlag("SYS") && option == "" && !hprefix.Contains("ss_")){
+  if(!IsDATA && HasFlag("SYS") && option == ""){
     // Prefiring weight
     map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
     map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
@@ -524,12 +524,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_bChargeSFHS"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
     map_weight["_bChargeSFHS_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
     map_weight["_bChargeSFHS_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
-
-    // Electron charge flip SF
-    map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
-    map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
-    map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
-  }else if(!IsDATA && HasFlag("PDFSYS") && option == "" && !hprefix.Contains("ss_")){
+  }else if(!IsDATA && HasFlag("PDFSYS") && option == ""){
     // Zpt Reweight
     map_weight["_noZpt"] =  map_weight[""] / zptweight;
     map_weight["_Zpt_gym"] =  map_weight[""] / zptweight * zptweight_gym;
@@ -559,7 +554,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
     // PDF
     for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
-  }else if(!IsDATA && HasFlag("LEPSYS") && option == "" && !hprefix.Contains("ss_")){
+  }else if(!IsDATA && HasFlag("LEPSYS") && option == ""){
     // EfficiencySF - stat
     for(int j=0; j<fEff->nreplica; j++){
       double SF_stat = 1. / muonTrackingSF / muonRECOSF / muonIDSF / muonTriggerSF / electronRECOSF / electronIDSF / electronTriggerSF;
@@ -628,6 +623,13 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun && !hprefix.Contains("ss_")){
     for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
   }
+
+  // Electron charge flip SF
+  if(!IsDATA && IsNominalRun){
+    map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
+    map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
+    map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
+  }
   if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
   // For comparison with Hyonsan's results (8 bins)
@@ -646,6 +648,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"beta_nbjets"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
     FillHist(prefix+hprefix+"bphi_nbjets"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
     FillHist(prefix+hprefix+"bChargeRaw_nbjets"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_nbjets"+suffix, bcharge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"bCharge_nbjets"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"met_nbjets"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
     FillHist(prefix+hprefix+"metphi_nbjets"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -674,6 +677,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"beta_Tight1b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bphi_Tight1b"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"bChargeRaw_Tight1b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2_Tight1b"+suffix, bcharge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"bCharge_Tight1b"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_Tight1b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_Tight1b"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -716,6 +720,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"beta_Veto2b"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bphi_Veto2b"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"bChargeRaw_Veto2b"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2_Veto2b"+suffix, bcharge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"bCharge_Veto2b"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_Veto2b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_Veto2b"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -742,6 +747,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"beta_met60"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"bphi_met60"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"bChargeRaw_met60"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2_met60"+suffix, bcharge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"bCharge_met60"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met_met60"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_met60"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -779,6 +785,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(!hprefix.Contains("ss_"))FillHist("betaphi", jet0->Eta(), jet0->Phi(), map_weight[""], 200,-2.5,2.5, 200,-3.2,3.2);
   }
   FillHist(prefix+hprefix+"bChargeRaw"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2"+suffix, bcharge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"bCharge"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -809,10 +816,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   for(int i=1; i<afb_chbinnum+1; i++){
     if(afb_chbin[i-1] < abs(bcharge) && abs(bcharge) < afb_chbin[i]){
       FillHist(Form(prefix+hprefix+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
+      FillHist(Form(prefix+hprefix+"bCharge%dRaw2"+suffix, i-1), bcharge, map_weight, 100,-5,5);
       FillHist(Form(prefix+hprefix+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       FillHist(prefix+hprefix+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
       FillHist(prefix+hprefix+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);
       FillHist(Form(prefix_nPV+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
+      FillHist(Form(prefix_nPV+"bCharge%dRaw2"+suffix, i-1), bcharge, map_weight, 100,-5,5);
       FillHist(Form(prefix_nPV+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       FillHist(prefix_nPV+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
       FillHist(prefix_nPV+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);
@@ -863,7 +872,7 @@ bool dybAnalyzer::HasDileptons(TString channel, unsigned int s, unsigned int m){
   leptons.push_back(lepton0);
   leptons.push_back(lepton1);
 
-  if(hprefix.Contains("ss_") && suffix != "") return false; // To reduce SS histograms
+  if(hprefix.Contains("ss_") && !IsNominalRun) return false; // To reduce SS histograms
 
   return true;
 }

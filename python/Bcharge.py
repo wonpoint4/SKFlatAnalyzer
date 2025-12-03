@@ -32,7 +32,7 @@ systematics = [
     ["_lumi_up", "_lumi_down"],
     ["_jetpt25", "_jetpt55"],
     ["_jeteta5", "_jeteta1p5"],
-    #["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
+    ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
     #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
     #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
     #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
@@ -79,7 +79,8 @@ def getfc(channel, chargeBin="", syst=""):
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
+    data_syst = syst if "smear" not in syst else ""
+    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+data_syst).Integral()
     mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
     print("getfc function : fc = ", fc, ", fc_e = ", fc_e, ", data = ", data, ", mc = ", mc, ", norm = ", data / mc)
 
@@ -165,6 +166,7 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
                     if process in syst: normstr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syst else 1)] * 0.01, process)
                 syst = ""
 
+            syst = "" if ientry == 0 and "smear" in syst else syst
             hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin+syst, normstr)
             hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+syst, normstr)
             print("syst = "+syst+normstr+", hp = ", hp.Integral(), ", fpxhp = ", hp.GetBinContent(2), ", hm = ", hm.Integral(), ", fmxhm = ", hm.GetBinContent(1), ", fc = ", fc, ", norm = ", norm)

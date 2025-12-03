@@ -10,6 +10,7 @@ void ttljAnalyzer::initializeAnalyzer(){
     JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb),
   });
   SetupPUJetWeight();
+  SetupJetVetoMap();
   SetupLikelihoods(0, 1);
 }
 
@@ -111,7 +112,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   else alljets = SelectJets(jets_raw, "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
-  vector<Jet> lepvetojets = {}, realjets = {}, bjets = {}, ajets = {};
+  vector<Jet> lepvetojets = {}, realjets_before_vetomap = {}, realjets = {}, bjets = {}, ajets = {};
   for(const auto& jet:alljets){
     if(lepton0 && jet.DeltaR(*lepton0) < 0.4) continue;
     lepvetojets.push_back(jet);
@@ -120,7 +121,19 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     if(!option.Contains("HS")){
       if(!PUJetIDPass(jet, "Loose")) continue;
     }
+    realjets_before_vetomap.push_back(jet);
+    if(IsNominalRun){
+      FillHist(prefix+hprefix+"etaphi_realjets_before_vetomap"+suffix, jet.Eta(), jet.Phi(), 1., 200,-5.,5., 200,-3.2,3.2);
+      FillHist("etaphi_realjets_before_vetomap", jet.Eta(), jet.Phi(), 1., 200,-5.,5., 200,-3.2,3.2);
+    }
+  }
+  for(const auto& jet:realjets_before_vetomap){
+    if(hvetomap->GetBinContent(hvetomap->FindBin(jet.Eta(), jet.Phi()))) continue;
     realjets.push_back(jet);
+    if(IsNominalRun){
+      FillHist(prefix+hprefix+"etaphi_realjets"+suffix, jet.Eta(), jet.Phi(), 1., 200,-5.,5., 200,-3.2,3.2);
+      FillHist("etaphi_realjets", jet.Eta(), jet.Phi(), 1., 200,-5.,5., 200,-3.2,3.2);
+    }
   }
 
   // b-tagging
@@ -498,6 +511,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"bpt_incTT"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"beta_incTT"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"beta_incTT"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bphi_incTT"+suffix, bjets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bphi_incTT"+suffix, bjets.at(1).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_incTT"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_incTT"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_metphi_incTT"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
     FillHist(prefix+hprefix+"bbCharges_incTT"+suffix, bbCharges, map_weight, 4,0,4);
   }
 
@@ -519,10 +537,17 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"beta_incTTLJ"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bphi_incTTLJ"+suffix, bjets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bphi_incTTLJ"+suffix, bjets.at(1).Phi(), map_weight, 64,-3.2,3.2);
     FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jpt_incTTLJ"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"jeta_incTTLJ"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jphi_incTTLJ"+suffix, ajets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"jphi_incTTLJ"+suffix, ajets.at(1).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_incTTLJ"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_incTTLJ"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_metphi_incTTLJ"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
     FillHist(prefix+hprefix+"bbCharges_incTTLJ"+suffix, bbCharges, map_weight, 4,0,4);
   }
 
@@ -552,10 +577,17 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"bpt_beforeLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"beta_beforeLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bphi_beforeLRcout"+suffix, bjets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bphi_beforeLRcout"+suffix, bjets.at(1).Phi(), map_weight, 64,-3.2,3.2);
     FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jpt_beforeLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"jeta_beforeLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jphi_beforeLRcout"+suffix, ajets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"jphi_beforeLRcout"+suffix, ajets.at(1).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_beforeLRcout"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_beforeLRcout"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_metphi_beforeLRcout"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
     FillHist(prefix+hprefix+"bbCharges_beforeLRcut"+suffix, bbCharges, map_weight, 4,0,4);
   }
 
@@ -569,10 +601,17 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"beta_afterLRcut"+suffix, bjets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bphi_afterLRcout"+suffix, bjets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bphi_afterLRcout"+suffix, bjets.at(1).Phi(), map_weight, 64,-3.2,3.2);
     FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(0).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jpt_afterLRcut"+suffix, ajets.at(1).Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(0).Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"jeta_afterLRcut"+suffix, ajets.at(1).Eta(), map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"jphi_afterLRcout"+suffix, ajets.at(0).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"jphi_afterLRcout"+suffix, ajets.at(1).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_afterLRcout"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_afterLRcout"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_metphi_afterLRcout"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
     FillHist(prefix+hprefix+"bbCharges_afterLRcut"+suffix, bbCharges, map_weight, 4,0,4);
   }
 
@@ -912,16 +951,29 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   FillHist(prefix+hprefix+"beta"+suffix, hadb.Eta(), map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"lepbeta"+suffix, lepb.Eta(), map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"hadbeta"+suffix, hadb.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"bphi"+suffix, lepb.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"bphi"+suffix, hadb.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"lepbphi"+suffix, lepb.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"hadbphi"+suffix, hadb.Phi(), map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"jeta"+suffix, Wj0.Eta(), map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"jeta"+suffix, Wj1.Eta(), map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"j0eta"+suffix, Wj0.Eta(), map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"j1eta"+suffix, Wj1.Eta(), map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"jphi"+suffix, Wj0.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"jphi"+suffix, Wj1.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"j0phi"+suffix, Wj0.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"j1phi"+suffix, Wj1.Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"met"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"metphi"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"met_metphi"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
 
   // bCharges
   FillHist(prefix+hprefix+"bbCharges"+suffix, bbCharges, map_weight, 4,0,4);
   FillHist(prefix+hprefix+"lepbChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"lepbChargeRaw2"+suffix, lepb_charge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"lepbCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"hadbChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"hadbChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
   FillHist(prefix+hprefix+"hadbCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"a0ChargeRaw"+suffix, a0charge, map_weight, 200,-5,5);
   FillHist(prefix+hprefix+"a0Charge"+suffix, (a0charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -934,8 +986,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"hadbChargeRaw_Lm"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+hprefix+"hadbCharge_Lm"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"recoBChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"recoBChargeRaw2"+suffix, lepb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recoBCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"recobChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"recobChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recobCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     if(lepb.Pt() < 35){
       FillHist(prefix+hprefix+"recoBChargeRaw_pt0"+suffix, lepb_charge, map_weight, 200,-5,5);
@@ -975,8 +1029,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"hadbChargeRaw_Lp"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+hprefix+"hadbCharge_Lp"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"recobChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"recobChargeRaw2"+suffix, lepb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recobCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix+hprefix+"recoBChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"recoBChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recoBCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     if(lepb.Pt() < 35){
       FillHist(prefix+hprefix+"recobChargeRaw_pt0"+suffix, lepb_charge, map_weight, 200,-5,5);
@@ -1019,6 +1075,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"lepbCharge%d_Lm"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         FillHist(prefix+hprefix+"lepbChargebin_Lm"+suffix, LHAPDF::sgn(lepb_charge) * (i - 0.5), map_weight, 12,-6,6);
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recoBCharge%dRaw2"+suffix, i-1), lepb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         if(lepb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_pt0"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
@@ -1046,6 +1103,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"hadbCharge%d_Lm"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         FillHist(prefix+hprefix+"hadbChargebin_Lm"+suffix, LHAPDF::sgn(hadb_charge) * (i - 0.5), map_weight, 12,-6,6);
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recobCharge%dRaw2"+suffix, i-1), hadb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         if(hadb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recobCharge%dRaw_pt0"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
@@ -1074,6 +1132,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"lepbCharge%d_Lp"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         FillHist(prefix+hprefix+"lepbChargebin_Lp"+suffix, LHAPDF::sgn(lepb_charge) * (i - 0.5), map_weight, 12,-6,6);
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recobCharge%dRaw2"+suffix, i-1), lepb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         if(lepb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recobCharge%dRaw_pt0"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
@@ -1101,6 +1160,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"hadbCharge%d_Lp"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         FillHist(prefix+hprefix+"hadbChargebin_Lp"+suffix, LHAPDF::sgn(hadb_charge) * (i - 0.5), map_weight, 12,-6,6);
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recoBCharge%dRaw2"+suffix, i-1), hadb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
         if(hadb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_pt0"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
@@ -1126,15 +1186,6 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     }
   }
 
-  FillHist(prefix+hprefix+"lepbChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"lepbCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-  FillHist(prefix+hprefix+"hadbChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"hadbCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-  FillHist(prefix+hprefix+"a0ChargeRaw"+suffix, a0charge, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"a0Charge"+suffix, (a0charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-  FillHist(prefix+hprefix+"a1ChargeRaw"+suffix, a1charge, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"a1Charge"+suffix, (a1charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-
   // bCharges vs. nPV
   FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
   FillHist(prefix_nPV+"bbCharges"+suffix, bbCharges, map_weight, 4,0,4);
@@ -1144,8 +1195,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix_nPV+"hadbChargeRaw_Lm"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix_nPV+"hadbCharge_Lm"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix_nPV+"recoBChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix_nPV+"recoBChargeRaw2"+suffix, lepb_charge, map_weight, 100,-5,5);
     FillHist(prefix_nPV+"recoBCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix_nPV+"recobChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix_nPV+"recobChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix_nPV+"recobCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   }else{
     FillHist(prefix_nPV+"lepbChargeRaw_Lp"+suffix, lepb_charge, map_weight, 200,-5,5);
@@ -1153,8 +1206,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix_nPV+"hadbChargeRaw_Lp"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix_nPV+"hadbCharge_Lp"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix_nPV+"recobChargeRaw"+suffix, lepb_charge, map_weight, 200,-5,5);
+    FillHist(prefix_nPV+"recobChargeRaw2"+suffix, lepb_charge, map_weight, 100,-5,5);
     FillHist(prefix_nPV+"recobCharge"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
     FillHist(prefix_nPV+"recoBChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
+    FillHist(prefix_nPV+"recoBChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix_nPV+"recoBCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   }
   for(int i=1; i<afb_chbinnum+1; i++){
