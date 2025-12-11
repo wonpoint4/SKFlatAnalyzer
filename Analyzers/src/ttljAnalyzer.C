@@ -428,9 +428,29 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
       map_weight["_bChargeSF1_up"+bCh] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 1, bCh);
       map_weight["_bChargeSF1_down"+bCh] = map_weight[""] * GetbChargeSFWeight(bjets, 1, -1, bCh);
     }
+    map_weight["_bChargeSFHS"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
+    map_weight["_bChargeSFHS_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
+    map_weight["_bChargeSFHS_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
 
     // Top pt Reweight
     map_weight["_noToppt"] =  map_weight[""] / topptweight;
+
+    // AlphaS
+    if(weight_AlphaS->size() == 2){
+      map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
+      map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
+    }
+
+    // FSR, ISR
+    if(weight_PSSyst->size()){
+      map_weight["_FSR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(1));
+      map_weight["_FSR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(0));
+      map_weight["_ISR_up"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(3));
+      map_weight["_ISR_down"] = map_weight[""] * TMath::Range(-5., 5., weight_PSSyst->at(2));
+    }
+
+    // Scale Variations
+    for(unsigned int i=0; i<weight_Scale->size(); i++) map_weight[Form("_scalevariation%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_Scale->at(i));
   }else if(!IsDATA && HasFlag("LEPSYS") && option == ""){
     // EfficiencySF - stat
     for(int j=0; j<fEff->nreplica; j++){
@@ -1305,7 +1325,7 @@ bool ttljAnalyzer::HasLeptons(TString channel, bool leps, unsigned int s, unsign
 
 void ttljAnalyzer::executeEventGen(){
   FillHist("gen/executeEventGen", 1, 1, 2,0,2);
-  vector<Gen> gens=GetGens();
+  gens=GetGens();
   if(IsTTSample) topptweight=mcCorr->GetTopPtReweight(gens);
   if(!MCSample.Contains("TTLJ")) return;
 

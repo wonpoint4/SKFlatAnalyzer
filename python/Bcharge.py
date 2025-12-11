@@ -26,7 +26,6 @@ xsec_unc = {
     "qcd" : [30, -30],
 }
 systematics = [
-    #["_jetpt25", "_jetpt30", "_jetpt40", "_jetpt45", "_jetpt50", "_jetpt55"],
     ["_donorm"],
     ["_noSelQ"],
     ["_lumi_up", "_lumi_down"],
@@ -37,6 +36,8 @@ systematics = [
     #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
     #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
     #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+    ["_scalevariation%d" % i for i in [0, 1, 2, 3, 4, 6, 8]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
+    ["_FSR_up", "_FSR_down"],
 ] + [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()]
 
 def calc(a0,a1,a2,a3):
@@ -72,16 +73,15 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
-    if "norm" in syst or "lumi" in syst: syst = ""
+    suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
 
-    correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
-    wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
+    correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
+    wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
     fc = correct / (correct + wrong)
     fc_e = fc * (1 - fc) / (correct + wrong)
 
-    data_syst = syst if "smear" not in syst else ""
-    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin+data_syst).Integral()
-    mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin+syst).Integral()
+    data = forNorm.GetHist(0, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
+    mc = forNorm.GetHist(1, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
     print("getfc function : fc = ", fc, ", fc_e = ", fc_e, ", data = ", data, ", mc = ", mc, ", norm = ", data / mc)
 
     return fc, fc_e, (data / mc)
@@ -159,17 +159,14 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
             elif "lumi_down" in syst: norm *= (100 - 1.616477652180815) / 100
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
 
-            if "lumi" in syst: syst = ""
-            normstr = ""
+            suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
             if "norm" in syst:
                 for process, uncs in xsec_unc.items():
-                    if process in syst: normstr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syst else 1)] * 0.01, process)
-                syst = ""
+                    if process in syst: suffix = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syst else 1)] * 0.01, process)
 
-            syst = "" if ientry == 0 and "smear" in syst else syst
-            hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin+syst, normstr)
-            hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin+syst, normstr)
-            print("syst = "+syst+normstr+", hp = ", hp.Integral(), ", fpxhp = ", hp.GetBinContent(2), ", hm = ", hm.Integral(), ", fmxhm = ", hm.GetBinContent(1), ", fc = ", fc, ", norm = ", norm)
+            hp = a.GetHist(ientry, channel+"/recoBCharge"+chargeBin, suffix)
+            hm = a.GetHist(ientry, channel+"/recobCharge"+chargeBin, suffix)
+            print("syst = "+syst+", suffix = "+suffix+", hp = ", hp.Integral(), ", fpxhp = ", hp.GetBinContent(2), ", hm = ", hm.Integral(), ", fmxhm = ", hm.GetBinContent(1), ", fc = ", fc, ", norm = ", norm)
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
             fcs[systs].append(fc)
@@ -193,9 +190,9 @@ def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     for systs in range(len(allsysts)):
         syst_ep_bigger, syst_em_bigger = 0, 0
         for syst in allsysts[systs]:
-            if "lumi" in syst or "norm" in syst: syst = ""
-            hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]"+syst)
-            hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]"+syst)
+            suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
+            hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]", suffix)
+            hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]", suffix)
             hp.Scale(1. / hp.Integral())
             hm.Scale(1. / hm.Integral())
 
@@ -283,19 +280,50 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
 
     c = ROOT.gROOT.MakeDefCanvas()
     c.SetLeftMargin(0.2)
+    c.SetRightMargin(0.05)
+    c.SetBottomMargin(0.1)
 
     hframe = ROOT.TH2D("hframe", "", 100, Xrange[0], Xrange[1], len(channels) * 2 + 2, 0, len(channels) * 2 + 2);
+    is_era_compared = True if [a for a in channels if "201[678][ab]?" in a] and [a for a in channels if "2018" in a] else False
+    is_lep_compared = True if [a for a in channels if "[em]" in a] and [a for a in channels if "e201" in a] else False
+    #is_nPV_compared = True if [a for a in channels if "Run2s" in a] and [a for a in channels if "2018" in a] else False
+    #is_pt_compared = False
     for i in range(len(channels)):
         title = channels[i]
-        title = title.replace("201[678][ab]?"," Run2")
-        title = title.replace("E","e")
-        title = title.replace("m","#mu")
-        title = title.replace("[e#mu] Run2F", "nPV <= 10")
-        title = title.replace("[e#mu] Run2S", "nPV(10,20]")
-        title = title.replace("[e#mu] Run2L", "nPV(20,30]")
-        title = title.replace("[e#mu] Run2M", "nPV(30,40]")
-        title = title.replace("[e#mu] Run2H", "nPV(40,50]")
-        title = title.replace("[e#mu] Run2V", "nPV > 50")
+        title = title.replace("201[678][ab]?", "Run2")
+        if is_era_compared:
+            title = title.replace("2016a", "2016a")
+            title = title.replace("2016b", "2016b")
+            title = title.replace("2016[ab]?", "2016")
+            title = title.replace("2017", "2017")
+            title = title.replace("2018", "2018")
+        else:
+            title = title.replace("2016a", "")
+            title = title.replace("2016b", "")
+            title = title.replace("2016[ab]?", "")
+            title = title.replace("2017", "")
+            title = title.replace("2018", "")
+
+        if is_lep_compared:
+            title = title.replace("[em]", "l")
+            title = title.replace("e", "e")
+            title = title.replace("m", "#mu")
+        else: title = title.replace("[em]", "")
+
+        title = title.replace("Run2F", "nPV #leq 10")
+        title = title.replace("Run2S", "nPV#in(10,20]")
+        title = title.replace("Run2L", "nPV#in(20,30]")
+        title = title.replace("Run2M", "nPV#in(30,40]")
+        title = title.replace("Run2H", "nPV#in(40,50]")
+        title = title.replace("Run2V", "50 < nPV")
+
+        title = title.replace("Run2_pt0", "pt(b)#in[25,35)")
+        title = title.replace("Run2_pt1", "pt(b)#in[35,50)")
+        title = title.replace("Run2_pt2", "pt(b)#in[50,80)")
+        title = title.replace("Run2_pt3", "pt(b)#in[80,120)")
+        title = title.replace("Run2_pt4", "120 #leq pt(b)")
+
+        if not is_era_compared: title = title.replace("Run2", "")
 
         chargeBin = ""
         for Bin in chBins:
@@ -304,14 +332,16 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
                 chargeBin = Bin.replace("_", "")
                 break
 
+        if title == "": c.SetLeftMargin(0.08)
+        else: title = " ("+title+")"
         alpha = "#alpha"
         if chargeBin != "":
-            if "[0-3]" in chargeBin: alpha = "#alpha_{j}"
-            elif "4" in chargeBin: alpha = "#alpha_{#mu}"
-            elif "5" in chargeBin: alpha = "#alpha_{e}"
-            else: alpha = "#alpha_{j,"+chargeBin+"}"
-        hframe.GetYaxis().SetBinLabel(i * 2 + 1, alpha+"^{#minus} ("+title+")")
-        hframe.GetYaxis().SetBinLabel(i * 2 + 2, alpha+"^{#plus} ("+title+")")
+            if "[0-3]" in chargeBin: alpha = "#alpha_{ j}"
+            elif "4" in chargeBin: alpha = "#alpha_{ #mu}"
+            elif "5" in chargeBin: alpha = "#alpha_{ e}"
+            else: alpha = "#alpha_{ j,"+chargeBin+"}"
+        hframe.GetYaxis().SetBinLabel(i * 2 + 1, alpha+"^{ #minus}"+title)
+        hframe.GetYaxis().SetBinLabel(i * 2 + 2, alpha+"^{ #plus}"+title)
 
     hframe.SetStats(0)
     hframe.Draw()
@@ -398,8 +428,45 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
     gtrue_tot_unc[1].SetLineColor(4)
     gtrue_tot_unc[1].Draw("same p")
 
+    # From DrawPreliminary() in Plotter.cc
+    latex = ROOT.TLatex()
+    latex.SetTextSize(0.04);
+    latex.SetNDC();
+    latex.SetTextAlign(11);
+    leftmargin = c.GetLeftMargin();
+    rightmargin = c.GetRightMargin();
+    topmargin = c.GetTopMargin();
+    latex.DrawLatex(0.01 + leftmargin, 1.01 - topmargin, "CMS #bf{#it{Preliminary}}")
+
+    latex.SetTextSize(0.035);
+    latex.SetTextAlign(31);
+    if [a for a in channels if "201[678][ab]?" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "138 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run II")
+    elif [a for a in channels if "2018" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "59.8 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run 2018")
+    elif [a for a in channels if "2017" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "41.5 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run 2017")
+    elif [a for a in channels if "2016[ab]?" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "36.3 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run 2016")
+    elif [a for a in channels if "2016b" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "16.8 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run 2016postVFP")
+    elif [a for a in channels if "2016a" in a]:
+      latex.DrawLatex(1 - rightmargin, 1.01 - topmargin, "19.5 fb^{-1} (13 TeV)")
+      latex.DrawLatex(1 - rightmargin, 1.05 - topmargin, "Run 2016preVFP")
+
+    latex.SetTextSize(0.035);
+    latex.SetTextColor(2)
+    latex.SetTextAlign(21)
+    latex.DrawLatex(0.6 * (leftmargin - rightmargin) + 0.5, 1.01 - topmargin, "#it{Working in progress}")
+    c.Update()
+
     #raw_input()
-    c.hists = [gdata, gsim, gtrue, gdata_tot_unc, gsim_tot_unc, gtrue_tot_unc, hframe, leg]
+    c.hists = [gdata, gsim, gtrue, gdata_tot_unc, gsim_tot_unc, gtrue_tot_unc, hframe, leg, latex]
     nametag = ""
     if tag != "": nametag = nametag+"_"+tag
     if option != "": nametag = nametag+"_"+option
@@ -602,14 +669,14 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2ss", option)
 
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[1]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin4", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[2]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin5", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[3]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0123", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[4]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[5]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin1", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[6]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin2", option)
-    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[7]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin3", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[1]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin4", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[2]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin5", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[3]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0123", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[4]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[5]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin1", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[6]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin2", option)
+    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[7]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin3", option)
 
     #DrawAccuracy_withLR([leps[0]+eras[4]+"F"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2F", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+"S"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2S", option)

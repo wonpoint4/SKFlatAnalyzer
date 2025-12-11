@@ -105,7 +105,7 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
         sin2ws.append(sin2w_values[i])
 
     sigma = 1
-    x = np.linspace(0.22300, 0.23800, 150000)
+    x = np.linspace(0.22200, 0.24000, 180000)
 
     # stat-only
     fit_stat = np.polyfit(sin2ws, chi2s_stat, 2)
@@ -131,15 +131,21 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
     z = np.full(len(y_stat), miny_total + sigma)
     plt.plot(x, z, color='red')
 
-    plt.title(r"$\chi^{2}$ Fitting ("+nametag+")", fontsize=15)
+    #plt.title(r"$\chi^{2}$ Fitting ("+nametag+")", fontsize=15)
     plt.xlabel("$sin^{2}\\theta^{l}_{eff}$")
     plt.ylabel("$\chi^{2}$")
-    plt.text(0.224, 0.1, "$\chi^{2}_{max}$ = %.3f" % chi2s_total[0])
-    plt.text(0.226, chi2s_total[0] * 0.82, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat) $\\pm$ %.5f (syst)" % (central, unc_stat, unc_syst))
-    plt.text(0.228, chi2s_total[0] * 0.76, "= %.5f $\\pm$ %.5f (total)" % (central, unc_total))
+    plt.text(0.2235, 0.1, "$\chi^{2}_{max}$ = %.3f" % chi2s_total[0])
+    plt.text(0.2245, chi2s_stat[0] * 0.84, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat) $\\pm$ %.5f (syst)" % (central, unc_stat, unc_syst))
+    plt.text(0.2267, chi2s_stat[0] * 0.78, "= %.5f $\\pm$ %.5f (total)" % (central, unc_total))
 
     plt.legend(handles=[pol2_stat, pol2_total], loc='upper right')
     plt.grid()
+    # CMS Style
+    plt.text(0.221, chi2s_stat[0] * 1.33, r"$\bf{CMS}$ Preliminary", fontsize=14)
+    plt.text(0.2285, chi2s_stat[0] * 1.33, r"$\it{Working\ in\ progress}$", fontsize=10, color='red')
+    plt.text(0.2385, chi2s_stat[0] * 1.4, r"$\bf{Run  II}$", fontsize=12)
+    plt.text(0.235, chi2s_stat[0] * 1.33, r"138 fb$^{-1}$ (13 TeV)", fontsize=12)
+
     if "no" not in nametag: plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
