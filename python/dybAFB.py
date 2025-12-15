@@ -42,7 +42,7 @@ systematics = {
     "Prefiring" : [["_prefireweight_up", "_prefireweight_down"]],
     "PU" :        [["_PUweight_up", "_PUweight_down"]],
     "PUIDSF" :    [["_PUjetSF_up", "_PUjetSF_down"]],
-    "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr2016a", "uncorr2016b", "uncorr2017", "uncorr2018"]],
+    "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr:2016preVFP", "uncorr:2016postVFP", "uncorr:2017", "uncorr:2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     "CFSF" :      [["_CFSF_up", "_CFSF_down"]],

@@ -323,31 +323,31 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   double dipt = (*lepton0 + *lepton1).Pt();
   double costhetaCS = GetCosThetaCS(lepton0, lepton1);
 
-  FillHist(prefix+hprefix+"mll_IncDY"+suffix, dimass, map_weight, 80,70,110);
-  FillHist(prefix+hprefix+"yll_IncDY"+suffix, dirap, map_weight, 96,-2.4,2.4);
-  FillHist(prefix+hprefix+"ptll_IncDY"+suffix, dipt, map_weight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
-  FillHist(prefix+hprefix+"lpt_IncDY"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"leta_IncDY"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"l0pt_IncDY"+suffix, lepton0->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"l0eta_IncDY"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"lpt_IncDY"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"leta_IncDY"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"l1pt_IncDY"+suffix, lepton1->Pt(), map_weight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-  FillHist(prefix+hprefix+"l1eta_IncDY"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-  FillHist(prefix+hprefix+"met_IncDY"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"metphi_IncDY"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-  FillHist(prefix+hprefix+"met_metphi_IncDY"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"costhetaCS_IncDY"+suffix, dimass, dirap, dipt, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
-  FillHist(prefix+hprefix+"nPV_IncDY"+suffix, nPV, map_weight, 100,0,100);
-
-  FillHist(prefix+hprefix+"nalljets_IncDY"+suffix, alljets.size(), map_weight, 15,0,15);
-  FillHist(prefix+hprefix+"nlepvetojets_IncDY"+suffix, lepvetojets.size(), map_weight, 15,0,15);
-  FillHist(prefix+hprefix+"nrealjets_before_vetomap_IncDY"+suffix, realjets_before_vetomap.size(), map_weight, 15,0,15);
-  FillHist(prefix+hprefix+"nrealjets_IncDY"+suffix, realjets.size(), map_weight, 15,0,15);
-  FillHist(prefix+hprefix+"nbjets_IncDY"+suffix, bjets.size(), map_weight, 10,0,10);
-
-  // For control plots before/after corrections
   if(IsNominalRun){
+    FillHist(prefix+hprefix+"mll_IncDY"+suffix, dimass, map_weight[""], 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY"+suffix, dirap, map_weight[""], 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_IncDY"+suffix, dipt, map_weight[""], AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY"+suffix, lepton0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_IncDY"+suffix, lepton0->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"l0eta_IncDY"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY"+suffix, lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_IncDY"+suffix, lepton1->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"l1eta_IncDY"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"met_IncDY"+suffix, PuppiMET_Type1_pt, map_weight[""], 200,0,200);
+    FillHist(prefix+hprefix+"metphi_IncDY"+suffix, PuppiMET_Type1_phi, map_weight[""], 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_metphi_IncDY"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+    FillHist(prefix+hprefix+"costhetaCS_IncDY"+suffix, dimass, dirap, dipt, costhetaCS, map_weight[""], afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+    FillHist(prefix+hprefix+"nPV_IncDY"+suffix, nPV, map_weight[""], 100,0,100);
+
+    FillHist(prefix+hprefix+"nalljets_IncDY"+suffix, alljets.size(), map_weight[""], 15,0,15);
+    FillHist(prefix+hprefix+"nlepvetojets_IncDY"+suffix, lepvetojets.size(), map_weight[""], 15,0,15);
+    FillHist(prefix+hprefix+"nrealjets_before_vetomap_IncDY"+suffix, realjets_before_vetomap.size(), map_weight[""], 15,0,15);
+    FillHist(prefix+hprefix+"nrealjets_IncDY"+suffix, realjets.size(), map_weight[""], 15,0,15);
+    FillHist(prefix+hprefix+"nbjets_IncDY"+suffix, bjets.size(), map_weight[""], 10,0,10);
+
+    // For control plots before/after corrections
     // Without efficiency SF
     FillHist(prefix+hprefix+"mll_IncDY_noeffSF"+suffix, dimass, weight_noeffSF, 80,70,110);
     FillHist(prefix+hprefix+"yll_IncDY_noeffSF"+suffix, dirap, weight_noeffSF, 96,-2.4,2.4);
@@ -432,6 +432,69 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"lpt_IncDY_noPU"+suffix, lepton1->Pt(), map_weight[""] / PUweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
     FillHist(prefix+hprefix+"leta_IncDY_noPU"+suffix, lepton1->Eta(), map_weight[""] / PUweight, 50,-2.5,2.5);
     FillHist(prefix+hprefix+"nPV_IncDY_noPU"+suffix, nPV, map_weight[""] / PUweight, 100,0,100);
+
+    // DY+njets (for Ankita)
+    if(realjets.size() == 0) return;
+    TString signal = prefix+hprefix;
+    if(IsDYSample){
+      Gen* gen_b0 = NULL;
+      Jet* jet_b0 = NULL;
+      jet_b0 = &realjets.at(0);
+      //int jet_idx = -1;
+      double mindR = 0.4;
+      //double maxpT = 0.;
+      //for(unsigned int j=0; j<realjets.size(); j++){
+      for(unsigned int i=4; i<gens.size(); i++){ // 0,1 - proton, 2,3 - partons
+        if(!gens.at(i).isPrompt()) continue;
+        if(!gens.at(i).isHardProcess()) continue;
+        if(fabs(gens.at(i).PID()) != 5) continue;
+        //if(gens.at(i).DeltaR(realjets.at(j)) > 0.4) continue;
+        //if(realjets.at(j).Pt() > maxpT) continue;
+        if(gens.at(i).DeltaR(realjets.at(0)) > mindR) continue;
+        //jet_b0 = &realjets.at(j);
+        //jet_idx = j;
+        gen_b0 = &gens.at(i);
+        mindR = gen_b0->DeltaR(*jet_b0);
+      }
+
+      bool isbG = false;
+      if(fabs(gens.at(2).PID()) * gens.at(3).PID() == 5 * 21) isbG = true;
+      if(gen_b0){
+        if(gen_b0->PID() > 0) signal += "dyb_";
+        else signal += "dybbar_";
+        FillHist(signal+"gen_b0_pt"+suffix, gen_b0->Pt(), map_weight[""], 200,0,200);
+        FillHist(signal+"gen_b0_eta"+suffix, gen_b0->Eta(), map_weight[""], 50,-2.5,2.5);
+        FillHist(signal+"gen_b0_ptratio"+suffix, gen_b0->Pt() / jet_b0->Pt(), map_weight[""], 200,0,10);
+        FillHist(signal+"gen_b0_dR"+suffix, gen_b0->DeltaR(*jet_b0), map_weight[""], 500,0,10);
+        //FillHist(signal+"gen_b0_jet_idx"+suffix, jet_idx, map_weight[""], 16,-1,15);
+
+        FillHist(signal+"gen_b0_PID"+suffix, gen_b0->PID(), map_weight[""], 200,-100,100);
+        FillHist(signal+"gen_b0_PID_partonflavor"+suffix, gen_b0->PID(), jet_b0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(signal+"gen_isbG"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
+      }else{
+        FillHist(signal+"gen_b0_PID"+suffix, 0, map_weight[""], 200,-100,100);
+        FillHist(signal+"gen_b0_PID_partonflavor"+suffix, 0, jet_b0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(signal+"gen_isbG"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
+      }
+    }
+
+    FillHist(signal+"mll_njets"+suffix, dimass, map_weight[""], 80,70,110);
+    FillHist(signal+"yll_njets"+suffix, dirap, map_weight[""], 96,-2.4,2.4);
+    FillHist(signal+"ptll_njets"+suffix, dipt, map_weight[""], 200,0,200);
+    FillHist(signal+"lpt_njets"+suffix, lepton0->Pt(), map_weight[""], 200,0,200);
+    FillHist(signal+"leta_njets"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(signal+"l0pt_njets"+suffix, lepton0->Pt(), map_weight[""], 200,0,200);
+    FillHist(signal+"l0eta_njets"+suffix, lepton0->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(signal+"lpt_njets"+suffix, lepton1->Pt(), map_weight[""], 200,0,200);
+    FillHist(signal+"leta_njets"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(signal+"l1pt_njets"+suffix, lepton1->Pt(), map_weight[""], 200,0,200);
+    FillHist(signal+"l1eta_njets"+suffix, lepton1->Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(signal+"j0pt_njets"+suffix, realjets.at(0).Pt(), map_weight[""], 200,0,200);
+    FillHist(signal+"j0eta_njets"+suffix, realjets.at(0).Eta(), map_weight[""], 50,-2.5,2.5);
+    FillHist(signal+"j0phi_njets"+suffix, realjets.at(0).Phi(), map_weight[""], 64,-3.2,3.2);
+    FillHist(signal+"met_njets"+suffix, PuppiMET_Type1_pt, map_weight[""], 200,0,200);
+    FillHist(signal+"metphi_njets"+suffix, PuppiMET_Type1_phi, map_weight[""], 64,-3.2,3.2);
+    FillHist(signal+"met_metphi_njets"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   }
 
   if(bjets.size() == 0) return;
@@ -444,14 +507,35 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   double costhetaRecoil_nobch = GetCosThetaRecoil(lepton0, lepton1, jet0, -1);
 
   if(IsDYSample){
+    vector<Gen> hs_gens = {};
     Gen* gen_b0 = NULL;
-    double mindR = 99.;
-    for(unsigned int i=0; i<gens.size(); i++){
-      if(gens.at(i).DeltaR(*jet0) > 0.4) continue;
+    double mindR = 0.4;
+    for(unsigned int i=4; i<gens.size(); i++){ // 0,1 - proton, 2,3 - partons
       if(!gens.at(i).isPrompt()) continue;
       if(!gens.at(i).isHardProcess()) continue;
+      hs_gens.push_back(gens.at(i));
       if(gens.at(i).DeltaR(*jet0) > mindR) continue;
       gen_b0 = &gens.at(i);
+      mindR = gen_b0->DeltaR(*jet0);
+    }
+
+    bool isbG = false;
+    if(fabs(gens.at(2).PID()) * gens.at(3).PID() == 5 * 21) isbG = true;
+    unsigned int nhsb = 0;
+    int PID_sum = 0;
+    for(unsigned int i=0; i<hs_gens.size(); i++){
+      if(fabs(hs_gens.at(i).PID()) == 5){
+        if(IsNominalRun) FillHist(prefix+hprefix+"gen_hs_i"+suffix, i, map_weight[""], 10,0,10);
+        if(IsNominalRun) FillHist(prefix+hprefix+"gen_hs_index"+suffix, hs_gens.at(i).Index(), map_weight[""], 10,0,10);
+        nhsb++;
+        PID_sum += hs_gens.at(i).PID();
+      }
+    }
+    if(IsNominalRun){
+      FillHist(prefix+hprefix+"gen_nhsb"+suffix, nhsb, map_weight[""], 10,0,10);
+      FillHist(prefix+hprefix+"gen_hsb_PIDsum"+suffix, PID_sum, map_weight[""], 40,-20,20);
+      if(isbG) FillHist(prefix+hprefix+"gen_nhsb_isbG"+suffix, nhsb, map_weight[""], 10,0,10);
+      if(isbG) FillHist(prefix+hprefix+"gen_hsb_PIDsum_isbG"+suffix, PID_sum, map_weight[""], 40,-20,20);
     }
 
     if(gen_b0){
@@ -460,11 +544,33 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       else if(gen_b0->PID() == 4) prefix += "dyc_";
       else if(gen_b0->PID() == -4) prefix += "dycbar_";
 
-      FillHist(prefix+hprefix+"gen_b0_PID"+suffix, gen_b0->PID(), map_weight[""], 200,-100,100);
-      FillHist(prefix+hprefix+"gen_b0_pt"+suffix, gen_b0->Pt(), map_weight[""], 200,0,200);
-      FillHist(prefix+hprefix+"gen_b0_ptratio"+suffix, gen_b0->Pt() / jet0->Pt(), map_weight[""], 200,0,10);
-      FillHist(prefix+hprefix+"gen_b0_dR"+suffix, gen_b0->DeltaR(*jet0), map_weight[""], 500,0,10);
-    }else FillHist(prefix+hprefix+"gen_b0_PID"+suffix, 0, map_weight[""], 200,-100,100);
+      if(IsNominalRun){
+        FillHist(prefix+hprefix+"gen_b0_pt"+suffix, gen_b0->Pt(), map_weight[""], 200,0,200);
+        FillHist(prefix+hprefix+"gen_b0_eta"+suffix, gen_b0->Eta(), map_weight[""], 50,-2.5,2.5);
+        FillHist(prefix+hprefix+"gen_b0_ptratio"+suffix, gen_b0->Pt() / jet0->Pt(), map_weight[""], 200,0,10);
+        FillHist(prefix+hprefix+"gen_b0_dR"+suffix, gen_b0->DeltaR(*jet0), map_weight[""], 500,0,10);
+
+        FillHist(prefix+hprefix+"gen_b0_PID"+suffix, gen_b0->PID(), map_weight[""], 200,-100,100);
+        FillHist(prefix+hprefix+"gen_b0_PID_nhsb"+suffix, gen_b0->PID(), nhsb, map_weight[""], 40,-10,30 , 10,0,10);
+        FillHist(prefix+hprefix+"gen_b0_PID_partonflavor"+suffix, gen_b0->PID(), jet0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_hadronflavor"+suffix, gen_b0->PID(), jet0->hadronFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_genHFflavor"+suffix, gen_b0->PID(), jet0->GenHFHadronMatcherFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_genHForigin"+suffix, gen_b0->PID(), jet0->GenHFHadronMatcherOrigin(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_nhsb_Matching"+suffix, nhsb, map_weight[""], 10,0,10);
+        FillHist(prefix+hprefix+"gen_hsb_PIDsum_Matching"+suffix, PID_sum, map_weight[""], 40,-20,20);
+        FillHist(prefix+hprefix+"gen_isbG_Matching"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
+      }else{
+        FillHist(prefix+hprefix+"gen_b0_PID"+suffix, 0, map_weight[""], 200,-100,100);
+        FillHist(prefix+hprefix+"gen_b0_PID_nhsb"+suffix, 0, nhsb, map_weight[""], 40,-10,30 , 10,0,10);
+        FillHist(prefix+hprefix+"gen_b0_PID_partonflavor"+suffix, 0, jet0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_hadronflavor"+suffix, 0, jet0->hadronFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_genHFflavor"+suffix, 0, jet0->GenHFHadronMatcherFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_b0_PID_genHForigin"+suffix, 0, jet0->GenHFHadronMatcherOrigin(), map_weight[""], 40,-10,30 , 40,-10,30);
+        FillHist(prefix+hprefix+"gen_nhsb_noMatching"+suffix, nhsb, map_weight[""], 10,0,10);
+        FillHist(prefix+hprefix+"gen_hsb_PIDsum_noMatching"+suffix, PID_sum, map_weight[""], 40,-20,20);
+        FillHist(prefix+hprefix+"gen_isbG_noMatching"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
+      }
+    }
   }
 
   map_weight[""] *= pujetSF;
@@ -501,11 +607,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_btagSF_hup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
     map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"+GetEraShort()] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
+    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"+GetEraShort()] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
+    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
 
     // PUjetID SF
     map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
@@ -636,6 +742,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   if(jet0->Pt() > 40){
     FillHist(prefix+hprefix+"mll_nbjets"+suffix, dimass, map_weight, 80,70,110);
     FillHist(prefix+hprefix+"yll_nbjets"+suffix, dirap, map_weight, 96,-2.4,2.4);
+    FillHist(prefix+hprefix+"ptll_nbjets"+suffix, dipt, map_weight, 200,0,200);
     FillHist(prefix+hprefix+"lpt_nbjets"+suffix, lepton0->Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"leta_nbjets"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
     FillHist(prefix+hprefix+"l0pt_nbjets"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -655,7 +762,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"met_metphi_nbjets"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
     FillHist(prefix+hprefix+"ZbdPhi_nbjets"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
     FillHist(prefix+hprefix+"Zbpt_nbjets"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"Zpt_nbjets"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"costhetaRecoil_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
     FillHist(prefix+hprefix+"costhetaRecoil2_nbjets"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   }
@@ -665,6 +771,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   FillHist(prefix+hprefix+"mll_Tight1b"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll_Tight1b"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_Tight1b"+suffix, dipt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"lpt_Tight1b"+suffix, lepton0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"leta_Tight1b"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"l0pt_Tight1b"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -684,7 +791,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_metphi_Tight1b"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   FillHist(prefix+hprefix+"ZbdPhi_Tight1b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Tight1b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"Zpt_Tight1b"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   FillHist(prefix+hprefix+"na20_Tight1b"+suffix, ajets.size(), map_weight, 10,0,10);
@@ -708,6 +814,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   FillHist(prefix+hprefix+"mll_Veto2b"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll_Veto2b"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_Veto2b"+suffix, dipt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"lpt_Veto2b"+suffix, lepton0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"leta_Veto2b"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"l0pt_Veto2b"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -727,7 +834,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_metphi_Veto2b"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Veto2b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"Zpt_Veto2b"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if(PuppiMET_Type1_pt > 60) return;
@@ -735,6 +841,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   FillHist(prefix+hprefix+"mll_met60"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll_met60"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll_met60"+suffix, dipt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"lpt_met60"+suffix, lepton0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"leta_met60"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"l0pt_met60"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -754,7 +861,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_metphi_met60"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_met60"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"Zpt_met60"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_met60"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
   if((*lepton0 + *lepton1).Pt() < 15) return;
@@ -769,6 +875,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   FillHist(prefix+hprefix+"mll"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll"+suffix, dirap, map_weight, 96,-2.4,2.4);
+  FillHist(prefix+hprefix+"ptll"+suffix, dipt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"lpt"+suffix, lepton0->Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"leta"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
   FillHist(prefix+hprefix+"l0pt"+suffix, lepton0->Pt(), map_weight, 200,0,200);
@@ -796,7 +903,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met2_metphi2"+suffix, PuppiMET_Type1_PhiCor_pt, PuppiMET_Type1_PhiCor_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
   FillHist(prefix+hprefix+"ZbdPhi"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"Zpt"+suffix, (*lepton0 + *lepton1).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
@@ -1015,11 +1121,54 @@ void dybAnalyzer::executeEventGen(){
   if(IsDYSample){
     // LHE Setting
     lhes = GetLHEs();
-    LHE lhe_l0, lhe_l1;
+    LHE lhe_l0, lhe_l1, lhe_p0, lhe_p1, lhe_j0;
+    double lhe_j0_pt = 0.1;
     for(int i=0; i<(int)lhes.size(); i++){
       if(lhe_l0.ID() == 0 && (abs(lhes[i].ID()) == 11 || abs(lhes[i].ID()) == 13 || abs(lhes[i].ID()) == 15)) lhe_l0 = lhes[i];
       if(lhe_l0.ID()      && (abs(lhes[i].ID()) == 11 || abs(lhes[i].ID()) == 13 || abs(lhes[i].ID()) == 15)) lhe_l1 = lhes[i];
+
+      if(lhe_p0.ID() == 0 && ((0 < abs(lhes[i].ID()) && abs(lhes[i].ID()) < 7) || lhes[i].ID() == 21)) lhe_p0 = lhes[i];
+      if(lhe_p0.ID()      && ((0 < abs(lhes[i].ID()) && abs(lhes[i].ID()) < 7) || lhes[i].ID() == 21)) lhe_p1 = lhes[i];
+      if(lhe_p0.ID() && lhe_p1.ID()){
+        if(lhe_p0.ID() > lhe_p1.ID()){
+          LHE temp = lhe_p0;
+          lhe_p0 = lhe_p1;
+          lhe_p1 = temp;
+        }
+        if(lhe_p1.ID() == 21 && (0 < abs(lhe_p0.ID()) && abs(lhe_p0.ID()) < 7) && lhes[i].ID() == lhe_p0.ID() && lhes[i].Pt() > lhe_j0_pt){
+          lhe_j0 = lhes[i];
+          lhe_j0_pt = lhes[i].Pt();
+        }
+      }
     }
+
+    if(lhe_p0.ID() == 0 || lhe_p1.ID() == 0){
+      cout <<"[dybAnalyzer::executeEventGen] something lhe is wrong in partons"<<endl;
+      exit(EXIT_FAILURE);
+    }
+    if(IsNominalRun){
+      if(lhe_j0.ID() != 0){ // qG collisions
+        bcharge = lhe_j0.ID() < 0? 1: -1;
+        double dimass_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).M();
+        double dirap_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Rapidity();
+        double dipt_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Pt();
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0);
+        FillHist(Form("lhe/costhetaRecoil_%dG", abs(lhe_j0.ID())), dimass_lhe, bcharge, dipt_lhe, costhetaRecoil_lhe, 1, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+        TString lhe_prefix = "";
+        if(lhe_j0.ID() == 5) lhe_prefix = "bG_";
+        else if(lhe_j0.ID() == -5) lhe_prefix = "BG_";
+        else if(lhe_j0.ID() == 4) lhe_prefix = "cG_";
+        else if(lhe_j0.ID() == -4) lhe_prefix = "CG_";
+        else if(lhe_j0.ID() == 3) lhe_prefix = "sG_";
+        else if(lhe_j0.ID() == -3) lhe_prefix = "SG_";
+        else if(lhe_j0.ID() == 2) lhe_prefix = "uG_";
+        else if(lhe_j0.ID() == -2) lhe_prefix = "UG_";
+        else if(lhe_j0.ID() == 1) lhe_prefix = "dG_";
+        else if(lhe_j0.ID() == -1) lhe_prefix = "DG_";
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qG", dimass_lhe, bcharge, dipt_lhe, costhetaRecoil_lhe, 1, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+    }
+
     if(lhe_l0.ID() == 0 || lhe_l1.ID() == 0){
       cout <<"[dybAnalyzer::executeEventGen] something lhe is wrong"<<endl;
       exit(EXIT_FAILURE);

@@ -288,6 +288,7 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
     is_lep_compared = True if [a for a in channels if "[em]" in a] and [a for a in channels if "e201" in a] else False
     #is_nPV_compared = True if [a for a in channels if "Run2s" in a] and [a for a in channels if "2018" in a] else False
     #is_pt_compared = False
+    is_LeftMargin_wide = False
     for i in range(len(channels)):
         title = channels[i]
         title = title.replace("201[678][ab]?", "Run2")
@@ -332,8 +333,9 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
                 chargeBin = Bin.replace("_", "")
                 break
 
-        if title == "": c.SetLeftMargin(0.08)
-        else: title = " ("+title+")"
+        if title != "":
+            is_LeftMargin_wide = True
+            title = " ("+title+")"
         alpha = "#alpha"
         if chargeBin != "":
             if "[0-3]" in chargeBin: alpha = "#alpha_{ j}"
@@ -343,6 +345,7 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
         hframe.GetYaxis().SetBinLabel(i * 2 + 1, alpha+"^{ #minus}"+title)
         hframe.GetYaxis().SetBinLabel(i * 2 + 2, alpha+"^{ #plus}"+title)
 
+    if is_LeftMargin_wide == True: c.SetLeftMargin(0.08)
     hframe.SetStats(0)
     hframe.Draw()
     hframe.GetXaxis().SetTitle("Accuracy")
