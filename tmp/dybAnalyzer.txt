@@ -1,4 +1,5 @@
 SKFlat.py -a dybAnalyzer -i DYJetsToMuMu_MiNNLO -n 100 -e 2017
+SKFlat.py -a dybAnalyzer -i DYJetsToMuMu_MiNNLO_H2ErratumFix_PDFExt -n 100 -e 2018
 SKFlat.py -a dybAnalyzer -i DYJetsToEE_MiNNLO -n 100 -e 2017
 SKFlat.py -a dybAnalyzer -i DYJetsToTauTau_MiNNLO -n 5 -e 2017
 SKFlat.py -a dybAnalyzer -i EGamma -n 10 -e 2018

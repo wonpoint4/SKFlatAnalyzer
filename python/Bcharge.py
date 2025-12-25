@@ -155,8 +155,8 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
         for syst in allsysts[systs]:
             fc, fc_stat, norm = getfc(channel, chargeBin, syst)
             if "donorm" not in syst: norm = 1.
-            if "lumi_up" in syst: norm *= (100 + 1.616477652180815) / 100
-            elif "lumi_down" in syst: norm *= (100 - 1.616477652180815) / 100
+            if "lumi_up" in syst: norm *= (100 + 0.74) / 100
+            elif "lumi_down" in syst: norm *= (100 - 0.74) / 100
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
 
             suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst

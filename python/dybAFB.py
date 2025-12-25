@@ -6,7 +6,7 @@ import ROOT
 ROOT.gROOT.ProcessLine('#include"dybPlotter.cc"')
 ROOT.Plotter.SetupStyle()
 
-dyb = ROOT.dybPlotter()
+dyb = ROOT.dybPlotter("data ^dyb_mi+dybbar_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
@@ -26,11 +26,11 @@ xsec_unc = {
     "qcd" : [30, -30],
 }
 lumi_unc = {
-    "2016"    : [1.0, 1.0, 0.0, 0.0],
-    "2017"    : [0.0, 0.0, 2.0, 0.0],
-    "2018"    : [0.0, 0.0, 0.0, 1.5],
-    "161718"  : [0.6, 0.6, 0.9, 2.0],
-    "17and18" : [0.0, 0.0, 0.6, 0.2],
+    "2016"    : [0.985, 0.985, 0.0,   0.0],
+    "2017"    : [0.0,   0.0,   0.378, 0.0],
+    "2018"    : [0.0,   0.0,   0.0,   0.439],
+    "17and18" : [0.0,   0.0,   0.626, 0.582],
+    "161718"  : [0.742, 0.742, 0.369, 0.414],
 }
 systematics = {
     # Stat
@@ -59,7 +59,7 @@ systematics = {
     "PDF4" :      [["_pdf%d" % i] for i in range(80,100)],
     "Bkgs" :      [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()],
     "Toppt" :     [["_noToppt"]],
-    "Zpt" :       [["_noZpt"], ["_Zpt_gym"]],
+    "Zpt" :       [["_Zpt"]],
     "Weak" :      [["_noWeak"]],
     # LEPSYS
     "MuTracking" : [["_muonTrackingeffSF_s%dm0" % i] for i in [1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16]] + [["_muonTrackingeffSF_s%dm0" % i, "_muonTrackingeffSF_s%dm1" % i] for i in [7, 8, 11, 12, 13]],
@@ -169,11 +169,11 @@ def getdAFBs_sin2w(channel):
         iSin = sin2w_indice[sin]
         dAFB_full = np.array([])
         for ch in range(len(chargeBins)):
-            #AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
+            AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
-            #for i in range(1, AFB_data.GetNbinsX() + 1):
-            #    if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
+            for i in range(1, AFB_data.GetNbinsX() + 1):
+                if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
             #dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
             dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
             dAFBs[sin].append(dAFB)

@@ -382,14 +382,9 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
 
-  if(IsNominalLike){
-    if(!IsDATA) map_weight["_bChargeSF0"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 0);
-    FillHist(prefix+hprefix+"weight_bChargeSF0"+suffix, GetbChargeSFWeight(bjets, 0, 0), map_weight[""], 200,-5,5);
-    if(!IsDATA) map_weight["_bChargeSFHS"] = map_weight[""] * GetbChargeSFWeight(bjets, 2, 0);
-    FillHist(prefix+hprefix+"weight_bChargeSFHS"+suffix, GetbChargeSFWeight(bjets, 2, 0), map_weight[""], 200,-5,5);
-    if(!IsDATA) map_weight["_bChargeSF1"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 0);
-    FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, GetbChargeSFWeight(bjets, 1, 0), map_weight[""], 200,-5,5);
-  }
+  double bChargeSF0 = GetbChargeSFWeight(bjets, 0, 0);
+  double bChargeSFHS = GetbChargeSFWeight(bjets, 2, 0);
+  double bChargeSF1 = GetbChargeSFWeight(bjets, 1, 0);
 
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
@@ -420,17 +415,17 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
 
     // bChargeID SF
-    map_weight["_bChargeSF0_up"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, 1);
-    map_weight["_bChargeSF0_down"] = map_weight[""] * GetbChargeSFWeight(bjets, 0, -1);
-    map_weight["_bChargeSF1_up"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 1);
-    map_weight["_bChargeSF1_down"] = map_weight[""] * GetbChargeSFWeight(bjets, 1, -1);
+    map_weight["_bChargeSF0_up"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 0, 1);
+    map_weight["_bChargeSF0_down"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 0, -1);
+    map_weight["_bChargeSF1_up"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 1, 1);
+    map_weight["_bChargeSF1_down"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 1, -1);
     for(TString bCh:{"0", "1", "2", "3", "4", "5"}){
-      map_weight["_bChargeSF1_up"+bCh] = map_weight[""] * GetbChargeSFWeight(bjets, 1, 1, bCh);
-      map_weight["_bChargeSF1_down"+bCh] = map_weight[""] * GetbChargeSFWeight(bjets, 1, -1, bCh);
+      map_weight["_bChargeSF1_up"+bCh] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 1, 1, bCh);
+      map_weight["_bChargeSF1_down"+bCh] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 1, -1, bCh);
     }
-    map_weight["_bChargeSFHS"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
-    map_weight["_bChargeSFHS_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
-    map_weight["_bChargeSFHS_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
+    map_weight["_bChargeSFHS"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 2, 0);
+    map_weight["_bChargeSFHS_up"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 2, 1);
+    map_weight["_bChargeSFHS_down"] = map_weight[""] / bChargeSF1 * GetbChargeSFWeight(bjets, 2, -1);
 
     // Top pt Reweight
     map_weight["_noToppt"] =  map_weight[""] / topptweight;
@@ -1011,6 +1006,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"recobChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+hprefix+"recobChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recobCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"recoBChargeRaw_afterSF1"+suffix, lepb_charge, map_weight * bChargeSF1, 200,-5,5);
+    FillHist(prefix+hprefix+"recoBCharge_afterSF1"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
+    FillHist(prefix+hprefix+"recobChargeRaw_afterSF1"+suffix, hadb_charge, map_weight * bChargeSF1, 200,-5,5);
+    FillHist(prefix+hprefix+"recobCharge_afterSF1"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
     if(lepb.Pt() < 35){
       FillHist(prefix+hprefix+"recoBChargeRaw_pt0"+suffix, lepb_charge, map_weight, 200,-5,5);
       FillHist(prefix+hprefix+"recoBCharge_pt0"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -1054,6 +1053,10 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     FillHist(prefix+hprefix+"recoBChargeRaw"+suffix, hadb_charge, map_weight, 200,-5,5);
     FillHist(prefix+hprefix+"recoBChargeRaw2"+suffix, hadb_charge, map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"recoBCharge"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"recobChargeRaw_afterSF1"+suffix, lepb_charge, map_weight * bChargeSF1, 200,-5,5);
+    FillHist(prefix+hprefix+"recobCharge_afterSF1"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
+    FillHist(prefix+hprefix+"recoBChargeRaw_afterSF1"+suffix, hadb_charge, map_weight * bChargeSF1, 200,-5,5);
+    FillHist(prefix+hprefix+"recoBCharge_afterSF1"+suffix, (hadb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
     if(lepb.Pt() < 35){
       FillHist(prefix+hprefix+"recobChargeRaw_pt0"+suffix, lepb_charge, map_weight, 200,-5,5);
       FillHist(prefix+hprefix+"recobCharge_pt0"+suffix, (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -1097,6 +1100,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw2"+suffix, i-1), lepb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_afterSF1"+suffix, i-1), lepb_charge, map_weight * bChargeSF1, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recoBCharge%d_afterSF1"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
         if(lepb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_pt0"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
           FillHist(Form(prefix+hprefix+"recoBCharge%d_pt0"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -1125,6 +1130,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw2"+suffix, i-1), hadb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+hprefix+"recobCharge%dRaw_afterSF1"+suffix, i-1), hadb_charge, map_weight * bChargeSF1, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recobCharge%d_afterSF1"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
         if(hadb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recobCharge%dRaw_pt0"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
           FillHist(Form(prefix+hprefix+"recobCharge%d_pt0"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -1154,6 +1161,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%dRaw2"+suffix, i-1), lepb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recobCharge%d"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+hprefix+"recobCharge%dRaw_afterSF1"+suffix, i-1), lepb_charge, map_weight * bChargeSF1, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recobCharge%d_afterSF1"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
         if(lepb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recobCharge%dRaw_pt0"+suffix, i-1), lepb_charge, map_weight, 200,-5,5);
           FillHist(Form(prefix+hprefix+"recobCharge%d_pt0"+suffix, i-1), (lepb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
@@ -1182,6 +1191,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%dRaw2"+suffix, i-1), hadb_charge, map_weight, 100,-5,5);
         FillHist(Form(prefix+hprefix+"recoBCharge%d"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+        FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_afterSF1"+suffix, i-1), hadb_charge, map_weight * bChargeSF1, 200,-5,5);
+        FillHist(Form(prefix+hprefix+"recoBCharge%d_afterSF1"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight * bChargeSF1, 2,-1,1);
         if(hadb.Pt() < 35){
           FillHist(Form(prefix+hprefix+"recoBCharge%dRaw_pt0"+suffix, i-1), hadb_charge, map_weight, 200,-5,5);
           FillHist(Form(prefix+hprefix+"recoBCharge%d_pt0"+suffix, i-1), (hadb_charge < 0? -0.5: 0.5), map_weight, 2,-1,1);

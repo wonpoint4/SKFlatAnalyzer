@@ -114,5 +114,12 @@ public:
   //static constexpr const double afb_ptbin[afb_ptbinnum+1] = {0,2,4,6,8,10,12,14,16,18,20,24,28,32,36,40,45,50,55,60,70,80,90,100,120,140,160,190,250,400,650};
 };
 
+template<typename KeyT, typename ValueT>
+std::map<KeyT, ValueT> operator*(std::map<KeyT, ValueT> copy_of_map, const ValueT& factor) {
+    for (auto& pair : copy_of_map) {
+        pair.second *= factor; // Multiply the value component
+    }
+    return copy_of_map; // Return the new, multiplied map by value
+}
 #endif
 
