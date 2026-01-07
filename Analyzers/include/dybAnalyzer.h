@@ -38,7 +38,7 @@ public:
   ~dybAnalyzer();
 
   virtual double GetCosThetaCS(const Particle *p0, const Particle *p1, int direction=0);
-  virtual double GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, int mode=0);
+  virtual double GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, const double bcharge, int mode=0);
   vector<vector<double>> Make2DWeights(const vector<int>& structure);
 
   TString prefix, gprefix, hprefix, suffix;
@@ -55,7 +55,6 @@ public:
   Jet* jet0 = NULL;
   Gen truth_lepton0;
   Gen truth_lepton1;
-  double bcharge = 0;
   std::map<TString,double> map_weight;
 
   double chargeflipSF = 1.;
@@ -86,6 +85,8 @@ public:
   double pujetSF = 1.;
   double bchargeSF = 1.;
 
+  LHE lhe_l0, lhe_l1, lhe_p0, lhe_p1, lhe_j0;
+  unsigned int nHSb = 0, nHSb_pt = 0, nHSb_eta = 0, nHSb_accept = 0;
   bool IsNominalRun = true;
   bool IsSkimmed = false;
   bool IsNominalLike = true;

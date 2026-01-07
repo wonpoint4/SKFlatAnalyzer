@@ -219,13 +219,13 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                     else: # Systematics
                         AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
                         syststr = "suffix:"+list_syst[term][syst]
-                        if "norm" in syststr:
+                        if "norm" in list_syst[term][syst]:
                             for process, uncs in xsec_unc.items():
-                                if process in syststr: syststr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syststr else 1)] * 0.01, process)
-                        elif "lumi" in syststr:
+                                if process in list_syst[term][syst]: syststr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in list_syst[term][syst] else 1)] * 0.01, process)
+                        elif "lumi" in list_syst[term][syst]:
                             for era, uncs in lumi_unc.items():
-                                if era in syststr:
-                                    unc = [1 + a * 0.01 * (1 if "up" in syststr else -1) for a in uncs]
+                                if era in list_syst[term][syst]:
+                                    unc = [1 + a * 0.01 * (1 if "up" in list_syst[term][syst] else -1) for a in uncs]
                                     syststr = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
                         print("syststr = "+syststr)
                         AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", syststr)

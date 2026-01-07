@@ -60,7 +60,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   lepton0 = NULL;
   lepton1 = NULL;
   jet0 = NULL;
-  bcharge = 0;
   prefix = channel+"/"+gprefix, hprefix = "", suffix = "";
   suffix += option;
   if((IsNominalRun || option != "") && set != 1) IsNominalLike = true;
@@ -405,14 +404,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"lpt_IncDY_noRocAep"+suffix, lepton1_raw->Pt(), map_weight[""], AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
     FillHist(prefix+hprefix+"leta_IncDY_noRocAep"+suffix, lepton1_raw->Eta(), map_weight[""], 50,-2.5,2.5);
 
-    // Without Zpt Correction
-    FillHist(prefix+hprefix+"mll_IncDY_noZpt"+suffix, dimass, map_weight[""] / zptweight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_IncDY_noZpt"+suffix, dirap, map_weight[""] / zptweight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_IncDY_noZpt"+suffix, dipt, map_weight[""] / zptweight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
-    FillHist(prefix+hprefix+"lpt_IncDY_noZpt"+suffix, lepton0->Pt(), map_weight[""] / zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-    FillHist(prefix+hprefix+"leta_IncDY_noZpt"+suffix, lepton0->Eta(), map_weight[""] / zptweight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_IncDY_noZpt"+suffix, lepton1->Pt(), map_weight[""] / zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
-    FillHist(prefix+hprefix+"leta_IncDY_noZpt"+suffix, lepton1->Eta(), map_weight[""] / zptweight, 50,-2.5,2.5);
+    // With Zpt Correction
+    FillHist(prefix+hprefix+"mll_IncDY_Zpt"+suffix, dimass, map_weight[""] * zptweight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_IncDY_Zpt"+suffix, dirap, map_weight[""] * zptweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_IncDY_Zpt"+suffix, dipt, map_weight[""] * zptweight, AFBAnalyzer::unfold_0bjet_ptbinnum_reco,AFBAnalyzer::unfold_0bjet_ptbin_reco);
+    FillHist(prefix+hprefix+"lpt_IncDY_Zpt"+suffix, lepton0->Pt(), map_weight[""] * zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_Zpt"+suffix, lepton0->Eta(), map_weight[""] * zptweight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_IncDY_Zpt"+suffix, lepton1->Pt(), map_weight[""] * zptweight, AFBAnalyzer::lptbinnum,AFBAnalyzer::lptbin);
+    FillHist(prefix+hprefix+"leta_IncDY_Zpt"+suffix, lepton1->Eta(), map_weight[""] * zptweight, 50,-2.5,2.5);
 
     // Without Weak Correction
     FillHist(prefix+hprefix+"mll_IncDY_noWeak"+suffix, dimass, map_weight[""] / weakweight, 80,70,110);
@@ -501,10 +500,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tightnb", map_weight[""]);
   //bjets.at(0) *= bjets.at(0).BJetNNCorrection(); // bJetEnergyCorrection (BjetRegression)?
   jet0 = &bjets.at(0);
-  bcharge = jetCharge(*jet0);
+  double bcharge = jetCharge(*jet0);
   bchargeSF = GetbChargeSFWeight(bjets, 1, 0);
-  double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0);
-  double costhetaRecoil_nobch = GetCosThetaRecoil(lepton0, lepton1, jet0, -1);
+  double costhetaRecoil = GetCosThetaRecoil(lepton0, lepton1, jet0, bcharge);
+  double costhetaRecoil_nobch = GetCosThetaRecoil(lepton0, lepton1, jet0, 0, -1);
 
   if(IsDYSample){
     vector<Gen> hs_gens = {};
@@ -740,6 +739,70 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }
   if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
+  FillHist(prefix+hprefix+"mll_Tightnb"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_Tightnb"+suffix, dirap, map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptll_Tightnb"+suffix, dipt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"lpt_Tightnb"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_Tightnb"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"l0pt_Tightnb"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"l0eta_Tightnb"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_Tightnb"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_Tightnb"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"l1pt_Tightnb"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"l1eta_Tightnb"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_Tightnb"+suffix, jet0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"beta_Tightnb"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bphi_Tightnb"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"bChargeRaw_Tightnb"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2_Tightnb"+suffix, bcharge, map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"bCharge_Tightnb"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+  FillHist(prefix+hprefix+"met_Tightnb"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"metphi_Tightnb"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"met_metphi_Tightnb"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+  FillHist(prefix+hprefix+"ZbdPhi_Tightnb"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"Zbpt_Tightnb"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"costhetaRecoil_Tightnb"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+  FillHist(prefix+hprefix+"nalljets_Tightnb"+suffix, alljets.size(), map_weight, 15,0,15);
+  FillHist(prefix+hprefix+"nlepvetojets_Tightnb"+suffix, lepvetojets.size(), map_weight, 15,0,15);
+  FillHist(prefix+hprefix+"nrealjets_before_vetomap_Tightnb"+suffix, realjets_before_vetomap.size(), map_weight, 15,0,15);
+  FillHist(prefix+hprefix+"nrealjets_Tightnb"+suffix, realjets.size(), map_weight, 15,0,15);
+  FillHist(prefix+hprefix+"nbjets_Tightnb"+suffix, bjets.size(), map_weight, 10,0,10);
+  FillHist(prefix+hprefix+"najets_Tightnb"+suffix, ajets.size(), map_weight, 10,0,10);
+
+  if(IsNominalRun){
+    for(unsigned int i=0; i<realjets.size(); i++){
+      if(bjets.size() > 0){
+        if(realjets.at(i) == bjets.at(0)) FillHist(prefix+hprefix+"jetidx_b0_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }else if(bjets.size() > 1){
+        if(realjets.at(i) == bjets.at(1)) FillHist(prefix+hprefix+"jetidx_b1_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }else if(bjets.size() > 2){
+        if(realjets.at(i) == bjets.at(2)) FillHist(prefix+hprefix+"jetidx_b2_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }
+      if(ajets.size() > 0){
+        if(realjets.at(i) == ajets.at(0)) FillHist(prefix+hprefix+"jetidx_a0_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }else if(ajets.size() > 1){
+        if(realjets.at(i) == ajets.at(1)) FillHist(prefix+hprefix+"jetidx_a1_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }else if(ajets.size() > 2){
+        if(realjets.at(i) == ajets.at(2)) FillHist(prefix+hprefix+"jetidx_a2_Tightnb"+suffix, i, map_weight[""], 10,0,10);
+      }
+    }
+    FillHist(prefix+hprefix+"nrealjets_nbjets_Tightnb"+suffix, realjets.size(), bjets.size(), map_weight[""], 15,0,15, 10,0,10);
+    FillHist(prefix+hprefix+"nrealjets_najets_Tightnb"+suffix, realjets.size(), ajets.size(), map_weight[""], 15,0,15, 10,0,10);
+    FillHist(prefix+hprefix+"nbjets_najets_Tightnb"+suffix, bjets.size(), ajets.size(), map_weight[""], 10,0,10, 10,0,10);
+
+    if(IsDYSample){
+      FillHist("lhe/nHSb_Tightnb", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/nHSb_Accept_Tightnb", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Accept_Tightnb", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Tightnb", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Accept_Tightnb", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Accept_Tightnb", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+    }
+  }
+
   // For comparison with Hyonsan's results (8 bins)
   if(jet0->Pt() > 40){
     FillHist(prefix+hprefix+"mll_nbjets"+suffix, dimass, map_weight, 80,70,110);
@@ -795,6 +858,33 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"Zbpt_Tight1b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 
+  if(IsNominalRun){
+    for(unsigned int i=0; i<realjets.size(); i++){
+      if(realjets.at(i) == bjets.at(0)) FillHist(prefix+hprefix+"jetidx_b0_Tight1b"+suffix, i, map_weight[""], 10,0,10);
+      if(ajets.size() > 0){
+        if(realjets.at(i) == ajets.at(0)) FillHist(prefix+hprefix+"jetidx_a0_Tight1b"+suffix, i, map_weight[""], 10,0,10);
+      }else if(ajets.size() > 1){
+        if(realjets.at(i) == ajets.at(1)) FillHist(prefix+hprefix+"jetidx_a1_Tight1b"+suffix, i, map_weight[""], 10,0,10);
+      }else if(ajets.size() > 2){
+        if(realjets.at(i) == ajets.at(2)) FillHist(prefix+hprefix+"jetidx_a2_Tight1b"+suffix, i, map_weight[""], 10,0,10);
+      }
+    }
+    FillHist(prefix+hprefix+"nrealjets_nbjets_Tight1b"+suffix, realjets.size(), bjets.size(), map_weight[""], 15,0,15, 10,0,10);
+    FillHist(prefix+hprefix+"nrealjets_najets_Tight1b"+suffix, realjets.size(), ajets.size(), map_weight[""], 15,0,15, 10,0,10);
+    FillHist(prefix+hprefix+"nbjets_najets_Tight1b"+suffix, bjets.size(), ajets.size(), map_weight[""], 10,0,10, 10,0,10);
+
+    if(IsDYSample){
+      FillHist("lhe/nHSb_Tight1b", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/nHSb_Accept_Tight1b", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Accept_Tight1b", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Tight1b", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Accept_Tight1b", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Accept_Tight1b", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+    }
+  }
+
   FillHist(prefix+hprefix+"na20_Tight1b"+suffix, ajets.size(), map_weight, 10,0,10);
   unsigned int najets_25 = 0, najets_30 = 0, najets_35 = 0, najets_40 = 0;
   for(const auto& jet:ajets){
@@ -837,6 +927,19 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"Zbpt_Veto2b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), jet0->Pt(), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+  if(IsNominalRun){
+    if(IsDYSample){
+      FillHist("lhe/nHSb_Veto2b", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/nHSb_Accept_Veto2b", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/p0p1_ID_nHSb_Accept_Veto2b", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Veto2b", nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), nHSb, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"nHSb_Accept_Veto2b", nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
+      FillHist("lhe/"+prefix+hprefix+"p0p1_ID_nHSb_Accept_Veto2b", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+    }
+  }
 
   if(PuppiMET_Type1_pt > 60) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET60", map_weight[""]);
@@ -1123,21 +1226,28 @@ void dybAnalyzer::executeEventGen(){
   if(IsDYSample){
     // LHE Setting
     lhes = GetLHEs();
-    LHE lhe_l0, lhe_l1, lhe_p0, lhe_p1, lhe_j0;
     double lhe_j0_pt = 0.1;
+    lhe_l0 = LHE(), lhe_l1 = LHE(), lhe_p0 = LHE(), lhe_p1 = LHE(), lhe_j0 = LHE();
+    nHSb = 0, nHSb_pt = 0, nHSb_eta = 0, nHSb_accept = 0;
+    vector<LHE> HSb = {};
     for(int i=0; i<(int)lhes.size(); i++){
       if(lhe_l0.ID() == 0 && (abs(lhes[i].ID()) == 11 || abs(lhes[i].ID()) == 13 || abs(lhes[i].ID()) == 15)) lhe_l0 = lhes[i];
       if(lhe_l0.ID()      && (abs(lhes[i].ID()) == 11 || abs(lhes[i].ID()) == 13 || abs(lhes[i].ID()) == 15)) lhe_l1 = lhes[i];
 
-      if(lhe_p0.ID() == 0 && ((0 < abs(lhes[i].ID()) && abs(lhes[i].ID()) < 7) || lhes[i].ID() == 21)) lhe_p0 = lhes[i];
-      if(lhe_p0.ID()      && ((0 < abs(lhes[i].ID()) && abs(lhes[i].ID()) < 7) || lhes[i].ID() == 21)) lhe_p1 = lhes[i];
+      if(lhe_p0.ID() == 0 && lhes[i].Status() == -1 && lhes[i].Pz() > 0) lhe_p0 = lhes[i];
+      if(lhe_p1.ID() == 0 && lhes[i].Status() == -1 && lhes[i].Pz() < 0) lhe_p1 = lhes[i];
+      if(fabs(lhes[i].ID()) == 5 && lhes[i].Status() == 1){
+        HSb.push_back(lhes[i]);
+        nHSb ++;
+        if(lhes[i].Pt() > 25) nHSb_pt ++;
+        if(fabs(lhes[i].Eta()) < 2.5) nHSb_eta ++;
+        if(lhes[i].Pt() > 25 && fabs(lhes[i].Eta()) < 2.5) nHSb_accept ++;
+      }
       if(lhe_p0.ID() && lhe_p1.ID()){
-        if(lhe_p0.ID() > lhe_p1.ID()){
-          LHE temp = lhe_p0;
-          lhe_p0 = lhe_p1;
-          lhe_p1 = temp;
-        }
-        if(lhe_p1.ID() == 21 && (0 < abs(lhe_p0.ID()) && abs(lhe_p0.ID()) < 7) && lhes[i].ID() == lhe_p0.ID() && lhes[i].Pt() > lhe_j0_pt){
+        if(lhe_p0.ID() == 21 && abs(lhe_p1.ID()) < 7 && lhes[i].ID() == lhe_p1.ID() && lhes[i].Pt() > lhe_j0_pt){
+          lhe_j0 = lhes[i];
+          lhe_j0_pt = lhes[i].Pt();
+        }else if(lhe_p1.ID() == 21 && abs(lhe_p0.ID()) < 7 && lhes[i].ID() == lhe_p0.ID() && lhes[i].Pt() > lhe_j0_pt){
           lhe_j0 = lhes[i];
           lhe_j0_pt = lhes[i].Pt();
         }
@@ -1159,15 +1269,112 @@ void dybAnalyzer::executeEventGen(){
     }
 
     if(IsNominalRun){
+      TString lhe_prefix = "";
+      double dimass_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).M();
+      double dirap_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Rapidity();
+      double dipt_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Pt();
+      double genweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
+      FillHist("lhe/"+lhe_prefix+"pt_p0", lhe_p0.Pt(), genweight, 1000,0,1000);
+      FillHist("lhe/"+lhe_prefix+"pZ_p0", lhe_p0.Pz(), genweight, 1000,-14000,14000);
+      FillHist("lhe/"+lhe_prefix+"idx_p0", lhe_p0.Index(), genweight, 15,0,15);
+      FillHist("lhe/"+lhe_prefix+"ID_p0", lhe_p0.ID(), genweight, 60,-30,30);
+      FillHist("lhe/"+lhe_prefix+"status_p0", lhe_p0.Status(), genweight, 200,-100,100);
+      FillHist("lhe/"+lhe_prefix+"pt_p1", lhe_p1.Pt(), genweight, 1000,0,1000);
+      FillHist("lhe/"+lhe_prefix+"pZ_p1", lhe_p1.Pz(), genweight, 1000,-14000,14000);
+      FillHist("lhe/"+lhe_prefix+"idx_p1", lhe_p1.Index(), genweight, 15,0,15);
+      FillHist("lhe/"+lhe_prefix+"ID_p1", lhe_p1.ID(), genweight, 60,-30,30);
+      FillHist("lhe/"+lhe_prefix+"status_p1", lhe_p1.Status(), genweight, 200,-100,100);
+      FillHist("lhe/"+lhe_prefix+"p0p1_ID", lhe_p0.ID() * lhe_p1.ID(), genweight, 2000,-1000,1000);
+      FillHist("lhe/"+lhe_prefix+"nHSb", nHSb, genweight, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"p0p1_ID_nHSb", lhe_p0.ID() * lhe_p1.ID(), nHSb, genweight, 600,-150,450, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"nHSb_pt", nHSb_pt, genweight, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"p0p1_ID_nHSb_pt", lhe_p0.ID() * lhe_p1.ID(), nHSb_pt, genweight, 600,-150,450, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"nHSb_eta", nHSb_eta, genweight, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"p0p1_ID_nHSb_eta", lhe_p0.ID() * lhe_p1.ID(), nHSb_eta, genweight, 600,-150,450, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"nHSb_Accept", nHSb_accept, genweight, 5,0,5);
+      FillHist("lhe/"+lhe_prefix+"p0p1_ID_nHSb_Accept", lhe_p0.ID() * lhe_p1.ID(), nHSb_accept, genweight, 600,-150,450, 5,0,5);
+
+      if(HSb.size() > 1){
+        LHE b0 = HSb.at(0), b1 = HSb.at(1);
+        if(b0.Pt() < b1.Pt()){
+          b0 = HSb.at(1);
+          b1 = HSb.at(0);
+        }
+        double costhetaRecoil_lhe_HSb0 = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b0, (b0.ID() < 0? 1: -1));
+        double costhetaRecoil_lhe_HSb1 = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b1, (b1.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"HSb0_idx", (b0 == HSb.at(0)? 0: 1), genweight, 2,0,2);
+        FillHist("lhe/"+lhe_prefix+"HSb0_pt", b0.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb0_eta", b0.Eta(), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_pt", ((Particle)b0 + (Particle)lhe_l0 + (Particle)lhe_l1).Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dR", b0.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dPhi", fabs(b0.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dEta", fabs(b0.Eta() - ((Particle)lhe_l0 + (Particle)lhe_l1).Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1_idx", (b1 == HSb.at(0)? 0: 1), genweight, 2,0,2);
+        FillHist("lhe/"+lhe_prefix+"HSb1_pt", b1.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb1_eta", b1.Eta(), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_pt", ((Particle)b1 + (Particle)lhe_l0 + (Particle)lhe_l1).Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dR", b1.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dPhi", fabs(b1.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dEta", fabs(b1.Eta() - ((Particle)lhe_l0 + (Particle)lhe_l1).Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dR", b0.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dR", b1.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dPhi", fabs(b0.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dPhi", fabs(b1.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dpt", b0.Pt() - b1.Pt(), genweight, 400,-200,200);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dR", b0.DeltaR(b1), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dPhi", fabs(b0.DeltaPhi(b1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dEta", fabs(b0.Eta() - b1.Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dAbsEta", fabs(b0.Eta()) - fabs(b1.Eta()), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_HSb0", dimass_lhe, (b0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe_HSb0, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_HSb1", dimass_lhe, (b1.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe_HSb1, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+
+        if(lhe_p0.ID() * lhe_p1.ID() == 25) lhe_prefix = "bb_";
+        else if(lhe_p0.ID() * lhe_p1.ID() == 441) lhe_prefix = "gg_";
+        else lhe_prefix = "qQ_";
+        FillHist("lhe/"+lhe_prefix+"HSb0_idx", (b0 == HSb.at(0)? 0: 1), genweight, 2,0,2);
+        FillHist("lhe/"+lhe_prefix+"HSb0_pt", b0.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb0_eta", b0.Eta(), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_pt", ((Particle)b0 + (Particle)lhe_l0 + (Particle)lhe_l1).Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dR", b0.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dPhi", fabs(b0.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb0Z_dEta", fabs(b0.Eta() - ((Particle)lhe_l0 + (Particle)lhe_l1).Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1_idx", (b1 == HSb.at(0)? 0: 1), genweight, 2,0,2);
+        FillHist("lhe/"+lhe_prefix+"HSb1_pt", b1.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb1_eta", b1.Eta(), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_pt", ((Particle)b1 + (Particle)lhe_l0 + (Particle)lhe_l1).Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dR", b1.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dPhi", fabs(b1.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb1Z_dEta", fabs(b1.Eta() - ((Particle)lhe_l0 + (Particle)lhe_l1).Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dR", b0.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dR", b1.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dPhi", fabs(b0.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dPhi", fabs(b1.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dpt", b0.Pt() - b1.Pt(), genweight, 400,-200,200);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dR", b0.DeltaR(b1), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dPhi", fabs(b0.DeltaPhi(b1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dEta", fabs(b0.Eta() - b1.Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSb01_dAbsEta", fabs(b0.Eta()) - fabs(b1.Eta()), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_HSb0", dimass_lhe, (b0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe_HSb0, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_HSb1", dimass_lhe, (b1.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe_HSb1, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }else if(HSb.size() == 1){
+        LHE b = HSb.at(0);
+        if(fabs(lhe_p0.ID() * lhe_p1.ID()) == 105) lhe_prefix = "bg_";
+        else lhe_prefix = "bq_";
+
+        double costhetaRecoil_lhe_HSb = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"HSb_pt", b.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSb_eta", b.Eta(), genweight, 200,-10,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_pt", ((Particle)b + (Particle)lhe_l0 + (Particle)lhe_l1).Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dR", b.DeltaR(((Particle)lhe_l0 + (Particle)lhe_l1)), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dPhi", fabs(b.DeltaPhi(((Particle)lhe_l0 + (Particle)lhe_l1))), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"HSbZ_dEta", fabs(b.Eta() - ((Particle)lhe_l0 + (Particle)lhe_l1).Eta()), genweight, 200,0,10);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_HSb", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe_HSb, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+
       if(lhe_j0.ID() != 0){ // qG collisions
-        bcharge = lhe_j0.ID() < 0? 1: -1;
-        double dimass_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).M();
-        double dirap_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Rapidity();
-        double dipt_lhe = ((Particle)lhe_l0 + (Particle)lhe_l1).Pt();
-        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0);
-	double genweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
-        FillHist(Form("lhe/costhetaRecoil_%dG", abs(lhe_j0.ID())), dimass_lhe, bcharge, dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
-        TString lhe_prefix = "";
+        lhe_prefix = "";
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0, (lhe_j0.ID() < 0? 1: -1));
+        FillHist(Form("lhe/"+lhe_prefix+"costhetaRecoil_%dG", abs(lhe_j0.ID())), dimass_lhe, (lhe_j0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
         if(lhe_j0.ID() == 5) lhe_prefix = "bG_";
         else if(lhe_j0.ID() == -5) lhe_prefix = "BG_";
         else if(lhe_j0.ID() == 4) lhe_prefix = "cG_";
@@ -1178,7 +1385,7 @@ void dybAnalyzer::executeEventGen(){
         else if(lhe_j0.ID() == -2) lhe_prefix = "UG_";
         else if(lhe_j0.ID() == 1) lhe_prefix = "dG_";
         else if(lhe_j0.ID() == -1) lhe_prefix = "DG_";
-        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qG", dimass_lhe, bcharge, dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qG", dimass_lhe, (lhe_j0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 	FillHist("lhe/"+lhe_prefix+"mll_qG", dimass_lhe, genweight, 200,40,140);
         FillHist("lhe/"+lhe_prefix+"yll_qG", dirap_lhe, genweight, 100,-5,5);
         FillHist("lhe/"+lhe_prefix+"ptll_qG", dipt_lhe, genweight, 200,0,200);
@@ -1189,6 +1396,100 @@ void dybAnalyzer::executeEventGen(){
         FillHist("lhe/"+lhe_prefix+"jpt_qG", lhe_j0.Pt(), genweight, 200,0,200);
         FillHist("lhe/"+lhe_prefix+"jeta_qG", lhe_j0.Eta(), genweight, 100,-5,5);
       }
+
+      // signal vs background def test (MY)
+      lhe_prefix = "";
+      LHE b = LHE();
+      if(HSb.size() == 1){
+        lhe_prefix = "sig1_";
+        b = HSb.at(0);
+      }else if(HSb.size() == 2){
+        if(HSb.at(0).Pt() < HSb.at(1).Pt()) b = HSb.at(1);
+        else b = HSb.at(0);
+        if(lhe_p0.ID() * lhe_p1.ID() == 441) lhe_prefix = "sig1_";
+        else lhe_prefix = "bkg1_";
+      }else lhe_prefix = "bkg1_";
+
+      if(b.ID() != 0){
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+      FillHist("lhe/"+lhe_prefix+"mll", dimass_lhe, genweight, 200,40,140);
+
+      // signal vs background def test (Un-ki) - dR 2.0
+      lhe_prefix = "";
+      b = LHE();
+      if(HSb.size() == 1){
+        lhe_prefix = "sig2_";
+        b = HSb.at(0);
+      }else if(HSb.size() == 2){
+        if(HSb.at(0).Pt() < HSb.at(1).Pt()) b = HSb.at(1);
+        else b = HSb.at(0);
+        if(HSb.at(0).DeltaR(HSb.at(1)) > 2.0) lhe_prefix = "sig2_";
+        else lhe_prefix = "bkg2_";
+      }else lhe_prefix = "bkg2_";
+
+      if(b.ID() != 0){
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+      FillHist("lhe/"+lhe_prefix+"mll", dimass_lhe, genweight, 200,40,140);
+
+      // signal vs background def test (Un-ki) - dR 1.0
+      lhe_prefix = "";
+      b = LHE();
+      if(HSb.size() == 1){
+        lhe_prefix = "sig3_";
+        b = HSb.at(0);
+      }else if(HSb.size() == 2){
+        if(HSb.at(0).Pt() < HSb.at(1).Pt()) b = HSb.at(1);
+        else b = HSb.at(0);
+        if(HSb.at(0).DeltaR(HSb.at(1)) > 1.0) lhe_prefix = "sig3_";
+        else lhe_prefix = "bkg3_";
+      }else lhe_prefix = "bkg3_";
+
+      if(b.ID() != 0){
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+      FillHist("lhe/"+lhe_prefix+"mll", dimass_lhe, genweight, 200,40,140);
+
+      // signal vs background def test (Un-ki) - dR 0.5
+      lhe_prefix = "";
+      b = LHE();
+      if(HSb.size() == 1){
+        lhe_prefix = "sig4_";
+        b = HSb.at(0);
+      }else if(HSb.size() == 2){
+        if(HSb.at(0).Pt() < HSb.at(1).Pt()) b = HSb.at(1);
+        else b = HSb.at(0);
+        if(HSb.at(0).DeltaR(HSb.at(1)) > 0.5) lhe_prefix = "sig4_";
+        else lhe_prefix = "bkg4_";
+      }else lhe_prefix = "bkg4_";
+
+      if(b.ID() != 0){
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+      FillHist("lhe/"+lhe_prefix+"mll", dimass_lhe, genweight, 200,40,140);
+
+      // signal vs background def test (Un-ki) - dR 0.0
+      lhe_prefix = "";
+      b = LHE();
+      if(HSb.size() == 1){
+        lhe_prefix = "sig5_";
+        b = HSb.at(0);
+      }else if(HSb.size() == 2){
+        if(HSb.at(0).Pt() < HSb.at(1).Pt()) b = HSb.at(1);
+        else b = HSb.at(0);
+        lhe_prefix = "sig5_";
+      }else lhe_prefix = "bkg5_";
+
+      if(b.ID() != 0){
+        double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&b, (b.ID() < 0? 1: -1));
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil", dimass_lhe, (b.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      }
+      FillHist("lhe/"+lhe_prefix+"mll", dimass_lhe, genweight, 200,40,140);
     }
 
     // GEN Setting
@@ -1314,7 +1615,7 @@ double dybAnalyzer::GetCosThetaCS(const Particle *p0,const Particle *p1,int dire
   return direction*2*(l0pp*l1pm-l0pm*l1pp)/sqrt(dimass*dimass*(dimass*dimass+dipt*dipt));
 }
 
-double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, int mode){
+double dybAnalyzer::GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, const double bcharge, int mode){
   if(!p0||!p1) return 0.;
   const TLorentzVector *lm,*lp;
   if(p0->Charge()<0&&p1->Charge()>0){
