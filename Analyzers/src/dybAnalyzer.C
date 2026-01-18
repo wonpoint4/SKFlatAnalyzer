@@ -436,44 +436,19 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(realjets.size() == 0) return;
     TString signal = prefix+hprefix;
     if(IsDYSample){
-      Gen* gen_b0 = NULL;
-      Jet* jet_b0 = NULL;
-      jet_b0 = &realjets.at(0);
-      //int jet_idx = -1;
+      LHE* lhe_b0 = NULL;
+      Jet* jet_b0 = &realjets.at(0);
       double mindR = 0.4;
-      //double maxpT = 0.;
-      //for(unsigned int j=0; j<realjets.size(); j++){
-      for(unsigned int i=4; i<gens.size(); i++){ // 0,1 - proton, 2,3 - partons
-        if(!gens.at(i).isPrompt()) continue;
-        if(!gens.at(i).isHardProcess()) continue;
-        if(fabs(gens.at(i).PID()) != 5) continue;
-        //if(gens.at(i).DeltaR(realjets.at(j)) > 0.4) continue;
-        //if(realjets.at(j).Pt() > maxpT) continue;
-        if(gens.at(i).DeltaR(realjets.at(0)) > mindR) continue;
-        //jet_b0 = &realjets.at(j);
-        //jet_idx = j;
-        gen_b0 = &gens.at(i);
-        mindR = gen_b0->DeltaR(*jet_b0);
+      for(unsigned int i=0; i<HSb.size(); i++){
+        if(HSb.at(i).DeltaR(realjets.at(0)) > mindR) continue;
+        lhe_b0 = &HSb.at(i);
+        mindR = lhe_b0->DeltaR(*jet_b0);
       }
 
-      bool isbG = false;
-      if(fabs(gens.at(2).PID()) * gens.at(3).PID() == 5 * 21) isbG = true;
-      if(gen_b0){
-        if(gen_b0->PID() > 0) signal += "dyb_";
-        else signal += "dybbar_";
-        FillHist(signal+"gen_b0_pt_njets"+suffix, gen_b0->Pt(), map_weight[""], 200,0,200);
-        FillHist(signal+"gen_b0_eta_njets"+suffix, gen_b0->Eta(), map_weight[""], 50,-2.5,2.5);
-        FillHist(signal+"gen_b0_ptratio_njets"+suffix, gen_b0->Pt() / jet_b0->Pt(), map_weight[""], 200,0,10);
-        FillHist(signal+"gen_b0_dR_njets"+suffix, gen_b0->DeltaR(*jet_b0), map_weight[""], 500,0,10);
-        //FillHist(signal+"gen_b0_jet_idx_njets"+suffix, jet_idx, map_weight[""], 16,-1,15);
-
-        FillHist(signal+"gen_b0_PID_njets"+suffix, gen_b0->PID(), map_weight[""], 200,-100,100);
-        FillHist(signal+"gen_b0_PID_partonflavor_njets"+suffix, gen_b0->PID(), jet_b0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(signal+"gen_isbG_njets"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
-      }else{
-        FillHist(signal+"gen_b0_PID_njets"+suffix, 0, map_weight[""], 200,-100,100);
-        FillHist(signal+"gen_b0_PID_partonflavor_njets"+suffix, 0, jet_b0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(signal+"gen_isbG_njets"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
+      bool isSignal = lhe_prefix.Contains("sig") && (lhe_b0);
+      if(isSignal){
+        if(lhe_b0->ID() > 0) signal += "dyb_";
+        else signal += "dyB_";
       }
     }
 
@@ -497,7 +472,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }
 
   if(bjets.size() == 0) return;
-  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tightnb", map_weight[""]);
+  //if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tightnb", map_weight[""]);
   //bjets.at(0) *= bjets.at(0).BJetNNCorrection(); // bJetEnergyCorrection (BjetRegression)?
   jet0 = &bjets.at(0);
   double bcharge = jetCharge(*jet0);
@@ -506,69 +481,18 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   double costhetaRecoil_nobch = GetCosThetaRecoil(lepton0, lepton1, jet0, 0, -1);
 
   if(IsDYSample){
-    vector<Gen> hs_gens = {};
-    Gen* gen_b0 = NULL;
+    LHE* lhe_b0 = NULL;
     double mindR = 0.4;
-    for(unsigned int i=4; i<gens.size(); i++){ // 0,1 - proton, 2,3 - partons
-      if(!gens.at(i).isPrompt()) continue;
-      if(!gens.at(i).isHardProcess()) continue;
-      hs_gens.push_back(gens.at(i));
-      if(gens.at(i).DeltaR(*jet0) > mindR) continue;
-      gen_b0 = &gens.at(i);
-      mindR = gen_b0->DeltaR(*jet0);
+    for(unsigned int i=0; i<HSb.size(); i++){
+      if(HSb.at(i).DeltaR(*jet0) > mindR) continue;
+      lhe_b0 = &HSb.at(i);
+      mindR = lhe_b0->DeltaR(*jet0);
     }
 
-    bool isbG = false;
-    if(fabs(gens.at(2).PID()) * gens.at(3).PID() == 5 * 21) isbG = true;
-    unsigned int nhsb = 0;
-    int PID_sum = 0;
-    for(unsigned int i=0; i<hs_gens.size(); i++){
-      if(fabs(hs_gens.at(i).PID()) == 5){
-        if(IsNominalRun) FillHist(prefix+hprefix+"gen_hs_i"+suffix, i, map_weight[""], 10,0,10);
-        if(IsNominalRun) FillHist(prefix+hprefix+"gen_hs_index"+suffix, hs_gens.at(i).Index(), map_weight[""], 10,0,10);
-        nhsb++;
-        PID_sum += hs_gens.at(i).PID();
-      }
-    }
-    if(IsNominalRun){
-      FillHist(prefix+hprefix+"gen_nhsb"+suffix, nhsb, map_weight[""], 10,0,10);
-      FillHist(prefix+hprefix+"gen_hsb_PIDsum"+suffix, PID_sum, map_weight[""], 40,-20,20);
-      if(isbG) FillHist(prefix+hprefix+"gen_nhsb_isbG"+suffix, nhsb, map_weight[""], 10,0,10);
-      if(isbG) FillHist(prefix+hprefix+"gen_hsb_PIDsum_isbG"+suffix, PID_sum, map_weight[""], 40,-20,20);
-    }
-
-    if(gen_b0){
-      if(gen_b0->PID() == 5) prefix += "dyb_";
-      else if(gen_b0->PID() == -5) prefix += "dybbar_";
-      else if(gen_b0->PID() == 4) prefix += "dyc_";
-      else if(gen_b0->PID() == -4) prefix += "dycbar_";
-
-      if(IsNominalRun){
-        FillHist(prefix+hprefix+"gen_b0_pt"+suffix, gen_b0->Pt(), map_weight[""], 200,0,200);
-        FillHist(prefix+hprefix+"gen_b0_eta"+suffix, gen_b0->Eta(), map_weight[""], 50,-2.5,2.5);
-        FillHist(prefix+hprefix+"gen_b0_ptratio"+suffix, gen_b0->Pt() / jet0->Pt(), map_weight[""], 200,0,10);
-        FillHist(prefix+hprefix+"gen_b0_dR"+suffix, gen_b0->DeltaR(*jet0), map_weight[""], 500,0,10);
-
-        FillHist(prefix+hprefix+"gen_b0_PID"+suffix, gen_b0->PID(), map_weight[""], 200,-100,100);
-        FillHist(prefix+hprefix+"gen_b0_PID_nhsb"+suffix, gen_b0->PID(), nhsb, map_weight[""], 40,-10,30 , 10,0,10);
-        FillHist(prefix+hprefix+"gen_b0_PID_partonflavor"+suffix, gen_b0->PID(), jet0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_hadronflavor"+suffix, gen_b0->PID(), jet0->hadronFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_genHFflavor"+suffix, gen_b0->PID(), jet0->GenHFHadronMatcherFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_genHForigin"+suffix, gen_b0->PID(), jet0->GenHFHadronMatcherOrigin(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_nhsb_Matching"+suffix, nhsb, map_weight[""], 10,0,10);
-        FillHist(prefix+hprefix+"gen_hsb_PIDsum_Matching"+suffix, PID_sum, map_weight[""], 40,-20,20);
-        FillHist(prefix+hprefix+"gen_isbG_Matching"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
-      }else{
-        FillHist(prefix+hprefix+"gen_b0_PID"+suffix, 0, map_weight[""], 200,-100,100);
-        FillHist(prefix+hprefix+"gen_b0_PID_nhsb"+suffix, 0, nhsb, map_weight[""], 40,-10,30 , 10,0,10);
-        FillHist(prefix+hprefix+"gen_b0_PID_partonflavor"+suffix, 0, jet0->partonFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_hadronflavor"+suffix, 0, jet0->hadronFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_genHFflavor"+suffix, 0, jet0->GenHFHadronMatcherFlavour(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_b0_PID_genHForigin"+suffix, 0, jet0->GenHFHadronMatcherOrigin(), map_weight[""], 40,-10,30 , 40,-10,30);
-        FillHist(prefix+hprefix+"gen_nhsb_noMatching"+suffix, nhsb, map_weight[""], 10,0,10);
-        FillHist(prefix+hprefix+"gen_hsb_PIDsum_noMatching"+suffix, PID_sum, map_weight[""], 40,-20,20);
-        FillHist(prefix+hprefix+"gen_isbG_noMatching"+suffix, isbG? 1: 0, map_weight[""], 2,0,2);
-      }
+    bool isSignal = lhe_prefix.Contains("sig") && (lhe_b0);
+    if(isSignal){
+      if(jet0->partonFlavour() == 5) prefix += "dyb_";
+      else if(jet0->partonFlavour() == -5) prefix += "dyB_";
     }
   }
 
@@ -829,10 +753,10 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
 
     if(IsDYSample){
-      FillHist("lhe_reco/nHSb_Tightnb", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Tightnb", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/nHSb_Tightnb", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Tightnb", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Tightnb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
     }
   }
 
@@ -928,205 +852,77 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
 
     if(IsDYSample){
-      FillHist("lhe_reco/nHSb_Tight1b", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Tight1b", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/nHSb_Tight1b", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Tight1b", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Tight1b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
       if(HSb.size() == 1){
-        FillHist("lhe_reco/dR_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob_Tight1b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Tight1b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob_Tight1b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Tight1b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
+          FillHist("lhe_reco/dR_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
       }else if(HSb.size() == 2){
-        FillHist("lhe_reco/dR_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/dR_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/mindR_recob_HSb01_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/maxdR_recob_HSb01_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob_Tight1b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb0_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb1_partonflavor_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Tight1b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/dR_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/mindR_recob_HSb01_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/maxdR_recob_HSb01_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob_Tight1b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb1_partonflavor_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Tight1b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor_Tight1b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor_Tight1b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS_Tight1b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(1).ID()){
-          FillHist("lhe_reco/dR_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS_Tight1b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
-        if(jet0->DeltaR(HSb.at(1)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(1)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0in_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0out_Tight1b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-
       }
     }
   }
@@ -1169,203 +965,76 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
 
     if(IsDYSample){
-      FillHist("lhe_reco/nHSb_Veto2b", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Veto2b", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/nHSb_Veto2b", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"nHSb_Veto2b", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb_Veto2b", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
       if(HSb.size() == 1){
-        FillHist("lhe_reco/dR_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob_Veto2b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Veto2b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob_Veto2b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Veto2b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
+          FillHist("lhe_reco/dR_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
       }else if(HSb.size() == 2){
-        FillHist("lhe_reco/dR_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/dR_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/mindR_recob_HSb01_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/maxdR_recob_HSb01_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob_Veto2b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb0_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb1_partonflavor_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Veto2b", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/dR_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/mindR_recob_HSb01_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/maxdR_recob_HSb01_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob_Veto2b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb1_partonflavor_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob_Veto2b", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor_Veto2b", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor_Veto2b", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS_Veto2b", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(1).ID()){
-          FillHist("lhe_reco/dR_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        }
-        if(jet0->DeltaR(HSb.at(1)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-	if(jet0->DeltaR(HSb.at(1)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0in_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0out_Veto2b", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
+          FillHist("lhe_reco/dR_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS_Veto2b", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
       }
     }
@@ -1480,203 +1149,76 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
 
     if(IsDYSample){
-      FillHist("lhe_reco/nHSb", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/p0p1_ID_nHSb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"nHSb", HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 5,0,5);
-      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/nHSb", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/p0p1_ID_nHSb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"nHSb", HSb.size(), map_weight[""], 5,0,5);
+      FillHist("lhe_reco/"+prefix+hprefix+"p0p1_ID_nHSb", lhe_p0.ID() * lhe_p1.ID(), HSb.size(), map_weight[""], 600,-150,450, 5,0,5);
       if(HSb.size() == 1){
-        FillHist("lhe_reco/dR_recob_HSb", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb_OS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_OS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb_SS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb_SS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
+          FillHist("lhe_reco/dR_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
       }else if(HSb.size() == 2){
-        FillHist("lhe_reco/dR_recob_HSb0", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/dR_recob_HSb1", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/mindR_recob_HSb01", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/maxdR_recob_HSb01", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/partonflavor_recob", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb0_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/dR_recob_HSb1_partonflavor", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob", jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
-        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/dR_recob_HSb1", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/mindR_recob_HSb01", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/maxdR_recob_HSb01", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/partonflavor_recob", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb0_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/dR_recob_HSb1_partonflavor", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/mindR_recob_HSb01_partonflavor", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/maxdR_recob_HSb01_partonflavor", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"partonflavor_recob", jet0->partonFlavour(), map_weight[""], 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_partonflavor", jet0->DeltaR(HSb.at(0)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_partonflavor", jet0->DeltaR(HSb.at(1)), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"mindR_recob_HSb01_partonflavor", min(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
+        FillHist("lhe_reco/"+lhe_prefix+"maxdR_recob_HSb01_partonflavor", max(jet0->DeltaR(HSb.at(0)), jet0->DeltaR(HSb.at(1))), jet0->partonFlavour(), map_weight[""], 200,0,10, 60,-30,30);
 
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb0", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb0", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(0).ID()){
-          FillHist("lhe_reco/dR_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_OS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb0_SS", jet0->DeltaR(HSb.at(0)), jet0->Pt() / HSb.at(0).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
-        if(jet0->DeltaR(HSb.at(0)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR0p4out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(0)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0in", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb0_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(0).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb0_OS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_OS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb0_SS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb0_SS_dR1p0out", jet0->Pt() / HSb.at(0).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-
-        FillHist("lhe_reco/dR_ptRatio_recob_HSb1", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+        FillHist("lhe_reco/dR_ptRatio_recob_HSb1", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+        FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         if(jet0->partonFlavour() != HSb.at(1).ID()){
-          FillHist("lhe_reco/dR_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
+          FillHist("lhe_reco/dR_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_OS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }else{
-          FillHist("lhe_reco/dR_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10, 200,0,10);
-        }
-        if(jet0->DeltaR(HSb.at(1)) < 0.4){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR0p4out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }
-        if(jet0->DeltaR(HSb.at(1)) < 1.0){
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0in", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
-        }else{
-          FillHist("lhe_reco/ptRatio_recob_HSb1_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          if(jet0->partonFlavour() != HSb.at(1).ID()){
-            FillHist("lhe_reco/ptRatio_recob_HSb1_OS_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_OS_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }else{
-            FillHist("lhe_reco/ptRatio_recob_HSb1_SS_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-            FillHist("lhe_reco/"+lhe_prefix+"ptRatio_recob_HSb1_SS_dR1p0out", jet0->Pt() / HSb.at(1).Pt(), reductionweight * MCweight() * _event.GetTriggerLumi("Full"), 200,0,10);
-          }
+          FillHist("lhe_reco/dR_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/dR_ptRatio_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), map_weight[""], 200,0,10);
+          FillHist("lhe_reco/"+lhe_prefix+"dR_ptRatio_recob_HSb1_SS", jet0->DeltaR(HSb.at(1)), jet0->Pt() / HSb.at(1).Pt(), map_weight[""], 200,0,10, 200,0,10);
         }
       }
     }

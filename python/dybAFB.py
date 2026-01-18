@@ -6,7 +6,7 @@ import ROOT
 ROOT.gROOT.ProcessLine('#include"dybPlotter.cc"')
 ROOT.Plotter.SetupStyle()
 
-dyb = ROOT.dybPlotter("data ^dyb_mi+dybbar_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
+dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
