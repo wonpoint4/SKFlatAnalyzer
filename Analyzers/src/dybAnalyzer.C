@@ -653,6 +653,34 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun && !hprefix.Contains("ss_")){
     for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
+
+    // New Weak corrections with sin2w variations
+    double lhe_mass = ((Particle)lhe_l0 + (Particle)lhe_l1).M();
+    double lhe_costheta_CS = -999;
+    if(lhe_p0.ID() == 21 || lhe_p0.ID() == 22){
+      if(lhe_p1.ID() == 21 || lhe_p1.ID() == 22) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 0);
+      else if(lhe_p1.ID() > 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, -1);
+      else if(lhe_p1.ID() < 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 1);
+    }else if(lhe_p0.ID() > 0){
+      if(lhe_p1.ID() == 21 || lhe_p1.ID() == 22) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 1);
+      else if(lhe_p1.ID() > 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 0);
+      else if(lhe_p1.ID() < 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 1);
+    }else if(lhe_p0.ID() < 0){
+      if(lhe_p1.ID() == 21 || lhe_p1.ID() == 22) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, -1);
+      else if(lhe_p1.ID() > 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, -1);
+      else if(lhe_p1.ID() < 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 0);
+    }
+    if(lhe_costheta_CS == -999){
+      cout<<"wrong pid for parton: "<<lhe_p0.ID()<<" "<<lhe_p1.ID()<<endl;
+      exit(EXIT_FAILURE);
+    }
+    double lhe_costheta_Recoil = -999;
+    if(lhe_j0.ID() != 0) lhe_costheta_Recoil = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0, (lhe_j0.ID() < 0? 1: -1));
+
+    for(unsigned int mem=0; mem<NWEIGHTS; mem++){
+      map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
+      map_weight["_Recoil_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, mem, lhe_j0.ID());
+    }
   }
 
   // Electron charge flip SF
@@ -1398,7 +1426,8 @@ void dybAnalyzer::executeEventGen(){
   if(IsDYSample){
     // LHE Setting
     lhes = GetLHEs();
-    double lhe_j0_pt = 0.1;
+    LHE lhe_j0_qg = LHE();
+    double lhe_j0_qg_pt = 0.1;
     lhe_l0 = LHE(), lhe_l1 = LHE(), lhe_p0 = LHE(), lhe_p1 = LHE(), lhe_j0 = LHE();
     HSb = {}, HSc = {};
     for(int i=0; i<(int)lhes.size(); i++){
@@ -1410,13 +1439,18 @@ void dybAnalyzer::executeEventGen(){
 
       if(fabs(lhes[i].ID()) == 5 && lhes[i].Status() == 1) HSb.push_back(lhes[i]);
       if(fabs(lhes[i].ID()) == 4 && lhes[i].Status() == 1) HSc.push_back(lhes[i]);
+      if((lhes[i].ID() == 21 || abs(lhes[i].ID()) < 7) && lhes[i].Status() == 1){
+        if(lhe_j0.ID() == 0) lhe_j0 = lhes[i];
+        else if(lhes[i].Pt() > lhe_j0.Pt()) lhe_j0 = lhes[i];
+      }
+      // for qg collisions
       if(lhe_p0.ID() && lhe_p1.ID()){
-        if(lhe_p0.ID() == 21 && abs(lhe_p1.ID()) < 7 && lhes[i].ID() == lhe_p1.ID() && lhes[i].Pt() > lhe_j0_pt){
-          lhe_j0 = lhes[i];
-          lhe_j0_pt = lhes[i].Pt();
-        }else if(lhe_p1.ID() == 21 && abs(lhe_p0.ID()) < 7 && lhes[i].ID() == lhe_p0.ID() && lhes[i].Pt() > lhe_j0_pt){
-          lhe_j0 = lhes[i];
-          lhe_j0_pt = lhes[i].Pt();
+        if(lhe_p0.ID() == 21 && abs(lhe_p1.ID()) < 7 && lhes[i].ID() == lhe_p1.ID() && lhes[i].Pt() > lhe_j0_qg_pt){
+          lhe_j0_qg = lhes[i];
+          lhe_j0_qg_pt = lhes[i].Pt();
+        }else if(lhe_p1.ID() == 21 && abs(lhe_p0.ID()) < 7 && lhes[i].ID() == lhe_p0.ID() && lhes[i].Pt() > lhe_j0_qg_pt){
+          lhe_j0_qg = lhes[i];
+          lhe_j0_qg_pt = lhes[i].Pt();
         }
       }
     }
@@ -1511,18 +1545,19 @@ void dybAnalyzer::executeEventGen(){
       }
     }
 
-    if(lhe_j0.ID() != 0){ // qG collisions
+    // qg collisions
+    if(lhe_j0_qg.ID() != 0){
       lhe_prefix = "";
-      double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0, (lhe_j0.ID() < 0? 1: -1));
-      if(IsNominalRun) FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qg", dimass_lhe, (lhe_j0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
-      if(fabs(lhe_j0.ID()) == 5) lhe_prefix = "bg_";
-      else if(fabs(lhe_j0.ID()) == 4) lhe_prefix = "cg_";
-      else if(fabs(lhe_j0.ID()) == 3) lhe_prefix = "sg_";
-      else if(fabs(lhe_j0.ID()) == 2) lhe_prefix = "ug_";
+      double costhetaRecoil_lhe = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0_qg, (lhe_j0_qg.ID() < 0? 1: -1));
+      if(IsNominalRun) FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qg", dimass_lhe, (lhe_j0_qg.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+      if(fabs(lhe_j0_qg.ID()) == 5) lhe_prefix = "bg_";
+      else if(fabs(lhe_j0_qg.ID()) == 4) lhe_prefix = "cg_";
+      else if(fabs(lhe_j0_qg.ID()) == 3) lhe_prefix = "sg_";
+      else if(fabs(lhe_j0_qg.ID()) == 2) lhe_prefix = "ug_";
       else lhe_prefix = "dg_";
 
       if(IsNominalRun){
-        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qg", dimass_lhe, (lhe_j0.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
+        FillHist("lhe/"+lhe_prefix+"costhetaRecoil_qg", dimass_lhe, (lhe_j0_qg.ID() < 0? 1: -1), dipt_lhe, costhetaRecoil_lhe, genweight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, afb_ptbinnum,(double*)afb_ptbin, 20,-1,1);
 	FillHist("lhe/"+lhe_prefix+"mll_qg", dimass_lhe, genweight, 200,40,140);
         FillHist("lhe/"+lhe_prefix+"yll_qg", dirap_lhe, genweight, 100,-5,5);
         FillHist("lhe/"+lhe_prefix+"ptll_qg", dipt_lhe, genweight, 200,0,200);
@@ -1530,8 +1565,8 @@ void dybAnalyzer::executeEventGen(){
         FillHist("lhe/"+lhe_prefix+"lpt_qg", lhe_l1.Pt(), genweight, 200,0,200);
         FillHist("lhe/"+lhe_prefix+"leta_qg", lhe_l0.Eta(), genweight, 100,-5,5);
         FillHist("lhe/"+lhe_prefix+"leta_qg", lhe_l1.Eta(), genweight, 100,-5,5);
-        FillHist("lhe/"+lhe_prefix+"jpt_qg", lhe_j0.Pt(), genweight, 200,0,200);
-        FillHist("lhe/"+lhe_prefix+"jeta_qg", lhe_j0.Eta(), genweight, 100,-5,5);
+        FillHist("lhe/"+lhe_prefix+"jpt_qg", lhe_j0_qg.Pt(), genweight, 200,0,200);
+        FillHist("lhe/"+lhe_prefix+"jeta_qg", lhe_j0_qg.Eta(), genweight, 100,-5,5);
       }
     }
 
@@ -1560,8 +1595,8 @@ void dybAnalyzer::executeEventGen(){
       FillHist("lhe/"+lhe_prefix+"lpt", lhe_l1.Pt(), genweight, 200,0,200);
       FillHist("lhe/"+lhe_prefix+"leta", lhe_l0.Eta(), genweight, 100,-5,5);
       FillHist("lhe/"+lhe_prefix+"leta", lhe_l1.Eta(), genweight, 100,-5,5);
-      FillHist("lhe/"+lhe_prefix+"jpt", lhe_j0.Pt(), genweight, 200,0,200);
-      FillHist("lhe/"+lhe_prefix+"jeta", lhe_j0.Eta(), genweight, 100,-5,5);
+      FillHist("lhe/"+lhe_prefix+"jpt", lhe_j0_qg.Pt(), genweight, 200,0,200);
+      FillHist("lhe/"+lhe_prefix+"jeta", lhe_j0_qg.Eta(), genweight, 100,-5,5);
     }
 
     // GEN Setting
@@ -1633,7 +1668,7 @@ void dybAnalyzer::executeEventGen(){
       TLorentzVector genZ = (gen_l0 + gen_l1);
       zptweight = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity());
       zptweight_gym = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity(), genZ.M());
-      weakweight = GetDYWeakWeight(genZ.M());
+      weakweight = GetDYWeakWeight(genZ.M(), 0., 2);
     }//else gprefix += "tau_";
   }
   if(IsTTSample) topptweight = mcCorr->GetTopPtReweight(gens);
@@ -2214,4 +2249,91 @@ double dybAnalyzer::GetCFSF(int sys){
   }
 
   return sf;
+}
+
+// Hyonsan's NLO Weak Corrections
+// From weakWeight_CS.cc, weakWeight_RecoilUDG.cc
+double dybAnalyzer::GetDYWeakWeight(double lhe_mass, double lhe_costheta, unsigned int set, unsigned int mem, int lead_pid){
+  if(IsDATA) return 1.;
+  if(!IsDYSample) return 1.;
+
+  // set = 2 (Old Weak NLO - only mass dependent k-factor)
+  if(set == 2) return SMPAnalyzerCore::GetDYWeakWeight(lhe_mass);
+
+  int ibin = -1;
+  if(lhe_mass < mass_edges[0]) lhe_mass = mass_edges[0] + 1e-4;
+  if(lhe_mass >= mass_edges[NBINS]) lhe_mass = mass_edges[NBINS] - 1e-4;
+  for(int i=0; i<NBINS; ++i){
+    if(lhe_mass >= mass_edges[i] && lhe_mass < mass_edges[i+1]){
+      ibin = i;
+      break;
+    }
+  }
+  if(ibin < 0) return 1.;
+
+  double x = lhe_costheta;
+  if (x >  1.0) x =  1.0;
+  if (x < -1.0) x = -1.0;
+
+  int ibin_ang = ibin;
+  if (ibin_ang > 24) ibin_ang = 24;
+
+  double A0m = 0.;
+  double A4m = 0.;
+  double A4v = 0.;
+  double w_ang = 1.;
+  double kf = 1.;
+
+  if(set == 0){ // Weak NLO based on CS frame
+    A0m = A0_minnlo[ibin_ang];
+    A4m = A4_minnlo[ibin_ang];
+    A4v = A4m + deltaA4[mem][ibin_ang];
+    kf = kfactor[mem][ibin];
+    if(!(kf > 0.0)) kf = 1.0;
+  }else if(set == 1){ // Weak NLO based on Recoil frame
+    const int apid = fabs(lead_pid);
+    char cat = 'X';
+    if(lead_pid == 21) cat = 'G';
+    else if(apid >= 1 && apid <= 6){
+      if(apid == 2 || apid == 4 || apid == 6) cat = 'U';
+      else cat = 'D';
+    }else{
+      cout<<"[dybAnalyzer::GetDYWeakWeight] ERROR: lead_pid is not a quark/gluon: "<<lead_pid<<endl;
+      exit(1);
+    }
+
+    const double *A0p = nullptr;
+    const double *A4p = nullptr;
+    const double (*Kp)[NBINS] = nullptr;
+    const double (*Dp)[NBINS] = nullptr;
+    if(cat == 'U'){
+      A0p = A0_minnlo_U;
+      A4p = A4_minnlo_U;
+      Kp = kfactor_U;
+      Dp = deltaA4_U;
+    }else if(cat == 'D'){
+      A0p = A0_minnlo_D;
+      A4p = A4_minnlo_D;
+      Kp = kfactor_D;
+      Dp = deltaA4_D;
+    }else{
+      A0p = A0_minnlo_G;
+      A4p = A4_minnlo_G;
+      Kp = kfactor_G;
+      Dp = deltaA4_G;
+    }
+
+    A0m = A0p[ibin_ang];
+    A4m = A4p[ibin_ang];
+    A4v = A4m + Dp[mem][ibin_ang];
+
+    kf = Kp[mem][ibin];
+    if(!(kf > 0.0)) kf = 1.0;
+  }else cout<<"[dybAnalyzer::GetDYWeakWeight] set is incorrect"<<endl;
+
+  double f_nom = (1.0 + x * x) + 0.5 * A0m * (1.0 - 3.0 * x * x) + A4m * x;
+  double f_var = (1.0 + x * x) + 0.5 * A0m * (1.0 - 3.0 * x * x) + A4v * x;
+  if (f_nom != 0.0) w_ang = f_var / f_nom;
+
+  return kf * w_ang;
 }
