@@ -49,6 +49,19 @@ public:
   virtual double GetCosThetaCS(const Particle *p0, const Particle *p1, int direction=0);
   virtual double GetCosThetaRecoil(const Particle *p0, const Particle *p1, Particle *b, const double bcharge, int mode=0);
   vector<vector<double>> Make2DWeights(const vector<int>& structure);
+  void FillHist(TString histname,
+                Double_t value_x, Double_t value_y, Double_t value_u,
+                Double_t weight,
+                Int_t n_binx, const Double_t *xbins,
+                Int_t n_biny, const Double_t *ybins,
+                Int_t n_binu, Double_t u_min, Double_t u_max);
+  using SMPAnalyzerCore::FillHist;
+  void FillHist(TString histname,
+                double value_x, double value_y, double value_u,
+                map<TString,double> weights,
+                int n_binx, const double *xbins,
+                int n_biny, const double *ybins,
+                int n_binu, double u_min, double u_max);
 
   TString prefix, gprefix, lhe_prefix, hprefix, suffix;
   vector<Gen> gens;

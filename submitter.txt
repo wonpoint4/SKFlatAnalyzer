@@ -18,7 +18,7 @@ cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_1B2L -e 20
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_1B2L -e 2016postVFP --userflags LEPSYS --memory 20000 --nmax 200 &"
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_1B2L -e 2016preVFP --userflags LEPSYS --memory 20000 --nmax 200 &"
 
-condor_qedit wonjun "RequestMemory=9000"; condor_release wonjun
+condor_qedit wonjun "RequestMemory=20000"; condor_release wonjun
 condor_qedit wonjun 'concurrencylimits="n101.wonjun"'
 
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2018 &"
@@ -41,17 +41,16 @@ cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP &"
 cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP &"
 
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2018 --userflags SYS &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2017 --userflags SYS &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags SYS &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags SYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep DY |xargs -i sh -c    "{} --skim SkimTree_Dilepton -e 2018 --userflags SYS --memory 6000 &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v DY |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2018 --userflags SYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep DY |xargs -i sh -c    "{} --skim SkimTree_Dilepton -e 2017 --userflags SYS --memory 6000 &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v DY |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2017 --userflags SYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep DY |xargs -i sh -c    "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags SYS --memory 6000 &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v DY |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags SYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep DY |xargs -i sh -c    "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags SYS --memory 6000 &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v DY |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags SYS &"
 
-cat tmp/dybAnalyzer.txt |grep dyb |grep -v Muon |grep -v EGamma |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2018 --userflags PDFSYS --memory 10000 --nmax 250 &"
-cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2017 --userflags PDFSYS --memory 10000 --nmax 250 &"
-cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags PDFSYS --memory 10000 --nmax 250 &"
-cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags PDFSYS --memory 10000 --nmax 250 &"
-
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2018 --userflags LEPSYS --memory 20000 --nmax 200 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2017 --userflags LEPSYS --memory 20000 --nmax 200 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags LEPSYS --memory 20000 --nmax 200 &"
-cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags LEPSYS --memory 20000 --nmax 200 &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v Muon |grep -v EGamma |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2018 --userflags PDFSYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2017 --userflags PDFSYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016postVFP --userflags PDFSYS &"
+cat tmp/dybAnalyzer.txt |grep dyb |grep -v Double |xargs -i sh -c "{} --skim SkimTree_Dilepton -e 2016preVFP --userflags PDFSYS &"

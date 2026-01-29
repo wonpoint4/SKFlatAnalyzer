@@ -1944,25 +1944,6 @@ void AnalyzerCore::FillHist(TString histname, double value, double weight, int n
   TH1D *this_hist = GetHist1D(histname);
   if( !this_hist ){
     this_hist = new TH1D(histname, "", n_bin, x_min, x_max);
-
-    // Won's bChargeRaw2
-    if(histname.Contains("Charge") && histname.Contains("Raw2")){
-      for(int i=1; i<this_hist->GetNbinsX(); i++){
-        if(this_hist->GetXaxis()->GetBinLabel(i) != "-1" && this_hist->GetXaxis()->GetBinLabel(i) != "0" && this_hist->GetXaxis()->GetBinLabel(i) != "1") this_hist->GetXaxis()->SetBinLabel(i, "");
-
-        //if(i % 4 != 0){
-        //  this_hist->GetXaxis()->SetBinLabel(i, "");
-        //  continue;
-        //}
-	//double x = this_hist->GetBinCenter(i);
-        //if(x < -3.0) this_hist->GetXaxis()->SetBinLabel(i, Form("%.1f", round(10 * x) / 10 + 4));
-        //else if(x < -1.0) this_hist->GetXaxis()->SetBinLabel(i, Form("%.1f", round(10 * x) / 10 + 2));
-        //else if(x < 1.0) this_hist->GetXaxis()->SetBinLabel(i, Form("%.1f", round(10 * x) / 10));
-        //else if(x < 3.0) this_hist->GetXaxis()->SetBinLabel(i, Form("%.1f", round(10 * x) / 10 - 2));
-	//else if(x < 5.0) this_hist->GetXaxis()->SetBinLabel(i, Form("%.1f", round(10 * x) / 10 - 4));
-      }
-      this_hist->GetXaxis()->SetLabelSize(0.05);
-    }
     this_hist->SetDirectory(NULL);
     maphist_TH1D[histname] = this_hist;
   }
