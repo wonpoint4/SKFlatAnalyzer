@@ -121,8 +121,8 @@ public:
   static const int afb_mbinnum_HS = 8;
   static constexpr const double afb_mbin_HS[afb_mbinnum_HS+1] = {52,65,77,106,140,200,280,400,3000};
 
-  static const int afb_mbinnum = 14;
-  static constexpr const double afb_mbin[afb_mbinnum+1] = {52,66,76,82,86,89.5,92.7,96,100,106,116,150,200,300,500};
+  static const int afb_mbinnum = 12;
+  static constexpr const double afb_mbin[afb_mbinnum+1] = {52,66,76,82,86,89.5,92.7,96,100,106,116,170,500};
   static const int afb_chbinnum = 6;
   static constexpr const double afb_chbin[afb_chbinnum+1] = {0., 0.1, 0.2, 0.6, 1.0, 3.0, 5.0};
   static const int afb_ptbinnum = 5;

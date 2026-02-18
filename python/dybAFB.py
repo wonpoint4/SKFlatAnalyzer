@@ -6,11 +6,11 @@ import ROOT
 ROOT.gROOT.ProcessLine('#include"dybPlotter.cc"')
 ROOT.Plotter.SetupStyle()
 
-dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer")
+dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-nMassbins = 14 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+nMassbins = 12 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
     #"dy" : [1.7, -1.8],
     "wjets" : [3.8, -3.8],
@@ -77,7 +77,7 @@ systematics = {
 }
 
 def findIntersection(x, y, sigma=1):
-    miny = 100
+    miny = 999
     minx = 0
     x1 = 0
     x2 = 0
@@ -86,16 +86,15 @@ def findIntersection(x, y, sigma=1):
             miny = y[i] # Find the minimum chi2
             minx = x[i] # and sintheta2
 
+    diff1 = 999
+    diff2 = 999
     for i in range(len(y)):
-        yi = y[i]
-        diff1 = 0.01
-        diff2 = 0.01
-        if i < len(x)/2 and abs(yi - (miny + sigma**2)) < diff1:
+        if x[i] < minx and abs(y[i] - (miny + sigma**2)) < diff1:
             x1 = x[i]
-            diff1 = abs(yi - (miny + sigma**2))
-        if i > len(x)/2 and abs(yi - (miny + sigma**2)) < diff2:
+            diff1 = abs(y[i] - (miny + sigma**2))
+        if x[i] > minx and abs(y[i] - (miny + sigma**2)) < diff2:
             x2 = x[i]
-            diff2 = abs(yi - (miny + sigma**2))
+            diff2 = abs(y[i] - (miny + sigma**2))
 
     return x1, x2, minx, miny
 
@@ -105,22 +104,31 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
         sin2ws.append(sin2w_values[i])
 
     sigma = 1
-    x = np.linspace(0.22200, 0.24000, 180000)
+    xmin = 0.22200
+    xmax = 0.24200
+    nxbin = int((xmax - xmin) / 0.00001 * 100)
+    xicenter = int((0.23154 - xmin) / 0.00001 * 100)
+    x = np.linspace(xmin, xmax, nxbin)
 
     # stat-only
     fit_stat = np.polyfit(sin2ws, chi2s_stat, 2)
     pol2_stat = np.poly1d(fit_stat)
     y_stat = pol2_stat(x)
     x1_stat, x2_stat, minx_stat, miny_stat = findIntersection(x, y_stat, sigma)
+    y_stat -= miny_stat
+    chi2s_stat -= miny_stat
 
     # stat+syst
     fit_total = np.polyfit(sin2ws, chi2s_total, 2)
     pol2_total = np.poly1d(fit_total)
     y_total = pol2_total(x)
     x1_total, x2_total, minx_total, miny_total = findIntersection(x, y_total, sigma)
+    y_total -= miny_total
+    chi2s_total -= miny_total
 
-    central = (x2_total + x1_total) / 2 # Or minx_total?
+    central_stat = minx_stat
     unc_stat = (x2_stat - x1_stat) / 2
+    central_total = minx_total
     unc_total = (x2_total - x1_total) / 2
     unc_syst = (unc_total**2 - unc_stat**2)**0.5
 
@@ -128,28 +136,33 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
     plt.plot(sin2ws, chi2s_total, 'o', color='black')
     pol2_stat, = plt.plot(x, y_stat, color='darkviolet', label="stat-only")
     pol2_total, = plt.plot(x, y_total, color='blue', label="stat+syst")
-    z = np.full(len(y_stat), miny_total + sigma)
+    z = np.full(len(y_stat), sigma)
     plt.plot(x, z, color='red')
 
+    ymax = max(y_stat[-1], y_stat[0], y_total[-1], y_total[0])
     #plt.title(r"$\chi^{2}$ Fitting ("+nametag+")", fontsize=15)
     plt.xlabel("$sin^{2}\\theta^{l}_{eff}$")
-    plt.ylabel("$\chi^{2}$")
-    plt.text(0.2235, y_stat[95400] * 1.05, "$\chi^{2}_{max}$ = %.3f" % chi2s_total[0])
-    plt.text(0.2245, y_stat[0] * 0.75, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat) $\\pm$ %.5f (syst)" % (central, unc_stat, unc_syst))
-    plt.text(0.2267, y_stat[0] * 0.7, "= %.5f $\\pm$ %.5f (total)" % (central, unc_total))
+    plt.ylabel("$\Delta\chi^{2}$")
+    plt.text(0.23514 + (0.23514 - x[0]) * -1.0, 0.3, "$\chi^{2}_{min}$ = %.3f, %.3f" % (miny_stat, miny_total))
+    plt.text(0.23514 + (0.23514 - x[0]) * -0.84, ymax * 0.8, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat-only)" % (central_stat, unc_stat))
+    plt.text(0.23514 + (0.23514 - x[0]) * -0.84, ymax * 0.7, "$\sin^{2}\\theta^{l}_{eff}$ = %.5f $\\pm$ %.5f (stat) $\\pm$ %.5f (syst)" % (central_total, unc_stat, unc_syst))
+    plt.text(0.23514 + (0.23514 - x[0]) * -0.65, ymax * 0.65, "= %.5f $\\pm$ %.5f (total)" % (central_total, unc_total))
 
     plt.legend(handles=[pol2_stat, pol2_total], loc='upper right')
     plt.grid()
     # CMS Style
-    plt.text(0.221, y_stat[0] * 1.07, r"$\bf{CMS}$ Preliminary", fontsize=14)
-    plt.text(0.2285, y_stat[0] * 1.07, r"$\it{Working\ in\ progress}$", fontsize=10, color='red')
-    plt.text(0.2385, y_stat[0] * 1.12, r"$\bf{Run  II}$", fontsize=12)
-    plt.text(0.235, y_stat[0] * 1.07, r"138 fb$^{-1}$ (13 TeV)", fontsize=12)
+    yRange = y_stat[0] - y_stat[xicenter]
+    plt.text(0.23514 + (0.23514 - x[0]) * -1.07, ymax * 1.07, r"$\bf{CMS}$ Preliminary", fontsize=14)
+    plt.text(0.23514 + (0.23514 - x[0]) * -0.42, ymax * 1.07, r"$\it{Working\ in\ progress}$", fontsize=10, color='red')
+    plt.text(0.23514 + (0.23514 - x[0]) * 0.45, ymax * 1.12, r"$\bf{Run\ II}$", fontsize=12)
+    plt.text(0.23514 + (0.23514 - x[0]) * 0.14, ymax * 1.07, r"138 fb$^{-1}$ (13 TeV)", fontsize=12)
+    #plt.text(0.23514 + (0.23514 - x[0]) * 0.32, ymax * 1.12, r"$\bf{Run\ 2018}$", fontsize=12)
+    #plt.text(0.23514 + (0.23514 - x[0]) * 0.14, ymax * 1.07, r"59.6 fb$^{-1}$ (13 TeV)", fontsize=12) # 19.5, 16.8, 42.1, 59.6
 
     if "no" not in nametag: plt.savefig("./precision_"+nametag+".pdf", dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(nametag, "sin2w central : ", central, "1 sigma (stat): ", unc_stat, "1 sigma (total): ", unc_total, "sin2w range : ", x1_total, x2_total)
+    print(nametag, "sin2w central : ", central_total, "1 sigma (stat): ", unc_stat, "1 sigma (total): ", unc_total, "sin2w range : ", x1_total, x2_total)
     return unc_stat, unc_total
 
 def getdAFB(AFB_ref, AFB):
@@ -174,8 +187,8 @@ def getdAFBs_sin2w(channel):
             AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
             for i in range(1, AFB_data.GetNbinsX() + 1):
                 if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
-            #dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
-            dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
+            dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
+            #dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
             dAFBs[sin].append(dAFB)
             if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
             print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB) of " % iSin), (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
@@ -293,11 +306,11 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
     #channel = "mm201[678][ab]?/"
-    npz_files_tag = "_14bins"
+    npz_files_tag = "_12bins"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
-    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+".npz"
+    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_data.npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
         np.savez(dAFBs_sin2w_npz, X = dAFBs_sin2w, Y = dAFBs_sin2w_full)

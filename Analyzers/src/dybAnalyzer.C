@@ -19,6 +19,7 @@ void dybAnalyzer::executeEvent(){
   if(MCSample == "DYJets" && !isnormal(weight_Scale->at(0))) return;
 
   ///////////////// GEN level /////////////////////
+  zptweight = 1., topptweight = 1., weakweight = 1.;
   if(IsDYSample || IsTTSample) executeEventGen();
 
   ///////////////// RECO level /////////////////////
@@ -64,6 +65,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   else IsNominalLike = false;
 
   // Weights Setup
+  lumiweight = 1., PUweight = 1., prefireweight = 1.;
   map_weight.clear();
   if(!IsDATA){
     lumiweight = reductionweight * MCweight() * _event.GetTriggerLumi("Full");
@@ -160,12 +162,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }
 
   // New Weak corrections with sin2w variations
-  double lhe_mass = -2;
-  double lhe_costheta_CS = -2;
-  double lhe_costheta_Recoil = -2;
+  double lhe_mass = -2.;
+  double lhe_costheta_CS = -2.;
+  double lhe_costheta_Recoil = -2.;
   if(IsDYSample){
     lhe_mass = ((Particle)lhe_l0 + (Particle)lhe_l1).M();
-    lhe_costheta_CS = -2;
     if(lhe_p0.ID() == 21 || lhe_p0.ID() == 22){
       if(lhe_p1.ID() == 21 || lhe_p1.ID() == 22) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 0);
       else if(lhe_p1.ID() > 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, -1);
@@ -179,21 +180,33 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       else if(lhe_p1.ID() > 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, -1);
       else if(lhe_p1.ID() < 0) lhe_costheta_CS = GetCosThetaCS(&lhe_l0, &lhe_l1, 0);
     }
-    if(lhe_costheta_CS == -2){
+    if(lhe_costheta_CS == -2.){
       cout<<"wrong pid for parton: "<<lhe_p0.ID()<<" "<<lhe_p1.ID()<<endl;
       exit(EXIT_FAILURE);
     }
-    lhe_costheta_Recoil = -2;
+
     if(lhe_j0.ID() != 0) lhe_costheta_Recoil = GetCosThetaRecoil((Particle*)&lhe_l0, (Particle*)&lhe_l1, (Particle*)&lhe_j0, (lhe_j0.ID() < 0? 1: -1));
 
     if(IsNominalRun){
-      FillHist(prefix+hprefix+"lhe_mass_"+suffix, lhe_mass, map_weight[""], 205,-5,200);
+      FillHist(prefix+hprefix+"lhe_mass"+suffix, lhe_mass, map_weight[""], 205,-5,200);
       FillHist(prefix+hprefix+"lhe_costheta_CS"+suffix, lhe_costheta_CS, map_weight[""], 40,-2,2);
       FillHist(prefix+hprefix+"lhe_costheta_Recoil"+suffix, lhe_costheta_Recoil, map_weight[""], 40,-2,2);
+      FillHist(prefix+hprefix+"lhe_mass_costheta_Recoil"+suffix, lhe_mass, lhe_costheta_Recoil, map_weight[""], 205,-5,200, 40,-2,2);
+      FillHist(prefix+hprefix+"lhe_j0_ID_costheta_Recoil"+suffix, lhe_j0.ID(), lhe_costheta_Recoil, map_weight[""], 50,-25,25, 40,-2,2);
     }
     //weakweight = GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, 5);
     weakweight = GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, 5, lhe_j0.ID());
     //weakweight = GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 2);
+
+    if(IsNominalRun){
+      FillHist(prefix+hprefix+"lhe_mass_weakweight"+suffix, lhe_mass, weakweight, map_weight[""], 205,-5,200, 200,0,5);
+      FillHist(prefix+hprefix+"lhe_costheta_Recoil_weakweight"+suffix, lhe_costheta_Recoil, weakweight, map_weight[""], 40,-2,2, 200,0,5);
+      FillHist(prefix+hprefix+"lhe_j0_ID_weakweight"+suffix, lhe_j0.ID(), weakweight, map_weight[""], 50,-25,25, 200,0,5);
+
+      FillHist(prefix+hprefix+"lhe_mass_weakweight2"+suffix, lhe_mass, GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, 5, lhe_j0.ID()), map_weight[""], 205,-5,200, 200,0,5);
+      FillHist(prefix+hprefix+"lhe_costheta_Recoil_weakweight2"+suffix, lhe_costheta_Recoil, GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, 5, lhe_j0.ID()), map_weight[""], 40,-2,2, 200,0,5);
+      FillHist(prefix+hprefix+"lhe_j0_ID_weakweight2"+suffix, lhe_j0.ID(), GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, 5, lhe_j0.ID()), map_weight[""], 50,-25,25, 200,0,5);
+    }
   }
   map_weight[""] *= weakweight;
   if(IsNominalLike){
@@ -493,6 +506,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
     // New Weak corrections with sin2w variations
     map_weight["_noWeak"] =  map_weight[""] / weakweight;
+    map_weight["_oldWeak"] =  map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, 0., 2);
     for(unsigned int mem=0; mem<NWEIGHTS; mem++){
       map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
       map_weight["_Recoil_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, mem, lhe_j0.ID());
@@ -1654,7 +1668,6 @@ void dybAnalyzer::executeEventGen(){
       TLorentzVector genZ = (gen_l0 + gen_l1);
       zptweight = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity());
       zptweight_gym = fZptCorrection->GetZptWeight(genZ.Pt(), genZ.Rapidity(), genZ.M());
-      weakweight = GetDYWeakWeight(genZ.M(), 0., 2);
     }//else gprefix += "tau_";
   }
   if(IsTTSample) topptweight = mcCorr->GetTopPtReweight(gens);
@@ -2264,12 +2277,15 @@ double dybAnalyzer::GetCFSF(int sys){
 // Hyonsan's NLO Weak Corrections
 // From weakWeight_CS.cc, weakWeight_RecoilUDG.cc
 double dybAnalyzer::GetDYWeakWeight(double lhe_mass, double lhe_costheta, unsigned int set, unsigned int mem, int lead_pid){
-  if(IsDATA) return 1.;
-  if(!IsDYSample) return 1.;
-  if(lhe_mass == -2.0 || lhe_costheta == -2.0) return 1.;
+  if(IsDATA || !IsDYSample){
+    cout<<"[dybAnalyzer::GetDYWeakWeight] ERROR: IsDATA || !IsDYSample"<<endl;
+    exit(1);
+  }
 
   // set = 2 (Old Weak NLO - only mass dependent k-factor)
   if(set == 2) return SMPAnalyzerCore::GetDYWeakWeight(lhe_mass);
+
+  if(lhe_mass == -2. || lhe_costheta == -2.) return 1.;
 
   int ibin = -1;
   if(lhe_mass < mass_edges[0]) lhe_mass = mass_edges[0] + 1e-4;
