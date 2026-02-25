@@ -690,6 +690,15 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, bchargeSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "bChargeSF1", map_weight[""]);
   }
+  //map_weight = map_weight * GetAdhocbChargeSFWeight(bcharge);
+  //if(IsNominalLike){
+  //  FillHist(prefix+hprefix+"weight_bChargeSF_adhoc"+suffix, bchargeSF, map_weight[""], 200,-5,5);
+  //  FillCutflow(prefix+hprefix+"cutflow"+suffix, "bChargeSF_adhoc", map_weight[""]);
+  //}
+  if(!IsDATA && IsNominalRun){
+    map_weight["_bChargeSF_adhoc"] = map_weight[""] * GetAdhocbChargeSFWeight(bcharge);
+    //map_weight["_nobChargeSF_adhoc"] = map_weight[""] / GetAdhocbChargeSFWeight(bcharge);
+  }
 
   FillHist(prefix+hprefix+"mll_Tightnb"+suffix, dimass, map_weight, 80,70,110);
   FillHist(prefix+hprefix+"yll_Tightnb"+suffix, dirap, map_weight, 50,-2.5,2.5);
@@ -2239,6 +2248,30 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
   }
 
   return weight;
+}
+
+double dybAnalyzer::GetAdhocbChargeSFWeight(float bCharge){
+  if(IsDATA) return 1.;
+
+  double sf = 1.;
+  if(-5.0 < bCharge && bCharge < -3.0) sf = 18300. / 21068.265;
+  else if(bCharge < -1.0) sf = 31046. / 33046.638;
+  else if(bCharge < -0.6) sf = 23110. / 26347.320;
+  else if(bCharge < -0.2) sf = 229552. / 239533.35;
+  else if(bCharge < -0.1) sf = 116808. / 117608.03;
+  else if(bCharge < -0.0) sf = 131471. / 132406.60;
+  else if(bCharge < 0.1) sf = 132580. / 133977.44;
+  else if(bCharge < 0.2) sf = 120521. / 121700.46;
+  else if(bCharge < 0.6) sf = 246385. / 253806.95;
+  else if(bCharge < 1.0) sf = 25875. / 29350.478;
+  else if(bCharge < 3.0) sf = 31988. / 33319.860;
+  else if(bCharge < 5.0) sf = 18197. / 20949.792;
+  else{
+    cout<<"[dybAnalyzer::GetAdhocbChargeSFWeight] |bCharge| >= 5.0?, actual value = "<<bCharge<<endl;
+    return sf;
+  }
+
+  return sf * 1163115.2 / 1125833.;
 }
 
 double dybAnalyzer::GetCFSF(int sys){

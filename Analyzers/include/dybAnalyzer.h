@@ -27,6 +27,7 @@ public:
   virtual double jetCharge(const Jet& jet);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys=0, TString bChargeBins="012345");
+  double GetAdhocbChargeSFWeight(float bCharge);
   double GetDYWeakWeight(double lhe_mass, double lhe_costheta, unsigned int set, unsigned int mem=0, int lead_pid=0);
 
   // PUJetID, SF
