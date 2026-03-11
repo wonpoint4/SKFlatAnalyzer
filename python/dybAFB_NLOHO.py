@@ -9,7 +9,7 @@ ROOT.Plotter.SetupStyle()
 dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
-sin2w_values = [0.22654, 0.22954, 0.23054, 0.23104, 0.23154, 0.23204, 0.23254, 0.23454, 0.23654]
+sin2w_values = [0.22654, 0.22854, 0.23054, 0.23104, 0.23154, 0.23204, 0.23254, 0.23454, 0.23654]
 sin2w_indice = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
 nMassbins = 12 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
@@ -314,7 +314,7 @@ if __name__=="__main__":
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
-    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_NLOHO_Recoil.npz"
+    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_NLOHO_data.npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
         np.savez(dAFBs_sin2w_npz, X = dAFBs_sin2w, Y = dAFBs_sin2w_full)

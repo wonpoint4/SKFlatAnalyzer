@@ -375,35 +375,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_PUweight_up"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
     map_weight["_PUweight_down"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, -1);
 
-    // b-tagging SF
-    map_weight["_nobtagSF"] =  map_weight[""] / btagSF;
-    map_weight["_btagSF_hup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
-    map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
-    map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
-    map_weight["_btagSF_lup"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
-    map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
-    map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
-
-    // PUjetID SF
-    map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
-    map_weight["_PUjetSF_up"] =  map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
-    map_weight["_PUjetSF_down"] = map_weight[""] / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
-
-    // bChargeID SF
-    map_weight["_bChargeSF0"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, 0);
-    map_weight["_bChargeSF0_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, 1);
-    map_weight["_bChargeSF0_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 0, -1);
-    map_weight["_nobChargeSF1"] = map_weight[""] / bchargeSF;
-    for(TString bCh:{"0", "1", "2", "3", "4", "5"}){
-      map_weight["_bChargeSF1_up"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, 1, bCh);
-      map_weight["_bChargeSF1_down"+bCh] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 1, -1, bCh);
-    }
-    map_weight["_bChargeSFHS"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
-    map_weight["_bChargeSFHS_up"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
-    map_weight["_bChargeSFHS_down"] = map_weight[""] / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
-
     // EfficiencySF - stat
     for(int j=0; j<fEff->nreplica; j++){
       double SF_stat = 1. / muonTrackingSF / muonRECOSF / muonIDSF / muonTriggerSF / electronRECOSF / electronIDSF / electronTriggerSF;
@@ -520,6 +491,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
   }
 
+  double weight_default = map_weight[""];
   if((HasFlag("SYS") || HasFlag("PDFSYS")) && option == "") map_weight.erase("");
 
   //==== Inclusive DY
@@ -675,16 +647,19 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
 
+  weight_default *= pujetSF;
   map_weight = map_weight * pujetSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_PUjetSF"+suffix, pujetSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "PUjetSF", map_weight[""]);
   }
+  weight_default *= btagSF;
   map_weight = map_weight * btagSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_btagSF"+suffix, btagSF, map_weight[""], 200,-5,5);
     FillCutflow(prefix+hprefix+"cutflow"+suffix, "btagSF", map_weight[""]);
   }
+  weight_default *= bchargeSF;
   map_weight = map_weight * bchargeSF;
   if(IsNominalLike){
     FillHist(prefix+hprefix+"weight_bChargeSF1"+suffix, bchargeSF, map_weight[""], 200,-5,5);
@@ -695,9 +670,41 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   //  FillHist(prefix+hprefix+"weight_bChargeSF_adhoc"+suffix, bchargeSF, map_weight[""], 200,-5,5);
   //  FillCutflow(prefix+hprefix+"cutflow"+suffix, "bChargeSF_adhoc", map_weight[""]);
   //}
-  if(!IsDATA && IsNominalRun){
-    map_weight["_bChargeSF_adhoc"] = map_weight[""] * GetAdhocbChargeSFWeight(bcharge);
-    //map_weight["_nobChargeSF_adhoc"] = map_weight[""] / GetAdhocbChargeSFWeight(bcharge);
+
+
+  //==== Weights of Systematics (regarding jets)
+  if(!IsDATA && HasFlag("SYS") && option == ""){
+    // b-tagging SF
+    map_weight["_nobtagSF"] =  weight_default / btagSF;
+    map_weight["_btagSF_hup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
+    map_weight["_btagSF_hdown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
+    map_weight["_btagSF_hcorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
+    map_weight["_btagSF_huncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
+    map_weight["_btagSF_lup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
+    map_weight["_btagSF_ldown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownLTag");
+    map_weight["_btagSF_lcorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagCorr");;
+    map_weight["_btagSF_luncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
+
+    // PUjetID SF
+    map_weight["_noPUjetSF"] =  weight_default / pujetSF;
+    map_weight["_PUjetSF_up"] =  weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
+    map_weight["_PUjetSF_down"] = weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
+
+    // bChargeID SF
+    map_weight["_bChargeSF0"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 0, 0);
+    map_weight["_bChargeSF0_up"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 0, 1);
+    map_weight["_bChargeSF0_down"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 0, -1);
+    map_weight["_nobChargeSF1"] = weight_default / bchargeSF;
+    for(TString bCh:{"0", "1", "2", "3", "4", "5"}){
+      map_weight["_bChargeSF1_up"+bCh] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 1, 1, bCh);
+      map_weight["_bChargeSF1_down"+bCh] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 1, -1, bCh);
+    }
+    map_weight["_bChargeSFHS"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, 0);
+    map_weight["_bChargeSFHS_up"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
+    map_weight["_bChargeSFHS_down"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
+  }else if(!IsDATA && IsNominalRun){ // Should be added "!hprefix.Contains("ss_")" next time
+    map_weight["_bChargeSF_adhoc"] = weight_default * GetAdhocbChargeSFWeight(bcharge);
+    //map_weight["_nobChargeSF_adhoc"] = weight_default / GetAdhocbChargeSFWeight(bcharge);
   }
 
   FillHist(prefix+hprefix+"mll_Tightnb"+suffix, dimass, map_weight, 80,70,110);

@@ -15,4 +15,3 @@ condor_run "python3 python/dybAFB_PDF3.py > npzing_syst_12bins_PDF3.log" &
 condor_run "python3 python/dybAFB_PDF4.py > npzing_syst_12bins_PDF4.log" &
 condor_run "python3 python/dybAFB_PDFSYS.py > npzing_syst_12bins_PDFSYS.log" &
 condor_run "python3 python/dybAFB_SYS.py > npzing_syst_12bins_SYS.log" &
-
