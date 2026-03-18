@@ -31,11 +31,12 @@ systematics = [
     ["_lumi_up", "_lumi_down"],
     ["_jetpt25", "_jetpt55"],
     ["_jeteta5", "_jeteta1p5"],
+    ["_bScore_up", "_bScore_down"],
     ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-    #["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-    #["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-    #["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-    #["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+    ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
+    ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
+    ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
+    ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
     ["_scalevariation%d" % i for i in [0, 1, 2, 3, 4, 6, 8]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     ["_FSR_up", "_FSR_down"],
 ] + [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()]
@@ -73,7 +74,7 @@ def GetAccuracy(ientry,channel,option=""):
 
 ### For Liklihood ratio method
 def getfc(channel, chargeBin="", syst=""):
-    suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
+    suffix = "" if "norm" in syst or "lumi" in syst or syst == "" else "suffix:"+syst
 
     correct = ttlj.GetHist(0, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
     wrong = ttlj.GetHist(1, channel+"/reco[bB]Charge"+chargeBin, suffix).Integral()
@@ -159,7 +160,7 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
             elif "lumi_down" in syst: norm *= (100 - 0.74) / 100
             a = ROOT.ttljPlotter("data_sub ttlj", norm)
 
-            suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
+            suffix = "" if "norm" in syst or "lumi" in syst or syst == "" else "suffix:"+syst
             if "norm" in syst:
                 for process, uncs in xsec_unc.items():
                     if process in syst: suffix = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in syst else 1)] * 0.01, process)
@@ -174,6 +175,7 @@ def GetAccuracy_withLR(ientry, channel, chargeBin="", option=""):
             fp_stat = hp.GetBinError(2)
             fms[systs].append(hm.GetBinContent(1))
             fm_stat = hm.GetBinError(1)
+            del a
         if systs < len(allsysts) - 1:
             fcs.append([])
             fps.append([])
@@ -190,7 +192,7 @@ def GetTrueAccuracy_withLR(channel, chargeBin="", option=""):
     for systs in range(len(allsysts)):
         syst_ep_bigger, syst_em_bigger = 0, 0
         for syst in allsysts[systs]:
-            suffix = "" if "norm" in syst or "lumi" in syst else "suffix:"+syst
+            suffix = "" if "norm" in syst or "lumi" in syst or syst == "" else "suffix:"+syst
             hp = ttlj_gen.GetHist(0, channel+"/genBCharge"+chargeBin+"_L[pm]", suffix)
             hm = ttlj_gen.GetHist(0, channel+"/genbCharge"+chargeBin+"_L[pm]", suffix)
             hp.Scale(1. / hp.Integral())
@@ -697,7 +699,7 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "nPV_chargeBin2", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "nPV_chargeBin3", option)
 
-    DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
+    #DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
     #DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.605, 0.66), "Eras_Leps", option)
     #chargeBins = ["", "_[0-3]", "_4", "_5"]
     #DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], (0.59, 0.78), "Eras_Bins", option)

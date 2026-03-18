@@ -21,6 +21,11 @@ cat tmp/dybAnalyzer.txt |grep dyb |xargs -i sh -c "{} --skim SkimTree_1B2L -e 20
 condor_qedit wonjun "RequestMemory=20000"; condor_release wonjun
 condor_qedit wonjun 'concurrencylimits="n101.wonjun"'
 
+cat tmp/dybAnalyzer.txt |grep ttlj |grep -v 2B1L |xargs -i sh -c "{} -e 2018 &"
+cat tmp/dybAnalyzer.txt |grep ttlj |grep -v 2B1L |xargs -i sh -c "{} -e 2017 &"
+cat tmp/dybAnalyzer.txt |grep ttlj |grep -v 2B1L |xargs -i sh -c "{} -e 2016postVFP &"
+cat tmp/dybAnalyzer.txt |grep ttlj |grep -v 2B1L |xargs -i sh -c "{} -e 2016preVFP &"
+
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2018 &"
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2017 &"
 cat tmp/dybAnalyzer.txt |grep ttlj |xargs -i sh -c "{} -e 2016postVFP &"

@@ -34,7 +34,7 @@ void ttljAnalyzer::executeEvent(){
         }
       }
     }else{
-      for(TString syst:{"_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
+      for(TString syst:{"_bScore_up", "_bScore_down", "_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
         executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }
@@ -53,7 +53,7 @@ void ttljAnalyzer::executeEvent(){
         }
       }
     }else{
-      for(TString syst:{"_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
+      for(TString syst:{"_bScore_up", "_bScore_down", "_jetpt25", "_jetpt30", "_jetpt35", "_jetpt45", "_jetpt50", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
         executeEventWithParameter("e"+GetEraShort(), syst);
       }
       electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0, true);
@@ -138,9 +138,99 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
 
   // b-tagging
   JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb);
+  // Check jetcharge vs. b-tagging score, pt, eta, nPV correlations in MC
+  if(!IsDATA && IsNominalRun){
+    for(const auto& jet:realjets){
+      if(jet.partonFlavour() == 5){
+        FillHist(prefix+hprefix+"b_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+        FillHist(prefix+hprefix+"b_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(jet.Pt() < 35) FillHist(prefix+hprefix+"b_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"b_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"b_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"b_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"b_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"b_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"b_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"b_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"b_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        FillHist(prefix+hprefix+"b_accuracy"+suffix, (jet.Charge() < 0? 1: 0), map_weight[""], 2,0,2);
+        FillHist(prefix+hprefix+"b_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
+        FillHist(prefix+hprefix+"b_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), (jet.Charge() < 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
+        if(jet.Charge() < 0){
+          FillHist(prefix+hprefix+"b_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"b_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"b_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"b_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
+        }else{
+          FillHist(prefix+hprefix+"b_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"b_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"b_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"b_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
+        }
+      }else if(jet.partonFlavour() == -5){
+        FillHist(prefix+hprefix+"B_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+        FillHist(prefix+hprefix+"B_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(jet.Pt() < 35) FillHist(prefix+hprefix+"B_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"B_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"B_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"B_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"B_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"B_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"B_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"B_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"B_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        FillHist(prefix+hprefix+"B_accuracy"+suffix, (jet.Charge() > 0? 1: 0), map_weight[""], 2,0,2);
+        FillHist(prefix+hprefix+"B_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
+        FillHist(prefix+hprefix+"B_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), (jet.Charge() > 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
+        if(jet.Charge() > 0){
+          FillHist(prefix+hprefix+"B_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"B_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"B_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"B_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
+        }else{
+          FillHist(prefix+hprefix+"B_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"B_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"B_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"B_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
+        }
+      }
+
+      if(fabs(jet.partonFlavour()) == 5){
+        FillHist(prefix+hprefix+"PID5_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+        FillHist(prefix+hprefix+"PID5_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(jet.Pt() < 35) FillHist(prefix+hprefix+"PID5_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"PID5_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"PID5_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"PID5_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"PID5_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"PID5_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"PID5_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"PID5_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        else FillHist(prefix+hprefix+"PID5_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
+        FillHist(prefix+hprefix+"PID5_accuracy"+suffix, ((jet.Charge() * jet.partonFlavour()) < 0? 1: 0), map_weight[""], 2,0,2);
+        FillHist(prefix+hprefix+"PID5_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
+        FillHist(prefix+hprefix+"PID5_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), ((jet.Charge() * jet.partonFlavour()) < 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
+        if((jet.Charge() * jet.partonFlavour()) < 0){
+          FillHist(prefix+hprefix+"PID5_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"PID5_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"PID5_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"PID5_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
+        }else{
+          FillHist(prefix+hprefix+"PID5_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
+          FillHist(prefix+hprefix+"PID5_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
+          FillHist(prefix+hprefix+"PID5_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
+          FillHist(prefix+hprefix+"PID5_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
+        }
+      }
+    }
+  }
+
   for(const auto& jet:realjets){
     //jet *= jet.BJetNNCorrection(); // full bJetEnergyCorrection (BBjetRegression)?
-    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP) && fabs(jet.Eta()) < (DataYear == 2016? 2.4: 2.5)) bjets.push_back(jet);
+    double btag_score_cut = mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP);
+    if(option.Contains("bScore_up")) btag_score_cut *= 1.10;
+    else if(option.Contains("bScore_down")) btag_score_cut *= 0.90;
+    if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > btag_score_cut && fabs(jet.Eta()) < (DataYear == 2016? 2.4: 2.5)) bjets.push_back(jet);
     else{
       if(option.Contains("jetpt25")) ajets.push_back(jet);
       else if(option.Contains("jetpt30")){
