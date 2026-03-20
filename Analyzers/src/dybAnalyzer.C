@@ -23,7 +23,9 @@ void dybAnalyzer::executeEvent(){
   if(IsDYSample || IsTTSample) executeEventGen();
 
   ///////////////// RECO level /////////////////////
-  jets_raw = GetAllJets(); // This can make event loops much slower in case of running over Unskimmed samples
+  muons_raw = GetAllMuons(); // This can make event loops much slower in case of running over Unskimmed samples
+  electrons_raw = GetAllElectrons();
+  jets_raw = GetAllJets();
   if(!IsDATA || DataStream.Contains("DoubleMuon")){
     muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0, true);
     executeEventWithParameter("mm"+GetEraShort());
@@ -125,92 +127,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   // b-tagging
   JetTagging::Parameters DeepJet_Tight = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Tight, JetTagging::incl, JetTagging::comb);
   JetTagging::Parameters DeepJet_Loose = JetTagging::Parameters(JetTagging::DeepJet, JetTagging::Loose, JetTagging::incl, JetTagging::comb);
-  // Check jetcharge vs. b-tagging score, pt, eta, nPV correlations in MC
-  if(!IsDATA && IsNominalRun){
-    for(const auto& jet:realjets){
-      if(jet.partonFlavour() == 5){
-        FillHist(prefix+hprefix+"b_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-        FillHist(prefix+hprefix+"b_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(jet.Pt() < 35) FillHist(prefix+hprefix+"b_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"b_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"b_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"b_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"b_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"b_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"b_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"b_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"b_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        FillHist(prefix+hprefix+"b_accuracy"+suffix, (jet.Charge() < 0? 1: 0), map_weight[""], 2,0,2);
-        FillHist(prefix+hprefix+"b_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
-        FillHist(prefix+hprefix+"b_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), (jet.Charge() < 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
-        if(jet.Charge() < 0){
-          FillHist(prefix+hprefix+"b_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"b_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"b_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"b_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
-        }else{
-          FillHist(prefix+hprefix+"b_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"b_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"b_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"b_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
-        }
-      }else if(jet.partonFlavour() == -5){
-        FillHist(prefix+hprefix+"B_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-        FillHist(prefix+hprefix+"B_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(jet.Pt() < 35) FillHist(prefix+hprefix+"B_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"B_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"B_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"B_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"B_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"B_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"B_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"B_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"B_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        FillHist(prefix+hprefix+"B_accuracy"+suffix, (jet.Charge() > 0? 1: 0), map_weight[""], 2,0,2);
-        FillHist(prefix+hprefix+"B_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
-        FillHist(prefix+hprefix+"B_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), (jet.Charge() > 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
-        if(jet.Charge() > 0){
-          FillHist(prefix+hprefix+"B_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"B_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"B_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"B_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
-        }else{
-          FillHist(prefix+hprefix+"B_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"B_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"B_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"B_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
-        }
-      }
 
-      if(fabs(jet.partonFlavour()) == 5){
-        FillHist(prefix+hprefix+"PID5_score"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-        FillHist(prefix+hprefix+"PID5_jetcharge"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(jet.Pt() < 35) FillHist(prefix+hprefix+"PID5_jetcharge_pt0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 50) FillHist(prefix+hprefix+"PID5_jetcharge_pt1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 80) FillHist(prefix+hprefix+"PID5_jetcharge_pt2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(jet.Pt() < 120) FillHist(prefix+hprefix+"PID5_jetcharge_pt3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"PID5_jetcharge_pt4"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        if(fabs(jet.Eta()) < 0.6) FillHist(prefix+hprefix+"PID5_jetcharge_eta0"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.2) FillHist(prefix+hprefix+"PID5_jetcharge_eta1"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else if(fabs(jet.Eta()) < 1.8) FillHist(prefix+hprefix+"PID5_jetcharge_eta2"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        else FillHist(prefix+hprefix+"PID5_jetcharge_eta3"+suffix, jet.Charge(), map_weight[""], 200,-1,1);
-        FillHist(prefix+hprefix+"PID5_accuracy"+suffix, ((jet.Charge() * jet.partonFlavour()) < 0? 1: 0), map_weight[""], 2,0,2);
-        FillHist(prefix+hprefix+"PID5_score_jetcharge"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), jet.Charge(), map_weight[""], 100,0,1, 200,-1,1);
-        FillHist(prefix+hprefix+"PID5_score_accuracy"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), ((jet.Charge() * jet.partonFlavour()) < 0? 1: 0), map_weight[""], 100,0,1, 2,0,2);
-        if((jet.Charge() * jet.partonFlavour()) < 0){
-          FillHist(prefix+hprefix+"PID5_pt_correct"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"PID5_eta_correct"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"PID5_score_correct"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"PID5_nPV_correct"+suffix, nPV, map_weight[""], 100,0,100);
-        }else{
-          FillHist(prefix+hprefix+"PID5_pt_incorrect"+suffix, jet.Pt(), map_weight[""], 200,0,200);
-          FillHist(prefix+hprefix+"PID5_eta_incorrect"+suffix, jet.Eta(), map_weight[""], 50,-2.5,2.5);
-          FillHist(prefix+hprefix+"PID5_score_incorrect"+suffix, jet.GetTaggerResult(DeepJet_Tight.j_Tagger), map_weight[""], 100,0,1);
-          FillHist(prefix+hprefix+"PID5_nPV_incorrect"+suffix, nPV, map_weight[""], 100,0,100);
-        }
-      }
-    }
-  }
+  // Check jetcharge vs. b-tagging score, pt, eta, nPV correlations in MC
+  if(!IsDATA && IsNominalRun) Checks_bjet_information(prefix+hprefix, realjets, map_weight[""]);
 
   for(auto& jet:realjets){
     //jet *= jet.BJetNNCorrection(); // full bJetEnergyCorrection (BBjetRegression)?
@@ -1438,21 +1357,18 @@ bool dybAnalyzer::IsFiredTriggers(TString channel){
 }
 double dybAnalyzer::jetCharge(const Jet& jet){
   double jetCharge = jet.Charge();
-  vector<Muon> allmus = GetAllMuons(); // Need RoccoR too?
-  std::sort(allmus.begin(),allmus.end(),PtComparing);
-  vector<Electron> allels = GetAllElectrons(); // Need Aepcor too?
-  std::sort(allels.begin(),allels.end(),PtComparing);
 
   // Selections from Hyonsan's AN (AN-20-216 v3)
   vector<Muon> bmuon;
-  for(const auto& mu:allmus){
+  if(muons_raw.size() == 0) muons_raw = GetAllMuons();
+  for(const auto& mu:muons_raw){
     if(jet.DeltaR(mu) > 0.3) continue;
     if(mu.P() * sin(mu.Angle(jet.Vect())) < 1.0) continue;
     if(mu.IsType(Muon::Type::PFMuon)) bmuon.push_back(mu);
   }
-
   vector<Electron> belectron;
-  for(const auto& el:allels){
+  if(electrons_raw.size() == 0) electrons_raw = GetAllElectrons();
+  for(const auto& el:electrons_raw){
     if(jet.DeltaR(el) > 0.3) continue;
     if(el.P() * sin(el.Angle(jet.Vect())) < 1.0) continue;
     if(!PassID(&el, "SoftElectronID")) continue;
@@ -1461,58 +1377,157 @@ double dybAnalyzer::jetCharge(const Jet& jet){
   }
 
   //The jet has soft muon inside, and its charge will determine the jet charge
-  if(bmuon.size() > 0){
-    jetCharge += 2 * bmuon.at(0).Charge();
-    if(IsNominalRun){
-      FillHist("softmuon/nmu", bmuon.size(), 1, 10,0,10);
-      FillHist("softmuon/nel", belectron.size(), 1, 10,0,10);
-      FillHist("softmuon/pt", bmuon.at(0).Pt(), 1, 200,0,200);
-      FillHist("softmuon/ptRel", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
-      FillHist("softmuon/ptRatio", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-      FillHist("softmuon/jetpt_pt", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      if(bmuon.at(0).Charge() * jet.Charge() > 0){
-        FillHist("softmuon/nmu_SS", bmuon.size(), 1, 10,0,10);
-        FillHist("softmuon/nel_SS", belectron.size(), 1, 10,0,10);
-        FillHist("softmuon/pt_SS", bmuon.at(0).Pt(), 1, 200,0,200);
-        FillHist("softmuon/ptRel_SS", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
-        FillHist("softmuon/ptRatio_SS", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-        FillHist("softmuon/jetpt_pt_SS", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      }else{
-        FillHist("softmuon/nmu_OS", bmuon.size(), 1, 10,0,10);
-        FillHist("softmuon/nel_OS", belectron.size(), 1, 10,0,10);
-        FillHist("softmuon/pt_OS", bmuon.at(0).Pt(), 1, 200,0,200);
-        FillHist("softmuon/ptRel_OS", bmuon.at(0).P() * sin(bmuon.at(0).Angle(jet.Vect())), 1, 400,0,10);
-        FillHist("softmuon/ptRatio_OS", bmuon.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-        FillHist("softmuon/jetpt_pt_OS", jet.Pt(), bmuon.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      }
+  if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
+  else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
+
+  return jetCharge;
+}
+
+void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet> realjets, double weight){
+  if(IsDATA) return;
+
+  for(const auto& jet:realjets){
+    if(fabs(jet.partonFlavour()) != 5) continue;
+    TString PID5 = (jet.partonFlavour() > 0? "b": "B");
+    double bScore = jet.GetTaggerResult(JetTagging::DeepJet);
+    double jetCharge = jet.Charge();
+
+    vector<Muon> bmuon;
+    if(muons_raw.size() == 0) muons_raw = GetAllMuons();
+    for(const auto& mu:muons_raw){
+      if(jet.DeltaR(mu) > 0.3) continue;
+      if(mu.P() * sin(mu.Angle(jet.Vect())) < 1.0) continue;
+      if(mu.IsType(Muon::Type::PFMuon)) bmuon.push_back(mu);
     }
-  }else if(belectron.size() > 0){
-    jetCharge += 4 * belectron.at(0).Charge();
-    if(IsNominalRun){
-      FillHist("softelectron/nmu", bmuon.size(), 1, 10,0,10);
-      FillHist("softelectron/nel", belectron.size(), 1, 10,0,10);
-      FillHist("softelectron/pt", belectron.at(0).Pt(), 1, 200,0,200);
-      FillHist("softelectron/ptRel", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
-      FillHist("softelectron/ptRatio", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-      FillHist("softelectron/jetpt_pt", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      if(belectron.at(0).Charge() * jet.Charge() > 0){
-        FillHist("softelectron/nmu_SS", belectron.size(), 1, 10,0,10);
-        FillHist("softelectron/nel_SS", belectron.size(), 1, 10,0,10);
-        FillHist("softelectron/pt_SS", belectron.at(0).Pt(), 1, 200,0,200);
-        FillHist("softelectron/ptRel_SS", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
-        FillHist("softelectron/ptRatio_SS", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-        FillHist("softelectron/jetpt_pt_SS", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      }else{
-        FillHist("softelectron/nmu_OS", belectron.size(), 1, 10,0,10);
-        FillHist("softelectron/nel_OS", belectron.size(), 1, 10,0,10);
-        FillHist("softelectron/pt_OS", belectron.at(0).Pt(), 1, 200,0,200);
-        FillHist("softelectron/ptRel_OS", belectron.at(0).P() * sin(belectron.at(0).Angle(jet.Vect())), 1, 400,0,10);
-        FillHist("softelectron/ptRatio_OS", belectron.at(0).Pt() / jet.Pt(), 1, 200,0,5);
-        FillHist("softelectron/jetpt_pt_OS", jet.Pt(), belectron.at(0).Pt(), 1, 200,0,1000, 80,0,400);
-      }
+    vector<Electron> belectron;
+    if(electrons_raw.size() == 0) electrons_raw = GetAllElectrons();
+    for(const auto& el:electrons_raw){
+      if(jet.DeltaR(el) > 0.3) continue;
+      if(el.P() * sin(el.Angle(jet.Vect())) < 1.0) continue;
+      if(!PassID(&el, "SoftElectronID")) continue;
+      if(!el.PassConversionVeto()) continue;
+      if(el.IsGsfCtfScPixChargeConsistent()) belectron.push_back(el);
+    }
+    if(bmuon.size() > 0) jetCharge += 2 * bmuon.at(0).Charge();
+    else if(belectron.size() > 0) jetCharge += 4 * belectron.at(0).Charge();
+
+    TString samples = "etc/";
+    if(IsDYSample) samples = "DY/";
+    else if(IsTTSample) samples = "ttbar/";
+    TString suf = "";
+    for(TString pre:{(TString)"PID5/", GetEraShort()+"/", prefix_hist, samples}){
+      FillHist(pre+"PID5_pt", jet.Pt(), weight, 200,0,200);
+      FillHist(pre+"PID5_eta", jet.Eta(), weight, 50,-2.5,2.5);
+      FillHist(pre+"PID5_phi", jet.Phi(), weight, 64,-3.2,3.2);
+      FillHist(pre+"PID5_score", bScore, weight, 100,0,1);
+      FillHist(pre+"PID5_nPV", nPV, weight, 100,0,100);
+      FillHist(pre+"PID5_jetcharge", jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+"PID5_jetCharge", jetCharge, weight, 200,-5,5);
+      FillHist(pre+"PID5_nmuons", bmuon.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_nelectrons", belectron.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_fbmuon", (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fbelectron", (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fblepton", (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_pt", jet.Pt(), weight, 200,0,200);
+      FillHist(pre+PID5+"_eta", jet.Eta(), weight, 50,-2.5,2.5);
+      FillHist(pre+PID5+"_phi", jet.Phi(), weight, 64,-3.2,3.2);
+      FillHist(pre+PID5+"_score", bScore, weight, 100,0,1);
+      FillHist(pre+PID5+"_nPV", nPV, weight, 100,0,100);
+      FillHist(pre+PID5+"_jetcharge", jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+PID5+"_jetCharge", jetCharge, weight, 200,-5,5);
+      FillHist(pre+PID5+"_nmuons", bmuon.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_nelectrons", belectron.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_fbmuon", (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fbelectron", (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fblepton", (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+
+      if(jet.Charge() * jet.partonFlavour() < 0) suf = "_correct";
+      else suf = "_incorrect";
+      FillHist(pre+"PID5_pt"+suf, jet.Pt(), weight, 200,0,200);
+      FillHist(pre+"PID5_eta"+suf, jet.Eta(), weight, 50,-2.5,2.5);
+      FillHist(pre+"PID5_phi"+suf, jet.Phi(), weight, 64,-3.2,3.2);
+      FillHist(pre+"PID5_score"+suf, bScore, weight, 100,0,1);
+      FillHist(pre+"PID5_nPV"+suf, nPV, weight, 100,0,100);
+      FillHist(pre+"PID5_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+"PID5_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+"PID5_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_pt"+suf, jet.Pt(), weight, 200,0,200);
+      FillHist(pre+PID5+"_eta"+suf, jet.Eta(), weight, 50,-2.5,2.5);
+      FillHist(pre+PID5+"_phi"+suf, jet.Phi(), weight, 64,-3.2,3.2);
+      FillHist(pre+PID5+"_score"+suf, bScore, weight, 100,0,1);
+      FillHist(pre+PID5+"_nPV"+suf, nPV, weight, 100,0,100);
+      FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+
+      if(jetCharge * jet.partonFlavour() < 0) suf = "_Correct";
+      else suf = "_Incorrect";
+      FillHist(pre+"PID5_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+"PID5_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+
+      if(jet.Pt() < 35) suf = "_pt0";
+      else if(jet.Pt() < 50) suf = "_pt1";
+      else if(jet.Pt() < 80) suf = "_pt2";
+      else if(jet.Pt() < 120) suf = "_pt3";
+      else suf = "_pt4";
+      FillHist(pre+"PID5_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+"PID5_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+"PID5_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+
+      if(fabs(jet.Eta()) < 0.6) suf = "_eta0";
+      else if(fabs(jet.Eta()) < 1.2) suf = "_eta1";
+      else if(fabs(jet.Eta()) < 1.8) suf = "_eta2";
+      else suf = "_eta3";
+      FillHist(pre+"PID5_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+"PID5_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+"PID5_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+      FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+      FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+      FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+
+      FillHist(pre+"PID5_accuracy", (jet.Charge() * jet.partonFlavour() < 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_score_jetcharge", bScore, jet.Charge(), weight, 100,0,1, 200,-1,1);
+      FillHist(pre+"PID5_score_accuracy", bScore, (jet.Charge() * jet.partonFlavour() < 0? 1: 0), weight, 100,0,1, 2,0,2);
+      FillHist(pre+"PID5_Accuracy", (jetCharge * jet.partonFlavour() < 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_score_jetCharge", bScore, jetCharge, weight, 100,0,1, 200,-5,5);
+      FillHist(pre+"PID5_score_Accuracy", bScore, (jetCharge * jet.partonFlavour() < 0? 1: 0), weight, 100,0,1, 2,0,2);
+      FillHist(pre+PID5+"_accuracy", (jet.Charge() * jet.partonFlavour() < 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_score_jetcharge", bScore, jet.Charge(), weight, 100,0,1, 200,-1,1);
+      FillHist(pre+PID5+"_score_accuracy", bScore, (jet.Charge() * jet.partonFlavour() < 0? 1: 0), weight, 100,0,1, 2,0,2);
+      FillHist(pre+PID5+"_Accuracy", (jetCharge * jet.partonFlavour() < 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_score_jetCharge", bScore, jetCharge, weight, 100,0,1, 200,-5,5);
+      FillHist(pre+PID5+"_score_Accuracy", bScore, (jetCharge * jet.partonFlavour() < 0? 1: 0), weight, 100,0,1, 2,0,2);
     }
   }
-  return jetCharge;
 }
 
 dybAnalyzer::dybAnalyzer(){}

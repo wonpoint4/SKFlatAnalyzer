@@ -25,6 +25,7 @@ public:
   virtual bool IsFiredTriggers(TString channel);
   virtual bool HasDileptons(TString channel, unsigned int set=0, unsigned int mem=0);
   virtual double jetCharge(const Jet& jet);
+  virtual void Checks_bjet_information(TString prefix_hist, const vector<Jet> jets, double weight);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys=0, TString bChargeBins="012345");
   double GetAdhocbChargeSFWeight(float bCharge);
@@ -71,7 +72,9 @@ public:
   vector<Jet> jets;
   vector<Jet> bjets;
   vector<Lepton*> leptons;
+  vector<Muon> muons_raw;
   vector<Muon> muons;
+  vector<Electron> electrons_raw;
   vector<Electron> electrons;
   Lepton* lepton0 = NULL;
   Lepton* lepton1 = NULL;
