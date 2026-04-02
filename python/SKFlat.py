@@ -899,7 +899,7 @@ try:
                   if nhadd<4: break
                   os.system('echo "Too many hadd currently (nhadd='+str(nhadd)+'). Sleep 60s" >> JobStatus.log')
                   time.sleep(60)
-                if NJobs < 45 or args.Userflags == "":
+                if (NJobs < 45) or (NJobs < 100 and args.Userflags == ""):
                   os.system('hadd -f '+outputname+'.root output/*.root >> JobStatus.log')
                 else:
                   os.system('condor_run -a request_memory='+str(2.5 * args.Memory + 10000)+' -a request_cpus=15 "hadd -j 15 -f '+outputname+'.root '+base_rundir+'/output/*.root 2>&1 >> JobStatus.log"')

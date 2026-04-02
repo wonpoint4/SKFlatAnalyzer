@@ -27,7 +27,8 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
+        if(syst.Contains("smear") && !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
+        else executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_muon.size(); s++){
@@ -45,12 +46,11 @@ void ttljAnalyzer::executeEvent(){
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5), 0,0, true);
     executeEventWithParameter("e"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5"}){
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
-      }
-      electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0, true);
-      for(TString syst:{"_HS", "_noSelQ"}){
-        executeEventWithParameter("e"+GetEraShort(), syst);
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
+        TString electron_ID = (syst.Contains("HS") || syst.Contains("noSelQ"))? "passMediumID": "passMediumID_SelQ";
+        electrons = ElectronEnergyCorrection(SMPGetElectrons(electron_ID, 8.0, 2.5), 0,0, true);
+        if(syst.Contains("smear") && !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
+        else executeEventWithParameter("e"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_electron.size(); s++){

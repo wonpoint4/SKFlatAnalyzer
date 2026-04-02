@@ -23,12 +23,14 @@ public:
   virtual void executeEventGen();
   virtual void executeEvent();
   virtual bool IsFiredTriggers(TString channel);
-  virtual bool HasDileptons(TString channel, unsigned int set=0, unsigned int mem=0);
+  virtual bool HasDileptons(TString channel, unsigned int set=0, unsigned int mem=0, int sys=0);
   virtual double jetCharge(const Jet& jet);
   virtual void Checks_bjet_information(TString prefix_hist, const vector<Jet> jets, double weight);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys=0, TString bChargeBins="012345");
   double GetAdhocbChargeSFWeight(float bCharge);
+  double GetAdhocZptWeight(float Zpt);
+  double GetAdhocNjetsWeight(unsigned int njets);
   double GetDYWeakWeight(double lhe_mass, double lhe_costheta, unsigned int set, unsigned int mem=0, int lead_pid=0);
 
   // PUJetID, SF
