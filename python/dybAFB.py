@@ -9,6 +9,8 @@ ROOT.Plotter.SetupStyle()
 dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
+sin2w_values = [0.22654, 0.22854, 0.23054, 0.23104, 0.23154, 0.23204, 0.23254, 0.23454, 0.23654]
+sin2w_indice = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
 nMassbins = 12 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
@@ -44,7 +46,6 @@ systematics = {
     "PUIDSF" :    [["_PUjetSF_up", "_PUjetSF_down"]],
     "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr:2016preVFP", "uncorr:2016postVFP", "uncorr:2017", "uncorr:2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
-    #"bChargeSF2" : [["_bChargeSF_adhoc"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     "CFSF" :      [["_CFSF_up", "_CFSF_down"]],
     # PDFSYS
@@ -100,9 +101,9 @@ def findIntersection(x, y, sigma=1):
     return x1, x2, minx, miny
 
 def calPrecision(chi2s_stat, chi2s_total, nametag=""):
-    sin2ws = []
-    for i in sin2w_indice:
-        sin2ws.append(sin2w_values[i])
+    sin2ws = sin2w_values#[]
+    #for i in sin2w_indice:
+    #    sin2ws.append(sin2w_values[i])
 
     sigma = 1
     xmin = 0.22200
@@ -180,12 +181,14 @@ def getdAFBs_sin2w(channel):
     dAFBs_full = []
 
     for sin in range(len(sin2w_indice)):
-        iSin = sin2w_indice[sin]
+        #iSin = sin2w_indice[sin]
+        iSin = sin2w_values[sin]
         dAFB_full = np.array([])
         for ch in range(len(chargeBins)):
             AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
             AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-            AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
+            #AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
+            AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_Recoil_weakNLOHO_s2eff_%i:dy" % (iSin * 1e5))
             for i in range(1, AFB_data.GetNbinsX() + 1):
                 if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
             dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
@@ -311,7 +314,7 @@ if __name__=="__main__":
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
-    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_data.npz"
+    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+".npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
         np.savez(dAFBs_sin2w_npz, X = dAFBs_sin2w, Y = dAFBs_sin2w_full)

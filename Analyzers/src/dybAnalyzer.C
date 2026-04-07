@@ -30,19 +30,15 @@ void dybAnalyzer::executeEvent(){
     muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0, true);
     executeEventWithParameter("mm"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("mm"+GetEraShort(), syst);
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
+        double lep_eta = syst.Contains("lep_eta_down")? 2.1: 2.4;
+        muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, lep_eta), 0,0, true);
+        if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("mm"+GetEraShort(), syst);
       }
       for(unsigned int s=0; s<nmem_muon.size(); s++){
         for(unsigned int m=0; m<nmem_muon.at(s); m++){
           executeEventWithParameter("mm"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
         }
-      }
-    }else if(!HasFlag("PDFSYS")){
-      for(TString syst:{"_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
-	double lep_eta = syst.Contains("lep_eta_down")? 2.1: 2.4;
-        muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, lep_eta), 0,0, true);
-        executeEventWithParameter("mm"+GetEraShort(), syst);
       }
     }
   }
@@ -50,19 +46,15 @@ void dybAnalyzer::executeEvent(){
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0, true);
     executeEventWithParameter("ee"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){
-        if(syst.Contains("scale") || !IsDATA) executeEventWithParameter("ee"+GetEraShort(), syst);
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
+        double lep_eta = syst.Contains("lep_eta_down")? 2.1: 2.5;
+        electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, lep_eta), 0,0, true);
+        if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("ee"+GetEraShort(), syst);
       }
       for(unsigned int s=0; s<nmem_electron.size(); s++){
         for(unsigned int m=0; m<nmem_electron.at(s); m++){
           executeEventWithParameter("ee"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
         }
-      }
-    }else if(!HasFlag("PDFSYS")){
-      for(TString syst:{"_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
-        double lep_eta = syst.Contains("lep_eta_down")?	2.1: 2.5;
-        electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, lep_eta), 0,0, true);
-        executeEventWithParameter("ee"+GetEraShort(), syst);
       }
     }
   }
@@ -1480,6 +1472,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+"PID5_fbmuon", (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fbelectron", (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fblepton", (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_chargedHadron", jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralHadron", jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralEm", jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_chargedMultiplicity", jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+"PID5_neutralMultiplicity", jet.neutralMultiplicity(), weight, 100,0,100);
       FillHist(pre+PID5+"_pt", jet.Pt(), weight, 200,0,200);
       FillHist(pre+PID5+"_eta", jet.Eta(), weight, 50,-2.5,2.5);
       FillHist(pre+PID5+"_phi", jet.Phi(), weight, 64,-3.2,3.2);
@@ -1492,6 +1489,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+PID5+"_fbmuon", (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fbelectron", (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fblepton", (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_chargedHadron", jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralHadron", jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralEm", jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_chargedMultiplicity", jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+PID5+"_neutralMultiplicity", jet.neutralMultiplicity(), weight, 100,0,100);
 
       if(jet.Charge() * jet.partonFlavour() < 0) suf = "_correct";
       else suf = "_incorrect";
@@ -1507,6 +1509,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+"PID5_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
       FillHist(pre+PID5+"_pt"+suf, jet.Pt(), weight, 200,0,200);
       FillHist(pre+PID5+"_eta"+suf, jet.Eta(), weight, 50,-2.5,2.5);
       FillHist(pre+PID5+"_phi"+suf, jet.Phi(), weight, 64,-3.2,3.2);
@@ -1519,6 +1526,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+PID5+"_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
 
       if(jetCharge * jet.partonFlavour() < 0) suf = "_Correct";
       else suf = "_Incorrect";
@@ -1539,6 +1551,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+"PID5_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
       FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
       FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
       FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
@@ -1546,6 +1563,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+PID5+"_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
 
       if(fabs(jet.Eta()) < 0.6) suf = "_eta0";
       else if(fabs(jet.Eta()) < 1.2) suf = "_eta1";
@@ -1558,6 +1580,11 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+"PID5_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+"PID5_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+"PID5_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
       FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
       FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
       FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
@@ -1565,6 +1592,51 @@ void dybAnalyzer::Checks_bjet_information(TString prefix_hist, const vector<Jet>
       FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
       FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+      FillHist(pre+PID5+"_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+      FillHist(pre+PID5+"_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+      FillHist(pre+PID5+"_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
+
+      for(double ch:{0.7, 0.8, 0.9, 0.95}){
+        if(fabs(jet.Charge()) < ch) break;
+        suf = Form("_charge0p%d", int(ch * 100));
+
+        FillHist(pre+"PID5_pt"+suf, jet.Pt(), weight, 200,0,200);
+        FillHist(pre+"PID5_eta"+suf, jet.Eta(), weight, 50,-2.5,2.5);
+        FillHist(pre+"PID5_phi"+suf, jet.Phi(), weight, 64,-3.2,3.2);
+        FillHist(pre+"PID5_score"+suf, bScore, weight, 100,0,1);
+        FillHist(pre+"PID5_nPV"+suf, nPV, weight, 100,0,100);
+        FillHist(pre+"PID5_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+        FillHist(pre+"PID5_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+        FillHist(pre+"PID5_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+        FillHist(pre+"PID5_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+        FillHist(pre+"PID5_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+"PID5_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+"PID5_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+"PID5_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+"PID5_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+"PID5_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+"PID5_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+        FillHist(pre+"PID5_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
+        FillHist(pre+PID5+"_pt"+suf, jet.Pt(), weight, 200,0,200);
+        FillHist(pre+PID5+"_eta"+suf, jet.Eta(), weight, 50,-2.5,2.5);
+        FillHist(pre+PID5+"_phi"+suf, jet.Phi(), weight, 64,-3.2,3.2);
+        FillHist(pre+PID5+"_score"+suf, bScore, weight, 100,0,1);
+        FillHist(pre+PID5+"_nPV"+suf, nPV, weight, 100,0,100);
+        FillHist(pre+PID5+"_jetcharge"+suf, jet.Charge(), weight, 200,-1,1);
+        FillHist(pre+PID5+"_jetCharge"+suf, jetCharge, weight, 200,-5,5);
+        FillHist(pre+PID5+"_nmuons"+suf, bmuon.size(), weight, 10,0,10);
+        FillHist(pre+PID5+"_nelectrons"+suf, belectron.size(), weight, 10,0,10);
+        FillHist(pre+PID5+"_fbmuon"+suf, (bmuon.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+PID5+"_fbelectron"+suf, (belectron.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+PID5+"_fblepton"+suf, (bmuon.size() * belectron.size() > 0? 1: 0), weight, 2,0,2);
+        FillHist(pre+PID5+"_chargedHadron"+suf, jet.chargedHadronEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+PID5+"_neutralHadron"+suf, jet.neutralHadronEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+PID5+"_neutralEm"+suf, jet.neutralEmEnergyFraction(), weight, 100,0,1);
+        FillHist(pre+PID5+"_chargedMultiplicity"+suf, jet.chargedMultiplicity(), weight, 100,0,100);
+        FillHist(pre+PID5+"_neutralMultiplicity"+suf, jet.neutralMultiplicity(), weight, 100,0,100);
+      }
 
       FillHist(pre+"PID5_accuracy", (jet.Charge() * jet.partonFlavour() < 0? 1: 0), weight, 2,0,2);
       FillHist(pre+"PID5_score_jetcharge", bScore, jet.Charge(), weight, 100,0,1, 200,-1,1);
@@ -2274,16 +2346,16 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     if(genpid == 0) continue; // No matched b-partons
 
     double Charge = jetCharge(jet); // No Normalization & TTJJ
-    double alpha_plus_DATA_eff = 0.63181282; //0.63079885;
-    double alpha_minus_DATA_eff = 0.61395198; //0.61295115;
-    double alpha_plus_MC_eff = 0.65415066;
-    double alpha_minus_MC_eff = 0.63769426;
+    double alpha_plus_DATA_eff = 0.63179105; //0.63181282; //0.63079885;
+    double alpha_minus_DATA_eff = 0.61389421; //0.61395198; //0.61295115;
+    double alpha_plus_MC_eff = 0.65428669; //0.65415066;
+    double alpha_minus_MC_eff = 0.63782927; //0.63769426;
     if(sys > 0){ // asym gets smaller
-      alpha_plus_DATA_eff += -0.00088663; //-0.00086244;
-      alpha_minus_DATA_eff += 0.00074632; //0.00072373;
+      alpha_plus_DATA_eff += -0.00106574; //-0.00088663; //-0.00086244;
+      alpha_minus_DATA_eff += 0.00085326; //0.00074632; //0.00072373;
     }else if(sys < 0){ // SF gets smaller
-      alpha_plus_DATA_eff += 0.00250343; //0.00237556;
-      alpha_minus_DATA_eff += 0.00297406; //0.00283084;
+      alpha_plus_DATA_eff += 0.00321587; //0.00250343; //0.00237556;
+      alpha_minus_DATA_eff += 0.0040167; //0.00297406; //0.00283084;
     }
 
     // Hyonsans's SF
@@ -2304,76 +2376,76 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     // 1D bChargeSF
     if(mode == 1){
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.52466892; //0.52455235;
-        alpha_minus_DATA_eff = 0.51791587; //0.51779908;
-        alpha_plus_MC_eff = 0.52968978;
-        alpha_minus_MC_eff = 0.52540184;
+        alpha_plus_DATA_eff = 0.52440445; //0.52466892; //0.52455235;
+        alpha_minus_DATA_eff = 0.51737104; //0.51791587; //0.51779908;
+        alpha_plus_MC_eff = 0.52957027; //0.52968978;
+        alpha_minus_MC_eff = 0.52548965; //0.52540184;
         if(sys > 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += -0.00159007; //-0.00157464;
-          alpha_minus_DATA_eff += 0.0021877; //0.00209931;
+          alpha_plus_DATA_eff += -0.00225534; //-0.00159007; //-0.00157464;
+          alpha_minus_DATA_eff += 0.00212763; //0.0021877; //0.00209931;
         }else if(sys < 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += 0.0029865; //0.00287364;
-          alpha_minus_DATA_eff += 0.00217065; //0.00215546;
+          alpha_plus_DATA_eff += 0.00324108; //0.0029865; //0.00287364;
+          alpha_minus_DATA_eff += 0.00343561; //0.00217065; //0.00215546;
         }
       }else if(fabs(Charge) < afb_chbin[2]){// 0.2
-        alpha_plus_DATA_eff = 0.57549775; //0.57503119;
-        alpha_minus_DATA_eff = 0.56120889; //0.56072413;
-        alpha_plus_MC_eff = 0.58939608;
-        alpha_minus_MC_eff = 0.57641132;
+        alpha_plus_DATA_eff = 0.57499135; //0.57549775; //0.57503119;
+        alpha_minus_DATA_eff = 0.56023694; //0.56120889; //0.56072413;
+        alpha_plus_MC_eff = 0.58955363; //0.58939608;
+        alpha_minus_MC_eff = 0.5764066; //0.57641132;
         if(sys > 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += -0.00163046; //-0.00176428;
-          alpha_minus_DATA_eff += 0.00239976; //0.00222184;
+          alpha_plus_DATA_eff += -0.0028866; //-0.00163046; //-0.00176428;
+          alpha_minus_DATA_eff += 0.00109804; //0.00239976; //0.00222184;
         }else if(sys < 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += 0.00365694; //0.00332861;
-          alpha_minus_DATA_eff += 0.00248462; //0.00264313;
+          alpha_plus_DATA_eff += 0.00204427; //0.00365694; //0.00332861;
+          alpha_minus_DATA_eff += 0.00537413; //0.00248462; //0.00264313;
         }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.66795153; //0.66685555;
-        alpha_minus_DATA_eff = 0.64183908; //0.6406924;
-        alpha_plus_MC_eff = 0.7016705;
-        alpha_minus_MC_eff = 0.67580431;
+        alpha_plus_DATA_eff = 0.668161; //0.66795153; //0.66685555;
+        alpha_minus_DATA_eff = 0.64258252; //0.64183908; //0.6406924;
+        alpha_plus_MC_eff = 0.70205254; //0.7016705;
+        alpha_minus_MC_eff = 0.67617536; //0.67580431;
         if(sys > 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += -0.00198435; //-0.00192819;
-          alpha_minus_DATA_eff += 0.00098174; //0.00094884;
+          alpha_plus_DATA_eff += -0.00257117; //-0.00198435; //-0.00192819;
+          alpha_minus_DATA_eff += 0.00138245; //0.00098174; //0.00094884;
         }else if(sys < 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += 0.00278728; //0.00262054;
-          alpha_minus_DATA_eff += 0.00563382; //0.00532535;
+          alpha_plus_DATA_eff += 0.00373721; //0.00278728; //0.00262054;
+          alpha_minus_DATA_eff += 0.00695071; //0.00563382; //0.00532535;
         }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.78691713; //0.78271638;
-        alpha_minus_DATA_eff = 0.74175893; //0.73778292;
-        alpha_plus_MC_eff = 0.82685472;
-        alpha_minus_MC_eff = 0.79243187;
+        alpha_plus_DATA_eff = 0.78853946; //0.78691713; //0.78271638;
+        alpha_minus_DATA_eff = 0.74319937; //0.74175893; //0.73778292;
+        alpha_plus_MC_eff = 0.8273833; //0.82685472;
+        alpha_minus_MC_eff = 0.79299394; //0.79243187;
         if(sys > 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += -0.00277093; //-0.00284074;
-          alpha_minus_DATA_eff += 0.00567753; //0.00513936;
+          alpha_plus_DATA_eff += -0.00347714; //-0.00277093; //-0.00284074;
+          alpha_minus_DATA_eff += 0.0064814; //0.00567753; //0.00513936;
         }else if(sys < 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += 0.01097872; //0.01040963;
-          alpha_minus_DATA_eff += 0.0053582; //0.00575384;
+          alpha_plus_DATA_eff += 0.01612633; //0.01097872; //0.01040963;
+          alpha_minus_DATA_eff += 0.00865146; //0.0053582; //0.00575384;
         }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.77490976; //0.77182254;
-        alpha_minus_DATA_eff = 0.77647107; //0.77357429;
-        alpha_plus_MC_eff = 0.78518778;
-        alpha_minus_MC_eff = 0.78552888;
+        alpha_plus_DATA_eff = 0.77495511; //0.77490976; //0.77182254;
+        alpha_minus_DATA_eff = 0.77649167; //0.77647107; //0.77357429;
+        alpha_plus_MC_eff = 0.78536886; //0.78518778;
+        alpha_minus_MC_eff = 0.78548813; //0.78552888;
         if(sys > 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += -0.00930939; //-0.00300315;
-          alpha_minus_DATA_eff += 0.00629106; //0.01019522;
+          alpha_plus_DATA_eff += -0.00350888; //-0.00930939; //-0.00300315;
+          alpha_minus_DATA_eff += 0.0057526; //0.00629106; //0.01019522;
         }else if(sys < 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += 0.00671166; //0.01005651;
-          alpha_minus_DATA_eff += 0.00993179; //0.00296229;
+          alpha_plus_DATA_eff += 0.01193073; //0.00671166; //0.01005651;
+          alpha_minus_DATA_eff += 0.00727731; //0.00993179; //0.00296229;
         }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.75926086; //0.75433632;
-        alpha_minus_DATA_eff = 0.75920095; //0.75499201;
-        alpha_plus_MC_eff = 0.76063023;
-        alpha_minus_MC_eff = 0.76337732;
+        alpha_plus_DATA_eff = 0.75874849; //0.75926086; //0.75433632;
+        alpha_minus_DATA_eff = 0.75794022; //0.75920095; //0.75499201;
+        alpha_plus_MC_eff = 0.76086731; //0.76063023;
+        alpha_minus_MC_eff = 0.76353419; //0.76337732;
         if(sys > 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += -0.00459789; //-0.00443982;
-          alpha_minus_DATA_eff += 0.00433558; //0.00398256;
+          alpha_plus_DATA_eff += -0.00587855; //-0.00459789; //-0.00443982;
+          alpha_minus_DATA_eff += 0.00639942; //0.00433558; //0.00398256;
         }else if(sys < 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += 0.00822754; //0.00811232;
-          alpha_minus_DATA_eff += 0.00872532; //0.00904374;
+          alpha_plus_DATA_eff += 0.01097021; //0.00822754; //0.00811232;
+          alpha_minus_DATA_eff += 0.01007731; //0.00872532; //0.00904374;
         }
       }
     }

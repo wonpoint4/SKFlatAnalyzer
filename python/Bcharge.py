@@ -32,14 +32,15 @@ systematics = [
     ["_jetpt25", "_jetpt55"],
     ["_jeteta5", "_jeteta1p5"],
     ["_bScore_up", "_bScore_down"],
-    ["_jet_scale_up", "_jet_scale_down"], ["_jet_smear_up", "_jet_smear_down"],
-    ["_prefireweight_up", "_prefireweight_down"], ["_PUweight_up", "_PUweight_down"], ["_PUjetSF_up", "_PUjetSF_down"],
-    ["_btagSF_hup", "_btagSF_hdown"], ["_btagSF_lup", "_btagSF_ldown"],
-    ["_btagSF_hcorr"], ["_btagSF_huncorr2016a"], ["_btagSF_huncorr2016b"], ["_btagSF_huncorr2017"], ["_btagSF_huncorr2018"],
-    ["_btagSF_lcorr"], ["_btagSF_luncorr2016a"], ["_btagSF_luncorr2016b"], ["_btagSF_luncorr2017"], ["_btagSF_luncorr2018"],
+    ["_prefireweight_up", "_prefireweight_down"],
+    ["_PUweight_up", "_PUweight_down"],
+    ["_PUjetSF_up", "_PUjetSF_down"],
     ["_scalevariation%d" % i for i in [0, 1, 2, 3, 4, 6, 8]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     ["_FSR_up", "_FSR_down"],
-] + [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()]
+] + [["norm_"+bkgs+updown for updown in ["_up", "_down"]] for bkgs in xsec_unc.keys()
+] + [["_jet_scale"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]
+] + [["_jet_smear"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]
+] + [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr:2016preVFP", "uncorr:2016postVFP", "uncorr:2017", "uncorr:2018"]]
 
 def calc(a0,a1,a2,a3):
     N=a0+a1+a2+a3

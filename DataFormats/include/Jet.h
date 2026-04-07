@@ -21,7 +21,13 @@ public:
   inline bool IsGenMatched() const { return j_GenHFHadronMatcher_flavour!=-999; }
   void SetTaggerResults(std::vector<double> ds);
   void SetEnergyFractions(double cH, double nH, double nEM, double cEM, double muE);
+  inline double chargedHadronEnergyFraction() const { return j_chargedHadronEnergyFraction; }
+  inline double neutralHadronEnergyFraction() const { return j_neutralHadronEnergyFraction; }
+  inline double chargedEmEnergyFraction() const { return j_chargedEmEnergyFraction; }
+  inline double neutralEmEnergyFraction() const { return j_neutralEmEnergyFraction; }
   inline double muonEnergyFraction() const { return j_muonEnergyFraction; }
+  inline int chargedMultiplicity() const { return j_chargedMultiplicity; }
+  inline int neutralMultiplicity() const { return j_neutralMultiplicity; }
   void SetMultiplicities(double cM, double nM);
   void SetPileupJetId(double v);
 

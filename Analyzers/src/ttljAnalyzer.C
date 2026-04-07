@@ -27,8 +27,7 @@ void ttljAnalyzer::executeEvent(){
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
-        if(syst.Contains("smear") && !IsDATA) executeEventWithParameter("m"+GetEraShort(), syst);
-        else executeEventWithParameter("m"+GetEraShort(), syst);
+        if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_muon.size(); s++){
@@ -49,8 +48,7 @@ void ttljAnalyzer::executeEvent(){
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
         TString electron_ID = (syst.Contains("HS") || syst.Contains("noSelQ"))? "passMediumID": "passMediumID_SelQ";
         electrons = ElectronEnergyCorrection(SMPGetElectrons(electron_ID, 8.0, 2.5), 0,0, true);
-        if(syst.Contains("smear") && !IsDATA) executeEventWithParameter("e"+GetEraShort(), syst);
-        else executeEventWithParameter("e"+GetEraShort(), syst);
+        if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("e"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
       for(unsigned int s=0; s<nmem_electron.size(); s++){
@@ -412,11 +410,11 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     map_weight["_btagSF_hup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTag");
     map_weight["_btagSF_hdown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagCorr");
-    map_weight["_btagSF_huncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
+    map_weight["_btagSF_huncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTag");
     map_weight["_btagSF_ldown"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystDownLTag");
     map_weight["_btagSF_lcorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagCorr");;
-    map_weight["_btagSF_luncorr"+GetEraShort()] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
+    map_weight["_btagSF_luncorr"] = map_weight[""] / btagSF * mcCorr->GetBTaggingReweight_1a(realjets, DeepJet_Tight, "SystUpLTagUnCorr");
 
     // PUjetID SF
     map_weight["_noPUjetSF"] =  map_weight[""] / pujetSF;
@@ -525,7 +523,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
 
   if((HasFlag("SYS") || HasFlag("PDFSYS") || HasFlag("LEPSYS")) && option == "") map_weight.erase("");
 
-  if(IsNominalLike){
+  if(IsNominalRun){
     FillHist(prefix+hprefix+"njets_incTT"+suffix, realjets.size(), map_weight, 15,0,15);
     FillHist(prefix+hprefix+"nbjets_incTT"+suffix, bjets.size(), map_weight, 10,0,10);
     FillHist(prefix+hprefix+"najets_incTT"+suffix, ajets.size(), map_weight, 10,0,10);
@@ -555,7 +553,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     if(!IsDATA && MCSample.Contains("TTLJ")) FillingLikelihood(bjets, ajets, map_weight[""], suffix, 1, 0); // Charmonium guy's method - match smaller dR < 0.3
   }
 
-  if(IsNominalLike){
+  if(IsNominalRun){
     FillHist(prefix+hprefix+"lpt_incTTLJ"+suffix, lepton0->Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"leta_incTTLJ"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"bpt_incTTLJ"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
@@ -587,7 +585,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   if(!goodKinematic) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Kin. cuts", map_weight[""]);
 
-  if(IsNominalLike){
+  if(IsNominalRun){
     FillHist(prefix+hprefix+"likelihood_ratio_beforeLRcut"+suffix, LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3), map_weight, 1000,0,50);
     FillHist(prefix+hprefix+"likelihood_ratio_Mbl_beforeLRcut"+suffix, LRs.at(0), map_weight, 100,0,5);
     FillHist(prefix+hprefix+"likelihood_ratio_MblMET_beforeLRcut"+suffix, LRs.at(1), map_weight, 100,0,5);
@@ -619,7 +617,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   if(LRs.at(0) * LRs.at(1) * LRs.at(2) * LRs.at(3) < 0.5) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "LR0p5 cuts", map_weight[""]);
 
-  if(IsNominalLike){
+  if(IsNominalRun){
     FillHist(prefix+hprefix+"lpt_afterLRcut"+suffix, lepton0->Pt(), map_weight, 100,0,200);
     FillHist(prefix+hprefix+"leta_afterLRcut"+suffix, lepton0->Eta(), map_weight, 100,-5,5);
     FillHist(prefix+hprefix+"bpt_afterLRcut"+suffix, bjets.at(0).Pt(), map_weight, 100,0,200);
@@ -990,7 +988,7 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
   FillHist(prefix+hprefix+"j1phi"+suffix, Wj1.Phi(), map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"met"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-  FillHist(prefix+hprefix+"met_metphi"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+  if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
 
   // bCharges
   FillHist(prefix+hprefix+"bbCharges"+suffix, bbCharges, map_weight, 4,0,4);
