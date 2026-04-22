@@ -14,6 +14,28 @@ std::map<KeyT, ValueT> operator*(std::map<KeyT, ValueT> copy_of_map, const Value
     return copy_of_map; // Return the new, multiplied map by value
 }
 
+template<typename KeyT, typename ValueT>
+std::map<KeyT, ValueT> operator*(std::map<KeyT, ValueT> copy_of_map, std::map<KeyT, ValueT> copy_of_map2) {
+    for(auto& pair:copy_of_map){
+      for(auto& pair2:copy_of_map2){
+        if(pair.first != pair2.first) continue;
+        pair.second *= pair2.second; // Multiply the value component
+      }
+    }
+    return copy_of_map; // Return the new, multiplied map by value
+}
+
+template<typename KeyT, typename ValueT>
+std::map<KeyT, ValueT> operator/(std::map<KeyT, ValueT> copy_of_map, std::map<KeyT, ValueT> copy_of_map2) {
+    for(auto& pair:copy_of_map){
+      for(auto& pair2:copy_of_map2){
+        if(pair.first != pair2.first) continue;
+        pair.second *= 1 / pair2.second; // Divide the value component
+      }
+    }
+    return copy_of_map; // Return the new, Divided map by value
+}
+
 class dybAnalyzer : public SMPAnalyzerCore {
 
 public:
@@ -26,6 +48,7 @@ public:
   virtual bool HasDileptons(TString channel, unsigned int set=0, unsigned int mem=0, int sys=0);
   virtual double jetCharge(const Jet& jet);
   virtual void Checks_bjet_information(TString prefix_hist, const vector<Jet> jets, double weight);
+  virtual void FillHists_bjet_information(TString prefix_hist, TString suffix_hist, const Jet jet, const vector<Muon> bmuon, const vector<Electron> belectron, double weight);
   virtual double GetBTaggingReweight_1a_2WP(const vector<Jet>& jets, JetTagging::Parameters jtpT, JetTagging::Parameters jtpL, string Syst="central");
   double GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mode, int sys=0, TString bChargeBins="012345");
   double GetAdhocbChargeSFWeight(float bCharge);
