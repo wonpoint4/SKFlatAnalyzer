@@ -32,14 +32,14 @@ void dybAnalyzer::executeEvent(){
     executeEventWithParameter("mm"+GetEraShort());
     if(HasFlag("SYS")){
       vector<Muon> muons_2p1 = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.1), 0,0, true);
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){//#### , "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
         muons = syst.Contains("lep_eta_down")? muons_2p1: muons_2p4;
         if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("mm"+GetEraShort(), syst);
       }
       muons = muons_2p4;
       for(unsigned int s=0; s<nmem_muon.size(); s++){
         for(unsigned int m=0; m<nmem_muon.at(s); m++){
-          executeEventWithParameter("mm"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
+          //#### executeEventWithParameter("mm"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
         }
       }
     }
@@ -50,14 +50,14 @@ void dybAnalyzer::executeEvent(){
     executeEventWithParameter("ee"+GetEraShort());
     if(HasFlag("SYS")){
       vector<Electron> electrons_2p1 = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.1), 0,0, true);
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){//#### , "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
         electrons = syst.Contains("lep_eta_down")? electrons_2p1: electrons_2p5;
         if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("ee"+GetEraShort(), syst);
       }
       electrons = electrons_2p5;
       for(unsigned int s=0; s<nmem_electron.size(); s++){
         for(unsigned int m=0; m<nmem_electron.at(s); m++){
-          executeEventWithParameter("ee"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
+          //#### executeEventWithParameter("ee"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
         }
       }
     }
@@ -113,14 +113,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(jets_raw, 1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(jets_raw, -1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(jets_raw, 1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(jets_raw, -1), "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(jets_raw, 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(jets_raw, -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(jets_raw, 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(jets_raw, -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
   else if(option.Contains("jet_pt_up")) alljets = SelectJets(jets_raw, "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
   else if(option.Contains("jet_pt_down")) alljets = SelectJets(jets_raw, "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_eta_down")) alljets = SelectJets(jets_raw, "tightLepVeto", 20, 2.1);
-  else alljets = SelectJets(jets_raw, "tightLepVeto", 20, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_eta_down")) alljets = SelectJets(jets_raw, "tightLepVeto", 30, 2.1);
+  else alljets = SelectJets(jets_raw, "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets_before_vetomap = {}, realjets = {}, bjets = {}, ajets = {};
@@ -131,7 +131,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   }
   for(const auto& jet:lepvetojets){
     if(!PUJetIDPass(jet, "Loose")) continue;
-    //if(!PUJetIDPass(jet, "Tight")) continue;
     realjets_before_vetomap.push_back(jet);
     if(IsNominalRun){
       FillHist(prefix+hprefix+"etaphi_realjets_before_vetomap"+suffix, jet.Eta(), jet.Phi(), 1., 200,-5.,5., 200,-3.2,3.2);
@@ -139,7 +138,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
   for(const auto& jet:realjets_before_vetomap){
-    //if(jet.Pt() < 30) continue;
     if(hvetomap->GetBinContent(hvetomap->FindBin(jet.Eta(), jet.Phi()))) continue;
     realjets.push_back(jet);
     if(IsNominalRun){
@@ -157,7 +155,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
 
   for(auto& jet:realjets){
     //jet *= jet.BJetNNCorrection(); // full bJetEnergyCorrection (BBjetRegression)?
-    if(jet.Pt() < 25) continue;
     if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Tight.j_Tagger, DeepJet_Tight.j_WP)) bjets.push_back(jet);
     else if(jet.GetTaggerResult(DeepJet_Loose.j_Tagger) > mcCorr->GetJetTaggingCutValue(DeepJet_Loose.j_Tagger, DeepJet_Loose.j_WP)) ajets.push_back(jet);
   }
@@ -396,12 +393,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // Prefiring weight
-    map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
-    map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
-    map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
+    //#### map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
+    //#### map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
+    //#### map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
 
     // PU reweight
-    map_weight["_noPUweight"] = map_weight[""] / PUweight;
+    //#### map_weight["_noPUweight"] = map_weight[""] / PUweight;
     map_weight["_PUweight_up"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
     map_weight["_PUweight_down"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, -1);
 
@@ -415,43 +412,43 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       SF_stat *= electronRECOSF_sys.size()? (double)electronRECOSF_sys[0][j]: 1.;
       SF_stat *= electronIDSF_sys.size()? (double)electronIDSF_sys[0][j]: 1.;
       SF_stat *= electronTriggerSF_sys.size()? (double)electronTriggerSF_sys[0][j]: 1.;
-      map_weight[Form("_lepeffSF_stat%d", j)] = map_weight[""] * SF_stat;
+      //#### map_weight[Form("_lepeffSF_stat%d", j)] = map_weight[""] * SF_stat;
     }
 
     // EfficiencySF - syst
     for(unsigned int i=0; i<muonTrackingSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTrackingSF_sys[i].size(); j++){
-        map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
+        //#### map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<muonRECOSF_sys[i].size(); j++){
-        map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
+        //#### map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonIDSF_sys.size(); i++){
       for(unsigned int j=0; j<muonIDSF_sys[i].size(); j++){
-        map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
+        //#### map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTriggerSF_sys[i].size(); j++){
-        map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
+        //#### map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<electronRECOSF_sys[i].size(); j++){
-        map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
+        //#### map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronIDSF_sys.size(); i++){
       for(unsigned int j=0; j<electronIDSF_sys[i].size(); j++){
-        map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
+        //#### map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<electronTriggerSF_sys[i].size(); j++){
-        map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
+        //#### map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
       }
     }
 
@@ -459,14 +456,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(channel.Contains("mm"+GetEraShort())){
       for(unsigned int i=0; i<nmem_electron.size(); i++){
         for(unsigned int j=0; j<nmem_electron.at(i); j++){
-          map_weight[Form("_ElectronEnergy_s%dm%d", i, j)] = map_weight[""];
+          //#### map_weight[Form("_ElectronEnergy_s%dm%d", i, j)] = map_weight[""];
         }
       }
     }
     if(channel.Contains("ee"+GetEraShort())){
       for(unsigned int i=0; i<nmem_muon.size(); i++){
         for(unsigned int j=0; j<nmem_muon.at(i); j++){
-          map_weight[Form("_MuonMomentum_s%dm%d", i, j)] = map_weight[""];
+          //#### map_weight[Form("_MuonMomentum_s%dm%d", i, j)] = map_weight[""];
         }
       }
     }
@@ -481,12 +478,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     //map_weight["_noWeak"] =  map_weight[""] / weakweight;
 
     // Top pt Reweight
-    map_weight["_noToppt"] =  map_weight[""] / topptweight;
+    //#### map_weight["_noToppt"] =  map_weight[""] / topptweight;
 
     // AlphaS
     if(weight_AlphaS->size() == 2){
-      map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
-      map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
+      //#### map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
+      //#### map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
     }
 
     // FSR, ISR
@@ -501,24 +498,24 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     for(unsigned int i=0; i<weight_Scale->size(); i++) map_weight[Form("_scalevariation%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_Scale->at(i));
 
     // PDF
-    for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
+    //#### for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun && !hprefix.Contains("ss_")){
-    for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
+    //#### for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
 
     // New Weak corrections with sin2w variations
     map_weight["_noWeak"] =  map_weight[""] / weakweight;
     map_weight["_oldWeak"] =  map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, 0., 2);
     for(unsigned int mem=0; mem<NWEIGHTS; mem++){
-      map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
+      //#### map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
       map_weight["_Recoil_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, mem, lhe_j0.ID());
     }
   }
 
   // Electron charge flip SF
   if(!IsDATA && IsNominalRun){
-    map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
-    map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
-    map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
+    //#### map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
+    //#### map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
+    //#### map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
   }
 
   double weight_default = map_weight[""];
@@ -706,9 +703,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   //==== Weights of Systematics (regarding jets)
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // b-tagging SF
-    map_weight["_nobtagSF"] =  weight_default / btagSF;
-    map_weight["_btagSF_hup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
-    map_weight["_btagSF_hdown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
+    //#### map_weight["_nobtagSF"] =  weight_default / btagSF;
+    //#### map_weight["_btagSF_hup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
+    //#### map_weight["_btagSF_hdown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
     map_weight["_btagSF_huncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
@@ -717,7 +714,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_btagSF_luncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
 
     // PUjetID SF
-    map_weight["_noPUjetSF"] =  weight_default / pujetSF;
+    //#### map_weight["_noPUjetSF"] =  weight_default / pujetSF;
     map_weight["_PUjetSF_up"] =  weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
     map_weight["_PUjetSF_down"] = weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
 
@@ -734,11 +731,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_bChargeSFHS_up"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
     map_weight["_bChargeSFHS_down"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
   }else if(!IsDATA && IsNominalRun && !hprefix.Contains("ss_")){
-    map_weight["_bChargeSF_adhoc"] = weight_default * GetAdhocbChargeSFWeight(bcharge);
+    //#### map_weight["_bChargeSF_adhoc"] = weight_default * GetAdhocbChargeSFWeight(bcharge);
     //map_weight["_nobChargeSF_adhoc"] = weight_default / GetAdhocbChargeSFWeight(bcharge);
 
-    map_weight["_Zpt_adhoc"] = weight_default * GetAdhocZptWeight(dipt);
-    map_weight["_njets_adhoc"] = weight_default * GetAdhocNjetsWeight(realjets.size());
+    //#### map_weight["_Zpt_adhoc"] = weight_default * GetAdhocZptWeight(dipt);
+    //####map_weight["_njets_adhoc"] = weight_default * GetAdhocNjetsWeight(realjets.size());
   }
 
   FillHist(prefix+hprefix+"mll_Tightnb"+suffix, dimass, map_weight, 80,70,110);
@@ -1131,6 +1128,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
 
+  //if(realjets.size() > 1) return;
+  //if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
+
   if(PuppiMET_Type1_pt > 60) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET60", map_weight[""]);
 
@@ -1245,6 +1245,31 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       FillHist(prefix+hprefix+"bj0dR"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
       FillHist(prefix+hprefix+"bj0dPhi"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
       FillHist(prefix+hprefix+"bj0dpt"+suffix, jet0->Pt() - realjets.at(i).Pt(), map_weight, 400,-200,200);
+    }
+    if(fabs(jet0->Eta()) < 0.3){
+      FillHist(prefix+hprefix+"bjdR_beta0p3"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p3"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 0.6){
+      FillHist(prefix+hprefix+"bjdR_beta0p6"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p6"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 0.9){
+      FillHist(prefix+hprefix+"bjdR_beta0p9"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p9"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 1.2){
+      FillHist(prefix+hprefix+"bjdR_beta1p2"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p2"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 1.5){
+      FillHist(prefix+hprefix+"bjdR_beta1p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 1.8){
+      FillHist(prefix+hprefix+"bjdR_beta1p8"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p8"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else if(fabs(jet0->Eta()) < 2.1){
+      FillHist(prefix+hprefix+"bjdR_beta2p1"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta2p1"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
+    }else{
+      FillHist(prefix+hprefix+"bjdR_beta2p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta2p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
     }
     nnearjets++;
   }
