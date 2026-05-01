@@ -30,6 +30,22 @@ void dybAnalyzer::executeEvent(){
     vector<Muon> muons_2p4 = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0, true);
     muons = muons_2p4;
     executeEventWithParameter("mm"+GetEraShort());
+    /*
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p01");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p05");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p10");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p15");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p20");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p25");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p30");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p35");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p50");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p60");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p70");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p80");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_0p90");
+    executeEventWithParameter("mm"+GetEraShort(), "_jet_dR_1p00");
+    */
     if(HasFlag("SYS")){
       vector<Muon> muons_2p1 = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.1), 0,0, true);
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){//#### , "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
@@ -48,6 +64,22 @@ void dybAnalyzer::executeEvent(){
     vector<Electron> electrons_2p5 = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.5), 0,0, true);
     electrons = electrons_2p5;
     executeEventWithParameter("ee"+GetEraShort());
+    /*
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p01");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p05");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p10");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p15");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p20");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p25");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p30");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p35");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p50");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p60");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p70");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p80");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_0p90");
+    executeEventWithParameter("ee"+GetEraShort(), "_jet_dR_1p00");
+    */
     if(HasFlag("SYS")){
       vector<Electron> electrons_2p1 = ElectronEnergyCorrection(SMPGetElectrons("passMediumID", 8.0, 2.1), 0,0, true);
       for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down"}){//#### , "_jet_pt_up", "_jet_pt_down", "_jet_eta_down", "_lep_pt_up", "_lep_pt_down", "_lep_eta_down"}){
@@ -124,9 +156,24 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets_before_vetomap = {}, realjets = {}, bjets = {}, ajets = {};
+  double dR_lj = 0.4;
+  if(option.Contains("jet_dR_0p01")) dR_lj = 0.01;
+  else if(option.Contains("jet_dR_0p05")) dR_lj = 0.05;
+  else if(option.Contains("jet_dR_0p10")) dR_lj = 0.10;
+  else if(option.Contains("jet_dR_0p15")) dR_lj = 0.15;
+  else if(option.Contains("jet_dR_0p20")) dR_lj = 0.2;
+  else if(option.Contains("jet_dR_0p25")) dR_lj = 0.25;
+  else if(option.Contains("jet_dR_0p30")) dR_lj = 0.3;
+  else if(option.Contains("jet_dR_0p35")) dR_lj = 0.35;
+  else if(option.Contains("jet_dR_0p50")) dR_lj = 0.5;
+  else if(option.Contains("jet_dR_0p60")) dR_lj = 0.6;
+  else if(option.Contains("jet_dR_0p70")) dR_lj = 0.7;
+  else if(option.Contains("jet_dR_0p80")) dR_lj = 0.8;
+  else if(option.Contains("jet_dR_0p90")) dR_lj = 0.9;
+  else if(option.Contains("jet_dR_1p00")) dR_lj = 1.0;
   for(const auto& jet:alljets){
-    if(lepton0 && jet.DeltaR(*lepton0) < 0.4) continue;
-    if(lepton1 && jet.DeltaR(*lepton1) < 0.4) continue;
+    if(lepton0 && jet.DeltaR(*lepton0) < dR_lj) continue;
+    if(lepton1 && jet.DeltaR(*lepton1) < dR_lj) continue;
     lepvetojets.push_back(jet);
   }
   for(const auto& jet:lepvetojets){
@@ -393,12 +440,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   //==== Weights of Systematics
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // Prefiring weight
-    //#### map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
-    //#### map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
-    //#### map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
+    map_weight["_noprefireweight"] =  map_weight[""] / prefireweight;
+    map_weight["_prefireweight_up"] =  map_weight[""] / prefireweight * L1PrefireReweight_Up;
+    map_weight["_prefireweight_down"] = map_weight[""] / prefireweight * L1PrefireReweight_Down;
 
     // PU reweight
-    //#### map_weight["_noPUweight"] = map_weight[""] / PUweight;
+    map_weight["_noPUweight"] = map_weight[""] / PUweight;
     map_weight["_PUweight_up"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, 1);
     map_weight["_PUweight_down"] = map_weight[""] / PUweight * GetPileUpWeight(nPileUp, -1);
 
@@ -412,43 +459,43 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       SF_stat *= electronRECOSF_sys.size()? (double)electronRECOSF_sys[0][j]: 1.;
       SF_stat *= electronIDSF_sys.size()? (double)electronIDSF_sys[0][j]: 1.;
       SF_stat *= electronTriggerSF_sys.size()? (double)electronTriggerSF_sys[0][j]: 1.;
-      //#### map_weight[Form("_lepeffSF_stat%d", j)] = map_weight[""] * SF_stat;
+      map_weight[Form("_lepeffSF_stat%d", j)] = map_weight[""] * SF_stat;
     }
 
     // EfficiencySF - syst
     for(unsigned int i=0; i<muonTrackingSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTrackingSF_sys[i].size(); j++){
-        //#### map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
+        map_weight[Form("_muonTrackingeffSF_s%dm%d", i, j)] = map_weight[""] / muonTrackingSF * muonTrackingSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<muonRECOSF_sys[i].size(); j++){
-        //#### map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
+        map_weight[Form("_muonRECOeffSF_s%dm%d", i, j)] = map_weight[""] / muonRECOSF * muonRECOSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonIDSF_sys.size(); i++){
       for(unsigned int j=0; j<muonIDSF_sys[i].size(); j++){
-        //#### map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
+        map_weight[Form("_muonIDeffSF_s%dm%d", i, j)] = map_weight[""] / muonIDSF * muonIDSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<muonTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<muonTriggerSF_sys[i].size(); j++){
-        //#### map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
+        map_weight[Form("_muonTriggereffSF_s%dm%d", i, j)] = map_weight[""] / muonTriggerSF * muonTriggerSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronRECOSF_sys.size(); i++){
       for(unsigned int j=0; j<electronRECOSF_sys[i].size(); j++){
-        //#### map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
+        map_weight[Form("_electronRECOeffSF_s%dm%d", i, j)] = map_weight[""] / electronRECOSF * electronRECOSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronIDSF_sys.size(); i++){
       for(unsigned int j=0; j<electronIDSF_sys[i].size(); j++){
-        //#### map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
+        map_weight[Form("_electronIDeffSF_s%dm%d", i, j)] = map_weight[""] / electronIDSF * electronIDSF_sys[i][j];
       }
     }
     for(unsigned int i=0; i<electronTriggerSF_sys.size(); i++){
       for(unsigned int j=0; j<electronTriggerSF_sys[i].size(); j++){
-        //#### map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
+        map_weight[Form("_electronTriggereffSF_s%dm%d", i, j)] = map_weight[""] / electronTriggerSF * electronTriggerSF_sys[i][j];
       }
     }
 
@@ -456,14 +503,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(channel.Contains("mm"+GetEraShort())){
       for(unsigned int i=0; i<nmem_electron.size(); i++){
         for(unsigned int j=0; j<nmem_electron.at(i); j++){
-          //#### map_weight[Form("_ElectronEnergy_s%dm%d", i, j)] = map_weight[""];
+          map_weight[Form("_ElectronEnergy_s%dm%d", i, j)] = map_weight[""];
         }
       }
     }
     if(channel.Contains("ee"+GetEraShort())){
       for(unsigned int i=0; i<nmem_muon.size(); i++){
         for(unsigned int j=0; j<nmem_muon.at(i); j++){
-          //#### map_weight[Form("_MuonMomentum_s%dm%d", i, j)] = map_weight[""];
+          map_weight[Form("_MuonMomentum_s%dm%d", i, j)] = map_weight[""];
         }
       }
     }
@@ -478,12 +525,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     //map_weight["_noWeak"] =  map_weight[""] / weakweight;
 
     // Top pt Reweight
-    //#### map_weight["_noToppt"] =  map_weight[""] / topptweight;
+    map_weight["_noToppt"] =  map_weight[""] / topptweight;
 
     // AlphaS
     if(weight_AlphaS->size() == 2){
-      //#### map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
-      //#### map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
+      map_weight["_alphaS_up"] = map_weight[""] * weight_AlphaS->at(1);
+      map_weight["_alphaS_down"] = map_weight[""] * weight_AlphaS->at(0);
     }
 
     // FSR, ISR
@@ -498,24 +545,24 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     for(unsigned int i=0; i<weight_Scale->size(); i++) map_weight[Form("_scalevariation%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_Scale->at(i));
 
     // PDF
-    //#### for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
+    for(unsigned int i=0; i<weight_PDF->size(); i++) map_weight[Form("_pdf%d", i)] = map_weight[""] * TMath::Range(-10., 10., weight_PDF->at(i));
   }else if(!IsDATA && MCSample.Contains("MiNNLO") && IsNominalRun && !hprefix.Contains("ss_")){
-    //#### for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
+    for(unsigned int i=0; i<weight_sthw2->size(); i++) map_weight[Form("_sthw2_%d", i)] = map_weight[""] * weight_sthw2->at(i);
 
     // New Weak corrections with sin2w variations
     map_weight["_noWeak"] =  map_weight[""] / weakweight;
     map_weight["_oldWeak"] =  map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, 0., 2);
     for(unsigned int mem=0; mem<NWEIGHTS; mem++){
-      //#### map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
+      // map_weight["_CS_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_CS, 0, mem);
       map_weight["_Recoil_"+TString(WEIGHT_NAMES[mem])] = map_weight[""] / weakweight * GetDYWeakWeight(lhe_mass, lhe_costheta_Recoil, 1, mem, lhe_j0.ID());
     }
   }
 
   // Electron charge flip SF
   if(!IsDATA && IsNominalRun){
-    //#### map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
-    //#### map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
-    //#### map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
+    map_weight["_noCFSF"] = map_weight[""] / chargeflipSF;
+    map_weight["_CFSF_up"] = map_weight[""] / chargeflipSF * GetCFSF(1);
+    map_weight["_CFSF_down"] = map_weight[""] / chargeflipSF * GetCFSF(-1);
   }
 
   double weight_default = map_weight[""];
@@ -703,9 +750,9 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   //==== Weights of Systematics (regarding jets)
   if(!IsDATA && HasFlag("SYS") && option == ""){
     // b-tagging SF
-    //#### map_weight["_nobtagSF"] =  weight_default / btagSF;
-    //#### map_weight["_btagSF_hup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
-    //#### map_weight["_btagSF_hdown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
+    map_weight["_nobtagSF"] =  weight_default / btagSF;
+    map_weight["_btagSF_hup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTag");
+    map_weight["_btagSF_hdown"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystDownHTag");
     map_weight["_btagSF_hcorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagCorr");
     map_weight["_btagSF_huncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpHTagUnCorr");
     map_weight["_btagSF_lup"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTag");
@@ -714,7 +761,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_btagSF_luncorr"] = weight_default / btagSF * GetBTaggingReweight_1a_2WP(realjets, DeepJet_Tight, DeepJet_Loose, "SystUpLTagUnCorr");
 
     // PUjetID SF
-    //#### map_weight["_noPUjetSF"] =  weight_default / pujetSF;
+    map_weight["_noPUjetSF"] =  weight_default / pujetSF;
     map_weight["_PUjetSF_up"] =  weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", 1);
     map_weight["_PUjetSF_down"] = weight_default / pujetSF * GetPUJetWeight(lepvetojets, "Loose", -1);
 
@@ -731,11 +778,11 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     map_weight["_bChargeSFHS_up"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, 1);
     map_weight["_bChargeSFHS_down"] = weight_default / bchargeSF * GetbChargeSFWeight(bjets, 2, -1);
   }else if(!IsDATA && IsNominalRun && !hprefix.Contains("ss_")){
-    //#### map_weight["_bChargeSF_adhoc"] = weight_default * GetAdhocbChargeSFWeight(bcharge);
+    map_weight["_bChargeSF_adhoc"] = weight_default * GetAdhocbChargeSFWeight(bcharge);
     //map_weight["_nobChargeSF_adhoc"] = weight_default / GetAdhocbChargeSFWeight(bcharge);
 
-    //#### map_weight["_Zpt_adhoc"] = weight_default * GetAdhocZptWeight(dipt);
-    //####map_weight["_njets_adhoc"] = weight_default * GetAdhocNjetsWeight(realjets.size());
+    map_weight["_Zpt_adhoc"] = weight_default * GetAdhocZptWeight(dipt);
+    map_weight["_njets_adhoc"] = weight_default * GetAdhocNjetsWeight(realjets.size());
   }
 
   FillHist(prefix+hprefix+"mll_Tightnb"+suffix, dimass, map_weight, 80,70,110);
@@ -758,7 +805,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_Tightnb"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_Tightnb"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
   if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_Tightnb"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"ZbdPhi_Tightnb"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdR_Tightnb"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi_Tightnb"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt_Tightnb"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Tightnb"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
 
@@ -857,7 +905,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"met_nbjets"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
     FillHist(prefix+hprefix+"metphi_nbjets"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
     if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_nbjets"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_nbjets"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdR_nbjets"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_nbjets"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
     FillHist(prefix+hprefix+"Zbpt_nbjets"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
     FillHist(prefix+hprefix+"costhetaRecoil_nbjets"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
     FillHist(prefix+hprefix+"costhetaRecoil2_nbjets"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
@@ -886,7 +935,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_Tight1b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_Tight1b"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
   if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_Tight1b"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"ZbdPhi_Tight1b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdR_Tight1b"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi_Tight1b"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt_Tight1b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Tight1b"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
 
@@ -1032,7 +1082,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_Veto2b"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_Veto2b"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
   if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_Veto2b"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdR_Veto2b"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi_Veto2b"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt_Veto2b"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_Veto2b"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
 
@@ -1128,9 +1179,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     }
   }
 
-  //if(realjets.size() > 1) return;
-  //if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
-
   if(PuppiMET_Type1_pt > 60) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "MET60", map_weight[""]);
 
@@ -1154,7 +1202,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met_met60"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi_met60"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
   if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_met60"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdR_met60"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi_met60"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt_met60"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_met60"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
 
@@ -1166,12 +1215,218 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   if((*lepton0 + *lepton1).Pt() < 15) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "ZpT15", map_weight[""]);
 
-  //if(option.Contains("jet_scale_up")) bjets = ScaleJets(bjets, 1);
-  //else if(option.Contains("jet_scale_down")) bjets = ScaleJets(bjets, -1);
-  //else if(option.Contains("jet_smear_up")) bjets = SmearJets(bjets, 1);
-  //else if(option.Contains("jet_smear_down")) bjets = SmearJets(bjets, -1);
-  //jet0 = &bjets.at(0);
-  //bcharge = jetCharge(*jet0);
+  FillHist(prefix+hprefix+"mll_zpt15"+suffix, dimass, map_weight, 80,70,110);
+  FillHist(prefix+hprefix+"yll_zpt15"+suffix, dirap, map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"ptll_zpt15"+suffix, dipt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"lpt_zpt15"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_zpt15"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"l0pt_zpt15"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"l0eta_zpt15"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"lpt_zpt15"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"leta_zpt15"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"l1pt_zpt15"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"l1eta_zpt15"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bpt_zpt15"+suffix, jet0->Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"beta_zpt15"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+  FillHist(prefix+hprefix+"bphi_zpt15"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+  FillHist(prefix+hprefix+"bChargeRaw_zpt15"+suffix, bcharge, map_weight, 200,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2_zpt15"+suffix, bcharge, map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"bCharge_zpt15"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+  FillHist(prefix+hprefix+"met_zpt15"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"metphi_zpt15"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+  if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi_zpt15"+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+  FillHist(prefix+hprefix+"ZbdR_zpt15"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi_zpt15"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  FillHist(prefix+hprefix+"Zbpt_zpt15"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+  FillHist(prefix+hprefix+"costhetaRecoil_zpt15"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+
+  // Checks QCD uncertainty controls
+  FillHist(prefix+hprefix+"nalljets_zpt15"+suffix, min((int)alljets.size(), 5), map_weight, 6,0,6);
+  FillHist(prefix+hprefix+"nlepvetojets_zpt15"+suffix, min((int)lepvetojets.size(), 5), map_weight, 6,0,6);
+  FillHist(prefix+hprefix+"nrealjets_before_vetomap_zpt15"+suffix, min((int)realjets_before_vetomap.size(), 5), map_weight, 6,0,6);
+  FillHist(prefix+hprefix+"nrealjets_zpt15"+suffix, min((int)realjets.size(), 5), map_weight, 6,0,6);
+
+  int nnearjets = 0;
+  for(int i=0; i<(int)realjets.size(); i++){
+    if(realjets.at(i) == *jet0){
+      FillHist(prefix+hprefix+"bidx"+suffix, min(i, 6), map_weight, 6,0,6);
+      continue;
+    }
+    if(realjets.at(i).DeltaR(*jet0) > 1.5) continue;
+
+    FillHist(prefix+hprefix+"jidx"+suffix, min(i, 6), map_weight, 6,0,6);
+    FillHist(prefix+hprefix+"jpt"+suffix, realjets.at(i).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"jeta"+suffix, realjets.at(i).Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"jphi"+suffix, realjets.at(i).Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bjdR"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+    FillHist(prefix+hprefix+"bjdPhi"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    FillHist(prefix+hprefix+"bjdpt"+suffix, jet0->Pt() - realjets.at(i).Pt(), map_weight, 400,-200,200);
+    if(nnearjets == 0){
+      FillHist(prefix+hprefix+"j0idx"+suffix, min(i, 6), map_weight, 6,0,6);
+      FillHist(prefix+hprefix+"j0pt"+suffix, realjets.at(i).Pt(), map_weight, 200,0,200);
+      FillHist(prefix+hprefix+"j0eta"+suffix, realjets.at(i).Eta(), map_weight, 50,-2.5,2.5);
+      FillHist(prefix+hprefix+"j0phi"+suffix, realjets.at(i).Phi(), map_weight, 64,-3.2,3.2);
+      FillHist(prefix+hprefix+"bj0dR"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bj0dPhi"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+      FillHist(prefix+hprefix+"bj0dpt"+suffix, jet0->Pt() - realjets.at(i).Pt(), map_weight, 400,-200,200);
+    }
+    if(fabs(jet0->Eta()) < 0.3){
+      FillHist(prefix+hprefix+"bjdR_beta0p3"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p3"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 0.6){
+      FillHist(prefix+hprefix+"bjdR_beta0p6"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p6"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 0.9){
+      FillHist(prefix+hprefix+"bjdR_beta0p9"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta0p9"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 1.2){
+      FillHist(prefix+hprefix+"bjdR_beta1p2"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p2"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 1.5){
+      FillHist(prefix+hprefix+"bjdR_beta1p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 1.8){
+      FillHist(prefix+hprefix+"bjdR_beta1p8"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta1p8"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else if(fabs(jet0->Eta()) < 2.1){
+      FillHist(prefix+hprefix+"bjdR_beta2p1"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta2p1"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }else{
+      FillHist(prefix+hprefix+"bjdR_beta2p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
+      FillHist(prefix+hprefix+"bjdPhi_beta2p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 60,-1.5,1.5);
+    }
+    nnearjets++;
+  }
+  FillHist(prefix+hprefix+"nj"+suffix, min(nnearjets, 6), map_weight, 6,0,6);
+
+  if(realjets.size() < 2){
+    FillHist(prefix+hprefix+"mll_0jet"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_0jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_0jet"+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt_0jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_0jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_0jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta_0jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_0jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_0jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_0jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta_0jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_0jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_0jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi_0jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw_0jet"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_0jet"+suffix, bcharge, map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bCharge_0jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_0jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_0jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR_0jet"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_0jet"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt_0jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_0jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(realjets.size() < 3){
+    FillHist(prefix+hprefix+"mll_1jet"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_1jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_1jet"+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt_1jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_1jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_1jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta_1jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_1jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_1jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_1jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta_1jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_1jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_1jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi_1jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw_1jet"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_1jet"+suffix, bcharge, map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bCharge_1jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_1jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_1jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR_1jet"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_1jet"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt_1jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_1jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(realjets.size() < 4){
+    FillHist(prefix+hprefix+"mll_2jet"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_2jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_2jet"+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt_2jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_2jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_2jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta_2jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_2jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_2jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_2jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta_2jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_2jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_2jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi_2jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw_2jet"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_2jet"+suffix, bcharge, map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bCharge_2jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_2jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_2jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR_2jet"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_2jet"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt_2jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_2jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(realjets.size() < 5){
+    FillHist(prefix+hprefix+"mll_3jet"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_3jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_3jet"+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt_3jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_3jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_3jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta_3jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_3jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_3jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_3jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta_3jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_3jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_3jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi_3jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw_3jet"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_3jet"+suffix, bcharge, map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bCharge_3jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_3jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_3jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR_3jet"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_3jet"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt_3jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_3jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(realjets.size() < 6){
+    FillHist(prefix+hprefix+"mll_4jet"+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll_4jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll_4jet"+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt_4jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_4jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt_4jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta_4jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt_4jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta_4jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt_4jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta_4jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt_4jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta_4jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi_4jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw_4jet"+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2_4jet"+suffix, bcharge, map_weight, 100,-5,5);
+    FillHist(prefix+hprefix+"bCharge_4jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met_4jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi_4jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR_4jet"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_4jet"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt_4jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"costhetaRecoil_4jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+
+  if(realjets.size() > 1) return;
+  if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
 
   // w : 0, w^2 : 1, w*v : 2, w*(w*v) : 3, (w*v)^2 : 4
   FillHist(prefix+hprefix+"statCorr"+suffix, 0, map_weight / map_weight * weight_default, 5,0,5);
@@ -1207,7 +1462,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"met2phi"+suffix, PuppiMET_Type1_PhiCor_phi, map_weight, 64,-3.2,3.2);
   FillHist(prefix+hprefix+"met_met2"+suffix, PuppiMET_Type1_pt - PuppiMET_Type1_PhiCor_pt, map_weight, 200,-100,100);
   if(IsNominalRun) FillHist(prefix+hprefix+"met2_metphi2"+suffix, PuppiMET_Type1_PhiCor_pt, PuppiMET_Type1_PhiCor_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
-  FillHist(prefix+hprefix+"ZbdPhi"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdR"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"ZbdPhi"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
@@ -1215,65 +1471,31 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaRecoil_nobch"+suffix, dimass, fabs(bcharge), costhetaRecoil_nobch, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, 20,-1,1);
-
-  // Checks QCD uncertainty controls
-  FillHist(prefix+hprefix+"nalljets"+suffix, min((int)alljets.size(), 5), map_weight, 6,0,6);
-  FillHist(prefix+hprefix+"nlepvetojets"+suffix, min((int)lepvetojets.size(), 5), map_weight, 6,0,6);
-  FillHist(prefix+hprefix+"nrealjets_before_vetomap"+suffix, min((int)realjets_before_vetomap.size(), 5), map_weight, 6,0,6);
-  FillHist(prefix+hprefix+"nrealjets"+suffix, min((int)realjets.size(), 5), map_weight, 6,0,6);
-
-  int nnearjets = 0;
-  for(int i=0; i<(int)realjets.size(); i++){
-    if(realjets.at(i) == *jet0){
-      FillHist(prefix+hprefix+"bidx"+suffix, min(i, 6), map_weight, 6,0,6);
-      continue;
-    }
-    if(realjets.at(i).DeltaR(*jet0) > 1.5) continue;
-
-    FillHist(prefix+hprefix+"jidx"+suffix, min(i, 6), map_weight, 6,0,6);
-    FillHist(prefix+hprefix+"jpt"+suffix, realjets.at(i).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"jeta"+suffix, realjets.at(i).Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"jphi"+suffix, realjets.at(i).Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bjdR"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-    FillHist(prefix+hprefix+"bjdPhi"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    FillHist(prefix+hprefix+"bjdpt"+suffix, jet0->Pt() - realjets.at(i).Pt(), map_weight, 400,-200,200);
-    if(nnearjets == 0){
-      FillHist(prefix+hprefix+"j0idx"+suffix, min(i, 6), map_weight, 6,0,6);
-      FillHist(prefix+hprefix+"j0pt"+suffix, realjets.at(i).Pt(), map_weight, 200,0,200);
-      FillHist(prefix+hprefix+"j0eta"+suffix, realjets.at(i).Eta(), map_weight, 50,-2.5,2.5);
-      FillHist(prefix+hprefix+"j0phi"+suffix, realjets.at(i).Phi(), map_weight, 64,-3.2,3.2);
-      FillHist(prefix+hprefix+"bj0dR"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bj0dPhi"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bj0dpt"+suffix, jet0->Pt() - realjets.at(i).Pt(), map_weight, 400,-200,200);
-    }
-    if(fabs(jet0->Eta()) < 0.3){
-      FillHist(prefix+hprefix+"bjdR_beta0p3"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta0p3"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 0.6){
-      FillHist(prefix+hprefix+"bjdR_beta0p6"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta0p6"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 0.9){
-      FillHist(prefix+hprefix+"bjdR_beta0p9"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta0p9"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 1.2){
-      FillHist(prefix+hprefix+"bjdR_beta1p2"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta1p2"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 1.5){
-      FillHist(prefix+hprefix+"bjdR_beta1p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta1p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 1.8){
-      FillHist(prefix+hprefix+"bjdR_beta1p8"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta1p8"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else if(fabs(jet0->Eta()) < 2.1){
-      FillHist(prefix+hprefix+"bjdR_beta2p1"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta2p1"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }else{
-      FillHist(prefix+hprefix+"bjdR_beta2p5"+suffix, realjets.at(i).DeltaR(*jet0), map_weight, 30,0,1.5);
-      FillHist(prefix+hprefix+"bjdPhi_beta2p5"+suffix, realjets.at(i).DeltaPhi(*jet0), map_weight, 30,0,1.5);
-    }
-    nnearjets++;
+  if(fabs(jet0->Eta()) < 0.3){
+    FillHist(prefix+hprefix+"ZbdR_beta0p3"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta0p3"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 0.6){
+    FillHist(prefix+hprefix+"ZbdR_beta0p6"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta0p6"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 0.9){
+    FillHist(prefix+hprefix+"ZbdR_beta0p9"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta0p9"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 1.2){
+    FillHist(prefix+hprefix+"ZbdR_beta1p2"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta1p2"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 1.5){
+    FillHist(prefix+hprefix+"ZbdR_beta1p5"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta1p5"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 1.8){
+    FillHist(prefix+hprefix+"ZbdR_beta1p8"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta1p8"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else if(fabs(jet0->Eta()) < 2.1){
+    FillHist(prefix+hprefix+"ZbdR_beta2p1"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta2p1"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+  }else{
+    FillHist(prefix+hprefix+"ZbdR_beta2p5"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi_beta2p5"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   }
-  FillHist(prefix+hprefix+"nj"+suffix, min(nnearjets, 6), map_weight, 6,0,6);
 
   // bCharges vs. nPV
   FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
@@ -1383,127 +1605,6 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
         }
       }
     }
-  }
-
-  if(realjets.size() < 2){
-    FillHist(prefix+hprefix+"mll_0jet"+suffix, dimass, map_weight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_0jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_0jet"+suffix, dipt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"lpt_0jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_0jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l0pt_0jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l0eta_0jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_0jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_0jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l1pt_0jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l1eta_0jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bpt_0jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"beta_0jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bphi_0jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bChargeRaw_0jet"+suffix, bcharge, map_weight, 200,-5,5);
-    FillHist(prefix+hprefix+"bChargeRaw2_0jet"+suffix, bcharge, map_weight, 100,-5,5);
-    FillHist(prefix+hprefix+"bCharge_0jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+hprefix+"met_0jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"metphi_0jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_0jet"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"Zbpt_0jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_0jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  }
-  if(realjets.size() < 3){
-    FillHist(prefix+hprefix+"mll_1jet"+suffix, dimass, map_weight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_1jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_1jet"+suffix, dipt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"lpt_1jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_1jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l0pt_1jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l0eta_1jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_1jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_1jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l1pt_1jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l1eta_1jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bpt_1jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"beta_1jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bphi_1jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bChargeRaw_1jet"+suffix, bcharge, map_weight, 200,-5,5);
-    FillHist(prefix+hprefix+"bChargeRaw2_1jet"+suffix, bcharge, map_weight, 100,-5,5);
-    FillHist(prefix+hprefix+"bCharge_1jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+hprefix+"met_1jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"metphi_1jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_1jet"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"Zbpt_1jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_1jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  }
-  if(realjets.size() < 4){
-    FillHist(prefix+hprefix+"mll_2jet"+suffix, dimass, map_weight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_2jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_2jet"+suffix, dipt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"lpt_2jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_2jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l0pt_2jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l0eta_2jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_2jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_2jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l1pt_2jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l1eta_2jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bpt_2jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"beta_2jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bphi_2jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bChargeRaw_2jet"+suffix, bcharge, map_weight, 200,-5,5);
-    FillHist(prefix+hprefix+"bChargeRaw2_2jet"+suffix, bcharge, map_weight, 100,-5,5);
-    FillHist(prefix+hprefix+"bCharge_2jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+hprefix+"met_2jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"metphi_2jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_2jet"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"Zbpt_2jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_2jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  }
-  if(realjets.size() < 5){
-    FillHist(prefix+hprefix+"mll_3jet"+suffix, dimass, map_weight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_3jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_3jet"+suffix, dipt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"lpt_3jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_3jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l0pt_3jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l0eta_3jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_3jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_3jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l1pt_3jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l1eta_3jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bpt_3jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"beta_3jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bphi_3jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bChargeRaw_3jet"+suffix, bcharge, map_weight, 200,-5,5);
-    FillHist(prefix+hprefix+"bChargeRaw2_3jet"+suffix, bcharge, map_weight, 100,-5,5);
-    FillHist(prefix+hprefix+"bCharge_3jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+hprefix+"met_3jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"metphi_3jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_3jet"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"Zbpt_3jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_3jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  }
-  if(realjets.size() < 6){
-    FillHist(prefix+hprefix+"mll_4jet"+suffix, dimass, map_weight, 80,70,110);
-    FillHist(prefix+hprefix+"yll_4jet"+suffix, dirap, map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"ptll_4jet"+suffix, dipt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"lpt_4jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_4jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l0pt_4jet"+suffix, lepton0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l0eta_4jet"+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"lpt_4jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"leta_4jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"l1pt_4jet"+suffix, lepton1->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"l1eta_4jet"+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bpt_4jet"+suffix, jet0->Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"beta_4jet"+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
-    FillHist(prefix+hprefix+"bphi_4jet"+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"bChargeRaw_4jet"+suffix, bcharge, map_weight, 200,-5,5);
-    FillHist(prefix+hprefix+"bChargeRaw2_4jet"+suffix, bcharge, map_weight, 100,-5,5);
-    FillHist(prefix+hprefix+"bCharge_4jet"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
-    FillHist(prefix+hprefix+"met_4jet"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"metphi_4jet"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
-    FillHist(prefix+hprefix+"ZbdPhi_4jet"+suffix, abs((*lepton0 + *lepton1).DeltaPhi(*jet0)), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"Zbpt_4jet"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-    FillHist(prefix+hprefix+"costhetaRecoil_4jet"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   }
 }
 
