@@ -55,7 +55,7 @@ void dybAnalyzer::executeEvent(){
       muons = muons_2p4;
       for(unsigned int s=0; s<nmem_muon.size(); s++){
         for(unsigned int m=0; m<nmem_muon.at(s); m++){
-          //#### executeEventWithParameter("mm"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
+          executeEventWithParameter("mm"+GetEraShort(), Form("_MuonMomentum_s%dm%d", s, m), s,m);
         }
       }
     }
@@ -89,7 +89,7 @@ void dybAnalyzer::executeEvent(){
       electrons = electrons_2p5;
       for(unsigned int s=0; s<nmem_electron.size(); s++){
         for(unsigned int m=0; m<nmem_electron.at(s); m++){
-          //#### executeEventWithParameter("ee"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
+          executeEventWithParameter("ee"+GetEraShort(), Form("_ElectronEnergy_s%dm%d", s, m), s,m);
         }
       }
     }
@@ -1794,17 +1794,17 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     }
     if(genpid == 0) continue; // No matched b-partons
 
-    double Charge = jetCharge(jet); // No Normalization & TTJJ
-    double alpha_plus_DATA_eff = 0.63179105; //0.63181282; //0.63079885;
-    double alpha_minus_DATA_eff = 0.61389421; //0.61395198; //0.61295115;
-    double alpha_plus_MC_eff = 0.65428669; //0.65415066;
-    double alpha_minus_MC_eff = 0.63782927; //0.63769426;
+    double Charge = jetCharge(jet); // bjpt > 25->30 GeV // More systs // No Normalization & TTJJ
+    double alpha_plus_DATA_eff = 0.63137949; //0.63179105; //0.63181282; //0.63079885;
+    double alpha_minus_DATA_eff = 0.61534016; //0.61389421; //0.61395198; //0.61295115;
+    double alpha_plus_MC_eff = 0.65458415; //0.65428669; //0.65415066;
+    double alpha_minus_MC_eff = 0.63863934; //0.63782927; //0.63769426;
     if(sys > 0){ // asym gets smaller
-      alpha_plus_DATA_eff += -0.00106574; //-0.00088663; //-0.00086244;
-      alpha_minus_DATA_eff += 0.00085326; //0.00074632; //0.00072373;
+      alpha_plus_DATA_eff += -0.00135034; //-0.00106574; //-0.00088663; //-0.00086244;
+      alpha_minus_DATA_eff += 0.00096904; //0.00085326; //0.00074632; //0.00072373;
     }else if(sys < 0){ // SF gets smaller
-      alpha_plus_DATA_eff += 0.00321587; //0.00250343; //0.00237556;
-      alpha_minus_DATA_eff += 0.0040167; //0.00297406; //0.00283084;
+      alpha_plus_DATA_eff += 0.00223155; //0.00321587; //0.00250343; //0.00237556;
+      alpha_minus_DATA_eff += 0.00310961; //0.0040167; //0.00297406; //0.00283084;
     }
 
     // Hyonsans's SF
@@ -1825,76 +1825,76 @@ double dybAnalyzer::GetbChargeSFWeight(const vector<Jet>& jets, unsigned int mod
     // 1D bChargeSF
     if(mode == 1){
       if(fabs(Charge) < afb_chbin[1]){// 0.1
-        alpha_plus_DATA_eff = 0.52440445; //0.52466892; //0.52455235;
-        alpha_minus_DATA_eff = 0.51737104; //0.51791587; //0.51779908;
-        alpha_plus_MC_eff = 0.52957027; //0.52968978;
-        alpha_minus_MC_eff = 0.52548965; //0.52540184;
+        alpha_plus_DATA_eff = 0.52391383; //0.52440445; //0.52466892; //0.52455235;
+        alpha_minus_DATA_eff = 0.51844103; //0.51737104; //0.51791587; //0.51779908;
+        alpha_plus_MC_eff = 0.52958572; //0.52957027; //0.52968978;
+        alpha_minus_MC_eff = 0.52553913; //0.52548965; //0.52540184;
         if(sys > 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += -0.00225534; //-0.00159007; //-0.00157464;
-          alpha_minus_DATA_eff += 0.00212763; //0.0021877; //0.00209931;
+          alpha_plus_DATA_eff += -0.00264795; //-0.00225534; //-0.00159007; //-0.00157464;
+          alpha_minus_DATA_eff += 0.00172429; //0.00212763; //0.0021877; //0.00209931;
         }else if(sys < 0 && bChargeBins.Contains("0")){
-          alpha_plus_DATA_eff += 0.00324108; //0.0029865; //0.00287364;
-          alpha_minus_DATA_eff += 0.00343561; //0.00217065; //0.00215546;
+          alpha_plus_DATA_eff += 0.00236306; //0.00324108; //0.0029865; //0.00287364;
+          alpha_minus_DATA_eff += 0.0036289; //0.00343561; //0.00217065; //0.00215546;
         }
       }else if(fabs(Charge) < afb_chbin[2]){// 0.2
-        alpha_plus_DATA_eff = 0.57499135; //0.57549775; //0.57503119;
-        alpha_minus_DATA_eff = 0.56023694; //0.56120889; //0.56072413;
-        alpha_plus_MC_eff = 0.58955363; //0.58939608;
-        alpha_minus_MC_eff = 0.5764066; //0.57641132;
+        alpha_plus_DATA_eff = 0.57340855; //0.57499135; //0.57549775; //0.57503119;
+        alpha_minus_DATA_eff = 0.56040137; //0.56023694; //0.56120889; //0.56072413;
+        alpha_plus_MC_eff = 0.58976601; //0.58955363; //0.58939608;
+        alpha_minus_MC_eff = 0.5768458; //0.5764066; //0.57641132;
         if(sys > 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += -0.0028866; //-0.00163046; //-0.00176428;
-          alpha_minus_DATA_eff += 0.00109804; //0.00239976; //0.00222184;
+          alpha_plus_DATA_eff += -0.00322615; //-0.0028866; //-0.00163046; //-0.00176428;
+          alpha_minus_DATA_eff += 0.0011049; //0.00109804; //0.00239976; //0.00222184;
         }else if(sys < 0 && bChargeBins.Contains("1")){
-          alpha_plus_DATA_eff += 0.00204427; //0.00365694; //0.00332861;
-          alpha_minus_DATA_eff += 0.00537413; //0.00248462; //0.00264313;
+          alpha_plus_DATA_eff += 0.00167391; //0.00204427; //0.00365694; //0.00332861;
+          alpha_minus_DATA_eff += 0.00488757; //0.00537413; //0.00248462; //0.00264313;
         }
       }else if(fabs(Charge) < afb_chbin[3]){// 0.6
-        alpha_plus_DATA_eff = 0.668161; //0.66795153; //0.66685555;
-        alpha_minus_DATA_eff = 0.64258252; //0.64183908; //0.6406924;
-        alpha_plus_MC_eff = 0.70205254; //0.7016705;
-        alpha_minus_MC_eff = 0.67617536; //0.67580431;
+        alpha_plus_DATA_eff = 0.6685798; //0.668161; //0.66795153; //0.66685555;
+        alpha_minus_DATA_eff = 0.64465731; //0.64258252; //0.64183908; //0.6406924;
+        alpha_plus_MC_eff = 0.70239881; //0.70205254; //0.7016705;
+        alpha_minus_MC_eff = 0.67749213; //0.67617536; //0.67580431;
         if(sys > 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += -0.00257117; //-0.00198435; //-0.00192819;
-          alpha_minus_DATA_eff += 0.00138245; //0.00098174; //0.00094884;
+          alpha_plus_DATA_eff += -0.00195613; //-0.00257117; //-0.00198435; //-0.00192819;
+          alpha_minus_DATA_eff += 0.00206392; //0.00138245; //0.00098174; //0.00094884;
         }else if(sys < 0 && bChargeBins.Contains("2")){
-          alpha_plus_DATA_eff += 0.00373721; //0.00278728; //0.00262054;
-          alpha_minus_DATA_eff += 0.00695071; //0.00563382; //0.00532535;
+          alpha_plus_DATA_eff += 0.00350697; //0.00373721; //0.00278728; //0.00262054;
+          alpha_minus_DATA_eff += 0.00332381; //0.00695071; //0.00563382; //0.00532535;
         }
       }else if(fabs(Charge) < afb_chbin[4]){// 1.0
-        alpha_plus_DATA_eff = 0.78853946; //0.78691713; //0.78271638;
-        alpha_minus_DATA_eff = 0.74319937; //0.74175893; //0.73778292;
-        alpha_plus_MC_eff = 0.8273833; //0.82685472;
-        alpha_minus_MC_eff = 0.79299394; //0.79243187;
+        alpha_plus_DATA_eff = 0.78123981; //0.78853946; //0.78691713; //0.78271638;
+        alpha_minus_DATA_eff = 0.74492833; //0.74319937; //0.74175893; //0.73778292;
+        alpha_plus_MC_eff = 0.82792016; //0.8273833; //0.82685472;
+        alpha_minus_MC_eff = 0.79454412; //0.79299394; //0.79243187;
         if(sys > 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += -0.00347714; //-0.00277093; //-0.00284074;
-          alpha_minus_DATA_eff += 0.0064814; //0.00567753; //0.00513936;
+          alpha_plus_DATA_eff += -0.00623389; //-0.00347714; //-0.00277093; //-0.00284074;
+          alpha_minus_DATA_eff += 0.00333936; //0.0064814; //0.00567753; //0.00513936;
         }else if(sys < 0 && bChargeBins.Contains("3")){
-          alpha_plus_DATA_eff += 0.01612633; //0.01097872; //0.01040963;
-          alpha_minus_DATA_eff += 0.00865146; //0.0053582; //0.00575384;
+          alpha_plus_DATA_eff += 0.0066016; //0.01612633; //0.01097872; //0.01040963;
+          alpha_minus_DATA_eff += 0.01232379; //0.00865146; //0.0053582; //0.00575384;
         }
       }else if(fabs(Charge) < afb_chbin[5]){// 3.0, soft muons
-        alpha_plus_DATA_eff = 0.77495511; //0.77490976; //0.77182254;
-        alpha_minus_DATA_eff = 0.77649167; //0.77647107; //0.77357429;
-        alpha_plus_MC_eff = 0.78536886; //0.78518778;
-        alpha_minus_MC_eff = 0.78548813; //0.78552888;
+        alpha_plus_DATA_eff = 0.77488593; //0.77495511; //0.77490976; //0.77182254;
+        alpha_minus_DATA_eff = 0.77556002; //0.77649167; //0.77647107; //0.77357429;
+        alpha_plus_MC_eff = 0.78471623; //0.78536886; //0.78518778;
+        alpha_minus_MC_eff = 0.78474967; //0.78548813; //0.78552888;
         if(sys > 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += -0.00350888; //-0.00930939; //-0.00300315;
-          alpha_minus_DATA_eff += 0.0057526; //0.00629106; //0.01019522;
+          alpha_plus_DATA_eff += -0.00016469; //-0.00350888; //-0.00930939; //-0.00300315;
+          alpha_minus_DATA_eff += 0.01251886; //0.0057526; //0.00629106; //0.01019522;
         }else if(sys < 0 && bChargeBins.Contains("4")){
-          alpha_plus_DATA_eff += 0.01193073; //0.00671166; //0.01005651;
-          alpha_minus_DATA_eff += 0.00727731; //0.00993179; //0.00296229;
+          alpha_plus_DATA_eff += 0.01046404; //0.01193073; //0.00671166; //0.01005651;
+          alpha_minus_DATA_eff += 0.00013766; //0.00727731; //0.00993179; //0.00296229;
         }
       }else{// 5.0, soft electrons
-        alpha_plus_DATA_eff = 0.75874849; //0.75926086; //0.75433632;
-        alpha_minus_DATA_eff = 0.75794022; //0.75920095; //0.75499201;
-        alpha_plus_MC_eff = 0.76086731; //0.76063023;
-        alpha_minus_MC_eff = 0.76353419; //0.76337732;
+        alpha_plus_DATA_eff = 0.75563201; //0.75874849; //0.75926086; //0.75433632;
+        alpha_minus_DATA_eff = 0.75563675; //0.75794022; //0.75920095; //0.75499201;
+        alpha_plus_MC_eff = 0.75890386; //0.76086731; //0.76063023;
+        alpha_minus_MC_eff = 0.76161921; //0.76353419; //0.76337732;
         if(sys > 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += -0.00587855; //-0.00459789; //-0.00443982;
-          alpha_minus_DATA_eff += 0.00639942; //0.00433558; //0.00398256;
+          alpha_plus_DATA_eff += -0.00718028; //-0.00587855; //-0.00459789; //-0.00443982;
+          alpha_minus_DATA_eff += 0.00669405; //0.00639942; //0.00433558; //0.00398256;
         }else if(sys < 0 && bChargeBins.Contains("5")){
-          alpha_plus_DATA_eff += 0.01097021; //0.00822754; //0.00811232;
-          alpha_minus_DATA_eff += 0.01007731; //0.00872532; //0.00904374;
+          alpha_plus_DATA_eff += 0.01028731; //0.01097021; //0.00822754; //0.00811232;
+          alpha_minus_DATA_eff += 0.01103453; //0.01007731; //0.00872532; //0.00904374;
         }
       }
     }

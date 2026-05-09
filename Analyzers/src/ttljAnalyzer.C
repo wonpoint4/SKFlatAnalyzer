@@ -26,7 +26,7 @@ void ttljAnalyzer::executeEvent(){
     muons = MuonMomentumCorrection(SMPGetMuons("POGMediumWithLooseTrkIso", 8.0, 2.4), 0,0, true);
     executeEventWithParameter("m"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt30", "_jetpt50", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
         if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("m"+GetEraShort(), syst);
       }
     }else if(HasFlag("LEPSYS")){
@@ -45,7 +45,7 @@ void ttljAnalyzer::executeEvent(){
     electrons = ElectronEnergyCorrection(SMPGetElectrons("passMediumID_SelQ", 8.0, 2.5), 0,0, true);
     executeEventWithParameter("e"+GetEraShort());
     if(HasFlag("SYS")){
-      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt25", "_jetpt55", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
+      for(TString syst:{"_jet_scale_up", "_jet_scale_down", "_jet_smear_up", "_jet_smear_down", "_jetpt30", "_jetpt50", "_jeteta5", "_jeteta1p5", "_HS", "_noSelQ"}){
         TString electron_ID = (syst.Contains("HS") || syst.Contains("noSelQ"))? "passMediumID": "passMediumID_SelQ";
         electrons = ElectronEnergyCorrection(SMPGetElectrons(electron_ID, 8.0, 2.5), 0,0, true);
         if(!(syst.Contains("smear") && IsDATA)) executeEventWithParameter("e"+GetEraShort(), syst);
@@ -103,13 +103,13 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
 
   // Jets
   vector<Jet> alljets = {};
-  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(jets_raw, 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(jets_raw, -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(jets_raw, 1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(jets_raw, -1), "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
-  else if(option.Contains("jeteta5")) alljets = SelectJets(SmearJets(jets_raw, 0), "tightLepVeto", 25, 5.0);
+  if(option.Contains("jet_scale_up")) alljets = SelectJets(ScaleJets(jets_raw, 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_scale_down")) alljets = SelectJets(ScaleJets(jets_raw, -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_up")) alljets = SelectJets(SmearJets(jets_raw, 1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jet_smear_down")) alljets = SelectJets(SmearJets(jets_raw, -1), "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
+  else if(option.Contains("jeteta5")) alljets = SelectJets(SmearJets(jets_raw, 0), "tightLepVeto", 30, 5.0);
   else if(option.Contains("HS")) alljets = SelectJets(jets_raw, "tightLepVeto", 40, 2.4);
-  else alljets = SelectJets(jets_raw, "tightLepVeto", 25, (DataYear == 2016? 2.4: 2.5));
+  else alljets = SelectJets(jets_raw, "tightLepVeto", 30, (DataYear == 2016? 2.4: 2.5));
   std::sort(alljets.begin(), alljets.end(), PtComparing);
 
   vector<Jet> lepvetojets = {}, realjets_before_vetomap = {}, realjets = {}, bjets = {}, ajets = {};
@@ -149,10 +149,8 @@ void ttljAnalyzer::executeEventWithParameter(TString channel, TString option, un
     else if(option.Contains("bScore_down")) btag_score_cut *= 0.90;
     if(jet.GetTaggerResult(DeepJet_Tight.j_Tagger) > btag_score_cut && fabs(jet.Eta()) < (DataYear == 2016? 2.4: 2.5)) bjets.push_back(jet);
     else{
-      if(option.Contains("jetpt25")) ajets.push_back(jet);
-      else if(option.Contains("jetpt30")){
-        if(jet.Pt() > 30) ajets.push_back(jet);
-      }else if(option.Contains("jetpt35")){
+      if(option.Contains("jetpt30")) ajets.push_back(jet);
+      else if(option.Contains("jetpt35")){
         if(jet.Pt() > 35) ajets.push_back(jet);
       }else if(option.Contains("jetpt45")){
         if(jet.Pt() > 45) ajets.push_back(jet);
