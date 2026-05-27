@@ -29,7 +29,7 @@ systematics = [
     ["_donorm"],
     ["_noSelQ"],
     ["_lumi_up", "_lumi_down"],
-    ["_jetpt25", "_jetpt55"],
+    ["_jetpt30", "_jetpt50"],
     ["_jeteta5", "_jeteta1p5"],
     ["_bScore_up", "_bScore_down"],
     ["_prefireweight_up", "_prefireweight_down"],
@@ -321,9 +321,9 @@ def DrawAccuracy_withLR(channels, Xrange=(0.6, 0.67), tag="", option=""):
         title = title.replace("Run2H", "nPV#in(40,50]")
         title = title.replace("Run2V", "50 < nPV")
 
-        title = title.replace("Run2_pt0", "pt(b)#in[25,35)")
-        title = title.replace("Run2_pt1", "pt(b)#in[35,50)")
-        title = title.replace("Run2_pt2", "pt(b)#in[50,80)")
+        title = title.replace("Run2_pt0", "pt(b)#in[30,40)")
+        title = title.replace("Run2_pt1", "pt(b)#in[40,55)")
+        title = title.replace("Run2_pt2", "pt(b)#in[55,80)")
         title = title.replace("Run2_pt3", "pt(b)#in[80,120)")
         title = title.replace("Run2_pt4", "120 #leq pt(b)")
 
@@ -675,7 +675,7 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[3]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), eras[3]+"s", option)
     DrawAccuracy_withLR([leps[0]+eras[4]+chargeBin for chargeBin in chargeBins], (0.51, 0.84), "Run2ss", option)
 
-    #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[0]+ptBin for ptBin in ptBins], (0.59, 0.67), "pt_chargeBin", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[1]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin4", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[2]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin5", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+chargeBins[3]+ptBin for ptBin in ptBins], (0.51, 0.84), "pt_chargeBin0123", option)
@@ -691,7 +691,7 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[4]+"H"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2H", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+"V"+chargeBin for chargeBin in chargeBins], (0.505, 0.84), "Run2V", option)
 
-    #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.59, 0.66), "nPV_chargeBin", option)
+    DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[0] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.66), "nPV_chargeBin", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[1] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.70, 0.79), "nPV_chargeBin4", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[2] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.63, 0.79), "nPV_chargeBin5", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[3] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.57, 0.645), "nPV_chargeBin0123", option)
@@ -700,7 +700,7 @@ if __name__=="__main__":
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[6] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.61, 0.72), "nPV_chargeBin2", option)
     #DrawAccuracy_withLR([leps[0]+eras[4]+nPV+chargeBins[7] for nPV in ["", "F", "S", "L", "M", "H", "V"]], (0.62, 0.84), "nPV_chargeBin3", option)
 
-    #DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
+    DrawAccuracy_withLR([leps[0]+era for era in eras], (0.605, 0.66), "Eras", option)
     #DrawAccuracy_withLR([lep+era for era in eras for lep in leps], (0.605, 0.66), "Eras_Leps", option)
     #chargeBins = ["", "_[0-3]", "_4", "_5"]
     #DrawAccuracy_withLR([leps[0]+era+chargeBin for era in eras for chargeBin in chargeBins], (0.59, 0.78), "Eras_Bins", option)
