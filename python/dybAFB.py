@@ -9,8 +9,8 @@ ROOT.Plotter.SetupStyle()
 dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.22654, 0.22854, 0.23054, 0.23104, 0.23154, 0.23204, 0.23254, 0.23454, 0.23654]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-costhetaBins = ["0", "1", "2", "3", "4"]
-nMassbins = 12 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+costhetaBins = [""]#"0", "1", "2", "3", "4"]
+nMassbins = 60 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
     #"dy" : [1.7, -1.8],
     "wjets" : [3.8, -3.8],
@@ -184,10 +184,10 @@ def getdAFBs_sin2w(channel):
         for ch in range(len(chargeBins)):
             dAFB_per_ch = np.array([])
             for cos in costhetaBins:
-                AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "")
-                AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "")
-                #AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "suffix:_sthw2_%i:dy" % iSin)
-                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "suffix:_Recoil_weakNLOHO_s2eff_%i:dy" % (iSin * 1e5))
+                AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                #AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins suffix:_sthw2_%i:dy" % iSin)
+                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins suffix:_Recoil_weakNLOHO_s2eff_%i:dy" % (iSin * 1e5))
                 for i in range(1, AFB_data.GetNbinsX() + 1):
                     if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
                 dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
@@ -224,7 +224,7 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                     dAFB = []
                     if "stat_Data" in systkey:
                         for cos in costhetaBins:
-                            AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "")
+                            AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
                             for iBin in range(nMassbins):
                                 dAFB.append(AFB_data_nominal.GetBinError(iBin + 1))
                         dAFBs[systkey][term][syst].append(np.array(dAFB))
@@ -232,7 +232,7 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                         if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
                     elif "stat_MC" in systkey:
                         for cos in costhetaBins:
-                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "")
+                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
                             for iBin in range(nMassbins):
                                 dAFB.append(AFB_mc_nominal.GetBinError(iBin + 1))
                         dAFBs[systkey][term][syst].append(np.array(dAFB))
@@ -241,7 +241,7 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                     else: # Systematics
                         dAFB_per_ch = np.array([])
                         for cos in costhetaBins:
-                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "")
+                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
                             syststr = "suffix:"+list_syst[term][syst]
                             if "norm" in list_syst[term][syst]:
                                 for process, uncs in xsec_unc.items():
@@ -251,7 +251,7 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                                     if era in list_syst[term][syst]:
                                         unc = [1 + a * 0.01 * (1 if "up" in list_syst[term][syst] else -1) for a in uncs]
                                         syststr = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
-                            AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", syststr)
+                            AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins "+syststr)
                             dAFB_syst = getdAFB(AFB_mc_nominal, AFB_mc_syst)
                             dAFB_per_ch = np.append(dAFB_per_ch, dAFB_syst)
                             if ch != 0: dAFB_full = np.append(dAFB_full, dAFB_syst)
@@ -319,7 +319,7 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
     #channel = "mm201[678][ab]?/"
-    npz_files_tag = "_full3D"
+    npz_files_tag = "_updated3D"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")

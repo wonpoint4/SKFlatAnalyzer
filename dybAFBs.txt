@@ -35,3 +35,23 @@ condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDF3.py > npzi
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDF4.py > npzing_syst_full3D_PDF4.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDFSYS.py > npzing_syst_full3D_PDFSYS.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_SYS.py > npzing_syst_full3D_SYS.log" &
+
+
+
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_Aepcor.py > npzing_syst_updated3D_LEPSYS_Aepcor.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_EffStatReplica.py > npzing_syst_updated3D_LEPSYS_EffStatReplica.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_ElID.py > npzing_syst_updated3D_LEPSYS_ElID.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_ElRECO.py > npzing_syst_updated3D_LEPSYS_ElRECO.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_ElTrigger.py > npzing_syst_updated3D_LEPSYS_ElTrigger.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_MuID.py > npzing_syst_updated3D_LEPSYS_MuID.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_MuRECO.py > npzing_syst_updated3D_LEPSYS_MuRECO.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_MuTracking.py > npzing_syst_updated3D_LEPSYS_MuTracking.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_MuTrigger.py > npzing_syst_updated3D_LEPSYS_MuTrigger.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_RoccoR.py > npzing_syst_updated3D_LEPSYS_RoccoR.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDF0.py > npzing_syst_updated3D_PDF0.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDF1.py > npzing_syst_updated3D_PDF1.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDF2.py > npzing_syst_updated3D_PDF2.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDF3.py > npzing_syst_updated3D_PDF3.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDF4.py > npzing_syst_updated3D_PDF4.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_PDFSYS.py > npzing_syst_updated3D_PDFSYS.log" &
+condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_SYS.py > npzing_syst_updated3D_SYS.log" &
