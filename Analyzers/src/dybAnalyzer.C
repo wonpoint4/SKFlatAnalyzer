@@ -760,7 +760,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(!hprefix.Contains("ss_"))FillHist("betaphi", jet0->Eta(), jet0->Phi(), map_weight[""], 200,-2.5,2.5, 200,-3.2,3.2);
   }
   FillHist(prefix+hprefix+"bChargeRaw"+suffix, bcharge, map_weight, 200,-5,5);
-  FillHist(prefix+hprefix+"bChargeRaw2"+suffix, bcharge, map_weight, 100,-5,5);
+  FillHist(prefix+hprefix+"bChargeRaw2"+suffix, jet0->Charge(), map_weight, 100,-1,1);
   FillHist(prefix+hprefix+"bCharge"+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
   FillHist(prefix+hprefix+"met"+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
   FillHist(prefix+hprefix+"metphi"+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
@@ -772,9 +772,30 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdR"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
   FillHist(prefix+hprefix+"ZbdPhi"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
-  FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil2"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil3"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  if(IsDATA && IsNominalRun){
+    int Nrandom = 100;
+    TRandom3 rand;
+    double mean = map_weight[""]; // Average rate (lambda)
+    for(int i=0; i<Nrandom; i++){
+      rand.SetSeed((run<<15) + (lumi<<10) + (event<<5) + lepton0->Eta() * 100 + i); // Initialize random seed
+      int randomPoisson = rand.Poisson(mean);
+      FillHist(Form(prefix+hprefix+"costhetaRecoil_default_Poisson%d", i)+suffix, dimass, fabs(bcharge), costhetaRecoil, randomPoisson, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    }
+    rand.SetSeed((run<<15) + (lumi<<10) + (event<<5) + lepton0->Eta() * 100); // Initialize random seed
+    double random_1over100 = rand.Uniform(Nrandom);
+    FillHist(Form(prefix+hprefix+"costhetaRecoil_default_1cent%d", int(random_1over100))+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight[""], afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    rand.SetSeed((run<<5) + (lumi<<10) + (event<<15) + lepton0->Eta() * 100); // Initialize random seed
+    double random_99over100 = rand.Uniform(Nrandom);
+    for(int i=0; i<Nrandom; i++){
+      if(i != int(random_99over100)) FillHist(Form(prefix+hprefix+"costhetaRecoil_default_99cent%d", i)+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight[""], afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    }
+  }
+  if(fabs(costhetaRecoil) < 0.9) FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
+  if(89.5 < dimass && dimass < 92.7) FillHist(prefix+hprefix+"costhetaRecoil_Zpeak"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_HS"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_original"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaRecoil_nobch"+suffix, dimass, fabs(bcharge), costhetaRecoil_nobch, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, 20,-1,1);
@@ -804,6 +825,82 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"ZbdPhi_beta2p5"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   }
 
+  Lepton* lepton_near = NULL;
+  if(lepton0->DeltaR(*jet0) < lepton1->DeltaR(*jet0)) lepton_near = lepton0;
+  else lepton_near = lepton1;
+  FillHist(prefix+hprefix+"lbdR"+suffix, lepton0->DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"lbdR"+suffix, lepton1->DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"lbmaxdR"+suffix, max(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"lbmindR"+suffix, lepton_near->DeltaR(*jet0), map_weight, 200,0,10);
+  FillHist(prefix+hprefix+"lbmindR_Charges"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+  if(lepton_near->Charge() > 0) FillHist(prefix+hprefix+"lbmindR_Charges_Lp"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+  else FillHist(prefix+hprefix+"lbmindR_Charges_Lm"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+  if(lepton_near->LeptonFlavour() == Lepton::MUON){
+    const Muon* mu = (Muon*)lepton_near;
+    FillHist(prefix+hprefix+"lbmindR_TrkIso"+suffix, mu->TrkIso() / mu->Pt(), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbmindR_PFIso"+suffix, mu->RelIso(), map_weight, 200,0,10);
+  }else if(lepton_near->LeptonFlavour() == Lepton::ELECTRON){
+    const Electron* el = (Electron*)lepton_near;
+    FillHist(prefix+hprefix+"lbmindR_TrkIso"+suffix, el->TrkIso() / el->Pt(), map_weight, 200,0,10);
+  }
+  FillHist(prefix+hprefix+"b_chargedHadronFraction"+suffix, jet0->chargedHadronEnergyFraction(), map_weight, 100,0,1);
+  FillHist(prefix+hprefix+"b_neutralHadronFraction"+suffix, jet0->neutralHadronEnergyFraction(), map_weight, 100,0,1);
+  FillHist(prefix+hprefix+"b_chargedEmFraction"+suffix, jet0->chargedEmEnergyFraction(), map_weight, 100,0,1);
+  FillHist(prefix+hprefix+"b_neutralEmFraction"+suffix, jet0->neutralEmEnergyFraction(), map_weight, 100,0,1);
+  FillHist(prefix+hprefix+"b_muonFraction"+suffix, jet0->muonEnergyFraction(), map_weight, 100,0,1);
+
+  if(fabs(costhetaRecoil) > 0.9){
+    TString cos = "_cos"+(TString)(costhetaRecoil > 0? "p": "m")+"0p9";
+    FillHist(prefix+hprefix+"mll"+cos+suffix, dimass, map_weight, 80,70,110);
+    FillHist(prefix+hprefix+"yll"+cos+suffix, dirap, map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"ptll"+cos+suffix, dipt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"lpt"+cos+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta"+cos+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l0pt"+cos+suffix, lepton0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l0eta"+cos+suffix, lepton0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"lpt"+cos+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"leta"+cos+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"l1pt"+cos+suffix, lepton1->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"l1eta"+cos+suffix, lepton1->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bpt"+cos+suffix, jet0->Pt(), map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"beta"+cos+suffix, jet0->Eta(), map_weight, 50,-2.5,2.5);
+    FillHist(prefix+hprefix+"bphi"+cos+suffix, jet0->Phi(), map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"bChargeRaw"+cos+suffix, bcharge, map_weight, 200,-5,5);
+    FillHist(prefix+hprefix+"bChargeRaw2"+cos+suffix, jet0->Charge(), map_weight, 100,-1,1);
+    FillHist(prefix+hprefix+"bCharge"+cos+suffix, (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
+    FillHist(prefix+hprefix+"met"+cos+suffix, PuppiMET_Type1_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"metphi"+cos+suffix, PuppiMET_Type1_phi, map_weight, 64,-3.2,3.2);
+    if(IsNominalRun) FillHist(prefix+hprefix+"met_metphi"+cos+suffix, PuppiMET_Type1_pt, PuppiMET_Type1_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+    FillHist(prefix+hprefix+"met2"+cos+suffix, PuppiMET_Type1_PhiCor_pt, map_weight, 200,0,200);
+    FillHist(prefix+hprefix+"met2phi"+cos+suffix, PuppiMET_Type1_PhiCor_phi, map_weight, 64,-3.2,3.2);
+    FillHist(prefix+hprefix+"met_met2"+cos+suffix, PuppiMET_Type1_pt - PuppiMET_Type1_PhiCor_pt, map_weight, 200,-100,100);
+    if(IsNominalRun) FillHist(prefix+hprefix+"met2_metphi2"+cos+suffix, PuppiMET_Type1_PhiCor_pt, PuppiMET_Type1_PhiCor_phi, map_weight[""], 40,0,200, 32,-3.2,3.2);
+    FillHist(prefix+hprefix+"ZbdR"+cos+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"ZbdPhi"+cos+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
+    FillHist(prefix+hprefix+"Zbpt"+cos+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
+
+    FillHist(prefix+hprefix+"lbdR"+cos+suffix, lepton0->DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbdR"+cos+suffix, lepton1->DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbmaxdR"+cos+suffix, max(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbmindR"+cos+suffix, lepton_near->DeltaR(*jet0), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbmindR_Charges"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+    if(lepton_near->Charge() > 0) FillHist(prefix+hprefix+"lbmindR_Charges_Lp"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+    else FillHist(prefix+hprefix+"lbmindR_Charges_Lm"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
+    if(lepton_near->LeptonFlavour() == Lepton::MUON){
+      const Muon* mu = (Muon*)lepton_near;
+      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 200,0,10);
+      FillHist(prefix+hprefix+"lbmindR_PFIso"+cos+suffix, mu->RelIso(), map_weight, 200,0,10);
+    }else if(lepton_near->LeptonFlavour() == Lepton::ELECTRON){
+      const Electron* el = (Electron*)lepton_near;
+      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 200,0,10);
+    }
+    FillHist(prefix+hprefix+"b_chargedHadronFraction"+cos+suffix, jet0->chargedHadronEnergyFraction(), map_weight, 100,0,1);
+    FillHist(prefix+hprefix+"b_neutralHadronFraction"+cos+suffix, jet0->neutralHadronEnergyFraction(), map_weight, 100,0,1);
+    FillHist(prefix+hprefix+"b_chargedEmFraction"+cos+suffix, jet0->chargedEmEnergyFraction(), map_weight, 100,0,1);
+    FillHist(prefix+hprefix+"b_neutralEmFraction"+cos+suffix, jet0->neutralEmEnergyFraction(), map_weight, 100,0,1);
+    FillHist(prefix+hprefix+"b_muonFraction"+cos+suffix, jet0->muonEnergyFraction(), map_weight, 100,0,1);
+  }
+
   // bCharges vs. nPV
   FillHist(prefix+hprefix+"nPV"+suffix, nPV, map_weight, 100,0,100);
   TString prefix_nPV = prefix+hprefix;
@@ -816,12 +913,12 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   for(int i=1; i<afb_chbinnum+1; i++){
     if(afb_chbin[i-1] < abs(bcharge) && abs(bcharge) < afb_chbin[i]){
       FillHist(Form(prefix+hprefix+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
-      FillHist(Form(prefix+hprefix+"bCharge%dRaw2"+suffix, i-1), bcharge, map_weight, 100,-5,5);
+      FillHist(Form(prefix+hprefix+"bCharge%dRaw2"+suffix, i-1), jet0->Charge(), map_weight, 100,-1,1);
       FillHist(Form(prefix+hprefix+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       FillHist(prefix+hprefix+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
       FillHist(prefix+hprefix+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);
       FillHist(Form(prefix_nPV+"bCharge%dRaw"+suffix, i-1), bcharge, map_weight, 200,-5,5);
-      FillHist(Form(prefix_nPV+"bCharge%dRaw2"+suffix, i-1), bcharge, map_weight, 100,-5,5);
+      FillHist(Form(prefix_nPV+"bCharge%dRaw2"+suffix, i-1), jet0->Charge(), map_weight, 100,-1,1);
       FillHist(Form(prefix_nPV+"bCharge%d"+suffix, i-1), (bcharge < 0? -0.5: 0.5), map_weight, 2,-1,1);
       FillHist(prefix_nPV+"bChargebin"+suffix, LHAPDF::sgn(bcharge) * (i - 0.5), map_weight, 12,-6,6);
       FillHist(prefix_nPV+"bChargeAbsbin"+suffix, i - 0.5, map_weight, 6,0,6);

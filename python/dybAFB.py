@@ -323,7 +323,7 @@ if __name__=="__main__":
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
-    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+".npz"
+    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_data.npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
         np.savez(dAFBs_sin2w_npz, X = dAFBs_sin2w, Y = dAFBs_sin2w_full)
@@ -367,9 +367,9 @@ if __name__=="__main__":
     chi2s_full2D_stat = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0, True)
     chi2s_full2D_total = calChi2sWithCov(dAFBs_sin2w_full, dAFBs_syst_full, 0)
 
-    unc_1D_stat, unc_1D_total = calPrecision(chi2s_1D_stat, chi2s_1D_total, "1D")
-    unc_2D_stat, unc_2D_total = calPrecision(chi2s_2D_stat, chi2s_2D_total, "2D")
-    unc_full2D_stat, unc_full2D_total = calPrecision(chi2s_full2D_stat, chi2s_full2D_total, "full2D")
+    unc_1D_stat, unc_1D_total = calPrecision(chi2s_1D_stat, chi2s_1D_total, "unblinded"+npz_files_tag+"_1D")
+    unc_2D_stat, unc_2D_total = calPrecision(chi2s_2D_stat, chi2s_2D_total, "unblinded"+npz_files_tag+"_2D")
+    unc_full2D_stat, unc_full2D_total = calPrecision(chi2s_full2D_stat, chi2s_full2D_total, "unblinded"+npz_files_tag+"_full2D")
 
     print("1D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_1D_stat, (unc_1D_total**2 - unc_1D_stat**2)**0.5, unc_1D_total))
     print("2D precision = %.5f (stat) pm %.5f (syst) = %.5f (total)" % (unc_2D_stat, (unc_2D_total**2 - unc_2D_stat**2)**0.5, unc_2D_total))

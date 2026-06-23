@@ -1,22 +1,20 @@
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_Aepcor.py > npzing_syst_12bins_LEPSYS_Aepcor.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_EffStatReplica.py > npzing_syst_12bins_LEPSYS_EffStatReplica.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_ElID.py > npzing_syst_12bins_LEPSYS_ElID.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_ElRECO.py > npzing_syst_12bins_LEPSYS_ElRECO.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_ElTrigger.py > npzing_syst_12bins_LEPSYS_ElTrigger.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_MuID.py > npzing_syst_12bins_LEPSYS_MuID.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_MuRECO.py > npzing_syst_12bins_LEPSYS_MuRECO.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_MuTracking.py > npzing_syst_12bins_LEPSYS_MuTracking.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_MuTrigger.py > npzing_syst_12bins_LEPSYS_MuTrigger.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_LEPSYS_RoccoR.py > npzing_syst_12bins_LEPSYS_RoccoR.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDF0.py > npzing_syst_12bins_PDF0.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDF1.py > npzing_syst_12bins_PDF1.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDF2.py > npzing_syst_12bins_PDF2.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDF3.py > npzing_syst_12bins_PDF3.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDF4.py > npzing_syst_12bins_PDF4.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_PDFSYS.py > npzing_syst_12bins_PDFSYS.log" &
-condor_run -a "RequestMemory=12000" "python3 python/dybAFB_SYS.py > npzing_syst_12bins_SYS.log" &
-
-
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_Aepcor.py > npzing_syst_12bins_LEPSYS_Aepcor.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_EffStatReplica.py > npzing_syst_12bins_LEPSYS_EffStatReplica.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_ElID.py > npzing_syst_12bins_LEPSYS_ElID.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_ElRECO.py > npzing_syst_12bins_LEPSYS_ElRECO.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_ElTrigger.py > npzing_syst_12bins_LEPSYS_ElTrigger.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_MuID.py > npzing_syst_12bins_LEPSYS_MuID.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_MuRECO.py > npzing_syst_12bins_LEPSYS_MuRECO.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_MuTracking.py > npzing_syst_12bins_LEPSYS_MuTracking.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_MuTrigger.py > npzing_syst_12bins_LEPSYS_MuTrigger.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_LEPSYS_RoccoR.py > npzing_syst_12bins_LEPSYS_RoccoR.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDF0.py > npzing_syst_12bins_PDF0.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDF1.py > npzing_syst_12bins_PDF1.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDF2.py > npzing_syst_12bins_PDF2.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDF3.py > npzing_syst_12bins_PDF3.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDF4.py > npzing_syst_12bins_PDF4.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_PDFSYS.py > npzing_syst_12bins_PDFSYS.log" &
+condor_run -a "RequestMemory=12000" "python3 python/old2D/dybAFB_old_SYS.py > npzing_syst_12bins_SYS.log" &
 
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_LEPSYS_Aepcor.py > npzing_syst_full3D_LEPSYS_Aepcor.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_LEPSYS_EffStatReplica.py > npzing_syst_full3D_LEPSYS_EffStatReplica.log" &
@@ -35,8 +33,6 @@ condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDF3.py > npzi
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDF4.py > npzing_syst_full3D_PDF4.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_PDFSYS.py > npzing_syst_full3D_PDFSYS.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_full3D_SYS.py > npzing_syst_full3D_SYS.log" &
-
-
 
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_Aepcor.py > npzing_syst_updated3D_LEPSYS_Aepcor.log" &
 condor_run -a "RequestMemory=12000" "python3 python/dybAFB_updated3D_LEPSYS_EffStatReplica.py > npzing_syst_updated3D_LEPSYS_EffStatReplica.log" &
