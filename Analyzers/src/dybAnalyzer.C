@@ -773,6 +773,8 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"ZbdPhi"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
   FillHist(prefix+hprefix+"Zbpt"+suffix, (*lepton0 + *lepton1 + *jet0).Pt(), map_weight, 200,0,200);
   FillHist(prefix+hprefix+"costhetaRecoil_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  else FillHist(prefix+hprefix+"costhetaRecoilm_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   if(IsDATA && IsNominalRun){
     int Nrandom = 100;
     TRandom3 rand;
@@ -791,9 +793,18 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
       if(i != int(random_99over100)) FillHist(Form(prefix+hprefix+"costhetaRecoil_default_99cent%d", i)+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight[""], afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
     }
   }
-  if(fabs(costhetaRecoil) < 0.9) FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
-  FillHist(prefix+hprefix+"costhetaRecoil_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
-  if(89.5 < dimass && dimass < 92.7) FillHist(prefix+hprefix+"costhetaRecoil_Zpeak"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  if(fabs(costhetaRecoil) < 0.9){
+    FillHist(prefix+hprefix+"costhetaRecoil"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  //FillHist(prefix+hprefix+"costhetaRecoil_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
+  //#if(89.5 < dimass && dimass < 92.7) FillHist(prefix+hprefix+"costhetaRecoil_Zpeak"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  if(fabs(costhetaRecoil) < 0.85){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
   FillHist(prefix+hprefix+"costhetaRecoil_HS"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil_original"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
