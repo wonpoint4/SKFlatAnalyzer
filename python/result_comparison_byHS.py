@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     xmin = 0.229;
     xmax = 0.239;
-    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table", group_separators=[6, 8, 11], layout_mode='outside', second_theory=True, width=8, height=6)
+    #vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table", group_separators=[6, 8, 11], layout_mode='outside', second_theory=True, width=8, height=6)
 
     results_won = [
         ["LEP $A_{FB}^{0,l}$", 0.23099, 0.00053, 'black', 'o', True],
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
     xmin = 0.224;
     xmax = 0.238;
-    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_backup_cos1p0", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
+    #vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_backup_cos1p0", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
 
     results_won = [
         ["LEP $A_{FB}^{0,l}$", 0.23099, 0.00053, 'black', 'o', True],
@@ -271,4 +271,32 @@ if __name__ == "__main__":
 
     xmin = 0.225;
     xmax = 0.242;
-    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_backup_cos0p9", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
+    #vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_backup_cos0p9", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
+
+    results_won = [
+        ["LEP $A_{FB}^{0,l}$", 0.23099, 0.00053, 'black', 'o', True],
+        ["LEP $P_{\\tau}$",    0.23159, 0.00041, 'black', 'o', True],
+        ["LEP $A_{FB}^{0,b}$", 0.23221, 0.00029, 'black', 'o', True],
+        ["LEP $A_{FB}^{0,c}$", 0.23220, 0.00081, 'black', 'o', True],
+        ["LEP $Q_{FB}^{had}$", 0.2324,  0.0012,  'black', 'o', True],
+        ["SLD $A_{LR}^{0}$",   0.23098, 0.00026, 'black', 'o', True],
+        ["CDF 1.96 TeV",       0.23221, 0.00046, '#228B22', 'o', True],  # forest green
+        ["D0 1.96 TeV",        0.23095, 0.00040, '#228B22', 'o', True],
+        ["ATLAS 7 TeV",        0.2308,  0.0012,  'blue', 'o', True],
+        ["LHCb 7+8 TeV",       0.23142, 0.00106, 'blue', 'o', True],
+        ["CMS 8 TeV",          0.23101, 0.00053, 'blue', 'o', True],
+        ["CMS 13 TeV",         0.23152, 0.00031, 'blue', 'o', True],
+        ["$|cos\\theta| < 0.85$ & $\ell\ell$", 0.23340, 0.00314, 'red', 'o', True],
+        ["$|cos\\theta| < 0.85$ & $ee$",       0.22973, 0.00506, 'royalblue', 'o', True],
+        ["$|cos\\theta| < 0.85$ & $\mu\mu$",   0.23524, 0.00392, 'blueviolet', 'o', True],
+        ["$|cos\\theta| < 0.9$ & $\ell\ell$",  0.23495, 0.00292, 'red', 'o', True],
+        ["$|cos\\theta| < 0.9$ & $ee$",        0.23074, 0.00468, 'royalblue', 'o', True],
+        ["$|cos\\theta| < 0.9$ & $\mu\mu$",    0.23754, 0.00364, 'blueviolet', 'o', True],
+        ["$|cos\\theta| < 1.0$ & $\ell\ell$",  0.23211, 0.00263, 'red', 'o', True],
+        ["$|cos\\theta| < 1.0$ & $ee$",        0.22930, 0.00433, 'royalblue', 'o', True],
+        ["$|cos\\theta| < 1.0$ & $\mu\mu$",    0.23369, 0.00328, 'blueviolet', 'o', True],
+    ]
+
+    xmin = 0.224;
+    xmax = 0.242;
+    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_costhetas", group_separators=[6, 8, 12, 15, 18], layout_mode='outside', second_theory=True, width=8, height=6)

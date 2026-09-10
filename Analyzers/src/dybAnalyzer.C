@@ -573,6 +573,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   double dipt = (*lepton0 + *lepton1).Pt();
   double costhetaCS = GetCosThetaCS(lepton0, lepton1);
 
+  //if(dimass < 86 || 96 < dimass) return;
   if(bjets.size() == 0) return;
   //if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Tightnb", map_weight[""]);
   //bjets.at(0) *= bjets.at(0).BJetNNCorrection(); // bJetEnergyCorrection (BjetRegression)?
@@ -735,6 +736,14 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   if(realjets.size() > 1) return;
   if(IsNominalLike) FillCutflow(prefix+hprefix+"cutflow"+suffix, "Veto2j", map_weight[""]);
 
+  //if(IsDATA){
+  //  if(min(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)) < 0.45) map_weight[""] = 1.0 / 0.92;
+  //  else if(min(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)) < 0.50) map_weight[""] *= 1.0 / 0.94;
+  //  else if(min(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)) < 0.55) map_weight[""] *= 1.0 / 0.97;
+  //  else if(min(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)) < 0.60) map_weight[""] *= 1.0 / 0.99;
+  //  else if(min(lepton0->DeltaR(*jet0), lepton1->DeltaR(*jet0)) < 0.65) map_weight[""] *= 1.0 / 0.97;
+  //}
+
   // w : 0, w^2 : 1, w*v : 2, w*(w*v) : 3, (w*v)^2 : 4
   FillHist(prefix+hprefix+"statCorr"+suffix, 0, map_weight / map_weight * weight_default, 5,0,5);
   FillHist(prefix+hprefix+"statCorr"+suffix, 1, map_weight / map_weight * (weight_default * weight_default), 5,0,5);
@@ -775,6 +784,7 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"costhetaRecoil_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   else FillHist(prefix+hprefix+"costhetaRecoilm_default"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  FillHist(prefix+hprefix+"costhetaRecoil_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
   if(IsDATA && IsNominalRun){
     int Nrandom = 100;
     TRandom3 rand;
@@ -798,18 +808,54 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
     else FillHist(prefix+hprefix+"costhetaRecoilm"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   }
-  //FillHist(prefix+hprefix+"costhetaRecoil_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
-  //#if(89.5 < dimass && dimass < 92.7) FillHist(prefix+hprefix+"costhetaRecoil_Zpeak"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   if(fabs(costhetaRecoil) < 0.85){
     FillHist(prefix+hprefix+"costhetaRecoil_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
     if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
     else FillHist(prefix+hprefix+"costhetaRecoilm_0p85"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   }
+  if(fabs(costhetaRecoil) < 0.91){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p91"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p91"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p91"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(fabs(costhetaRecoil) < 0.92){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p92"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p92"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p92"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(fabs(costhetaRecoil) < 0.93){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p93"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p93"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p93"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(fabs(costhetaRecoil) < 0.94){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p94"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p94"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p94"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+  if(fabs(costhetaRecoil) < 0.95){
+    FillHist(prefix+hprefix+"costhetaRecoil_0p95"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    if(bcharge > 0) FillHist(prefix+hprefix+"costhetaRecoilp_0p95"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    else FillHist(prefix+hprefix+"costhetaRecoilm_0p95"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+  }
+
   FillHist(prefix+hprefix+"costhetaRecoil_HS"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_HS,(double*)afb_mbin_HS, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"costhetaRecoil_original"+suffix, dimass, fabs(bcharge), costhetaRecoil, map_weight, afb_mbinnum_original,(double*)afb_mbin_original, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
   FillHist(prefix+hprefix+"AbscosthetaRecoil"+suffix, dimass, fabs(bcharge), fabs(costhetaRecoil), map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaRecoil_nobch"+suffix, dimass, fabs(bcharge), costhetaRecoil_nobch, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 10,0,1);
   FillHist(prefix+hprefix+"costhetaCS"+suffix, dimass, dirap, costhetaCS, map_weight, afb_mbinnum,(double*)afb_mbin, afb_ybinnum,(double*)afb_ybin, 20,-1,1);
+
+  if(IsNominalRun){
+    // bJetEnergyCorrection (BjetRegression)?
+    bjets.at(0) *= bjets.at(0).BJetNNCorrection();
+    Jet* jet0_Breg = &bjets.at(0);
+    double costhetaRecoil_Breg = GetCosThetaRecoil(lepton0, lepton1, jet0_Breg, bcharge);
+    FillHist(prefix+hprefix+"costhetaRecoil_Breg"+suffix, dimass, fabs(bcharge), costhetaRecoil_Breg, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 20,-1,1);
+    FillHist(prefix+hprefix+"costhetaRecoil_Breg_fine"+suffix, dimass, fabs(bcharge), costhetaRecoil_Breg, map_weight, afb_mbinnum,(double*)afb_mbin, afb_chbinnum,(double*)afb_chbin, 100,-1,1);
+    FillHist(prefix+hprefix+"costhetaRecoil_dBreg"+suffix, costhetaRecoil - costhetaRecoil_Breg, map_weight, 400,-2,2);
+    FillHist(prefix+hprefix+"costhetaRecoil_dBreg_2D"+suffix, costhetaRecoil, costhetaRecoil - costhetaRecoil_Breg, map_weight, 20,-1,1, 400,-2,2);
+  }
+
   if(fabs(jet0->Eta()) < 0.3){
     FillHist(prefix+hprefix+"ZbdR_beta0p3"+suffix, (*lepton0 + *lepton1).DeltaR(*jet0), map_weight, 200,0,10);
     FillHist(prefix+hprefix+"ZbdPhi_beta0p3"+suffix, (*lepton0 + *lepton1).DeltaPhi(*jet0), map_weight, 128,-3.2,3.2);
@@ -846,13 +892,48 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
   FillHist(prefix+hprefix+"lbmindR_Charges"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
   if(lepton_near->Charge() > 0) FillHist(prefix+hprefix+"lbmindR_Charges_Lp"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
   else FillHist(prefix+hprefix+"lbmindR_Charges_Lm"+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
-  if(lepton_near->LeptonFlavour() == Lepton::MUON){
+
+  TString charges = (TString)(lepton_near->Charge() * bcharge > 0? "_SS": "_OS");
+  if(IsNominalRun && lepton_near->LeptonFlavour() == Lepton::MUON){
     const Muon* mu = (Muon*)lepton_near;
-    FillHist(prefix+hprefix+"lbmindR_TrkIso"+suffix, mu->TrkIso() / mu->Pt(), map_weight, 200,0,10);
-    FillHist(prefix+hprefix+"lbmindR_PFIso"+suffix, mu->RelIso(), map_weight, 200,0,10);
-  }else if(lepton_near->LeptonFlavour() == Lepton::ELECTRON){
+    FillHist(prefix+hprefix+"lbmindR_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+    FillHist(prefix+hprefix+"lbmindR_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    if(lepton_near->DeltaR(*jet0) < 0.5){
+      FillHist(prefix+hprefix+"lbmindR0p4_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p4_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.6){
+      FillHist(prefix+hprefix+"lbmindR0p5_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p5_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.7){
+      FillHist(prefix+hprefix+"lbmindR0p6_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p6_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.8){
+      FillHist(prefix+hprefix+"lbmindR0p7_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p7_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    }else{
+      FillHist(prefix+hprefix+"lbmindR0p8_TrkIso"+charges+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p8_PFIso"+charges+suffix, mu->RelIso(), map_weight, 1000,0,1);
+    }
+  }else if(IsNominalRun && lepton_near->LeptonFlavour() == Lepton::ELECTRON){
     const Electron* el = (Electron*)lepton_near;
-    FillHist(prefix+hprefix+"lbmindR_TrkIso"+suffix, el->TrkIso() / el->Pt(), map_weight, 200,0,10);
+    FillHist(prefix+hprefix+"lbmindR_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+    FillHist(prefix+hprefix+"lbmindR_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    if(lepton_near->DeltaR(*jet0) < 0.5){
+      FillHist(prefix+hprefix+"lbmindR0p4_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p4_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.6){
+      FillHist(prefix+hprefix+"lbmindR0p5_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p5_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.7){
+      FillHist(prefix+hprefix+"lbmindR0p6_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p6_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    }else if(lepton_near->DeltaR(*jet0) < 0.8){
+      FillHist(prefix+hprefix+"lbmindR0p7_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p7_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    }else{
+      FillHist(prefix+hprefix+"lbmindR0p8_TrkIso"+charges+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR0p8_PFIso"+charges+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+    }
   }
   FillHist(prefix+hprefix+"b_chargedHadronFraction"+suffix, jet0->chargedHadronEnergyFraction(), map_weight, 100,0,1);
   FillHist(prefix+hprefix+"b_neutralHadronFraction"+suffix, jet0->neutralHadronEnergyFraction(), map_weight, 100,0,1);
@@ -897,14 +978,49 @@ void dybAnalyzer::executeEventWithParameter(TString channel, TString option, uns
     FillHist(prefix+hprefix+"lbmindR_Charges"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
     if(lepton_near->Charge() > 0) FillHist(prefix+hprefix+"lbmindR_Charges_Lp"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
     else FillHist(prefix+hprefix+"lbmindR_Charges_Lm"+cos+suffix, (lepton_near->Charge() * bcharge > 0? 1: 0), map_weight, 2,0,2);
-    if(lepton_near->LeptonFlavour() == Lepton::MUON){
+
+    if(IsNominalRun && lepton_near->LeptonFlavour() == Lepton::MUON){
       const Muon* mu = (Muon*)lepton_near;
-      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 200,0,10);
-      FillHist(prefix+hprefix+"lbmindR_PFIso"+cos+suffix, mu->RelIso(), map_weight, 200,0,10);
-    }else if(lepton_near->LeptonFlavour() == Lepton::ELECTRON){
+      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      if(lepton_near->DeltaR(*jet0) < 0.5){
+        FillHist(prefix+hprefix+"lbmindR0p4_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p4_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.6){
+        FillHist(prefix+hprefix+"lbmindR0p5_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p5_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.7){
+        FillHist(prefix+hprefix+"lbmindR0p6_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p6_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.8){
+        FillHist(prefix+hprefix+"lbmindR0p7_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p7_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      }else{
+        FillHist(prefix+hprefix+"lbmindR0p8_TrkIso"+cos+suffix, mu->TrkIso() / mu->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p8_PFIso"+cos+suffix, mu->RelIso(), map_weight, 1000,0,1);
+      }
+    }else if(IsNominalRun && lepton_near->LeptonFlavour() == Lepton::ELECTRON){
       const Electron* el = (Electron*)lepton_near;
-      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 200,0,10);
+      FillHist(prefix+hprefix+"lbmindR_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+      FillHist(prefix+hprefix+"lbmindR_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      if(lepton_near->DeltaR(*jet0) < 0.5){
+        FillHist(prefix+hprefix+"lbmindR0p4_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p4_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.6){
+        FillHist(prefix+hprefix+"lbmindR0p5_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p5_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.7){
+        FillHist(prefix+hprefix+"lbmindR0p6_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p6_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      }else if(lepton_near->DeltaR(*jet0) < 0.8){
+        FillHist(prefix+hprefix+"lbmindR0p7_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p7_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      }else{
+        FillHist(prefix+hprefix+"lbmindR0p8_TrkIso"+cos+suffix, el->TrkIso() / el->Pt(), map_weight, 1000,0,1);
+        FillHist(prefix+hprefix+"lbmindR0p8_PFIso"+cos+suffix, el->RelPFIso_Rho(), map_weight, 1000,0,1);
+      }
     }
+
     FillHist(prefix+hprefix+"b_chargedHadronFraction"+cos+suffix, jet0->chargedHadronEnergyFraction(), map_weight, 100,0,1);
     FillHist(prefix+hprefix+"b_neutralHadronFraction"+cos+suffix, jet0->neutralHadronEnergyFraction(), map_weight, 100,0,1);
     FillHist(prefix+hprefix+"b_chargedEmFraction"+cos+suffix, jet0->chargedEmEnergyFraction(), map_weight, 100,0,1);

@@ -126,6 +126,7 @@ public:
   bool Pass_SUSYLoose() const;
 
   void SetRelPFIso_Rho(double r);
+  inline double RelPFIso_Rho() const {return j_RelPFIso_Rho;}
   double EA();
 
   //==== ID

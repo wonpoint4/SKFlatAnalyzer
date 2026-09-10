@@ -9,7 +9,6 @@ ROOT.Plotter.SetupStyle()
 dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_backup")
 sin2w_values = [0.22654, 0.22854, 0.23054, 0.23104, 0.23154, 0.23204, 0.23254, 0.23454, 0.23654]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-chargeBins = ["y[0,5]/", "y[0,1]/", "y[1,3]/", "y[3,5]/"]
 costhetaBins = [""]#"0", "1", "2", "3", "4"]
 nMassbins = 60 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
@@ -320,7 +319,8 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
     #channel = "ee201[678][ab]?/"
-    npz_files_tag = "_updated3D"
+    npz_files_tag = "_cos0p85_updated3D"
+    #npz_files_tag = "_updated3D"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
