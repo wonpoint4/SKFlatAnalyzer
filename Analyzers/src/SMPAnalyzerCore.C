@@ -1698,6 +1698,13 @@ std::vector<Muon> SMPAnalyzerCore::SMPGetMuons(TString id,double ptmin,double fe
       //if(muon.TrkIso()/muon.Pt()<0.1) out.push_back(muon);
       if(muon.PassSelector(Muon::Selector::TkIsoLoose)) out.push_back(muon);
     }
+  }else if(id=="POGMediumWithTightIso"){
+    vector<Muon> muons;
+    if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);
+    else muons=GetMuons("POGMedium",ptmin,fetamax);
+    for(auto const& muon: muons){
+      if(muon.RelIso() < 0.15) out.push_back(muon);
+    }
   }else if(id=="POGMediumWithLooseTrkIso"){
     vector<Muon> muons;
     if(DataEra=="2016preVFP") muons=GetMuons("POGMedium_hip",ptmin,fetamax);

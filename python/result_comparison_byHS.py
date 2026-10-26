@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
     # For SMP-25-012 DY+b
     theory_bands = [
-        ["SM", 0.23161, 0.00004, '#FFA500'],
+        ["SM", 0.23152, 0.00006, '#FFA500'],
     ]
 
     results_won = [
@@ -243,8 +243,8 @@ if __name__ == "__main__":
         ["CMS 8 TeV",          0.23101, 0.00053, 'blue', 'o', True],
         ["CMS 13 TeV",         0.23152, 0.00031, 'blue', 'o', True],
         ["This analysis",      0.23211, 0.00263, 'red', 'o', True],
-        ["ee",                 0.22930, 0.00433, 'red', 'o', True],
-        ["$\mu\mu$",           0.23369, 0.00328, 'red', 'o', True],
+        ["ee channel",         0.22930, 0.00433, 'red', 'o', True],
+        ["$\mu\mu$ channel",   0.23369, 0.00328, 'red', 'o', True],
     ]
 
     xmin = 0.224;
@@ -265,13 +265,13 @@ if __name__ == "__main__":
         ["CMS 8 TeV",          0.23101, 0.00053, 'blue', 'o', True],
         ["CMS 13 TeV",         0.23152, 0.00031, 'blue', 'o', True],
         ["This analysis",      0.23495, 0.00292, 'red', 'o', True],
-        ["ee",                 0.23074, 0.00468, 'red', 'o', True],
-        ["$\mu\mu$",           0.23754, 0.00364, 'red', 'o', True],
+        ["ee channel",         0.23074, 0.00468, 'red', 'o', True],
+        ["$\mu\mu$ channel",   0.23754, 0.00364, 'red', 'o', True],
     ]
 
-    xmin = 0.225;
-    xmax = 0.242;
-    #vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_backup_cos0p9", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
+    xmin = 0.2255;
+    xmax = 0.2415;
+    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_cos0p9", group_separators=[6, 8, 12], layout_mode='outside', second_theory=True, width=8, height=6)
 
     results_won = [
         ["LEP $A_{FB}^{0,l}$", 0.23099, 0.00053, 'black', 'o', True],
@@ -299,4 +299,4 @@ if __name__ == "__main__":
 
     xmin = 0.224;
     xmax = 0.242;
-    vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_costhetas", group_separators=[6, 8, 12, 15, 18], layout_mode='outside', second_theory=True, width=8, height=6)
+    #vertical_result_comparison(xmin, xmax, observable, results_won, theory_bands, "sin2w_table_costhetas", group_separators=[6, 8, 12, 15, 18], layout_mode='outside', second_theory=True, width=8, height=6)

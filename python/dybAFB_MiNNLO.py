@@ -10,7 +10,8 @@ dyb = ROOT.dybPlotter("data ^dyb_mi+dyB_mi+dyall+ttall+ewkall", "dybAnalyzer_bac
 sin2w_values = [0.23151, 0.23154, 0.23157, 0.2230, 0.2300, 0.2305, 0.2310, 0.2315, 0.2320, 0.2325, 0.2330]
 sin2w_indice = [3, 4, 5, 6, 7, 0, 1, 2, 8, 9, 10]
 chargeBins = ["y[0,5]/", "y[0,0.1]/", "y[0.1,0.2]/", "y[0.2,0.6]/", "y[0.6,1]/", "y[1,3]/", "y[3,5]/"]
-nMassbins = 12 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
+costhetaBins = [""]#"0", "1", "2", "3", "4"]
+nMassbins = 60 # 52 ~ 500 GeV. See afb_mbin[afb_mbinnum+1] in dybAnalyzer.h
 xsec_unc = {
     #"dy" : [1.7, -1.8],
     "wjets" : [3.8, -3.8],
@@ -36,6 +37,7 @@ systematics = {
     # Stat
     "stat_Data" : [["stat_Data"]],
     "stat_MC" :   [["stat_MC"]],
+
     # SYS
     "JES" :       [["_jet_scale"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]],
     "JER" :       [["_jet_smear"+updown+era for updown in ["_up", "_down"]] for era in [":2016preVFP", ":2016postVFP", ":2017", ":2018"]],
@@ -44,9 +46,9 @@ systematics = {
     "PUIDSF" :    [["_PUjetSF_up", "_PUjetSF_down"]],
     "btagSF" :    [["_btagSF"+flavor+corr] for flavor in ["_h", "_l"] for corr in ["corr", "uncorr:2016preVFP", "uncorr:2016postVFP", "uncorr:2017", "uncorr:2018"]],
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
-    #"bChargeSF2" : [["_bChargeSF_adhoc"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     "CFSF" :      [["_CFSF_up", "_CFSF_down"]],
+    #"lbmindR" :   [["_lbdR_adhoc"]],
     # PDFSYS
     "Scales" :    [["_scalevariation%d:%s" % (i, j) for i in [0, 1, 2, 3, 4, 6, 8]] for j in ["dy", "tt"]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
@@ -181,22 +183,29 @@ def getdAFBs_sin2w(channel):
 
     for sin in range(len(sin2w_indice)):
         iSin = sin2w_indice[sin]
+        print("getdAFBs_sin2w("+channel+"), %d-th sin2w_variation = %f \n" % (sin, iSin))
         dAFB_full = np.array([])
         for ch in range(len(chargeBins)):
-            AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-            AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-            AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "suffix:_sthw2_%i:dy" % iSin)
-            for i in range(1, AFB_data.GetNbinsX() + 1):
-                if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
-            dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
-            #dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
-            dAFBs[sin].append(dAFB)
-            if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
-            print("\n dAFBs of "+channel+chargeBins[ch], (", sin2w_variation : %d, trace(dAFB) of " % iSin), (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
-            print(dAFB)
+            dAFB_per_ch = np.array([])
+            for cos in costhetaBins:
+                AFB_data = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                #AFB_mc = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins suffix:_sthw2_%i:dy" % iSin)
+                #AFB_mc_sin2w = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins suffix:_Recoil_weakNLOHO_s2eff_%i:dy" % (iSin * 1e5))
+                #for i in range(1, AFB_data.GetNbinsX() + 1):
+                #    if AFB_data.GetBinCenter(i) < 120: AFB_data.SetBinContent(i, AFB_mc.GetBinContent(i)) # Blinded under 120 GeV
+                dAFB = getdAFB(AFB_data, AFB_mc_sin2w)
+                #dAFB = getdAFB(AFB_mc, AFB_mc_sin2w)
+                dAFB_per_ch = np.append(dAFB_per_ch, dAFB)
+                if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
+                print("\n trace(dAFB) of costhetaBin "+cos+" = ", (dAFB * dAFB).sum(), ", len(dAFB) = ", len(dAFB))
+                print(dAFB)
+            dAFBs[sin].append(dAFB_per_ch)
+            print("\n trace(dAFBs[iSin][ch]) of chargeBin %d = " % ch, (dAFBs[sin][ch] * dAFBs[sin][ch]).sum(), ", len(dAFBs[%d][%d]) = " % (sin, ch), len(dAFBs[sin][ch]))
+            print(dAFBs[sin][ch])
         dAFBs_full.append(dAFB_full)
-        print("\n dAFBs of "+channel, (", sin2w_variation : %d, trace(dAFB_full) of " % iSin), (dAFB_full * dAFB_full).sum(), ", len(dAFB_full) = ", len(dAFB_full))
-        print(dAFB_full)
+        print("\n getdAFBs_sin2w("+channel+"), %d-th sin2w_variation = %f, trace(dAFBs_full) of " % (sin, iSin), (dAFBs_full[sin] * dAFBs_full[sin]).sum(), ", len(dAFBs_full) = ", len(dAFBs_full[sin]))
+        print(dAFBs_full[sin])
 
     return np.array(dAFBs), np.array(dAFBs_full)
 
@@ -213,40 +222,47 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
                 dAFBs[systkey][term].append([])
                 dAFBs_full[systkey][term].append([])
                 dAFB_full = np.array([])
+
                 for ch in range(len(chargeBins)):
-                    print("\n channel+chargeBin : "+channel+chargeBins[ch])
+                    print("\ngetdAFBs_syst("+channel+", "+list_syst[term][syst]+"), chargeBin : "+chargeBins[ch])
                     dAFB = []
                     if "stat_Data" in systkey:
-                        AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-                        for iBin in range(nMassbins):
-                            dAFB.append(AFB_data_nominal.GetBinError(iBin + 1))
+                        for cos in costhetaBins:
+                            AFB_data_nominal = dyb.GetHist(0, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                            for iBin in range(nMassbins):
+                                dAFB.append(AFB_data_nominal.GetBinError(iBin + 1))
                         dAFBs[systkey][term][syst].append(np.array(dAFB))
-                        print("trace(dAFB_stat_Data) = ", (dAFBs["stat_Data"][term][syst][ch] * dAFBs["stat_Data"][term][syst][ch]).sum(), ", len(dAFB_stat_Data) = ", len(dAFBs["stat_Data"][term][syst][ch]))
+                        print("\n trace(dAFB_stat_Data) = ", (dAFBs["stat_Data"][term][syst][ch] * dAFBs["stat_Data"][term][syst][ch]).sum(), ", len(dAFB_stat_Data) = ", len(dAFBs["stat_Data"][term][syst][ch]))
                         if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
                     elif "stat_MC" in systkey:
-                        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-                        for iBin in range(nMassbins):
-                            dAFB.append(AFB_mc_nominal.GetBinError(iBin + 1))
+                        for cos in costhetaBins:
+                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                            for iBin in range(nMassbins):
+                                dAFB.append(AFB_mc_nominal.GetBinError(iBin + 1))
                         dAFBs[systkey][term][syst].append(np.array(dAFB))
-                        print("trace(dAFB_stat_MC) = ", (dAFBs["stat_MC"][term][syst][ch] * dAFBs["stat_MC"][term][syst][ch]).sum(), ", len(dAFB_stat_MC) = ", len(dAFBs["stat_MC"][term][syst][ch]))
+                        print("\n trace(dAFB_stat_MC) = ", (dAFBs["stat_MC"][term][syst][ch] * dAFBs["stat_MC"][term][syst][ch]).sum(), ", len(dAFB_stat_MC) = ", len(dAFBs["stat_MC"][term][syst][ch]))
                         if ch != 0: dAFB_full = np.append(dAFB_full, dAFB)
                     else: # Systematics
-                        AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", "")
-                        syststr = "suffix:"+list_syst[term][syst]
-                        if "norm" in list_syst[term][syst]:
-                            for process, uncs in xsec_unc.items():
-                                if process in list_syst[term][syst]: syststr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in list_syst[term][syst] else 1)] * 0.01, process)
-                        elif "lumi" in list_syst[term][syst]:
-                            for era, uncs in lumi_unc.items():
-                                if era in list_syst[term][syst]:
-                                    unc = [1 + a * 0.01 * (1 if "up" in list_syst[term][syst] else -1) for a in uncs]
-                                    syststr = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
-                        print("syststr = "+syststr)
-                        AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil(x)", syststr)
-                        dAFB_syst = getdAFB(AFB_mc_nominal, AFB_mc_syst)
-                        dAFBs[systkey][term][syst].append(dAFB_syst)
-                        print(list_syst[term][syst]+", trace(dAFB_syst) = ", (dAFBs[systkey][term][syst][ch] * dAFBs[systkey][term][syst][ch]).sum(), ", len(dAFB_syst) = ", len(dAFBs[systkey][term][syst][ch]))
-                        if ch != 0: dAFB_full = np.append(dAFB_full, dAFB_syst)
+                        dAFB_per_ch = np.array([])
+                        for cos in costhetaBins:
+                            AFB_mc_nominal = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins")
+                            syststr = "suffix:"+list_syst[term][syst]
+                            if "norm" in list_syst[term][syst]:
+                                for process, uncs in xsec_unc.items():
+                                    if process in list_syst[term][syst]: syststr = "scale:%.3f:%s" % (1 + uncs[(0 if "up" in list_syst[term][syst] else 1)] * 0.01, process)
+                            elif "lumi" in list_syst[term][syst]:
+                                for era, uncs in lumi_unc.items():
+                                    if era in list_syst[term][syst]:
+                                        unc = [1 + a * 0.01 * (1 if "up" in list_syst[term][syst] else -1) for a in uncs]
+                                        syststr = "scale:%.3f:2016preVFP scale:%.3f:2016postVFP scale:%.3f:2017 scale:%.3f:2018" % (unc[0], unc[1], unc[2], unc[3])
+                            AFB_mc_syst = dyb.GetHist(1, channel+chargeBins[ch]+"AFBrecoil"+cos+"(x)", "cosbins "+syststr)
+                            dAFB_syst = getdAFB(AFB_mc_nominal, AFB_mc_syst)
+                            dAFB_per_ch = np.append(dAFB_per_ch, dAFB_syst)
+                            if ch != 0: dAFB_full = np.append(dAFB_full, dAFB_syst)
+                            print("\n trace(dAFB_syst) of costhetaBin "+cos+" = ", (dAFB_syst * dAFB_syst).sum(), ", len(dAFB) = ", len(dAFB_syst))
+                            print(dAFB_syst)
+                        dAFBs[systkey][term][syst].append(dAFB_per_ch)
+                        print("\n "+list_syst[term][syst]+", trace(dAFB_syst) = ", (dAFBs[systkey][term][syst][ch] * dAFBs[systkey][term][syst][ch]).sum(), ", len(dAFB_syst) = ", len(dAFBs[systkey][term][syst][ch]))
                     #print(dAFBs[systkey][term][syst][ch])
 
                 dAFBs_full[systkey][term][syst].append(dAFB_full)
@@ -256,7 +272,7 @@ def getdAFBs_syst(channel, dAFBs, dAFBs_full, missingSyst=""):
     return dAFBs, dAFBs_full
 
 def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""):
-    dim = dAFBs_sin2w.shape[1] # 30 or 180
+    dim = dAFBs_sin2w.shape[1] # 60 or 360
     cov = np.zeros((dim, dim))
     for systkey, list_syst in dAFBs_syst.items():
         if systkey == N_1: continue # For (N-1) syst uncertainties
@@ -306,12 +322,12 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
-    #channel = "mm201[678][ab]?/"
-    npz_files_tag = "_12bins"
+    channel = "mm201[678][ab]?/"
+    npz_files_tag = "_cos1p0_MiNNLO"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
     channel_path = channel.replace("?", "").replace("/", "").replace("[", "").replace("]", "")
-    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_MiNNLO.npz"
+    dAFBs_sin2w_npz = channel_path+"_dAFBs_sin2w"+npz_files_tag+"_data.npz"
     if not os.path.exists(dAFBs_sin2w_npz):
         dAFBs_sin2w, dAFBs_sin2w_full = getdAFBs_sin2w(channel)
         np.savez(dAFBs_sin2w_npz, X = dAFBs_sin2w, Y = dAFBs_sin2w_full)

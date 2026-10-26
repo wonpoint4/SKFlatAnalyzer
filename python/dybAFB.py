@@ -47,6 +47,7 @@ systematics = {
     "bChargeSF" : [["_bChargeSF1"+updown+bCh] for updown in ["_up", "_down"] for bCh in ["0", "1", "2", "3", "4", "5"]],
     "Lumi" :      [["lumi_"+eras+updown for updown in ["_up", "_down"]] for eras in lumi_unc.keys()],
     "CFSF" :      [["_CFSF_up", "_CFSF_down"]],
+    #"lbmindR" :   [["_lbdR_adhoc"]],
     # PDFSYS
     "Scales" :    [["_scalevariation%d:%s" % (i, j) for i in [0, 1, 2, 3, 4, 6, 8]] for j in ["dy", "tt"]], # 0=(1, 1), 5=(2, 0.5), and 7=(0.5, 2)
     "AlphaS" :    [["_alphaS_up", "_alphaS_down"]],
@@ -103,8 +104,8 @@ def calPrecision(chi2s_stat, chi2s_total, nametag=""):
     sin2ws = sin2w_values
 
     sigma = 1
-    xmin = 0.22200
-    xmax = 0.24200
+    xmin = 0.212 #0.22200
+    xmax = 0.252 #0.24200
     nxbin = int((xmax - xmin) / 0.00001 * 100)
     xicenter = int((0.23154 - xmin) / 0.00001 * 100)
     x = np.linspace(xmin, xmax, nxbin)
@@ -318,8 +319,9 @@ def calChi2sWithCov(dAFBs_sin2w, dAFBs_syst, chargeBin=0, statOnly=False, N_1=""
 
 if __name__=="__main__":
     channel = "[em][em]201[678][ab]?/"
-    #channel = "ee201[678][ab]?/"
-    npz_files_tag = "_cos0p85_updated3D"
+    channel = "mm201[678][ab]?/"
+    channel = "mm2018/"
+    npz_files_tag = "_cos1p0_updated3D"
     #npz_files_tag = "_updated3D"
 
     ## dAFBs_sin2w[sin2w scenarios][chargeBins]
